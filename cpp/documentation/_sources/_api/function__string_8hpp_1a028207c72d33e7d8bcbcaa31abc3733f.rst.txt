@@ -3,7 +3,7 @@
 Template Function VN::StringUtils::startsWith(const String<Capacity>&, const String<Capacity>&)
 ===============================================================================================
 
-- Defined in :ref:`file_include_TemplateLibrary_String.hpp`
+- Defined in :ref:`file_include_vectornav_TemplateLibrary_String.hpp`
 
 
 Function Documentation

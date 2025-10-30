@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # 
-# VectorNav SDK (v0.19.0)
+# VectorNav SDK (v0.22.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -41,7 +41,9 @@ if regScan.exists():
     macros.append(('__REGSCAN__', None))
     plugins.append(str(regScan))
     plugins.extend([
-        '../cpp/plugins/RegisterScan/RegisterScan.cpp'
+        '../cpp/plugins/RegisterScan/src/RegisterScan.cpp',
+        '../cpp/plugins/RegisterScan/src/ConfigReader.cpp',
+        '../cpp/plugins/RegisterScan/src/ConfigWriter.cpp'
     ])
     includes.append('../cpp/plugins/RegisterScan/include')
 
@@ -109,7 +111,7 @@ ext_modules = [
             '../cpp/src/Implementation/PacketSynchronizer.cpp',
 
             # Interface
-            '../cpp/src/Interface/Command.cpp',
+            '../cpp/src/Interface/GenericCommand.cpp',
             '../cpp/src/Interface/Sensor.cpp',
             '../cpp/src/Interface/Registers.cpp',
             
@@ -126,6 +128,6 @@ ext_modules = [
 
 setup(
     name='vectornav',
-    version='0.19.0',
+    version='0.22.0',
     ext_modules=ext_modules,
 )

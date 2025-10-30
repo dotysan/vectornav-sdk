@@ -3,7 +3,7 @@
 Variable VN::Config::Errors::asyncErrorQueueCapacity
 ====================================================
 
-- Defined in :ref:`file_include_Config.hpp`
+- Defined in :ref:`file_include_vectornav_Config.hpp`
 
 
 Variable Documentation

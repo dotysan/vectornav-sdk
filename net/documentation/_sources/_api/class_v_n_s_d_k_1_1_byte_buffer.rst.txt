@@ -3,7 +3,7 @@
 Class ByteBuffer
 ================
 
-- Defined in :ref:`file_documentation__include_CLI_ByteBuffer.hpp`
+- Defined in :ref:`file_documentation__include_vectornav_CLI_ByteBuffer.hpp`
 
 
 Class Documentation

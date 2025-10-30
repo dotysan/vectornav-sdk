@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,48 +21,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// clang-format off
 #include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "Interface/Command.hpp"
-#include "Interface/Commands.hpp"
+#include "vectornav/Interface/Commands.hpp"
+#include "vectornav/Interface/GenericCommand.hpp"
 
 namespace py = pybind11;
 namespace VN {
 
 void init_commands(py::module& m) {
-  py::module commands = m.def_submodule("Commands", "Commands submodule");
 
-  py::class_<Command>(commands, "Command")
-      .def(py::init<const Command&>())
+  py::class_<GenericCommand>(m, "GenericCommand")
+      .def(py::init<const GenericCommand&>())
       .def(py::init<AsciiMessage&, uint8_t>(), py::arg("commandString") = "",
            py::arg("numCharToMatch") = 3)
-      .def("isAwaitingResponse", &Command::isAwaitingResponse)
-      .def("hasValidResponse", &Command::hasValidResponse)
-      .def("getError", &Command::getError)
-      .def("getResponse", &Command::getResponse);
+      .def("isAwaitingResponse", &GenericCommand::isAwaitingResponse)
+      .def("hasValidResponse", &GenericCommand::hasValidResponse)
+      .def("getError", &GenericCommand::getError)
+      .def("getResponse", &GenericCommand::getResponse);
 
-  py::class_<WriteSettings, Command>(commands, "WriteSettings")
+  py::class_<WriteSettings, GenericCommand>(m, "WriteSettings")
       .def(py::init<>());
 
-  py::class_<RestoreFactorySettings, Command>(commands,
-                                              "RestoreFactorySettings")
+  py::class_<RestoreFactorySettings, GenericCommand>(m,
+                                                     "RestoreFactorySettings")
       .def(py::init<>());
 
-  py::class_<Reset, Command>(commands, "Reset").def(py::init<>());
+  py::class_<Reset, GenericCommand>(m, "Reset").def(py::init<>());
 
-  py::class_<FirmwareUpdate, Command>(commands, "FirmwareUpdate")
+  py::class_<FirmwareUpdate, GenericCommand>(m, "FirmwareUpdate")
       .def(py::init<>());
 
-  py::class_<SetInitialHeading, Command>(commands, "SetInitialHeading")
+  py::class_<SetInitialHeading, GenericCommand>(m, "SetInitialHeading")
       .def(py::init<float>());
 
-  py::class_<SetFilterBias, Command>(commands, "SetFilterBias")
+  py::class_<SetFilterBias, GenericCommand>(m, "SetFilterBias")
       .def(py::init<>());
 
-  py::class_<KnownMagneticDisturbance, Command> knownMagneticDisturbance(
-      commands, "KnownMagneticDisturbance");
+  py::class_<KnownMagneticDisturbance, GenericCommand> knownMagneticDisturbance(
+      m, "KnownMagneticDisturbance");
 
   py::enum_<KnownMagneticDisturbance::State>(knownMagneticDisturbance, "State")
       .value("NotPresent", KnownMagneticDisturbance::State::NotPresent)
@@ -70,8 +70,8 @@ void init_commands(py::module& m) {
 
   knownMagneticDisturbance.def(py::init<KnownMagneticDisturbance::State>());
 
-  py::class_<KnownAccelerationDisturbance, Command>
-      knownAccelerationDisturbance(commands, "KnownAccelerationDisturbance");
+  py::class_<KnownAccelerationDisturbance, GenericCommand>
+      knownAccelerationDisturbance(m, "KnownAccelerationDisturbance");
 
   knownAccelerationDisturbance.def(
       py::init<KnownAccelerationDisturbance::State>());
@@ -81,8 +81,8 @@ void init_commands(py::module& m) {
       .value("NotPresent", KnownAccelerationDisturbance::State::NotPresent)
       .value("Present", KnownAccelerationDisturbance::State::Present);
 
-  py::class_<AsyncOutputEnable, Command> asyncOutputEnable(commands,
-                                                           "AsyncOutputEnable");
+  py::class_<AsyncOutputEnable, GenericCommand> asyncOutputEnable(
+      m, "AsyncOutputEnable");
 
   py::enum_<AsyncOutputEnable::State>(asyncOutputEnable, "State")
       .value("Disable", AsyncOutputEnable::State::Disable)
@@ -92,3 +92,4 @@ void init_commands(py::module& m) {
 }
 
 }  // namespace VN
+// clang-format on

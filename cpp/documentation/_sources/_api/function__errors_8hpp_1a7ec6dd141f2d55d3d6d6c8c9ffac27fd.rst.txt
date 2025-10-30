@@ -3,7 +3,7 @@
 Function VN::SensorException_Is_Synchronous
 ===========================================
 
-- Defined in :ref:`file_include_Interface_Errors.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Errors.hpp`
 
 
 Function Documentation

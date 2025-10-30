@@ -251,7 +251,7 @@ GnssGroup
       
       GNSS Status info flags.
       
-    .. py:attribute:: gnss1AltMSL
+    .. py:attribute:: gnss1AltMsl
       :type: optional[double]
       
       Altitude (Mean Sea Level).
@@ -464,7 +464,7 @@ Gnss2Group
       
       GNSS Status info flags.
       
-    .. py:attribute:: gnss2AltMSL
+    .. py:attribute:: gnss2AltMsl
       :type: optional[double]
       
       Altitude (Mean Sea Level).
@@ -560,7 +560,7 @@ Gnss3Group
       
       GNSS Status info flags.
       
-    .. py:attribute:: gnss3AltMSL
+    .. py:attribute:: gnss3AltMsl
       :type: optional[double]
       
       Altitude (Mean Sea Level).

@@ -3,7 +3,7 @@
 Typedef VN::Vec2d
 =================
 
-- Defined in :ref:`file_include_TemplateLibrary_Matrix.hpp`
+- Defined in :ref:`file_include_vectornav_TemplateLibrary_Matrix.hpp`
 
 
 Typedef Documentation

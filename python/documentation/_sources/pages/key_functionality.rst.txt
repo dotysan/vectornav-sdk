@@ -88,7 +88,7 @@ As discussed in :ref:`pages/key_functionality:Accessing Registers`, the :meth:`S
    #. Call the ``readRegister`` method
    #. Access the received values in the original ``Register`` object
 
-.. literalinclude:: ../../examples/getting_started.py
+.. literalinclude:: ../../examples/getting_started/getting_started.py
    :language: python
    :start-after: #### 2
    :end-before: #### 3
@@ -101,7 +101,7 @@ As discussed in :ref:`pages/key_functionality:Accessing Registers`, the :meth:`S
    #. Populate the ``Register`` object with the desired values to configure the unit
    #. Call the ``writeRegister`` method
 
-.. literalinclude:: ../../examples/getting_started.py
+.. literalinclude:: ../../examples/getting_started/getting_started.py
    :language: python
    :start-after: #### 4
    :end-before: asyncDataOutputFreq= Registers.AsyncOutputFreq()
@@ -164,7 +164,7 @@ The following code block shows and example of reading measurements from a Vector
 Sending Commands 
 ================
 
-Each command able to be sent to the unit is available as a public method of the :py:class:`vectornav.Sensor` class. 
+Each command able to be sent to the unit is available as a public method of the :py:class:`vectornav.Sensor` class. They are all blocking calls; if non-blocking commands are necessary, refer to the :ref:`pages/advanced_functionality:Non-Blocking Commands` section.
 To send a command, simply call the public method with the necessary parameters, if applicable. For example, to send a `Set Initial Heading` command, you can call
 
 .. code-block:: python

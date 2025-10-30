@@ -3,7 +3,7 @@
 Typedef VN::VnXml::GnssProcessorCheck
 =====================================
 
-- Defined in :ref:`file_plugins_FirmwareUpdate_include_VnXml.hpp`
+- Defined in :ref:`file_plugins_FirmwareUpdate_include_vectornav_VnXml.hpp`
 
 
 Typedef Documentation

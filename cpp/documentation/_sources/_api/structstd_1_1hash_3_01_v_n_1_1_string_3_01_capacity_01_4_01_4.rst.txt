@@ -3,7 +3,7 @@
 Template Struct hash< VN::String< Capacity > >
 ==============================================
 
-- Defined in :ref:`file_include_TemplateLibrary_String.hpp`
+- Defined in :ref:`file_include_vectornav_TemplateLibrary_String.hpp`
 
 
 Struct Documentation

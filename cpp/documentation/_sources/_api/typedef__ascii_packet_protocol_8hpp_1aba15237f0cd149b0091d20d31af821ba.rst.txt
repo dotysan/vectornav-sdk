@@ -3,7 +3,7 @@
 Typedef VN::AsciiPacketProtocol::AsciiParameter
 ===============================================
 
-- Defined in :ref:`file_include_Implementation_AsciiPacketProtocol.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_AsciiPacketProtocol.hpp`
 
 
 Typedef Documentation

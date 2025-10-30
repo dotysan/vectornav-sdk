@@ -32,6 +32,7 @@ Contents
    pages/migration_guide
    pages/getting_started
    pages/key_functionality
+   pages/advanced_functionality
    api/index
    plugins/index
    

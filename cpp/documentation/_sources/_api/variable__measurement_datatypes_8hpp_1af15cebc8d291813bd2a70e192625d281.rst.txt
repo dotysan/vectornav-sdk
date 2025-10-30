@@ -3,7 +3,7 @@
 Variable VN::binaryTypeMaxSize
 ==============================
 
-- Defined in :ref:`file_include_Implementation_MeasurementDatatypes.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_MeasurementDatatypes.hpp`
 
 
 Variable Documentation

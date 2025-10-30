@@ -88,12 +88,12 @@ To disconnect from the unit, the :func:`VN::Sensor::disconnect` method can be ca
 
 Accessing Registers
 ===================
-All configuration settings and many measurements are stored in one of 256 registers, which are accessible via synchronous polling and synchronous writing. The VNSDK contains the complete register definitions in :ref:`file_include_Interface_Registers.hpp`, each defined as a class with each register field a public class member.
+All configuration settings and many measurements are stored in one of 256 registers, which are accessible via synchronous polling and synchronous writing. The VNSDK contains the complete register definitions in :ref:`file_include_vectornav_Interface_Registers.hpp`, each defined as a class with each register field a public class member.
 All of the register classes exist in the :ref:`namespace_VN__Registers` and a namespace for the register group. Alternatively, each register is aliased under the :ref:`namespace_VN__Registers__ById` by their register ID. For example, the *Synchronization Control* register can either be accessed as :class:`VN::Registers::System::SyncControl` or :type:`VN::Registers::ById::Reg32`.
 
 Both measurement registers and configuration registers can be read, whereas only configuration registers can be written. This is accomplished best using the :func:`VN::Sensor::readRegister` and :func:`VN::Sensor::writeRegister` methods, which are discussed in the following sections. 
 
-The ``readRegister`` and ``writeRegister`` methods are calls which block until reception of the unit's response, with a timeout length of :member:`VN::Config::Sensor::commandSendTimeoutLength` (set in :ref:`file_include_Config.hpp`). If no response is received in time and retry is enabled, each method will retry the call according to the number of :member:`VN::Config::Sensor::commandSendRetriesAllowed` (set in :ref:`file_include_Config.hpp`). If all retries fail to receive a response, each method will return ``Error::ResponseTimeout``. If the unit responds with a valid, non-VnError response within the timeout length, the fields of the passed ``Register`` object will be populated with the unit's response.
+The ``readRegister`` and ``writeRegister`` methods are calls which block until reception of the unit's response, with a timeout length of :member:`VN::Config::Sensor::commandSendTimeoutLength` (set in :ref:`file_include_vectornav_Config.hpp`). If no response is received in time and retry is enabled, each method will retry the call according to the number of :member:`VN::Config::Sensor::commandSendRetriesAllowed` (set in :ref:`file_include_vectornav_Config.hpp`). If all retries fail to receive a response, each method will return ``Error::ResponseTimeout``. If the unit responds with a valid, non-VnError response within the timeout length, the fields of the passed ``Register`` object will be populated with the unit's response.
 
 The fields in each ``Register`` object will match the fields listed in the sensor's latest ICD, which can be downloaded directly from VectorNav's website.
 
@@ -374,7 +374,7 @@ Synchronous errors are generated via any blocking ``Sensor`` method; this most o
    Synchronous errors raised due to a non-blocking :func:`VN::Sensor::sendCommand` call are not returned up the stack. For an example, see :ref:`pages/AdvancedFunctionality:Non-Blocking Commands`.
    When using :func:`VN::Sensor::sendCommand` while blocking, errors will be returned up the stack as expected.
    
-   Regardless of the selected ``SendCommandBlockMode``, the synchronous error from the unit will be attached to the ``Command`` object and can be accessed using :func:`VN::Command::getError`.
+   Regardless of the selected ``SendCommandBlockMode``, the synchronous error from the unit will be attached to the ``GenericCommand`` object and can be accessed using :func:`VN::GenericCommand::getError`.
 
 Asynchronous Errors
 -------------------

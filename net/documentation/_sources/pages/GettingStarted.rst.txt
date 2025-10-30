@@ -12,26 +12,24 @@ Requirements
 Installation
 ************
 
-To build and install the VectorNav MATLAB library, download and install MATLAB from the `Mathworks website. <https://www.mathworks.com/help/install/ug/install-products-with-internet-connection.html>`_:
-
-The VnSdk_Net.dll file is distributed in `/net`. To use the dll, you must import that file into your MATLAB instance using 
+To build and install the VectorNav MATLAB library, download and install MATLAB from the `Mathworks website <https://www.mathworks.com/help/install/ug/install-products-with-internet-connection.html>`_ if you have not already done so. The VnSdk_Net.dll file is distributed in the `./net` directory. To use the dll, you must import that file into your MATLAB instance using: 
 
 .. code-block:: matlab
 
     NET.addAssembly(VnDotNetAssemblyPath);
 
-All of the values in the assembly are nested in the `VNSDK` namespace. You then must import the namespace `VNSDK` which also strips the namespace qualifier.
+All of the values in the assembly are nested in the `VNSDK` namespace. You must then import the namespace `VNSDK` which also strips the namespace qualifier.
 
 .. code-block:: matlab
 
     import VNSDK.*
 
-The namespace importing is scope-tied, so it must be called each new function. 
+The namespace importing is scope-tied, so it must be called in each new function. 
 
 Run the Getting Started Example
 *******************************
 
-The best way to validate the installation is by running the GettingStarted example. To do so, open the **GettingStarted.m** file in the /matlab/examples/ directory, update the COM port for the connected sensor, and run the script. The VectorNav USB adapter will show up in Windows as COMXX where XX is the COM port number.
+The best way to validate the installation is by running the Getting Started example. To do so, open the **GettingStarted.m** file in the `./matlab/examples/GettingStarted` directory, update the COM port for the connected sensor, and run the script. The VectorNav USB adapter will show up in Windows as **COMXX** where **XX** is the COM port number.
 
 
 .. tip::
@@ -42,13 +40,13 @@ The best way to validate the installation is by running the GettingStarted examp
         vnSdkAssembly = NET.addAssembly(VnDotNetAssemblyPath);
         disp(vnSdkAssembly.Enums);
 
-    An enum is accessed via `('ClassName+EnumName')` inside the correct namespace. For example, for the `HeadingMode` enum inside the `VpeBasicControl` class (Defined in :class:`VNSDK::Registers::Attitude::VpeBasicControl`) can be accessed via
+    An enum is accessed via `('ClassName+EnumName')` inside the correct namespace. For example, for the `HeadingMode` enum inside the `VpeBasicControl` class (defined in :class:`VNSDK::Registers::Attitude::VpeBasicControl`) can be accessed via:
 
     .. code-block:: matlab
 
         VNSDK.Regsiters.Attitude.('VpeBasicControl+HeadingMode').Absolute
 
-    Getting the enums available from an imported enum class is not intuitive in Matlab. To make this easier, the SDK provides a utility to get the available enums, called `getEnumNames`, inside the ``matlab/Examples/GettingStarted`` folder. The following code block details how to extract the possible enums and list their names.
+    Unfortunately, getting the enums available from an imported enum class is not intuitive in MATLAB. To make this easier, the VNSDK provides a utility to get the available enums, called `getEnumNames`, inside the ``matlab/Examples/GettingStarted`` folder. The following code block details how to extract the possible enums and list their names.
 
     .. code-block:: matlab
 
@@ -81,7 +79,7 @@ The CLI SDK is continually tested on the following hardware/compiler combination
 
 Run the Getting Started Example
 *******************************
-The best way to validate the download, tool chain, and basic hardware compatibility is by running the GettingStarted example. This can be done on command line or through the Visual Studio IDE using the following steps:
+The best way to validate the download, tool chain, and basic hardware compatibility is by running the Getting Started example. This can be done on command line or through the Visual Studio IDE using the following steps:
 
 .. tab:: Command Line
 
@@ -100,11 +98,11 @@ The best way to validate the download, tool chain, and basic hardware compatibil
     
        ``>> Release\GettingStarted.exe COM8``
 
-       Notice you can run this file by passing the COM port as a command line argument or by hard coding the value inside the GettingStarted example file. The VectorNav USB adapter will show up in Windows as COMXX where XX is the COM port number.         
+       Notice you can run this file by passing the COM port as a command line argument or by hard coding the value inside the GettingStarted example file. The VectorNav USB adapter will show up in Windows as **COMXX** where **XX** is the COM port number.         
 
 .. tab:: Visual Studio IDE
 
-    #. In Visual Studio 2022 use "open a local folder" to open /cs/examples/GettingStarted/
+    #. In Visual Studio 2022 use "open a local folder" to open ./cs/examples/GettingStarted/
 
         .. tip::
             To Resolve 'CMake Error: CMAKE_CSharp_COMPILER not set'

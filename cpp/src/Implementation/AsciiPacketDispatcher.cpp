@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,8 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Implementation/AsciiPacketDispatcher.hpp"
-#include "Implementation/AsciiPacketProtocol.hpp"
+#include "vectornav/Implementation/AsciiPacketDispatcher.hpp"
+
+#include "vectornav/Implementation/AsciiPacketProtocol.hpp"
 
 namespace VN
 {
@@ -42,9 +43,9 @@ void AsciiPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const s
         AsciiPacketProtocol::AsciiMeasurementHeader asciiHeader = AsciiPacketProtocol::getMeasHeader(_latestPacketMetadata.header);
         if (asciiHeader != AsciiPacketProtocol::AsciiMeasurementHeader::None)
         {
+            _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
             if (AsciiPacketProtocol::asciiIsParsable(asciiHeader))
             {
-                _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
                 if constexpr (Config::PacketDispatchers::compositeDataQueueCapacity > 0)
                 {
                     packetHasBeenConsumed |= _tryPushToCompositeDataQueue(byteBuffer, syncByteIndex, _latestPacketMetadata, asciiHeader);
@@ -55,7 +56,7 @@ void AsciiPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const s
         {  // Data is not a measurement. This includes vnerrs.
             VN_DEBUG_1("Passing command response.");
             AsciiMessage packet{};
-            for (size_t idx = 0; idx < _latestPacketMetadata.length; idx++) { packet.push_back(byteBuffer.peek_unchecked(syncByteIndex + idx)); }
+            for (uint16_t idx = 0; idx < _latestPacketMetadata.length; idx++) { packet.push_back(byteBuffer.peek_unchecked(syncByteIndex + idx)); }
             _commandProcessor->matchResponse(packet, _latestPacketMetadata);
         }
     }

@@ -3,7 +3,7 @@
 Class VNPacket
 ==============
 
-- Defined in :ref:`file_documentation__include_CLI_Packet.hpp`
+- Defined in :ref:`file_documentation__include_vectornav_CLI_Packet.hpp`
 
 
 Class Documentation

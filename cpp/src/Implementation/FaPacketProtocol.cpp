@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,17 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "vectornav/Implementation/FaPacketProtocol.hpp"
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include "Implementation/FaPacketProtocol.hpp"
-#include "Implementation/BinaryHeader.hpp"
-#include "Implementation/CoreUtils.hpp"
-#include "HAL/Timer.hpp"
 
-#include "Debug.hpp"
-#include "Implementation/MeasurementDatatypes.hpp"
-#include "TemplateLibrary/ByteBuffer.hpp"
+#include "vectornav/Debug.hpp"
+#include "vectornav/HAL/Timer.hpp"
+#include "vectornav/Implementation/BinaryHeader.hpp"
+#include "vectornav/Implementation/CoreUtils.hpp"
+#include "vectornav/Implementation/MeasurementDatatypes.hpp"
+#include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 
 namespace VN
 {
@@ -39,7 +40,7 @@ namespace FaPacketProtocol
 {
 namespace
 {
-bool _isValidBinaryCrc(const ByteBuffer& buffer, const size_t syncByteIndex, const size_t packetLength) noexcept
+bool _isValidBinaryCrc(const ByteBuffer& buffer, const size_t syncByteIndex, const uint16_t packetLength) noexcept
 {
     uint16_t calculatedCrc = 0;
     // Crc validation does not include sync byte
@@ -51,8 +52,8 @@ bool _isValidBinaryCrc(const ByteBuffer& buffer, const size_t syncByteIndex, con
 }
 
 PacketDispatcher::FindPacketRetVal::Validity _calculateBinaryMeasurementTypeSize(const ByteBuffer& buffer, const size_t typeDataStartIndex,
-                                                                                 const size_t binaryGroupOffset, const size_t binaryTypeOffset,
-                                                                                 size_t& binaryTypeSize) noexcept
+                                                                                 const uint16_t binaryGroupOffset, const uint16_t binaryTypeOffset,
+                                                                                 uint16_t& binaryTypeSize) noexcept
 {
     if (binaryGroupOffset == 3 || binaryGroupOffset == 6 || binaryGroupOffset == 12)
     {  // Is a GNSS group
@@ -87,7 +88,7 @@ PacketDispatcher::FindPacketRetVal::Validity _calculateBinaryMeasurementTypeSize
 }
 
 PacketDispatcher::FindPacketRetVal::Validity _calculteExpectedPayloadSize(const ByteBuffer& buffer, BinaryHeader& header, const size_t syncByteIndex,
-                                                                          size_t& expectedPayloadSize) noexcept
+                                                                          uint16_t& expectedPayloadSize) noexcept
 {
     uint8_t headerSize = header.outputGroups.size() + header.outputTypes.size() * 2;
     uint8_t groupByteNumber = 0;
@@ -117,7 +118,7 @@ PacketDispatcher::FindPacketRetVal::Validity _calculteExpectedPayloadSize(const 
                         uint8_t binaryGroupNumber = groupByteNumber * 8 + groupBitOffset;
                         uint8_t binaryTypeNumber = typeWordNumber * 16 + typeBitOffset;
 
-                        size_t measurementTypeSize = 0;
+                        uint16_t measurementTypeSize = 0;
                         Validity measurementTypeSizeRetVal =
                             _calculateBinaryMeasurementTypeSize(buffer, typeDataStartIdx, binaryGroupNumber, binaryTypeNumber, measurementTypeSize);
                         expectedPayloadSize += measurementTypeSize;
@@ -180,10 +181,7 @@ PacketDispatcher::FindPacketRetVal::Validity _populateHeader(const ByteBuffer& b
                     if (!tmpRet2.has_value()) { return Validity::Incomplete; }
                     uint16_t currentTypeWord = tmpRet1.value() + (tmpRet2.value() << 8);
                     // Type is too long  (too many bits set or extensions) for what can fit in our data structure
-                    if (header.outputTypes.push_back(currentTypeWord))
-                    {
-                        return Validity::Invalid;
-                    }
+                    if (header.outputTypes.push_back(currentTypeWord)) { return Validity::Invalid; }
                     processingMeasurementTypes = (currentTypeWord & 0x8000);
                 } while (processingMeasurementTypes);
             }
@@ -237,10 +235,10 @@ FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteI
     }
     uint8_t headerSize = header.outputGroups.size() + header.outputTypes.size() * 2;
 
-    size_t expectedPayloadSize = 0;
+    uint16_t expectedPayloadSize = 0;
     PacketDispatcher::FindPacketRetVal::Validity calcExpectedPayloadSizeValidity =
         _calculteExpectedPayloadSize(byteBuffer, header, syncByteIndex, expectedPayloadSize);
-    size_t requiredPacketLength = 1 + headerSize + expectedPayloadSize + 2;
+    uint16_t requiredPacketLength = 1 + headerSize + expectedPayloadSize + 2;
     switch (calcExpectedPayloadSizeValidity)
     {
         case (Validity::Invalid):
@@ -280,7 +278,7 @@ std::optional<CompositeData> parsePacket(const ByteBuffer& buffer, const size_t 
     bool consumed = false;
     while (iter.next())
     {
-        size_t fieldSize = 0;
+        uint16_t fieldSize = 0;
         auto validity = _calculateBinaryMeasurementTypeSize(buffer, syncByteIndex + extractor.index(), iter.group(), iter.field(), fieldSize);
         if (validity != PacketDispatcher::FindPacketRetVal::Validity::Valid) { return std::nullopt; }
         if (compositeData.copyFromBuffer(extractor, iter.group(), iter.field())) { extractor.discard(fieldSize); }

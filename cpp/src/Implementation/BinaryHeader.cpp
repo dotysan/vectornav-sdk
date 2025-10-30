@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,10 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Implementation/BinaryHeader.hpp"
+#include "vectornav/Implementation/BinaryHeader.hpp"
 
-#include "Implementation/BinaryMeasurementDefinitions.hpp"
-#include "Debug.hpp"
+#include "vectornav/Debug.hpp"
+#include "vectornav/Implementation/BinaryMeasurementDefinitions.hpp"
 
 namespace VN
 {
@@ -103,11 +103,11 @@ EnabledMeasurements BinaryHeader::toMeasurementHeader() const noexcept
     return presentMeasurements;
 }
 
-unsigned int BinaryHeader::_countSetBits(uint8_t n)
+uint8_t BinaryHeader::_countSetBits(uint8_t n)
 {
     uint8_t mask = 0x7F;  // binary: 01111111
     n &= mask;
-    unsigned int count = 0;
+    uint8_t count = 0;
     while (n)
     {
         count += n & 1;

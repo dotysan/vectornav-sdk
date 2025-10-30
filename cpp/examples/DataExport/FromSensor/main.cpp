@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,35 +21,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <cstdint>
 #include <filesystem>
 #include <thread>
 
-#include "Config.hpp"
-#include "ExporterCsv.hpp"
+#include "vectornav/Config.hpp"
+#include "vectornav/ExporterCsv.hpp"
 // #include "FileExportFaDispatcher.hpp"
-#include "Implementation/AsciiPacketDispatcher.hpp"
-#include "Implementation/FaPacketDispatcher.hpp"
-#include "Implementation/MeasurementDatatypes.hpp"
-#include "Interface/Sensor.hpp"
-#include "Implementation/FaPacketProtocol.hpp"
+#include "vectornav/Implementation/AsciiPacketDispatcher.hpp"
+#include "vectornav/Implementation/FaPacketDispatcher.hpp"
+#include "vectornav/Implementation/FaPacketProtocol.hpp"
+#include "vectornav/Implementation/MeasurementDatatypes.hpp"
+#include "vectornav/Interface/Sensor.hpp"
 
 using namespace VN;
 namespace fs = std::filesystem;
 
 Sensor sensor;
 
-ExporterCsv csvExporter((fs::path(__FILE__).parent_path()).string() + '/', true);
-
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-    auto latestError = sensor.autoConnect("COM18");
+    const std::string portName = (argc > 1) ? argv[1] : "COM18";
+    const std::string outputDirectory = (argc > 2) ? argv[2] : (fs::path(__FILE__).parent_path()).string();
+
+    auto latestError = sensor.autoConnect(portName);
     if (latestError != Error::None)
     {
         std::cout << "Error " << latestError << " encountered when connecting to " << sensor.connectedPortName().value() << ".\t" << std::endl;
         return static_cast<int>(latestError);
     }
-    std::cout << "Connected to " << sensor.connectedPortName().value() << " at " << sensor.connectedBaudRate().value() << std::endl;
+    std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
+
+    ExporterCsv csvExporter(outputDirectory);
 
     // Add a subscriber to all VN FA and ASCII packets
     latestError = sensor.subscribeToMessage(csvExporter.getQueuePtr(), Sensor::BinaryOutputMeasurements{}, Sensor::FaSubscriberFilterType::AnyMatch);
@@ -66,7 +68,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     }
 
     csvExporter.start();
-    std::cout << "logging started" << std::endl;
+    std::cout << "Logging to " << outputDirectory << std::endl;
 
     std::this_thread::sleep_for(5s);
     csvExporter.stop();

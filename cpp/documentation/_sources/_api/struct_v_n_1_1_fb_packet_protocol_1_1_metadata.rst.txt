@@ -3,7 +3,7 @@
 Struct Metadata
 ===============
 
-- Defined in :ref:`file_include_Implementation_FbPacketProtocol.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_FbPacketProtocol.hpp`
 
 
 Struct Documentation

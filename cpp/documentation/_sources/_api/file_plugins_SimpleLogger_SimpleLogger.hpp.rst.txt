@@ -30,13 +30,13 @@ Includes
 --------
 
 
-- ``HAL/File.hpp``
-
-- ``Interface/Sensor.hpp``
-
-- ``TemplateLibrary/ByteBuffer.hpp``
-
 - ``cstdint``
+
+- ``vectornav/HAL/File.hpp``
+
+- ``vectornav/Interface/Sensor.hpp``
+
+- ``vectornav/TemplateLibrary/ByteBuffer.hpp``
 
 
 

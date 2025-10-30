@@ -3,7 +3,7 @@
 Typedef VN::Minutes
 ===================
 
-- Defined in :ref:`file_include_HAL_Duration.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_Duration.hpp`
 
 
 Typedef Documentation

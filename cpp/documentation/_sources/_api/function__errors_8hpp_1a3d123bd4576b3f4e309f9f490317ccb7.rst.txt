@@ -3,7 +3,7 @@
 Function VN::operator<<(std::ostream&, const Error&)
 ====================================================
 
-- Defined in :ref:`file_include_Interface_Errors.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Errors.hpp`
 
 
 Function Documentation

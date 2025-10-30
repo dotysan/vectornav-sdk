@@ -3,7 +3,7 @@
 Template Class EnumCheck< EnumType, V, Next... >
 ================================================
 
-- Defined in :ref:`file_include_Interface_Errors.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Errors.hpp`
 
 
 Inheritance Relationships

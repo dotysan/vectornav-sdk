@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +23,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using VNSDK;
 
 namespace Examples
@@ -36,15 +37,19 @@ namespace Examples
         public string navPath { get; }
         public string gnssPath { get; }
         public string imuPath { get; }
+        public uint firmwareBaudRate { get; }
+        public uint bootloaderBaudRate { get; }
 
         public Parameters(string[] args)
         {
-            usage = "[--PortName={port_name}] [--{Processor}={file_path}... | --vnXml={file_path}]";
+            usage = "[--PortName={port_name}] [--{Processor}={file_path}... | --vnXml={file_path}] --firmwareBaudRate={firmware_baudrate} --bootloaderBaudRate={bootloader_baudrate}";
             port = string.Empty;
             vnxmlPath = string.Empty;
             navPath = string.Empty;
             gnssPath = string.Empty;
             imuPath = string.Empty;
+            firmwareBaudRate = 115200;
+            bootloaderBaudRate = 115200;
             valid = true;
 
             if (args.Length == 0)
@@ -56,6 +61,7 @@ namespace Examples
 
             int index = 0;
 
+            uint tempBaudRate;
             foreach (string parameter in args)
             {
                 index = parameter.IndexOf('=');
@@ -91,6 +97,25 @@ namespace Examples
                 {
                     vnxmlPath = value;
                 }
+
+                // [--firmwareBaudRate={firmware_baudrate}]
+                if (parameter.StartsWith("--firmwareBaudRate"))
+                {
+                    if (uint.TryParse(value, out tempBaudRate))
+                    {
+                        firmwareBaudRate = tempBaudRate;
+                    }
+                }
+
+                // [--bootloaderBaudRate={bootloader_baudrate}]
+                if (parameter.StartsWith("--bootloaderBaudRate"))
+                {
+                    if (uint.TryParse(value, out tempBaudRate))
+                    {
+                        bootloaderBaudRate = tempBaudRate;
+                    }
+                }
+
             }
         }
     }
@@ -107,27 +132,39 @@ namespace Examples
             }
 
             Sensor sensor = new Sensor();
-            sensor.Connect(parameters.port, 115200);
-            if (!sensor.VerifySensorConnectivity)
-            {
-                throw new Exception($"Failed to connect to {portName}");
+            // Connect to sensor. We are not autoconnecting or verifying connectivity because we can not assume the sensor has a valid firmware
+            sensor.Connect(parameters.port, parameters.firmwareBaudRate);
+
+            List<VNSDK.FirmwareUpdater.FirmwareFile> files = new List<VNSDK.FirmwareUpdater.FirmwareFile>();
+            if (!string.IsNullOrEmpty(parameters.gnssPath)) {
+                VNSDK.FirmwareUpdater.FirmwareFile file = new VNSDK.FirmwareUpdater.FirmwareFile(VNSDK.FirmwareUpdater.Processor.Gnss, parameters.gnssPath);
+                files.Add(file);
+            }
+            if (!string.IsNullOrEmpty(parameters.navPath)) {
+                VNSDK.FirmwareUpdater.FirmwareFile file = new VNSDK.FirmwareUpdater.FirmwareFile(VNSDK.FirmwareUpdater.Processor.Nav, parameters.navPath);
+                files.Add(file);
+            }
+            if (!string.IsNullOrEmpty(parameters.imuPath)) {
+                VNSDK.FirmwareUpdater.FirmwareFile file = new VNSDK.FirmwareUpdater.FirmwareFile(VNSDK.FirmwareUpdater.Processor.Imu, parameters.imuPath);
+                files.Add(file);
             }
 
-            VNSDK.FirmwareUpdater firmwareUpdater = new VNSDK.FirmwareUpdater(ref sensor);
+            VNSDK.FirmwareUpdater firmwareUpdater = new VNSDK.FirmwareUpdater();
 
+            VNSDK.FirmwareUpdater.Params fwUpdateParams = new VNSDK.FirmwareUpdater.Params(parameters.firmwareBaudRate, parameters.bootloaderBaudRate);
             Console.WriteLine($"Begin updating.");
 
             if (!string.IsNullOrEmpty(parameters.vnxmlPath))
             {
                 Console.WriteLine($"Update firmware with vnxml: {parameters.vnxmlPath}");
-                firmwareUpdater.UpdateFirmware(parameters.vnxmlPath);
+                firmwareUpdater.UpdateFirmware(ref sensor, parameters.vnxmlPath, fwUpdateParams);
             }
             else
             {
                 Console.WriteLine($"Update NAV Firmware : {parameters.navPath}");
                 Console.WriteLine($"Update GNSS Firmware: {parameters.gnssPath}");
                 Console.WriteLine($"Update IMU Firmware : {parameters.imuPath}");
-                firmwareUpdater.UpdateFirmware(parameters.navPath, parameters.gnssPath, parameters.imuPath);
+                firmwareUpdater.UpdateFirmware(ref sensor, files, fwUpdateParams);
             }
             sensor.Disconnect();
             return 0;

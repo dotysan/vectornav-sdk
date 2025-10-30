@@ -21,18 +21,21 @@ The fundamental way to interface with the sensor is the same but many features h
 This guide is not a how-to guide but a document of new features and changes between the two software packages. 
 Please consult the :doc:`Getting Started example <pages/GettingStarted>` for how to use the SDK. 
 
-
-Contents
-========
+Indices and tables
+==================
 
 * :ref:`genindex`
 * :ref:`search`
 
+
+Contents
+========
+
 .. toctree::
    :maxdepth: 2
    
+   pages/MigrationGuide
    pages/GettingStarted
    pages/KeyFunctionality
-   pages/Plugins
-   pages/MigrationGuide
+   plugins/index
    pages/api_index

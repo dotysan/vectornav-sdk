@@ -3,7 +3,7 @@
 Function VN::Registers::GNSSCompass::operator==(const GnssCompassEstBaseline&, const GnssCompassEstBaseline&)
 =============================================================================================================
 
-- Defined in :ref:`file_include_Interface_Registers.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Registers.hpp`
 
 
 Function Documentation

@@ -3,7 +3,7 @@
 Class CompositeData
 ===================
 
-- Defined in :ref:`file_include_Interface_CompositeData.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_CompositeData.hpp`
 
 
 Nested Relationships

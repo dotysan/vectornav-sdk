@@ -3,15 +3,18 @@
 Class Serial_Base
 =================
 
-- Defined in :ref:`file_include_HAL_Serial_Base.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_Serial_Base.hpp`
 
 
 Inheritance Relationships
 -------------------------
 
-Derived Type
-************
+Derived Types
+*************
 
+- ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
+- ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
+- ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
 - ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
 
 

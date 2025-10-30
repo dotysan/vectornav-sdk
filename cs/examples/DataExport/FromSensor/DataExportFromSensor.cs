@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,8 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 using System;
+using System.IO;
+using System.Reflection;
 using VNSDK;
 
 namespace DataExportFromSensor
@@ -31,13 +32,8 @@ namespace DataExportFromSensor
     {
         static int Main(string[] args)
         {
-            Console.WriteLine($"Data Export From Sensor example.");
-
-            Console.WriteLine($"Log from a sensor.");
-
-            String port = "COM3";
-            String path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-            path += "/";
+            String port = "COM33";
+            String outputDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
             if (args.Length > 0)
             {
@@ -46,21 +42,17 @@ namespace DataExportFromSensor
 
             if (args.Length > 1)
             {
-                path = args[1];
+                outputDirectory = args[1];
             }
-
 
             Sensor sensor = new Sensor();
             sensor.AutoConnect(port);
 
             Console.WriteLine($"Connected to {port} at {sensor.ConnectedBaudRate()}");
 
-            VNSDK.Registers.System.Model modelReg = new VNSDK.Registers.System.Model();
-            sensor.ReadRegister(modelReg);
-            Console.WriteLine($"Sensor Model Number: {modelReg.model}");
+            ExporterCsv csvExporter = new ExporterCsv(outputDirectory);
 
-            ExporterCsv csvExporter = new ExporterCsv(path);
-
+            // Subscribe to messages
             sensor.RegisterDataExporter(csvExporter);
 
             if (csvExporter.Start())
@@ -69,14 +61,13 @@ namespace DataExportFromSensor
                 return 1;
             }
 
-            Console.WriteLine($"Logging to {path}");
+            Console.WriteLine($"Logging to {outputDirectory}");
             System.Threading.Thread.Sleep(5000);
 
             csvExporter.Stop();
-            sensor.DeregisterDataExporter(csvExporter);
 
             sensor.Disconnect();
-            Console.WriteLine($"Sensor Disconnected.");
+            Console.WriteLine($"ExportFromSensor example complete.");
             return 0;
         }
     }

@@ -1,28 +1,26 @@
 
 
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>VectorNav CLI Migration Guide &#8212; VectorNav SDK 0.19.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists\css\tree_view.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <title>VectorNav CLI Migration Guide &#8212; VectorNav SDK 0.22.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=36acb9b5" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=4c969af8" />
+    <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists\css\tree_view.css?v=a885cde7" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6d58504" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/tabs.js"></script>
-    <script src="../_static/collapsible-lists\js\CollapsibleLists.compressed.js"></script>
-    <script src="../_static/collapsible-lists\js\apply-collapsible-lists.js"></script>
+    <script src="../_static/documentation_options.js?v=5686f5df"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/tabs.js?v=3ee01567"></script>
+    <script src="../_static/collapsible-lists\js\CollapsibleLists.compressed.js?v=73120307"></script>
+    <script src="../_static/collapsible-lists\js\apply-collapsible-lists.js?v=660e4f45"></script>
 
     
     
@@ -42,25 +40,25 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="VNSDK API" href="api_index.html" />
-    <link rel="prev" title="Plugins" href="Plugins.html" /> 
+    <link rel="next" title="Getting Started" href="GettingStarted.html" />
+    <link rel="prev" title="VectorNav CLI SDK" href="../Documentation.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
         
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="api_index.html" title="VNSDK API"
+          <a href="GettingStarted.html" title="Getting Started"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="Plugins.html" title="Plugins"
+          <a href="../Documentation.html" title="VectorNav CLI SDK"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav SDK 0.19.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">VectorNav CLI Migration Guide</a></li> 
       </ul>
@@ -74,9 +72,9 @@
           <div class="body" role="main">
             
   <section id="vectornav-cli-migration-guide">
-<h1>VectorNav CLI Migration Guide<a class="headerlink" href="#vectornav-cli-migration-guide" title="Permalink to this headline">¶</a></h1>
+<h1>VectorNav CLI Migration Guide<a class="headerlink" href="#vectornav-cli-migration-guide" title="Link to this heading">¶</a></h1>
 <section id="highlights">
-<span id="migrationguide"></span><h2>Highlights<a class="headerlink" href="#highlights" title="Permalink to this headline">¶</a></h2>
+<span id="migrationguide"></span><h2>Highlights<a class="headerlink" href="#highlights" title="Link to this heading">¶</a></h2>
 <p>The VNSDK has several updated features since the Programming Library to enhance user-friendliness and performance:</p>
 <ul class="simple">
 <li><p>high-rate data stability (can output above 200 Hz)</p></li>
@@ -87,11 +85,11 @@
 </ul>
 </section>
 <section id="migrating-from-the-vectornav-programming-library-to-the-vnsdk">
-<h2>Migrating from the VectorNav Programming Library to the VNSDK<a class="headerlink" href="#migrating-from-the-vectornav-programming-library-to-the-vnsdk" title="Permalink to this headline">¶</a></h2>
+<h2>Migrating from the VectorNav Programming Library to the VNSDK<a class="headerlink" href="#migrating-from-the-vectornav-programming-library-to-the-vnsdk" title="Link to this heading">¶</a></h2>
 <p>The CLI SDK wraps the C++ SDK using <a class="reference external" href="https://learn.microsoft.com/en-us/cpp/dotnet/dotnet-programming-with-cpp-cli-visual-cpp?view=msvc-170">C++/CLI</a> to provide a .NET-accessible dll file for use in MATLAB or C#.
 This migration guide shows the basic communication differences between the VNSDK and the Programming Library for MATLAB and C#.</p>
 <section id="establishing-communication">
-<h3>Establishing Communication<a class="headerlink" href="#establishing-communication" title="Permalink to this headline">¶</a></h3>
+<h3>Establishing Communication<a class="headerlink" href="#establishing-communication" title="Link to this heading">¶</a></h3>
 <p>The COM port must be known to connect to the sensor.
 For the VectorNav Programming Library, the correct baud rate is required.
 With the VNSDK, there is an option to specify the baud rate using the <em>Connect</em> attribute, but now there is an <em>AutoConnect</em> attribute that will poll the sensor for its baud rate.</p>
@@ -141,13 +139,13 @@ On the VectorNav Programming Library this was done by</p>
 </section>
 </section>
 <section id="accessing-registers">
-<h2>Accessing Registers<a class="headerlink" href="#accessing-registers" title="Permalink to this headline">¶</a></h2>
+<h2>Accessing Registers<a class="headerlink" href="#accessing-registers" title="Link to this heading">¶</a></h2>
 <p>In the VectorNav Programming Library, a VnSensor object was created, and all registers were attributes of that object.
 In the VNSDK, a Sensor object is still created for interaction, but now only two objects, <em>ReadRegister</em> and <em>WriteRegister</em>, for interacting with the registers exists.
 Each register is now its own object that will be populated when a <em>ReadRegister</em> or <em>WriteRegister</em> request is sent.
 The examples below will show differences between frequently used commands.</p>
 <section id="reading-registers">
-<h3>Reading Registers<a class="headerlink" href="#reading-registers" title="Permalink to this headline">¶</a></h3>
+<h3>Reading Registers<a class="headerlink" href="#reading-registers" title="Link to this heading">¶</a></h3>
 <p>Previously, to read a register the user would create a VnSensor object and create a register attribute.
 For example, this was how the user would read the Yaw, Pitch, Roll register (Register 8) using the VectorNav Programming Library</p>
 <div class="tab-set docutils container">
@@ -182,13 +180,13 @@ For example, this was how the user would read the Yaw, Pitch, Roll register (Reg
 </div>
 </section>
 <section id="writing-registers">
-<h3>Writing Registers<a class="headerlink" href="#writing-registers" title="Permalink to this headline">¶</a></h3>
+<h3>Writing Registers<a class="headerlink" href="#writing-registers" title="Link to this heading">¶</a></h3>
 <p>Writing to a register incorporates the same changes as reading a register.
 The following examples show the difference between writing to the Asynchronous Data Output Frequency register (Register 7) in the Programming Library and the VNSDK.
 To configure the VectorNav Programming Library to output at the frequency of 2 Hz, the user would create the sensor object and then write to the Asynchronous Data Output Frequency register:</p>
 <div class="tab-set docutils container">
 <input checked="True" class="tab-input" id="tab-set--4-input--1" name="tab-set--4" type="radio"><label class="tab-label" for="tab-set--4-input--1">C#</label><div class="tab-content docutils container">
-<div class="highlight-C# notranslate"><div class="highlight"><pre><span></span><span class="n">vs</span><span class="p">.</span><span class="n">WriteAsyncDataOutputFrequency</span><span class="p">(</span><span class="m">2</span><span class="p">);</span>
+<div class="highlight-C# notranslate"><div class="highlight"><pre><span></span><span class="n">vs</span><span class="p">.</span><span class="n">WriteAsyncDataOutputFrequency</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -227,13 +225,13 @@ To configure the VectorNav Programming Library to output at the frequency of 2 H
 </div>
 </section>
 <section id="extracting-asynchronous-data">
-<h3>Extracting Asynchronous Data<a class="headerlink" href="#extracting-asynchronous-data" title="Permalink to this headline">¶</a></h3>
+<h3>Extracting Asynchronous Data<a class="headerlink" href="#extracting-asynchronous-data" title="Link to this heading">¶</a></h3>
 <p>Previously, data was handled using basic callback handlers.
 In the VNSDK, the data will be handled with queues.</p>
 </section>
 </section>
 <section id="naming-convention">
-<h2>Naming Convention<a class="headerlink" href="#naming-convention" title="Permalink to this headline">¶</a></h2>
+<h2>Naming Convention<a class="headerlink" href="#naming-convention" title="Link to this heading">¶</a></h2>
 <p>The naming convention has changed from the Programming Library and has been updated to be consistent between all supported languages. The new naming conventions are as follows:</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -254,21 +252,21 @@ In the VNSDK, the data will be handled with queues.</p>
 </ul>
 </section>
 <section id="notable-changes-and-features">
-<h2>Notable Changes and Features<a class="headerlink" href="#notable-changes-and-features" title="Permalink to this headline">¶</a></h2>
+<h2>Notable Changes and Features<a class="headerlink" href="#notable-changes-and-features" title="Link to this heading">¶</a></h2>
 <section id="config-file">
-<h3>Config File<a class="headerlink" href="#config-file" title="Permalink to this headline">¶</a></h3>
+<h3>Config File<a class="headerlink" href="#config-file" title="Link to this heading">¶</a></h3>
 <p>Any memory or behavior configurability variables are located in this folder.
 This allows the user to change any variables needed and reduces the need to look through the source code.</p>
 </section>
 <section id="exception-handling">
-<h3>Exception Handling<a class="headerlink" href="#exception-handling" title="Permalink to this headline">¶</a></h3>
+<h3>Exception Handling<a class="headerlink" href="#exception-handling" title="Link to this heading">¶</a></h3>
 <p>correctly propagates exceptions</p>
 </section>
 <section id="optional-positional-parameters">
-<h3>Optional Positional Parameters<a class="headerlink" href="#optional-positional-parameters" title="Permalink to this headline">¶</a></h3>
+<h3>Optional Positional Parameters<a class="headerlink" href="#optional-positional-parameters" title="Link to this heading">¶</a></h3>
 </section>
 <section id="exception-error-handling">
-<h3>Exception/Error Handling<a class="headerlink" href="#exception-error-handling" title="Permalink to this headline">¶</a></h3>
+<h3>Exception/Error Handling<a class="headerlink" href="#exception-error-handling" title="Link to this heading">¶</a></h3>
 <p>Before explaining how to read and write registers, the user should know the differences in handling errors between the two softwares.</p>
 <p>In the VectorNav Programming Library, if an error occurred such as an <em>InsufficientBaudRate</em> error, the program would throw an exception and crash without providing the user any relevant information.
 The VNSDK does not have exceptions, but instead will return an error code.
@@ -276,23 +274,23 @@ This allows the user to debug their codes easily and lets the user decide how th
 </section>
 </section>
 <section id="added-plugins">
-<h2>Added PlugIns<a class="headerlink" href="#added-plugins" title="Permalink to this headline">¶</a></h2>
+<h2>Added PlugIns<a class="headerlink" href="#added-plugins" title="Link to this heading">¶</a></h2>
 <p>During development, several plugins were created to boost additional functionality that was not available in the previous Programming Library.</p>
 <section id="enhanced-firmware-update">
-<h3>Enhanced Firmware Update<a class="headerlink" href="#enhanced-firmware-update" title="Permalink to this headline">¶</a></h3>
+<h3>Enhanced Firmware Update<a class="headerlink" href="#enhanced-firmware-update" title="Link to this heading">¶</a></h3>
 <p>While this plugin was available in the Programming Library, it has been updated with the issuance of the VNSDK.
 The new Firmware Update plugin has the ability to accept both <em>VNX</em> and <em>VNXML</em> firmware files.
 This plugin allows a user to update their sensor’s firmware without having to connect it to VectorNav’s Control Center GUI or create their own firmware programmer.
 All firmware updates must be performed over the main serial port, UART-1, and communication must be established before an update can occur.</p>
 </section>
 <section id="register-scan">
-<h3>Register Scan<a class="headerlink" href="#register-scan" title="Permalink to this headline">¶</a></h3>
+<h3>Register Scan<a class="headerlink" href="#register-scan" title="Link to this heading">¶</a></h3>
 <p>The Register Scan plugin is a newly added plugin unique to the VNSDK.
 This plugin is capable of scanning each register on a sensor to determine changes from the default configuration.
 An <em>XML</em> configuration file is created from this scan.</p>
 </section>
 <section id="simple-logger">
-<h3>Simple Logger<a class="headerlink" href="#simple-logger" title="Permalink to this headline">¶</a></h3>
+<h3>Simple Logger<a class="headerlink" href="#simple-logger" title="Link to this heading">¶</a></h3>
 <p>The simple logger plugin allows users to easily log data to a binary file.
 This plug in reduces the need for users to write their own logging function.
 Any messages that the user configures for output, in lieu of an insufficient baud rate, will be written to the binary file.</p>
@@ -305,12 +303,9 @@ Any messages that the user configures for output, in lieu of an insufficient bau
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-        <p class="logo"><a href="../Documentation.html" title="Documentation">
-          <img class="logo" src="../_static/VectorNav_LogoStacked_ForWeb_RGB_Full-Color.png" alt="Logo"/>
-        </a></p>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -318,14 +313,11 @@ Any messages that the user configures for output, in lieu of an insufficient bau
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script>$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 <div class="sphinx-toc sphinxglobaltoc">
 <h3><a href="../Documentation.html">Table of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="KeyFunctionality.html">Key Functionality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Plugins.html">Plugins</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">VectorNav CLI Migration Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#highlights">Highlights</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#migrating-from-the-vectornav-programming-library-to-the-vnsdk">Migrating from the VectorNav Programming Library to the VNSDK</a></li>
@@ -335,18 +327,21 @@ Any messages that the user configures for output, in lieu of an insufficient bau
 <li class="toctree-l2"><a class="reference internal" href="#added-plugins">Added PlugIns</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="KeyFunctionality.html">Key Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_index.html">VNSDK API</a></li>
 </ul>
 </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
-    <p class="topless"><a href="Plugins.html"
-                          title="Previous page">&larr; Plugins</a></p>
+    <p class="topless"><a href="../Documentation.html"
+                          title="Previous page">&larr; VectorNav CLI SDK</a></p>
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="api_index.html"
-                          title="Next page">&rarr; VNSDK API</a></p>
+    <p class="topless"><a href="GettingStarted.html"
+                          title="Next page">&rarr; Getting Started</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -378,19 +373,19 @@ Any messages that the user configures for output, in lieu of an insufficient bau
     </div>
     <div class="relbar-bottom">
         
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="api_index.html" title="VNSDK API"
+          <a href="GettingStarted.html" title="Getting Started"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="Plugins.html" title="Plugins"
+          <a href="../Documentation.html" title="VectorNav CLI SDK"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav SDK 0.19.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">VectorNav CLI Migration Guide</a></li> 
       </ul>
@@ -398,8 +393,8 @@ Any messages that the user configures for output, in lieu of an insufficient bau
     </div>
 
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2024, VectorNav Technologies.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    &#169; Copyright 2024, VectorNav Technologies.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
     <!-- cloud_sptheme 1.4 -->
   </body>

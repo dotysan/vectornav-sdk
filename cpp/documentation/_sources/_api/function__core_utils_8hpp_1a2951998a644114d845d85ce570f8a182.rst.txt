@@ -3,7 +3,7 @@
 Function VN::_calculateCRC
 ==========================
 
-- Defined in :ref:`file_include_Implementation_CoreUtils.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_CoreUtils.hpp`
 
 
 Function Documentation

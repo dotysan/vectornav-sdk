@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,17 +21,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Implementation/CommandProcessor.hpp"
+#include "vectornav/Implementation/CommandProcessor.hpp"
+
 #include <cstdint>
+#include <cstring>
 #include <optional>
-#include "Debug.hpp"
-#include "Interface/Command.hpp"
-#include "TemplateLibrary/String.hpp"
+
+#include "vectornav/Debug.hpp"
+#include "vectornav/HAL/Timer.hpp"
+#include "vectornav/Implementation/CoreUtils.hpp"
+#include "vectornav/Interface/GenericCommand.hpp"
+#include "vectornav/TemplateLibrary/String.hpp"
 
 namespace VN
 {
 
-CommandProcessor::RegisterCommandReturn CommandProcessor::registerCommand(Command* pCommand, const Microseconds timeoutThreshold) noexcept
+CommandProcessor::RegisterCommandReturn CommandProcessor::registerCommand(GenericCommand* pCommand, const Microseconds timeoutThreshold) noexcept
 {  // Should only be called on main thread
     if (pCommand->isAwaitingResponse()) { return RegisterCommandReturn{RegisterCommandReturn::Error::CommandResent, AsciiMessage{}}; }
 
@@ -41,10 +46,8 @@ CommandProcessor::RegisterCommandReturn CommandProcessor::registerCommand(Comman
         while (!_cmdQueue.isEmpty())
         {
             const auto item = _cmdQueue.peek().value();
-            if ((curr_time - item.cmd->getSentTime()) > item.timeoutThreshold) {
-                _cmdQueue.get().value().cmd->setStale();
-            } else { break; }
-             
+            if ((curr_time - item.cmd->getSentTime()) > item.timeoutThreshold) { _cmdQueue.get().value().cmd->setStale(); }
+            else { break; }
         }
 
         if (_cmdQueue.isFull()) { return RegisterCommandReturn{RegisterCommandReturn::Error::CommandQueueFull, AsciiMessage{}}; }
@@ -52,9 +55,11 @@ CommandProcessor::RegisterCommandReturn CommandProcessor::registerCommand(Comman
 
     pCommand->prepareToSend();
     AsciiMessage messageToSend;
-    sprintf(messageToSend.begin(), "$VN%s", pCommand->getCommandString().c_str());
-    uint16_t crcValue = CalculateCRC((uint8_t*)messageToSend.c_str() + 1, messageToSend.length() - 1);
-    sprintf(messageToSend.end(), "*%04X\r\n", crcValue);
+    if (frameVnAsciiString(pCommand->getCommandString().c_str(), messageToSend.data(), messageToSend.capacity()))
+    {
+        // Todo: Handle overflow and alert user
+    };
+
     VN_DEBUG_1("TX: " + messageToSend);
 
     {
@@ -70,16 +75,15 @@ bool CommandProcessor::matchResponse(const AsciiMessage& response, const AsciiPa
     while (!_cmdQueue.isEmpty())
     {
         const auto item = _cmdQueue.peek().value();
-        if ((metadata.timestamp - item.cmd->getSentTime()) > item.timeoutThreshold) {
-            _cmdQueue.get().value().cmd->setStale();
-        } else { break; }
+        if ((metadata.timestamp - item.cmd->getSentTime()) > item.timeoutThreshold) { _cmdQueue.get().value().cmd->setStale(); }
+        else { break; }
     }
 
     bool responseHasBeenMatched = false;
     VN_DEBUG_1("RX: " + response + "\t queue size: " + std::to_string(_cmdQueue.size()));
     if (StringUtils::startsWith(response, AsciiMessage("$VNERR,")))
     {
-        if (Command::isMatchingError(response))
+        if (GenericCommand::isMatchingError(response))
         {
             auto frontCommand = _cmdQueue.get();
             if (frontCommand.has_value())
@@ -90,15 +94,15 @@ bool CommandProcessor::matchResponse(const AsciiMessage& response, const AsciiPa
                     VN_ABORT();  // We just made sure it is a valid vnerr, should not be possible
                 }
             }
-            else { _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response)); }
+            else { _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response, now())); }
         }
         else
         {
             // Is an async error or is ill-formed
             AsciiMessage errorNumString = StringUtils::extractBetween(response, ',', '*');
             const auto errorNum = StringUtils::fromStringHex<uint8_t>(errorNumString.begin(), errorNumString.end());
-            if (errorNum.has_value()) { _asyncErrorQueuePush(AsyncError(static_cast<Error>(errorNum.value()), response)); }
-            else { _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response)); }
+            if (errorNum.has_value()) { _asyncErrorQueuePush(AsyncError(static_cast<Error>(errorNum.value()), response, now())); }
+            else { _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response, now())); }
         }
         return true;
     }
@@ -120,7 +124,7 @@ bool CommandProcessor::matchResponse(const AsciiMessage& response, const AsciiPa
     }
     if (!responseHasBeenMatched)
     {
-        _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response));
+        _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response, now()));
         return true;
     }
     return false;

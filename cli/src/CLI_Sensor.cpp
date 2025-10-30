@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,11 +23,13 @@
 
 
 
-#include "CLI_Sensor.hpp"
+#include "vectornav/CLI_Sensor.hpp"
+#include "vectornav/CLI_Commands.hpp"
 
 #include <conio.h>
 #include <msclr/marshal.h>
 
+#include <cstdint>
 #include <string>
 
 using namespace msclr::interop;
@@ -248,43 +250,48 @@ void Sensor::SetFilterBias()
     }
 }
 
-// // Blocking call
-// void Sensor::SendCommand(String ^ commandToSend) {
-//   VN::AsciiMessage commandString;
-//   int length = commandToSend->Length;
+// Error sendCommand(Command* commandToSend, SendCommandBlockMode waitMode, const Microseconds waitLength = Config::Sensor::commandSendTimeoutLength,
+//     const Microseconds timeoutThreshold = Config::CommandProcessor::commandRemovalTimeoutLength) noexcept;
 
-//   for (int i = 0; i < length; i++) {
-//     commandString.push_back(commandToSend[i]);
-//   }
-
-//   VN::Command command(commandString);
-
-//   VN::Error error = _sensor->sendCommand(
-//       &command, VN::Sensor::cmdWaitMode::blockingWithRetry);
-//   if (error != VN::Error::None) {
-//     VnException ^ pVnException = gcnew VnException;
-//     pVnException->error = error;
-//     throw pVnException;
-//   }
-// }
-
-// // None blocking call
-// void Sensor::SendCommand(Commands::Command^% commandToSend)
-// {
-// 	VN::Error error = _sensor->sendCommand(commandToSend->GetReference(),
-// VN::Sensor::cmdWaitMode::none); 	if (error != VN::Error::None)
-// 	{
-// 		VnException^ pVnException = gcnew VnException;
-// 		pVnException->error = error;
-// 		throw pVnException;
-// 	}
-// }
+void Sensor::SendCommand(GenericCommand^% commandToSend, Sensor::SendCommandBlockMode waitMode)
+{
+    VN::Sensor::SendCommandBlockMode waitModeC = static_cast<VN::Sensor::SendCommandBlockMode>(static_cast<int>(waitMode));
+	VN::Error error = _sensor->sendCommand(commandToSend->GetReference(), waitModeC); 	
+    if (error != VN::Error::None)
+	{
+		VnException^ pVnException = gcnew VnException(error);
+		throw pVnException;
+	}
+}
 
 void Sensor::SerialSend(String ^ msgToSend)
 {
     marshal_context ^ context = gcnew marshal_context();
-    _sensor->serialSend(context->marshal_as<const char*>(msgToSend));
+    auto msgChar = context->marshal_as<const char*>(msgToSend);
+    _sensor->serialSend(msgChar, strlen(msgChar));
     delete context;
+}
+
+// ----------------------
+// Error Handling
+// ----------------------
+
+Nullable<AsyncError> Sensor::GetAsynchronousError() {
+    auto latestError = _sensor->getAsynchronousError();
+    if (!latestError.has_value()) {
+        return Nullable<AsyncError>();
+    }
+    AsyncError error;
+    error.Error = static_cast<uint16_t>(latestError->error);
+    error.Message = marshal_as<String^>(latestError->message.to_string());
+    error.Timestamp = _clock.ConvertTime(latestError->timestamp);
+    return error;
+}
+
+
+System::DateTime Sensor::Now() 
+{
+    return _clock.now();
 }
 
 // ----------------------
@@ -334,5 +341,7 @@ void Sensor::DeregisterHsiCalibration(Calibration::HsiCalibration_Base^ hsi)
 {
     _sensor->unsubscribeFromMessage(hsi->GetQueuePointer(), "VNYMR");
 }
+
+
 #endif
 } // namespace VNSDK

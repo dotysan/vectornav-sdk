@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,13 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Implementation/FbPacketProtocol.hpp"
+#include "vectornav/Implementation/FbPacketProtocol.hpp"
 
 namespace VN
 {
 namespace FbPacketProtocol
 {
-bool _isValidBinaryCrc(const ByteBuffer& buffer, const size_t syncByteIndex, const size_t packetLength) noexcept
+bool _isValidBinaryCrc(const ByteBuffer& buffer, const size_t syncByteIndex, const uint16_t packetLength) noexcept
 {
     uint16_t calculatedCrc = 0;
     // Crc validation does not include sync byte
@@ -41,8 +41,8 @@ bool _isValidBinaryCrc(const ByteBuffer& buffer, const size_t syncByteIndex, con
 FbPacketProtocol::FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept
 {
     Metadata metadata;
-    const size_t headerSize = 5;
-    size_t currentFromHeadIndex = syncByteIndex;
+    const uint16_t headerSize = 5;
+    uint16_t currentFromHeadIndex = syncByteIndex;
 
     // Get the first byte and verify it is 0xFB
     const uint8_t syncByte = byteBuffer.peek_unchecked(syncByteIndex);
@@ -54,7 +54,7 @@ FbPacketProtocol::FindPacketReturn findPacket(const ByteBuffer& byteBuffer, cons
 
     const size_t numPacketBytesInBuffer = byteBuffer.size() - syncByteIndex;
 
-    const size_t minPossiblePacketLength = 1 + headerSize + 1 + 2;  // Sync byte + FB header (5) + 1 Payload + CRC
+    const uint16_t minPossiblePacketLength = 1 + headerSize + 1 + 2;  // Sync byte + FB header (5) + 1 Payload + CRC
     if (numPacketBytesInBuffer < minPossiblePacketLength) { return FindPacketReturn{Validity::Incomplete, Metadata{}}; }
 
     metadata.header.messageId = byteBuffer.peek_unchecked(++currentFromHeadIndex);

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,9 +25,9 @@
 #include <pybind11/stl.h>
 
 #include "SimpleLogger/SimpleLogger.hpp"
-#include "HAL/File.hpp"
-#include "TemplateLibrary/String.hpp"
-#include "TemplateLibrary/ByteBuffer.hpp"
+#include "vectornav/HAL/File.hpp"
+#include "vectornav/TemplateLibrary/String.hpp"
+#include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 
 namespace py = pybind11;
 
@@ -42,9 +42,8 @@ void init_simple_logger(py::module& m) {
   simpleLogger.def(py::init<ByteBuffer&, Filesystem::FilePath&>())
     .def("start", &SimpleLogger::start)
     .def("stop", &SimpleLogger::stop)
-    .def("isLogging", &SimpleLogger::isLogging);
-    
+    .def("isLogging", &SimpleLogger::isLogging)
+    .def("numBytesLogged", &SimpleLogger::numBytesLogged);
 }
 
 } // namespace VN
-

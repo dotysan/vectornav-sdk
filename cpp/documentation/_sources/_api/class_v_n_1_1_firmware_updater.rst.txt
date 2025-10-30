@@ -3,7 +3,7 @@
 Class FirmwareUpdater
 =====================
 
-- Defined in :ref:`file_plugins_FirmwareUpdate_include_FirmwareUpdater.hpp`
+- Defined in :ref:`file_plugins_FirmwareUpdate_include_vectornav_FirmwareUpdater.hpp`
 
 
 Nested Relationships

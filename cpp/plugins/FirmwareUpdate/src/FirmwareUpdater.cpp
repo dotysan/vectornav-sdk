@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,15 +21,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "FirmwareUpdater.hpp"
+#include "vectornav/FirmwareUpdater.hpp"
 
-#include "HAL/Timer.hpp"
-#include "HAL/Thread.hpp"
-#include "Interface/Command.hpp"
-#include "Interface/Sensor.hpp"
-#include "Debug.hpp"
-
-#include "Bootloader.hpp"
+#include "vectornav/Bootloader.hpp"
+#include "vectornav/Debug.hpp"
+#include "vectornav/HAL/Thread.hpp"
+#include "vectornav/HAL/Timer.hpp"
+#include "vectornav/Interface/GenericCommand.hpp"
+#include "vectornav/Interface/Sensor.hpp"
 
 namespace VN
 {
@@ -68,11 +67,13 @@ bool FirmwareUpdater::updateFirmware(Sensor* sensor, InputFile& vnXmlFile, Param
     // Reset the input stream to the beginning of the file
     vnXmlFile.reset();
 
-    if (_tryUpdateNavFirmwareFromBootloader(vnXmlFile, vnXmlMetadata))
+    auto ret = _tryUpdateNavFirmwareFromBootloader(vnXmlFile, vnXmlMetadata);
+    if (ret == _RecoveryReturn::Failed)
     {
         std::cout << "Failed to recover firmware." << std::endl;
         return true;
     }
+    // Todo: Add handling of skipping nav firmware update when in recovery mode
     if (_pollSensorModelAndFirmwareVersion()) { return true; }
     std::cout << "Sensor model : " << _model << std::endl;
     Error latestError = _sensor->restoreFactorySettings();  // Has to happen before current processor polling because some firmware has a bug preventing a valid
@@ -170,11 +171,14 @@ bool FirmwareUpdater::updateFirmware(Sensor* sensor, InputFile& vnxFile, const P
     _bootloaderBaudRate = params.bootloaderBaudRate;
     _totalLinesInFile = _calculateNumberOfLinesInFile(vnxFile);
     // Assume that we have a sensor in an invalid state due to a previously failed bootload attempt
-    if (_tryUpdateNavFirmwareFromBootloader(vnxFile, processor))
+    auto ret = _tryUpdateNavFirmwareFromBootloader(vnxFile, processor);
+    if (ret == _RecoveryReturn::Failed)
     {
         std::cout << "Failed to recover firmware." << std::endl;
         return true;
     }
+    else if (ret == _RecoveryReturn::Success) { return false; }
+    else {}  // Proceed normally
     if (_pollSensorModelAndFirmwareVersion()) { return true; }
     std::cout << "Sensor model : " << _model << std::endl;
     if (!_isCompatible(processor)) { return true; }
@@ -235,11 +239,11 @@ bool FirmwareUpdater::updateFirmware(Sensor* sensor, InputFile& vnxFile, const P
     return false;
 }
 
-bool FirmwareUpdater::_tryUpdateNavFirmwareFromBootloader(InputFile& vnXmlFile, const VN::VnXml::Metadata& vnXmlMetadata)
+FirmwareUpdater::_RecoveryReturn FirmwareUpdater::_tryUpdateNavFirmwareFromBootloader(InputFile& vnXmlFile, const VN::VnXml::Metadata& vnXmlMetadata)
 {
     if (!Bootloader::autoconfigureBootloader(_sensor, Sensor::BaudRate::Baud115200))
     {  // If we are in recovery mode, don't try to go too fast.
-        std::cout << "Attempting to recover firmware from corrupted file." << std::endl;
+        std::cout << "Unit already in bootloader. Attempting to recover nav firmware from a corrputed previous attempt.\n";
         // Bootloader detection succeeded.
         // We're in the bootloader and should just start by updating the nav firmware. Hope we're talking to nav.
 
@@ -252,35 +256,38 @@ bool FirmwareUpdater::_tryUpdateNavFirmwareFromBootloader(InputFile& vnXmlFile, 
             const size_t numLinesToSkip = component.dataLineBegin - prevLineNum;
             for (size_t lineNo = 0; lineNo < numLinesToSkip; ++lineNo) { vnXmlFile.getLine(discard.begin(), discard.capacity()); }
             if (!VnXml::NavProcessorCheck::is_value(component.hardwareId)) { continue; }
-            if (_updateFirmware(_sensor, vnXmlFile, component.dataLineBegin, component.dataLineEnd - component.dataLineBegin)) { return true; }
-            Bootloader::exitBootloader(_sensor);
+            if (_updateFirmware(_sensor, vnXmlFile, component.dataLineBegin, component.dataLineEnd - component.dataLineBegin))
+            {
+                return _RecoveryReturn::Failed;
+            }
+            if (Bootloader::exitBootloader(_sensor)) { return _RecoveryReturn::Failed; }
             std::cout << "Recovered firmware version.\n";
-            return false;  // We successfully updated the nav firmware.
+            return _RecoveryReturn::Success;  // We successfully updated the nav firmware.
         }
         // There wasn't a valid firmware file.
         _sensor->changeHostBaudRate(_navBaudRate);
-        return true;
+        return _RecoveryReturn::Failed;
     }
     // If we couldn't confirm bootload, assume we didn't start in the bootloader and we can proceed as normal
     _sensor->changeHostBaudRate(_navBaudRate);
-    return false;
+    return _RecoveryReturn::Success;
 }
 
-bool FirmwareUpdater::_tryUpdateNavFirmwareFromBootloader(InputFile& vnxFile, Processor processor)
+FirmwareUpdater::_RecoveryReturn FirmwareUpdater::_tryUpdateNavFirmwareFromBootloader(InputFile& vnxFile, Processor processor)
 {
     if (!Bootloader::autoconfigureBootloader(_sensor, Sensor::BaudRate::Baud115200))
     {  // If we are in recovery mode, don't try to go too fast.
-        std::cout << "Attempting to recover firmware from corrupted file." << std::endl;
+        std::cout << "Unit already in bootloader. Attempting to recover nav firmware from a corrputed previous attempt.\n";
         // Bootloader detection succeeded.
         // We're in the bootloader and should just start by updating the nav firmware. Hope we're talking to nav.
-        if (processor != Processor::Nav) { return true; }
-        if (_updateFirmware(_sensor, vnxFile, 0, _totalLinesInFile)) { return true; }
-        Bootloader::exitBootloader(_sensor);
+        if (processor != Processor::Nav) { return _RecoveryReturn::Failed; }
+        if (_updateFirmware(_sensor, vnxFile, 0, _totalLinesInFile)) { return _RecoveryReturn::Failed; }
+        if (Bootloader::exitBootloader(_sensor)) { return _RecoveryReturn::Failed; }
         std::cout << "Recovered firmware version.\n";
-        return false;  // We successfully updated the nav firmware.
+        return _RecoveryReturn::Success;  // We successfully updated the nav firmware.
     }
-    // If we couldn't confirm bootload, assume we didnt' start in the bootloader and we can proceed as normal
-    return false;
+    // If we couldn't confirm bootload, assume we didn't start in the bootloader and we can proceed as normal
+    return _RecoveryReturn::NotInBootloader;
 }
 
 bool FirmwareUpdater::_isCompatible(const Processor processor) const

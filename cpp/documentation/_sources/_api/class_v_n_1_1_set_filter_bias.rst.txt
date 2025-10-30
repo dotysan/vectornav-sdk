@@ -3,7 +3,7 @@
 Class SetFilterBias
 ===================
 
-- Defined in :ref:`file_include_Interface_Commands.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Commands.hpp`
 
 
 Inheritance Relationships
@@ -12,7 +12,7 @@ Inheritance Relationships
 Base Type
 *********
 
-- ``public VN::Command`` (:ref:`exhale_class_class_v_n_1_1_command`)
+- ``public VN::GenericCommand`` (:ref:`exhale_class_class_v_n_1_1_generic_command`)
 
 
 Class Documentation

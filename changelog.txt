@@ -1,3 +1,67 @@
+0.22.0
+ - Global  : Increased maximum ASCII and command message sizes in Config.hpp
+ - Global  : Enforced camelCase on register field names (eg. gnss1AltMSL->gnss1AltMsl or posEX->posEx)
+ - Global  : Add timestamps to AsyncError struct
+ - Cpp     : Added optional parameter to changeBaudRate function so the serialPort can be specified
+ - Cpp     : Added Register 51 to listed configuration registers  
+ - Cpp     : Added a getMeasurementRegisterName() function to complement the getConfigRegisterName() function
+ - Cpp     : Renamed the Command class to GenericCommand
+ - Cpp     : Reduce size_t integers to uint16_t where applicable
+ - Cpp     : Changed Commands example to NonBlockingCommands for a more realistic use case
+ - Python  : Renamed the Command class to GenericCommand
+ - Python  : Removed Commands module and moved all classes associated with it into the main vectornav module
+ - Python  : Added numBytesAvailable to SimpleLogger
+ - Python  : Add ability to print parsing statistics for DataExport, and updated example
+ - Python  : Add capability to export skipped bytes and updated example
+ - Python  : Changed commands.py example to non_block_polling.py for a more realistic use case
+ - Cli     : Add ability to print parsing statistics for DataExport, and updated examples for Matlab and C#
+ - Cli     : Add capability to export skipped bytes and updated examples for Matlab and C#
+ - Cli     : Added NumBytesAvailable to SimpleLogger
+ - Cli     : Refactored Commands and renamed the Command class to GenericCommand
+ - Cli     : Added Firmware Update plugin
+ - Matlab  : Added Firmware Update example
+ - Matlab  : Added NonBlockingCommands example
+ - Matlab  : Added Data Export examples
+ - C#      : Added NonBlockingCommands example
+ - Plugin  : Math; Refactored cpp plugin. Split up and renamed files. Moved all functions to Math namespace 
+			 (eliminated namespaces for LinAlg, Conversions, AttConversions and PosVelConversions)
+ - Plugin  : Math; Renamed functions for consistency and added several new functions needed for Calibration.
+ - Plugin  : DataExport; Updated names for column headings on CSV export
+ - Plugin  : FirmwareUpdate; Fix printing of error codes received
+ - Plugin  : FirmwareUpdate; Allow resending of lines after a comm error has occurred
+ - Plugin  : FirmwareUpdate; When recovering firmware version, fix current attempt to reload a firmware already successfully loaded, 
+			 causing a reported failure
+ - Plugin  : FirmwareUpdate; Fix usage of vnxml on VN-300
+ - Plugin  : Calibration; Removed deprecated RfrAndBiasCalculator from Calibration plugin.  All languages.
+ - Plugin  : RegScan; Bug fixes to handle responses from all registers
+ - Plugin  : RegScan; Added pause & resume async for more reliable saving configuration
+
+ 
+0.21.0
+ - RegScan : Completley rewrite plugin to allow lighter weight, more stable, and more modular use. 
+               Load and save in any user-defined way or format (pre-written are xml and unparsed ascii, lambda injection allowed).
+               Added new saveNonDefaultConfiguration method to do full default setting check, requiring an RFS (similar to previous saveConfiguration method).
+               Redefined saveConfiguration not to include any default comparison, RFS, Write Settings, or Reset.
+               Added setConfigurationRegisters to load registers as-is without any other commands.
+               Redefined loadConfiguration to include a preceeding RFS and succeeding WriteSettings and Reset.
+               Split out examples to be specific to each method (loadConfiguration, saveConfiguration, saveNonDefaultConfiguration).
+               Stability improvements.
+               Improve handling of exceptional registers.
+               More granular error reporting.
+ - Cli     : Delete all register scan bindings (will be readded in future release)
+ - Cpp     : Default File_Pc InputFile nullTerminateRead to true
+ - Cpp     : Added read overload in InputFile to allow an end char
+ - Global  : Redefine Sensor::serialSend to accept a char* rather than an AsciiMessage, to avoid accidental truncation of raw string
+ - Export  : Add GNSS3 as csv exportable
+ - Math    : Refactored Conversions with PosVel and Attitude
+ - Global  : Change Reference Frame Rotation fields from rFR to rfr
+ - Cpp     : Replace use of platform-dependent integer types in favor of fixed-width, where possible
+ - Cpp     : Standardize include guards according to Google C++ Style Guide
+ - Cpp     : Added vectornav sublayer to include dirs
+ - Cli     : Standardize include guards according to Google C++ Style Guide
+ - Cli     : Added vectornav sublayer to include dirs
+ - Cpp     : Calibration; Add plugin for static IMU bias and RFR calculation. Includes supporting methods in Math plugin.
+
  0.19.0
  - Export  : Fix bug causing extra csv field when SatInfo.NumSats reports as 0
  - Export  : Fix bug causing missing csv header when GnssStatus or GnssAltMsl are present

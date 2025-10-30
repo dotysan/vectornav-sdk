@@ -12,11 +12,11 @@ Directory RegisterScan
 
 *Directory path:* ``plugins\RegisterScan``
 
+Subdirectories
+--------------
 
-Files
------
+- :ref:`dir_plugins_RegisterScan_include`
+- :ref:`dir_plugins_RegisterScan_src`
 
-- :ref:`file_plugins_RegisterScan_RegisterScan.cpp`
-- :ref:`file_plugins_RegisterScan_RegisterScan.hpp`
 
 

@@ -12,12 +12,10 @@ Directory Math
 
 *Directory path:* ``plugins\Math``
 
+Subdirectories
+--------------
 
-Files
------
+- :ref:`dir_plugins_Math_vectornav`
 
-- :ref:`file_plugins_Math_Conversions.hpp`
-- :ref:`file_plugins_Math_LinearAlgebra.hpp`
-- :ref:`file_plugins_Math_MatrixMath.hpp`
 
 

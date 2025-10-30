@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,9 +24,9 @@
 #include <optional>
 #include <variant>
 
-#include "Interface/Errors.hpp"
-#include "Interface/Sensor.hpp"
-#include "FirmwareUpdater.hpp"
+#include "vectornav/FirmwareUpdater.hpp"
+#include "vectornav/Interface/Errors.hpp"
+#include "vectornav/Interface/Sensor.hpp"
 
 using namespace VN;
 
@@ -45,6 +45,14 @@ std::optional<ParsedArgs> parseArgs(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
+    // This firmware update example will walk you throgh the C++ usage of the SDK to connect to and update the firmware on a VectorNav sensor.
+
+    // This example will achieve the following:
+    // 1. Connect to the sensor
+    // 2. Create a firmwareUpdater object
+    // 3. Update the firmware based on the file type
+    // 4. Disconnect from the sensor
+
     // Parse command line arguments
     std::optional<ParsedArgs> parsedArgs = parseArgs(argc, argv);
     if (!parsedArgs.has_value())
@@ -53,23 +61,26 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    const std::string portName = parsedArgs->portName.has_value() ? parsedArgs->portName.value() : "COM10";  // Change this to your desired serial port name
+    // Define the port connection parameters to be used later
+    const std::string portName =
+        parsedArgs->portName.has_value() ? parsedArgs->portName.value() : "COM10";  // Change the sensor port name to the COM port of your local machine
     const Sensor::BaudRate firmwareBaudRate = parsedArgs->firmwareBaudRate.has_value() ? parsedArgs->firmwareBaudRate.value() : Sensor::BaudRate::Baud115200;
     const Sensor::BaudRate bootloaderBaudRate =
         parsedArgs->bootloaderBaudRate.has_value() ? parsedArgs->bootloaderBaudRate.value() : Sensor::BaudRate::Baud115200;
 
-    // Connect to sensor. We are not autoconnecting or verifying connectivity because we can not assume the sensor has a valid firmware
+    // [1] Instantiate a sensor object we'll use to connect to and interact with the unit.
+    // We are not autoconnecting or verifying connectivity because we cannot assume the sensor has a valid firmware
     Sensor sensor;
     Error latestError = sensor.connect(portName, firmwareBaudRate);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " occurred when autoconnecting." << std::endl;
+        std::cerr << "Error " << latestError << " occurred when connecting." << std::endl;
         return 1;
     }
-    // Create firmwareUpdater object
+    // [2] Create firmwareUpdater object
     FirmwareUpdater firmwareUpdater;
 
-    // Update firmware based on filetype
+    // [3] Update firmware based on the filetype. There are two file types that can be used to update the firmware: VNX or VNXML
     bool firmwareUpdateFailure = false;
     if (parsedArgs->filePaths.has_value())
     {
@@ -81,7 +92,7 @@ int main(int argc, char** argv)
         }
         else if (std::holds_alternative<Filesystem::FilePath>(*parsedArgs->filePaths))
         {
-            // Run using a VNXML
+            // Run using a VNXML file
             firmwareUpdateFailure =
                 firmwareUpdater.updateFirmware(&sensor, std::get<Filesystem::FilePath>(*parsedArgs->filePaths), {firmwareBaudRate, bootloaderBaudRate});
         }
@@ -102,7 +113,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // Disconnect from sensr
+    // [4] Disconnect from sensor
     sensor.disconnect();
     std::cout << "FirmwareUpdate example complete" << std::endl;
 }

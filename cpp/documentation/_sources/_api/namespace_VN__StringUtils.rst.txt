@@ -17,9 +17,9 @@ Functions
 ---------
 
 
-- :ref:`exhale_function__string_8hpp_1a4c2330416880496c0cdcdf80497df76f`
-
 - :ref:`exhale_function__string_8hpp_1aa511ebcd64005708f8213fd5c9b481cb`
+
+- :ref:`exhale_function__string_8hpp_1a4c2330416880496c0cdcdf80497df76f`
 
 - :ref:`exhale_function__string_8hpp_1a9c1883a95d61546768f44fa6cb76a79c`
 
@@ -31,13 +31,15 @@ Functions
 
 - :ref:`exhale_function__string_8hpp_1ab31bce87059503e8ba8852332868844c`
 
-- :ref:`exhale_function__string_8hpp_1a028207c72d33e7d8bcbcaa31abc3733f`
+- :ref:`exhale_function__string_8hpp_1a23dc857c6726a81aea4acae3f631546c`
 
 - :ref:`exhale_function__string_8hpp_1a8fe0f1f2c15e5fee0cb541ab4d1bad5a`
+
+- :ref:`exhale_function__string_8hpp_1a028207c72d33e7d8bcbcaa31abc3733f`
 
 
 Variables
 ---------
 
 
-- :ref:`exhale_variable__string_8hpp_1af97f5446157a6e36acf8ec57361b386f`
+- :ref:`exhale_variable__string_8hpp_1ac4e195cb6158ac1d649cec39160186e6`

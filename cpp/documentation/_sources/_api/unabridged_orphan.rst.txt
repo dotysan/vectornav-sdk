@@ -16,22 +16,27 @@ Directories
 .. toctree::
    :maxdepth: 5
 
-   dir_include_HAL.rst
+   dir_include_vectornav.rst
 
 .. toctree::
    :maxdepth: 5
 
-   dir_include_Implementation.rst
+   dir_include_vectornav_HAL.rst
 
 .. toctree::
    :maxdepth: 5
 
-   dir_include_Interface.rst
+   dir_include_vectornav_Implementation.rst
 
 .. toctree::
    :maxdepth: 5
 
-   dir_include_TemplateLibrary.rst
+   dir_include_vectornav_Interface.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir_include_vectornav_TemplateLibrary.rst
 
 .. toctree::
    :maxdepth: 5
@@ -51,6 +56,11 @@ Directories
 .. toctree::
    :maxdepth: 5
 
+   dir_plugins_DataExport_include_vectornav.rst
+
+.. toctree::
+   :maxdepth: 5
+
    dir_plugins_FirmwareUpdate.rst
 
 .. toctree::
@@ -61,12 +71,37 @@ Directories
 .. toctree::
    :maxdepth: 5
 
+   dir_plugins_FirmwareUpdate_include_vectornav.rst
+
+.. toctree::
+   :maxdepth: 5
+
    dir_plugins_Math.rst
 
 .. toctree::
    :maxdepth: 5
 
+   dir_plugins_Math_vectornav.rst
+
+.. toctree::
+   :maxdepth: 5
+
    dir_plugins_RegisterScan.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir_plugins_RegisterScan_include.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir_plugins_RegisterScan_include_vectornav.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir_plugins_RegisterScan_src.rst
 
 .. toctree::
    :maxdepth: 5
@@ -80,262 +115,332 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_AsciiHeader.hpp.rst
+   file_include_vectornav_Implementation_AsciiHeader.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_AsciiPacketDispatcher.hpp.rst
+   file_include_vectornav_Implementation_AsciiPacketDispatcher.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_AsciiPacketProtocol.hpp.rst
+   file_include_vectornav_Implementation_AsciiPacketProtocol.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_BinaryHeader.hpp.rst
+   file_plugins_Math_vectornav_AttitudeMath.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_BinaryMeasurementDefinitions.hpp.rst
+   file_include_vectornav_Implementation_BinaryHeader.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_FirmwareUpdate_include_Bootloader.hpp.rst
+   file_include_vectornav_Implementation_BinaryMeasurementDefinitions.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_TemplateLibrary_ByteBuffer.hpp.rst
+   file_plugins_FirmwareUpdate_include_vectornav_Bootloader.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Interface_Command.hpp.rst
+   file_include_vectornav_TemplateLibrary_ByteBuffer.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_CommandProcessor.hpp.rst
+   file_include_vectornav_Implementation_CommandProcessor.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Interface_Commands.hpp.rst
+   file_include_vectornav_Interface_Commands.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Interface_CompositeData.hpp.rst
+   file_include_vectornav_Interface_CompositeData.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Config.hpp.rst
+   file_include_vectornav_Config.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_Math_Conversions.hpp.rst
+   file_plugins_RegisterScan_src_ConfigReader.cpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_CoreUtils.hpp.rst
+   file_plugins_RegisterScan_include_vectornav_ConfigReader.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Debug.hpp.rst
+   file_plugins_RegisterScan_src_ConfigWriter.cpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_TemplateLibrary_DirectAccessQueue.hpp.rst
+   file_plugins_RegisterScan_include_vectornav_ConfigWriter.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Duration.hpp.rst
+   file_plugins_Math_vectornav_Conversions.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Interface_Errors.hpp.rst
+   file_include_vectornav_Implementation_CoreUtils.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_Exporter.hpp.rst
+   file_include_vectornav_Debug.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_ExporterAscii.hpp.rst
+   file_include_vectornav_TemplateLibrary_DirectAccessQueue.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_ExporterCsv.hpp.rst
+   file_include_vectornav_HAL_Duration.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_ExporterCsvUtils.hpp.rst
+   file_plugins_Math_vectornav_EigenDecomposition.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_ExporterImr.hpp.rst
+   file_include_vectornav_Interface_Errors.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_ExporterRinex.hpp.rst
+   file_plugins_DataExport_include_vectornav_Exporter.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_FaPacketDispatcher.hpp.rst
+   file_plugins_DataExport_include_vectornav_ExporterAscii.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_FaPacketProtocol.hpp.rst
+   file_plugins_DataExport_include_vectornav_ExporterCsv.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_FbPacketDispatcher.hpp.rst
+   file_plugins_DataExport_include_vectornav_ExporterCsvUtils.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_FbPacketProtocol.hpp.rst
+   file_plugins_DataExport_include_vectornav_ExporterImr.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_File.hpp.rst
+   file_plugins_DataExport_include_vectornav_ExporterRinex.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_File_Base.hpp.rst
+   file_include_vectornav_Implementation_FaPacketDispatcher.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_File_PC.hpp.rst
+   file_include_vectornav_Implementation_FaPacketProtocol.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_FileExporter.hpp.rst
+   file_include_vectornav_Implementation_FbPacketDispatcher.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_FirmwareUpdate_include_FirmwareUpdater.hpp.rst
+   file_include_vectornav_Implementation_FbPacketProtocol.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_Math_LinearAlgebra.hpp.rst
+   file_include_vectornav_HAL_File.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_TemplateLibrary_Matrix.hpp.rst
+   file_include_vectornav_HAL_File_Base.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_Math_MatrixMath.hpp.rst
+   file_include_vectornav_HAL_File_PC.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_MeasurementDatatypes.hpp.rst
+   file_include_vectornav_HAL_File_Wasm.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Mutex.hpp.rst
+   file_plugins_DataExport_include_vectornav_FileExporter.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Mutex_Base.hpp.rst
+   file_plugins_FirmwareUpdate_include_vectornav_FirmwareUpdater.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Mutex_PC.hpp.rst
+   file_include_vectornav_Interface_GenericCommand.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_Packet.hpp.rst
+   file_plugins_Math_vectornav_LinearAlgebra.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_PacketDispatcher.hpp.rst
+   file_plugins_Math_vectornav_LinearLeastSquares.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_PacketSynchronizer.hpp.rst
+   file_include_vectornav_TemplateLibrary_Matrix.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_TemplateLibrary_Queue.hpp.rst
+   file_include_vectornav_Implementation_MeasurementDatatypes.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Implementation_QueueDefinitions.hpp.rst
+   file_include_vectornav_HAL_Mutex.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Interface_Registers.hpp.rst
+   file_include_vectornav_HAL_Mutex_Base.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_RegisterScan_RegisterScan.cpp.rst
+   file_include_vectornav_HAL_Mutex_CLI.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_RegisterScan_RegisterScan.hpp.rst
+   file_include_vectornav_HAL_Mutex_Disabled.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_Interface_Sensor.hpp.rst
+   file_include_vectornav_HAL_Mutex_Mbed.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Serial.hpp.rst
+   file_include_vectornav_HAL_Mutex_PC.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Serial_Base.hpp.rst
+   file_include_vectornav_Implementation_Packet.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Serial_Linux.hpp.rst
+   file_include_vectornav_Implementation_PacketDispatcher.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_Implementation_PacketSynchronizer.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_plugins_Math_vectornav_PosVelMath.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_TemplateLibrary_Queue.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_Implementation_QueueDefinitions.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_Interface_Registers.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_plugins_RegisterScan_src_RegisterScan.cpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_plugins_RegisterScan_include_vectornav_RegisterScan.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_Interface_Sensor.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_HAL_Serial.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_HAL_Serial_Base.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_HAL_Serial_Linux.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_HAL_Serial_Mbed.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_HAL_Serial_Wasm.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_HAL_Serial_Windows.hpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -345,49 +450,59 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_SkippedByteExporter.hpp.rst
+   file_plugins_DataExport_include_vectornav_SkippedByteExporter.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_TemplateLibrary_String.hpp.rst
+   file_include_vectornav_TemplateLibrary_String.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Thread.hpp.rst
+   file_include_vectornav_HAL_Thread.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Thread_Base.hpp.rst
+   file_include_vectornav_HAL_Thread_Base.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Thread_PC.hpp.rst
+   file_include_vectornav_HAL_Thread_Mbed.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Timer.hpp.rst
+   file_include_vectornav_HAL_Thread_PC.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Timer_Base.hpp.rst
+   file_include_vectornav_HAL_Timer.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_HAL_Timer_PC.hpp.rst
+   file_include_vectornav_HAL_Timer_Base.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_include_TemplateLibrary_Vector.hpp.rst
+   file_include_vectornav_HAL_Timer_Mbed.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_FirmwareUpdate_include_VnXml.hpp.rst
+   file_include_vectornav_HAL_Timer_PC.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_TemplateLibrary_Vector.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_plugins_FirmwareUpdate_include_vectornav_VnXml.hpp.rst

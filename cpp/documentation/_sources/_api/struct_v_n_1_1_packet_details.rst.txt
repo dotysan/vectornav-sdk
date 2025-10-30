@@ -3,7 +3,7 @@
 Struct PacketDetails
 ====================
 
-- Defined in :ref:`file_include_Implementation_Packet.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_Packet.hpp`
 
 
 Struct Documentation

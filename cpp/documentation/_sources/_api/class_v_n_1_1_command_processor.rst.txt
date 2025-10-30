@@ -3,7 +3,7 @@
 Class CommandProcessor
 ======================
 
-- Defined in :ref:`file_include_Implementation_CommandProcessor.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_CommandProcessor.hpp`
 
 
 Nested Relationships

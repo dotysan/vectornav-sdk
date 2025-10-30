@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,23 +21,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// clang-format off
 #include <exception>
 #include <pybind11/pybind11.h>
 #include <pybind11/chrono.h>
 #include <pybind11/stl.h>
 
-#include "Config.hpp"
-#include "TemplateLibrary/String.hpp"
-#include "TemplateLibrary/ByteBuffer.hpp"
+#include "vectornav/Config.hpp"
+#include "vectornav/TemplateLibrary/String.hpp"
+#include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 
-#include "Interface/Registers.hpp"
-#include "Interface/Sensor.hpp"
-#include "Interface/CompositeData.hpp"
-#include "Interface/Command.hpp"
-#include "Implementation/MeasurementDatatypes.hpp"
-#include "Interface/Errors.hpp"
-#include "Implementation/BinaryHeader.hpp"
-#include "Implementation/Packet.hpp"
+#include "vectornav/Interface/Registers.hpp"
+#include "vectornav/Interface/Sensor.hpp"
+#include "vectornav/Interface/CompositeData.hpp"
+#include "vectornav/Interface/GenericCommand.hpp"
+#include "vectornav/Implementation/MeasurementDatatypes.hpp"
+#include "vectornav/Interface/Errors.hpp"
+#include "vectornav/Implementation/BinaryHeader.hpp"
+#include "vectornav/Implementation/Packet.hpp"
+#include "vectornav/HAL/Timer.hpp"
 
 #include "PyTemplates.hpp"
 
@@ -231,21 +233,26 @@ PYBIND11_MODULE(vectornav, m) {
       }
     )
     .def("sendCommand", 
-      [](Sensor& vs, Command* commandToSend, Sensor::SendCommandBlockMode waitMode, const Microseconds waitLengthMs) {
+      [](Sensor& vs, GenericCommand* commandToSend, Sensor::SendCommandBlockMode waitMode, const Microseconds waitLengthMs) {
         Error error = vs.sendCommand(commandToSend, waitMode, waitLengthMs);
         if (error != Error::None) { throw std::runtime_error(genErrorMessage(error)); }
       }
     )
     .def("sendCommand", 
-      [](Sensor& vs, Command* commandToSend, Sensor::SendCommandBlockMode waitMode) {
+      [](Sensor& vs, GenericCommand* commandToSend, Sensor::SendCommandBlockMode waitMode) {
         Error error = vs.sendCommand(commandToSend, waitMode, Config::Sensor::commandSendTimeoutLength);
         if (error != Error::None) { throw std::runtime_error(genErrorMessage(error)); }
       }
     )
     .def("serialSend",
-      [](Sensor& vs, const AsciiMessage& msgToSend) {
-        Error error = vs.serialSend(msgToSend);
+      [](Sensor& vs, const char* msgToSend, const size_t len) {
+        Error error = vs.serialSend(msgToSend, len);
         if (error != Error::None) { throw std::runtime_error(genErrorMessage(error)); }
+      }
+    )
+    .def("now",
+      [](Sensor& vs) {
+        return VN::now();
       }
     )
     // Additional Logging
@@ -562,7 +569,8 @@ PYBIND11_MODULE(vectornav, m) {
   py::class_<AsyncError>(m, "AsyncError")
     .def(py::init<>())
     .def_readwrite("error", &AsyncError::error)
-    .def_readwrite("message", &AsyncError::message);
+    .def_readwrite("message", &AsyncError::message)
+    .def_readwrite("timestamp", &AsyncError::timestamp);
 
   py::enum_<Error>(m, "Error")
     .value("HardFault", Error::HardFault)
@@ -612,3 +620,4 @@ PYBIND11_MODULE(vectornav, m) {
   declare_direct_access_queue<VN::Packet, 1000>(m, "PacketQueue");
  
 }}
+// clang-format on

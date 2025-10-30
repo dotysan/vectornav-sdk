@@ -3,7 +3,7 @@
 Struct CsvTypeInfo
 ==================
 
-- Defined in :ref:`file_plugins_DataExport_include_ExporterCsvUtils.hpp`
+- Defined in :ref:`file_plugins_DataExport_include_vectornav_ExporterCsvUtils.hpp`
 
 
 Struct Documentation

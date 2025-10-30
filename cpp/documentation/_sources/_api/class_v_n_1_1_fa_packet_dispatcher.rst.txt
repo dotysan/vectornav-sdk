@@ -3,7 +3,7 @@
 Class FaPacketDispatcher
 ========================
 
-- Defined in :ref:`file_include_Implementation_FaPacketDispatcher.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_FaPacketDispatcher.hpp`
 
 
 Nested Relationships

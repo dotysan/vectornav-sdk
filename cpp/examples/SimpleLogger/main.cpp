@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,15 +22,15 @@
 // THE SOFTWARE.
 
 #include <cstdint>
-#include <iostream>
 #include <filesystem>
-
-#include "Interface/Errors.hpp"
-#include "Interface/Sensor.hpp"
-#include "Interface/Registers.hpp"
-#include "TemplateLibrary/ByteBuffer.hpp"
+#include <iostream>
+#include <string>
 
 #include "SimpleLogger.hpp"
+#include "vectornav/Interface/Errors.hpp"
+#include "vectornav/Interface/Registers.hpp"
+#include "vectornav/Interface/Sensor.hpp"
+#include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 
 using namespace VN;
 namespace fs = std::filesystem;
@@ -58,7 +58,8 @@ int main(int argc, char* argv[])
     latestError = sensor.readRegister(&modelRegister);
     if (latestError != Error::None)
     {
-        std::cout << "Error" << latestError << " encountered when reading register " << modelRegister.id() << " (" << modelRegister.name() << ")" << std::endl;
+        std::cout << "Error " << latestError << " encountered when reading register " << std::to_string(modelRegister.id()) << " (" << modelRegister.name()
+                  << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     std::string modelNumber = modelRegister.model;

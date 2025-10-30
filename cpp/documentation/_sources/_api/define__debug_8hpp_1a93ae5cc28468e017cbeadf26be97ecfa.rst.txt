@@ -3,7 +3,7 @@
 Define VN_PROFILER_PRINT_TIMERS
 ===============================
 
-- Defined in :ref:`file_include_Debug.hpp`
+- Defined in :ref:`file_include_vectornav_Debug.hpp`
 
 
 Define Documentation

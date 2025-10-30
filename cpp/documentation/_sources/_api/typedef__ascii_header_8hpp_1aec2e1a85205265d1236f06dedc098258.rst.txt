@@ -3,7 +3,7 @@
 Typedef VN::AsciiHeader
 =======================
 
-- Defined in :ref:`file_include_Implementation_AsciiHeader.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_AsciiHeader.hpp`
 
 
 Typedef Documentation

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,8 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Implementation/PacketSynchronizer.hpp"
-#include "Debug.hpp"
+#include "vectornav/Implementation/PacketSynchronizer.hpp"
+
+#include "vectornav/Debug.hpp"
+#include "vectornav/HAL/Timer.hpp"
 
 namespace VN
 {
@@ -144,7 +146,7 @@ void PacketSynchronizer::_copyToSkippedByteBufferIfEnabled(const size_t numBytes
             if (_primaryByteBuffer.peek(_copySkippedReceivedLinearBuffer.data(), bytesToCopy, bytesCopied)) { VN_ABORT(); }
             if (_pSkippedByteBuffer->put(_copySkippedReceivedLinearBuffer.data(), bytesToCopy))
             {
-                if (_asyncErrorQueuePush) { _asyncErrorQueuePush(AsyncError(Error::SkippedByteBufferFull)); }
+                if (_asyncErrorQueuePush) { _asyncErrorQueuePush(AsyncError(Error::SkippedByteBufferFull, now())); }
                 return;
             }
             bytesRemainingToCopy -= bytesToCopy;
@@ -166,7 +168,7 @@ void PacketSynchronizer::_copyToReceivedByteBufferIfEnabled(const size_t numByte
             if (_primaryByteBuffer.peek(_copySkippedReceivedLinearBuffer.data(), bytesToCopy, bytesCopied)) { VN_ABORT(); }
             if (_pReceivedByteBuffer->put(_copySkippedReceivedLinearBuffer.data(), bytesToCopy))
             {
-                if (_asyncErrorQueuePush) { _asyncErrorQueuePush(AsyncError(Error::ReceivedByteBufferFull)); }
+                if (_asyncErrorQueuePush) { _asyncErrorQueuePush(AsyncError(Error::ReceivedByteBufferFull, now())); }
                 return;
             }
             bytesRemainingToCopy -= bytesToCopy;

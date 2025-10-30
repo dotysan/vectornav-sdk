@@ -3,7 +3,7 @@
 Define GNSS_GNSS1TIMEUNCERTAINTY_BIT
 ====================================
 
-- Defined in :ref:`file_include_Implementation_BinaryMeasurementDefinitions.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_BinaryMeasurementDefinitions.hpp`
 
 
 Define Documentation

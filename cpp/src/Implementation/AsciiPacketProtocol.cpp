@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,15 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Implementation/AsciiPacketProtocol.hpp"
+#include "vectornav/Implementation/AsciiPacketProtocol.hpp"
 
-#include "Config.hpp"
-#include "Interface/CompositeData.hpp"
 #include <cstdint>
-#include "TemplateLibrary/String.hpp"
-#include "Implementation/CoreUtils.hpp"
-#include "HAL/Timer.hpp"
-#include "Debug.hpp"
+
+#include "vectornav/Config.hpp"
+#include "vectornav/Debug.hpp"
+#include "vectornav/HAL/Timer.hpp"
+#include "vectornav/Implementation/CoreUtils.hpp"
+#include "vectornav/Interface/CompositeData.hpp"
+#include "vectornav/TemplateLibrary/String.hpp"
 
 namespace VN
 {
@@ -225,7 +226,7 @@ FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteI
     bool processingHeader = true;
     uint8_t checksum8 = 0;
     uint16_t crc16 = 0;
-    for (size_t fromSyncByteIndex = 1; fromSyncByteIndex < details.length; ++fromSyncByteIndex)
+    for (uint16_t fromSyncByteIndex = 1; fromSyncByteIndex < details.length; ++fromSyncByteIndex)
     {                                                              // Beginning one after the sync byte, but mark it as checked
         size_t fromTailIndex = syncByteIndex + fromSyncByteIndex;  // Should be zero-based, but is relative to current absolute tail.
         tmpByte = byteBuffer.peek_unchecked(fromTailIndex);
@@ -254,7 +255,7 @@ FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteI
         _calculateCRC(&crc16, tmpByte);
     }
 
-    const size_t bytesBetweenAstereskAndNewline = details.length - details.delimiterIndices.back();
+    const uint16_t bytesBetweenAstereskAndNewline = details.length - details.delimiterIndices.back();
     uint8_t crcLength;
     uint16_t calculatedChecksum;
     if (bytesBetweenAstereskAndNewline == static_cast<size_t>(2 + 2 + 1 - isMissingCarriageReturn))

@@ -55,31 +55,31 @@ target_include_directories(${PROJECT_NAME} PRIVATE oVnSensor)
 
 if(PLUGIN_CALIBRATION)
 	target_include_directories(${PROJECT_NAME} PRIVATE CalibrationPlugin)
-	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT}/Calibration)
+	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT})
 	target_link_libraries(${PROJECT_NAME} CalibrationPlugin)
 endif()
 
 if(PLUGIN_DATAEXPORT)
 	target_include_directories(${PROJECT_NAME} PRIVATE DataExportPlugin)
-	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT}/DataExport)
+	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT})
 	target_link_libraries(${PROJECT_NAME} DataExportPlugin)
 endif()
 
 if(PLUGIN_FIRMWAREUPDATE)
 	target_include_directories(${PROJECT_NAME} PRIVATE FirmwareUpdatePlugin)
-	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT}/FirmwareUpdate)
+	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT})
 	target_link_libraries(${PROJECT_NAME} FirmwareUpdatePlugin)
 endif()
 
 if(PLUGIN_REGISTERSCAN)
 	target_include_directories(${PROJECT_NAME} PRIVATE RegisterScanPlugin)
-	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT}/RegisterScan)
+	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT})
 	target_link_libraries(${PROJECT_NAME} RegisterScanPlugin)
 endif()
 
 if(PLUGIN_SIMPLELOGGER)
 	target_include_directories(${PROJECT_NAME} PRIVATE ${PLUGIN_ROOT}/SimpleLogger)
-	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT}/SimpleLogger)
+	target_include_directories(${PROJECT_NAME} PUBLIC ${CLI_PLUGIN_ROOT})
 endif()
 
 

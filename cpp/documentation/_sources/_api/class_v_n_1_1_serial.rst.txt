@@ -3,15 +3,18 @@
 Class Serial
 ============
 
-- Defined in :ref:`file_include_HAL_Serial_Linux.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_Serial_Linux.hpp`
 
 
 Inheritance Relationships
 -------------------------
 
-Base Type
-*********
+Base Types
+**********
 
+- ``public VN::Serial_Base`` (:ref:`exhale_class_class_v_n_1_1_serial___base`)
+- ``public VN::Serial_Base`` (:ref:`exhale_class_class_v_n_1_1_serial___base`)
+- ``public VN::Serial_Base`` (:ref:`exhale_class_class_v_n_1_1_serial___base`)
 - ``public VN::Serial_Base`` (:ref:`exhale_class_class_v_n_1_1_serial___base`)
 
 

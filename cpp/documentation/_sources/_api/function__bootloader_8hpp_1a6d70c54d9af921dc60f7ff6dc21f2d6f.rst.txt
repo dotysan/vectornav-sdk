@@ -3,7 +3,7 @@
 Function VN::Bootloader::errorCodeToString
 ==========================================
 
-- Defined in :ref:`file_plugins_FirmwareUpdate_include_Bootloader.hpp`
+- Defined in :ref:`file_plugins_FirmwareUpdate_include_vectornav_Bootloader.hpp`
 
 
 Function Documentation

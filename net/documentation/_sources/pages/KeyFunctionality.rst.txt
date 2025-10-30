@@ -18,7 +18,7 @@ It is first necessary to create a :class:`VNSDK::Sensor` object, which we will u
 
 .. tab:: MATLAB
 
-      .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+      .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
          :language: matlab
          :start-at: Sensor();
          :end-at: ();
@@ -36,7 +36,7 @@ We can then connect to the VectorNav unit using the :func:`VNSDK::Sensor::AutoCo
 
 .. tab:: MATLAB
 
-   .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+   .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
       :language: matlab
       :start-at: sensor.AutoConnect(port_name);
       :end-at: sensor.AutoConnect(port_name);
@@ -138,7 +138,7 @@ To disconnect from the unit, the :func:`VNSDK::Sensor::Disconnect` method can be
 
 .. tab:: MATLAB
 
-   .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+   .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
       :language: matlab
       :start-at: sensor.Disconnect();
       :end-at: sensor.Disconnect();
@@ -183,7 +183,7 @@ As discussed in :ref:`pages/KeyFunctionality:Accessing Registers`, the :func:`VN
 
 .. tab:: MATLAB
 
-   .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+   .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
       :language: matlab
       :start-at: ypr = Registers.Attitude.YawPitchRoll();
       :end-at: ' Pitch: %f\t Roll: %f\n'],ypr.yaw, ypr.pitch, ypr.roll);
@@ -208,7 +208,7 @@ As discussed in :ref:`pages/KeyFunctionality:Accessing Registers`, the :func:`VN
 
 .. tab:: MATLAB
 
-   .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+   .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
       :language: matlab
       :start-at: % Set Measurements to YPR
       :end-at: sensor.WriteRegister(asyncDataOutputType);
@@ -276,7 +276,7 @@ Receiving Composite Data
    
 .. tab:: MATLAB
 
-   .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+   .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
       :language: matlab
       :start-at: while toc
       :end-before: fprintf('Ascii

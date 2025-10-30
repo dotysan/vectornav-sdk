@@ -3,7 +3,7 @@
 Typedef VN::Filesystem::FilePath
 ================================
 
-- Defined in :ref:`file_include_HAL_File_Base.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_File_Base.hpp`
 
 
 Typedef Documentation

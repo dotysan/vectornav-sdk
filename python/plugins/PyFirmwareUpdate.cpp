@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,11 +23,11 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "FirmwareUpdate/include/FirmwareUpdater.hpp"
-#include "TemplateLibrary/Vector.hpp"
-#include "TemplateLibrary/String.hpp"
-#include "Interface/Sensor.hpp"
-#include "HAL/File.hpp"
+#include "FirmwareUpdate/include/vectornav/FirmwareUpdater.hpp"
+#include "vectornav/TemplateLibrary/Vector.hpp"
+#include "vectornav/TemplateLibrary/String.hpp"
+#include "vectornav/Interface/Sensor.hpp"
+#include "vectornav/HAL/File.hpp"
 
 #include "PyTemplates.hpp"
 
@@ -70,4 +70,3 @@ void init_firmware_updater(py::module& m) {
   py::implicitly_convertible<py::str, Filesystem::FilePath>();
     
 }} // namespace VN
-

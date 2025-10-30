@@ -1,25 +1,23 @@
 
 
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Migration Guide &#8212; VectorNav 0.19.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <title>Migration Guide &#8212; VectorNav 0.22.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=36acb9b5" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=4c969af8" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6d58504" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
     
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/tabs.js"></script>
+    <script src="../_static/documentation_options.js?v=5686f5df"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/tabs.js?v=3ee01567"></script>
 
     
     
@@ -45,7 +43,7 @@
   </head><body>
     <div class="relbar-top">
         
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,7 +55,7 @@
         <li class="right" >
           <a href="../Documentation.html" title="Welcome to VectorNav Python documentation!"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav 0.19.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav 0.22.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Migration Guide</a></li> 
       </ul>
@@ -71,9 +69,9 @@
           <div class="body" role="main">
             
   <section id="migration-guide">
-<h1>Migration Guide<a class="headerlink" href="#migration-guide" title="Permalink to this headline">¶</a></h1>
+<h1>Migration Guide<a class="headerlink" href="#migration-guide" title="Link to this heading">¶</a></h1>
 <section id="notable-changes-and-features">
-<span id="migrationguidepython"></span><h2>Notable Changes and Features<a class="headerlink" href="#notable-changes-and-features" title="Permalink to this headline">¶</a></h2>
+<span id="migrationguidepython"></span><h2>Notable Changes and Features<a class="headerlink" href="#notable-changes-and-features" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>64-bit Python support</p></li>
 <li><p>High-rate data stability (can output above 200 Hz)</p></li>
@@ -86,13 +84,13 @@
 </ul>
 </section>
 <section id="migrating-from-the-vectornav-programming-library-to-the-vnsdk">
-<h2>Migrating from the VectorNav Programming Library to the VNSDK<a class="headerlink" href="#migrating-from-the-vectornav-programming-library-to-the-vnsdk" title="Permalink to this headline">¶</a></h2>
+<h2>Migrating from the VectorNav Programming Library to the VNSDK<a class="headerlink" href="#migrating-from-the-vectornav-programming-library-to-the-vnsdk" title="Link to this heading">¶</a></h2>
 <p>In the VectorNav Programming Library, a <cite>VnSensor</cite> object is created with each read or write register command as a method of that object.
 In the VNSDK, a <cite>Sensor</cite> object is still created for interaction, but now only two methods, <cite>readRegister</cite> and <cite>writeRegister</cite>, exist for register interaction.
 Each register is now its own class that will be populated when a <cite>readRegister</cite> or <cite>writeRegister</cite> request is sent.
 The examples below will show differences between frequently used commands.</p>
 <section id="naming-conventions">
-<h3>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Permalink to this headline">¶</a></h3>
+<h3>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><dl class="simple">
 <dt>Method, member, and variable names are written in <strong>camelCase</strong></dt><dd><p>For example, a composite data variable accessing the accel value will be written as compositeData.imu.accel</p>
@@ -107,13 +105,13 @@ The examples below will show differences between frequently used commands.</p>
 </ul>
 </section>
 <section id="error-handling">
-<h3>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h3>
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading">¶</a></h3>
 <p>Before explaining how to read and write registers, the user should know the differences in handling errors between the two softwares.
 While both are Python libraries wrapping C++ code, the Programming Library was unable to catch exceptions through the language barrier, causing a crash on any exception thrown in C++, regardless of whether it was supposed to be caught in Python.
 The VNSDK C++ library does not throw exceptions; it instead returns error codes which are propagated to the Python code and thrown natively in Python. Because of this, all exceptions can be caught as native Python exceptions.</p>
 </section>
 <section id="connecting-to-the-unit">
-<h3>Connecting to the Unit<a class="headerlink" href="#connecting-to-the-unit" title="Permalink to this headline">¶</a></h3>
+<h3>Connecting to the Unit<a class="headerlink" href="#connecting-to-the-unit" title="Link to this heading">¶</a></h3>
 <p>For both software packages, the serial port name is strictly necessary to connect to the unit.
 For the VectorNav Programming Library, the baud rate must also be known.
 With the VNSDK, there is an option to specify the baud rate using the <cite>connect</cite> method, but now there is an <cite>autoConnect</cite> method that will scan the specified port for the unit’s baud rate.</p>
@@ -131,15 +129,15 @@ On the VectorNav Programming Library this is done by</p>
 </div>
 </section>
 <section id="registers">
-<h3>Registers<a class="headerlink" href="#registers" title="Permalink to this headline">¶</a></h3>
+<h3>Registers<a class="headerlink" href="#registers" title="Link to this heading">¶</a></h3>
 <section id="bitfields">
-<h4>Bitfields<a class="headerlink" href="#bitfields" title="Permalink to this headline">¶</a></h4>
+<h4>Bitfields<a class="headerlink" href="#bitfields" title="Link to this heading">¶</a></h4>
 </section>
 <section id="enumerations">
-<h4>Enumerations<a class="headerlink" href="#enumerations" title="Permalink to this headline">¶</a></h4>
+<h4>Enumerations<a class="headerlink" href="#enumerations" title="Link to this heading">¶</a></h4>
 </section>
 <section id="reading-registers">
-<h4>Reading Registers<a class="headerlink" href="#reading-registers" title="Permalink to this headline">¶</a></h4>
+<h4>Reading Registers<a class="headerlink" href="#reading-registers" title="Link to this heading">¶</a></h4>
 <p>Using the Programming Library, the user would create a VnSensor object and call the respective read register method.
 For example, the following code reads the YPR register (Register 85).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create Sensor Object</span>
@@ -172,7 +170,7 @@ This looks like:</p>
 </div>
 </section>
 <section id="writing-registers">
-<h4>Writing Registers<a class="headerlink" href="#writing-registers" title="Permalink to this headline">¶</a></h4>
+<h4>Writing Registers<a class="headerlink" href="#writing-registers" title="Link to this heading">¶</a></h4>
 <p>Writing to the registers incorporates the same changes as reading the registers.
 The following examples will show the difference between writing to the <em>AsyncDataOutputType</em> register (Register 6).
 To configure the VectorNav Programming Library to output the <em>VNYPR</em> message, create the sensor object and then write to the <em>AsyncDataOutputType</em> register:</p>
@@ -208,10 +206,10 @@ To configure the VectorNav Programming Library to output the <em>VNYPR</em> mess
 </section>
 </section>
 <section id="reading-measurements">
-<h3>Reading Measurements<a class="headerlink" href="#reading-measurements" title="Permalink to this headline">¶</a></h3>
+<h3>Reading Measurements<a class="headerlink" href="#reading-measurements" title="Link to this heading">¶</a></h3>
 <p>In the Programming Library, the primary method of extracting asynchronous data was via a <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> object from the <code class="docutils literal notranslate"><span class="pre">EzAsyncData</span></code> class. Because the VNSDK is tightly integrated with its <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> class, this section outlines how to migrate between <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> classes.</p>
 <section id="the-compositedata-class">
-<h4>The <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> Class<a class="headerlink" href="#the-compositedata-class" title="Permalink to this headline">¶</a></h4>
+<h4>The <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> Class<a class="headerlink" href="#the-compositedata-class" title="Link to this heading">¶</a></h4>
 <p>Both the Programming Library and VNSDK provide a <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> class that are reasonably similar to each other. In both codebases, each <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> object allocates memory for every possible measurement output from the unit, optionally containing a subset of those measurements.
 The Programming Library’s <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> class maintains public data members, getters, setters, and present booleans. The VNSDK’s <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> only contains public data members, instead opting to report which variables are optionally <code class="docutils literal notranslate"><span class="pre">None</span></code>. In this way, the Programming Library’s <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> class feels more like a true class, whereas the VNSDK feels more like a data structure.</p>
 <p>The first distinction is in organization; the Programming Library’s <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> contains each measurement type accessor by getter methods at the top level, whereas the VNSDK’s <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> contains each measurement type directly accessable, organized in their respective binary groups, as defined by the Interface Control Document (ICD).</p>
@@ -222,7 +220,7 @@ The VNSDK’s <code class="docutils literal notranslate"><span class="pre">Compo
 <p>Besides the snake case to camel case convention change, there also are some minor measurement type name changes (i.e. Programming Library’s <code class="docutils literal notranslate"><span class="pre">acceleration</span></code> to VNSDK’s <code class="docutils literal notranslate"><span class="pre">accel</span></code>), where the VNSDK’s <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> naming will always match the latest ICD.</p>
 </section>
 <section id="compositedata-accessor-methods">
-<h4><code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> Accessor Methods<a class="headerlink" href="#compositedata-accessor-methods" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> Accessor Methods<a class="headerlink" href="#compositedata-accessor-methods" title="Link to this heading">¶</a></h4>
 <p>The Programming Library’s <code class="docutils literal notranslate"><span class="pre">VnSensor</span></code> class does not natively handle <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> classes, so a separate class—<cite>EzAsyncData</cite>—has to handle parsing and reporting the objects.
 In contrast, the VNSDK’s <code class="docutils literal notranslate"><span class="pre">Sensor</span></code> class natively parses to <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> objects and reports them to the user. Both <code class="docutils literal notranslate"><span class="pre">EzAsyncData</span></code> and <code class="docutils literal notranslate"><span class="pre">Sensor</span></code> produce exactly one <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code> object per measurement message received from the unit.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">EzAsyncData</span></code> class provides two methods to retrieve data: <code class="docutils literal notranslate"><span class="pre">EzAsyncData::currentdata</span></code> and <code class="docutils literal notranslate"><span class="pre">EzAsyncData::next_data</span></code>; the <code class="docutils literal notranslate"><span class="pre">Sensor</span></code> class provides <code class="docutils literal notranslate"><span class="pre">Sensor::getNextMeasurement</span></code> and <code class="docutils literal notranslate"><span class="pre">Sensor::getMostRecentMeasurement</span></code>.
@@ -239,9 +237,9 @@ In this case, <code class="docutils literal notranslate"><span class="pre">EzAsy
 </section>
 </section>
 <section id="plugin-list">
-<h2>Plugin List<a class="headerlink" href="#plugin-list" title="Permalink to this headline">¶</a></h2>
+<h2>Plugin List<a class="headerlink" href="#plugin-list" title="Link to this heading">¶</a></h2>
 <section id="firmware-update">
-<h3>Firmware Update<a class="headerlink" href="#firmware-update" title="Permalink to this headline">¶</a></h3>
+<h3>Firmware Update<a class="headerlink" href="#firmware-update" title="Link to this heading">¶</a></h3>
 <p>While this plugin is available in the Programming Library, it has been updated with the issuance of the VNSDK.
 The new Firmware Update plugin has the ability to accept both <em>VNX</em> and <em>VNXML</em> files, contains significant stability improvements, and has much more flexible and simple syntax.
 This plugin allows the users to update their unit’s firmware without having to connect it to VectorNav’s GUI, Control Center, or create their own embedded updater.
@@ -249,19 +247,19 @@ All firmware updates must be performed over the main port, UART-1, and communica
 More information on this plugin can be found on the <a class="reference internal" href="../plugins/firmware_update.html#firmware-update"><span class="std std-ref">Firmware Update</span></a> page.</p>
 </section>
 <section id="register-scan">
-<h3>Register Scan<a class="headerlink" href="#register-scan" title="Permalink to this headline">¶</a></h3>
+<h3>Register Scan<a class="headerlink" href="#register-scan" title="Link to this heading">¶</a></h3>
 <p>The Register Scan plugin is a newly added plugin unique to the VNSDK.
 This plugin is capable of producing an XML file containing the non-default registers on the unit, or uploading an XML file of register values to the unit. It is similar to and interoperable with the “Save Config” and “Load Config” buttons on Control Center.
 Additional information can be found on the <a class="reference internal" href="../plugins/register_scan.html#register-scan"><span class="std std-ref">Register Scan</span></a> page.</p>
 </section>
 <section id="simple-logger">
-<h3>Simple Logger<a class="headerlink" href="#simple-logger" title="Permalink to this headline">¶</a></h3>
+<h3>Simple Logger<a class="headerlink" href="#simple-logger" title="Link to this heading">¶</a></h3>
 <p>The Simple Logger plugin allows users to easily log all bytes received from the unit to a binary file without the need to parse the packets.
 The Programming Library does not have any native capaibility to do this, and was most often accomplished by custom code utilizing the <cite>RawDataReceivedHandler</cite>.
 Additional information can be found on the <a class="reference internal" href="../plugins/simple_logger.html#simple-logger"><span class="std std-ref">Simple Logger</span></a> page.</p>
 </section>
 <section id="file-export">
-<h3>File Export<a class="headerlink" href="#file-export" title="Permalink to this headline">¶</a></h3>
+<h3>File Export<a class="headerlink" href="#file-export" title="Link to this heading">¶</a></h3>
 <p>The File Export plugin can export data into formats such as a <em>CSV</em>, <em>TXT</em>, or <em>RINEX</em> file.
 The plugin can handle data from either previously logged binary files or data directly from a VectorNav unit.
 Additionally, it can handle exporting to multiple different formats at once.</p>
@@ -274,11 +272,8 @@ Additionally, it can handle exporting to multiple different formats at once.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-        <p class="logo"><a href="../Documentation.html" title="Documentation">
-          <img class="logo" src="../_static/VectorNav_LogoStacked_ForWeb_RGB_Full-Color.png" alt="Logo"/>
-        </a></p>
 <div class="sphinx-toc sphinxglobaltoc">
 <h3><a href="../Documentation.html">Table of Contents</a></h3>
 <ul class="current">
@@ -290,6 +285,7 @@ Additionally, it can handle exporting to multiple different formats at once.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="key_functionality.html">Key Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_functionality.html">Advanced Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">VNSDK API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 </ul>
@@ -311,7 +307,7 @@ Additionally, it can handle exporting to multiple different formats at once.</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -319,8 +315,8 @@ Additionally, it can handle exporting to multiple different formats at once.</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script>$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
     
@@ -344,7 +340,7 @@ Additionally, it can handle exporting to multiple different formats at once.</p>
     </div>
     <div class="relbar-bottom">
         
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -356,7 +352,7 @@ Additionally, it can handle exporting to multiple different formats at once.</p>
         <li class="right" >
           <a href="../Documentation.html" title="Welcome to VectorNav Python documentation!"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav 0.19.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav 0.22.0 documentation</a> &#187;</li>
 
         <li class="nav-item nav-item-this"><a href="">Migration Guide</a></li> 
       </ul>
@@ -364,8 +360,8 @@ Additionally, it can handle exporting to multiple different formats at once.</p>
     </div>
 
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2024, VectorNav Technologies.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    &#169; Copyright 2024, VectorNav Technologies.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
     <!-- cloud_sptheme 1.4 -->
   </body>

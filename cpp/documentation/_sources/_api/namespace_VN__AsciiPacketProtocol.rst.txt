@@ -58,6 +58,6 @@ Typedefs
 
 - :ref:`exhale_typedef__ascii_packet_protocol_8hpp_1aba15237f0cd149b0091d20d31af821ba`
 
-- :ref:`exhale_typedef__ascii_packet_protocol_8hpp_1a175440dfbd0ebd4524208ca8746ab18b`
+- :ref:`exhale_typedef__ascii_packet_protocol_8hpp_1a1fd94ed741a3ce500db410f62616b9b7`
 
 - :ref:`exhale_typedef__ascii_packet_protocol_8hpp_1aa6968b3592b554e1b91ad293a83edfc7`

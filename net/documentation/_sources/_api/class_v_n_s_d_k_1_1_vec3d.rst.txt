@@ -3,7 +3,7 @@
 Class Vec3d
 ===========
 
-- Defined in :ref:`file_documentation__include_CLI_Matrix.hpp`
+- Defined in :ref:`file_documentation__include_vectornav_CLI_Matrix.hpp`
 
 
 Class Documentation

@@ -33,5 +33,5 @@ Contents
    pages/AdvancedFunctionality
    pages/MemoryConstrained
    pages/NonOsUsage
-   pages/Plugins
    pages/api_index
+   plugins/index

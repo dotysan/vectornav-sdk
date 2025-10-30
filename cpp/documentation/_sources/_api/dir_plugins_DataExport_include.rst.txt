@@ -12,17 +12,10 @@ Directory include
 
 *Directory path:* ``plugins\DataExport\include``
 
+Subdirectories
+--------------
 
-Files
------
+- :ref:`dir_plugins_DataExport_include_vectornav`
 
-- :ref:`file_plugins_DataExport_include_Exporter.hpp`
-- :ref:`file_plugins_DataExport_include_ExporterAscii.hpp`
-- :ref:`file_plugins_DataExport_include_ExporterCsv.hpp`
-- :ref:`file_plugins_DataExport_include_ExporterCsvUtils.hpp`
-- :ref:`file_plugins_DataExport_include_ExporterImr.hpp`
-- :ref:`file_plugins_DataExport_include_ExporterRinex.hpp`
-- :ref:`file_plugins_DataExport_include_FileExporter.hpp`
-- :ref:`file_plugins_DataExport_include_SkippedByteExporter.hpp`
 
 

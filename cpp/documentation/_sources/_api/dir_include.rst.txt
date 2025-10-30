@@ -10,16 +10,7 @@ Directory include
 Subdirectories
 --------------
 
-- :ref:`dir_include_HAL`
-- :ref:`dir_include_Implementation`
-- :ref:`dir_include_Interface`
-- :ref:`dir_include_TemplateLibrary`
+- :ref:`dir_include_vectornav`
 
-
-Files
------
-
-- :ref:`file_include_Config.hpp`
-- :ref:`file_include_Debug.hpp`
 
 

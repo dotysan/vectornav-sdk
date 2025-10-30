@@ -3,7 +3,7 @@
 Class Exporter
 ==============
 
-- Defined in :ref:`file_plugins_DataExport_include_Exporter.hpp`
+- Defined in :ref:`file_plugins_DataExport_include_vectornav_Exporter.hpp`
 
 
 Inheritance Relationships

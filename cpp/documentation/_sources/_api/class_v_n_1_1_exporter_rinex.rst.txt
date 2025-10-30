@@ -3,7 +3,7 @@
 Class ExporterRinex
 ===================
 
-- Defined in :ref:`file_plugins_DataExport_include_ExporterRinex.hpp`
+- Defined in :ref:`file_plugins_DataExport_include_vectornav_ExporterRinex.hpp`
 
 
 Inheritance Relationships

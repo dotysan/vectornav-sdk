@@ -3,7 +3,7 @@
 Define _USE_MATH_DEFINES
 ========================
 
-- Defined in :ref:`file_plugins_Math_Conversions.hpp`
+- Defined in :ref:`file_plugins_Math_vectornav_Conversions.hpp`
 
 
 Define Documentation

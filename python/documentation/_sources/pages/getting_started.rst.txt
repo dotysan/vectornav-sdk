@@ -1,15 +1,10 @@
 Getting Started
 ###############
 
-Overview
-========
-
-This is the documentation for the VectorNav Python Software Development Kit
-
 Requirements
 ============
 
-* Python >= 3.8 64bit
+* Python >= 3.8 64-bit
 * MSVC >= 2015 on Windows OS
 * pybind11
 
@@ -31,25 +26,25 @@ To build and install the VectorNav Python library run the following command from
     pip install ./python
 
 .. tip::
-    If an installation occurs, pip may need to be upgraded.
+    If an installation error occurs, pip may need to be upgraded.
     Run the command::
 
         python -m pip install --upgrade pip 
 
-    Try to reinstall the VNSDK python package to see if error still occurs.
+    After updating pip, try to reinstall the VNSDK python package to see if the error still occurs.
     If so, reach out to VectorNav support for further assistance.
 
-Run getting_started.py
-======================
+Run the Getting Started Example
+===============================
 
-Now that the Python library is installed, lets get data from the sensor. Open the **getting_started.py** file in the ./python/examples/ directory. Notice you can run this file by passing the COM port as a command line argument or by hardcoding the value. The VectorNav USB Adapter will show up in Windows **COMXX** wher **XX** is the number and in Linux as **/dev/ttyUSBX** where **X** is a number (usually 0). Now run the getting_started example:
-
-.. code-block:: console
-
-    python ./python/examples/getting_started.py
-
-Or using the optional command line argument
+The best way to validate the installation is by running the Getting Started example located in the ./python/examples/getting_started directory. Notice you can run this file by passing the COM port as a command line argument or by hardcoding the value inside the **getting_started.py** example file. The VectorNav USB adapter will show up in Windows as **COMXX**, where **XX** is the COM port number, and in Linux as **/dev/ttyUSBX**, where **X** is a number (usually 0). The example can now be run using:
 
 .. code-block:: console
 
-    python ./python/examples/getting_started.py your_com_port_here
+    python ./python/examples/getting_started/getting_started.py
+
+or using the optional command line argument:
+
+.. code-block:: console
+
+    python ./python/examples/getting_started/getting_started.py your_com_port_here

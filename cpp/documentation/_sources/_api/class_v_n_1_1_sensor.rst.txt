@@ -3,7 +3,7 @@
 Class Sensor
 ============
 
-- Defined in :ref:`file_include_Interface_Sensor.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Sensor.hpp`
 
 
 Class Documentation

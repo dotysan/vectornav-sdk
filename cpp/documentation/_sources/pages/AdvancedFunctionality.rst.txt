@@ -5,70 +5,70 @@ Advanced Functionality
 Non-Blocking Commands
 =====================
 In some cases, it is necessary to send commands without blocking, perform other operations, and later return to validate the unit's response. This is what the generic :func:`VN::Sensor::sendCommand` method is for. To do so:
-   #. Create the ``Command`` object that we would like to send to the unit
+   #. Create the ``GenericCommand`` object that we would like to send to the unit
 
-      .. literalinclude:: ../../Examples/Commands/main.cpp
+      .. literalinclude:: ../../examples/NonBlockingCommands/main.cpp
          :linenos:
          :lineno-match:
          :language: c++
          :start-at: KnownMagneticDisturbance
          :end-at: KnownMagneticDisturbance
-         :caption: Command Instantiation (Examples/Commands/main.cpp)
+         :caption: GenericCommand Instantiation (examples/NonBlockingCommands/main.cpp)
 
-   #. Call the ``sendCommand`` method with our ``Command`` object and the waitMode specified as ``Sensor::SendCommandBlockMode::None``
+   #. Call the ``sendCommand`` method with our ``GenericCommand`` object and the waitMode specified as ``Sensor::SendCommandBlockMode::None``
 
-      .. literalinclude:: ../../Examples/Commands/main.cpp
+      .. literalinclude:: ../../examples/NonBlockingCommands/main.cpp
          :linenos:
          :lineno-match:
          :language: c++
          :start-at: &kmd
          :end-at: &kmd
-         :caption: Send Command (Examples/Commands/main.cpp)
+         :caption: Send GenericCommand (examples/NonBlockingCommands/main.cpp)
 
-A full list of available commands can be found in :ref:`file_include_Interface_Commands.hpp`.
+A full list of available commands can be found in :ref:`file_include_vectornav_Interface_Commands.hpp`.
 
 The command will then be sent to the unit and added to a queue, waiting for a corresponding response from the unit. When a command response (i.e. non-measurement ASCII packet) is seen from the unit, the response will attempt to be matched with the oldest command sent in the queue.
 If the response matches, the function exits. If not, it will continue through the queue (popping each command from the queue) until either the response is matched to a command or the queue is empty. This is done because VectorNav units always respond to commands in the order in which they were received. Any synchronous VnError is considered a valid response to any command.
 
-When you are ready to check the unit's response, you can do so using :func:`VN::Command::getResponse`;
+When you are ready to check the unit's response, you can do so using :func:`VN::GenericCommand::getResponse`;
 
-.. literalinclude:: ../../Examples/Commands/main.cpp
+.. literalinclude:: ../../examples/NonBlockingCommands/main.cpp
    :linenos:
    :lineno-match:
    :language: c++
    :start-at: getResponse()
    :end-before: getError()
-   :caption: Print Command Response (Examples/Commands/main.cpp)
+   :caption: Print GenericCommand Response (examples/NonBlockingCommands/main.cpp)
 
 If the response is empty, a couple of things may be happening:
    * The command is still in the command queue, awaiting a response
-      If this is the case, :func:`Command::isAwaitingResponse` will return ``true``. Whether a command is "awaiting a response" is not time-based; rather, it will be awaiting a response until any command response attempts to match with that command. As such, the correct response could either be to check again later (if only a brief period has elapsed) or to resend the command, assuming it was not received.
+      If this is the case, :func:`VN::GenericCommand::isAwaitingResponse` will return ``true``. Whether a command is "awaiting a response" is not time-based; rather, it will be awaiting a response until any command response attempts to match with that command. As such, the correct response could either be to check again later (if only a brief period has elapsed) or to resend the command, assuming it was not received.
 
    .. code-block:: cpp
-      :caption: Command Is Awaiting Response
+      :caption: GenericCommand Is Awaiting Response
 
       if (kmd.isAwaitingResponse()) {
          // The kmd command is still in the queue. It could either be too early to have heard a response, or this command should be resent.
       }
 
    * The command has received an invalid response
-      In this case, a response has attempted to be matched with the ``Command`` object. This likely means that the unit did not hear the command and was responding to a subsequent command. Most likely, we should try to resend the command.
+      In this case, a response has attempted to be matched with the ``GenericCommand`` object. This likely means that the unit did not hear the command and was responding to a subsequent command. Most likely, we should try to resend the command.
 
-Now that we know we have a valid response, we should make sure the response is not a VnError using :func:`VN::Command::getError` (if the response is any VnError, the unit did not apply the command). 
+Now that we know we have a valid response, we should make sure the response is not a VnError using :func:`VN::GenericCommand::getError` (if the response is any VnError, the unit did not apply the command). 
 
-.. literalinclude:: ../../Examples/Commands/main.cpp
+.. literalinclude:: ../../examples/NonBlockingCommands/main.cpp
    :linenos:
    :lineno-match:
    :language: c++
    :start-at: getError()
    :end-at: }
-   :caption: Ensuring Response Isn't Error (Examples/Commands/main.cpp)
+   :caption: Ensuring Response Isn't Error (examples/NonBlockingCommands/main.cpp)
 
 If the value returned from ``getError`` is empty, no error occurred and the command was accepted by the unit.
 
 If the value returned is not empty, the error can either be printed to a log using :func:`VN::VnException::what` or identified using :func:`VN::VnException::errorCode`. Every possible :class:`VN::VnException` in the SDK is guaranteed to have an error code, and each error code is present in the enum class :enum:`VN::Error`. 
 
-Because *Read Register* and *Write Register* are simply specialized commands to the unit, sending the commands non-blocking is very similar to sending any other command non-blocking. The only additional step is the conversion between the ``Register`` object and the ``Command`` object.
+Because *Read Register* and *Write Register* are simply specialized commands to the unit, sending the commands non-blocking is very similar to sending any other command non-blocking. The only additional step is the conversion between the ``Register`` object and the ``GenericCommand`` object.
 
 Non-Blocking Read Register
 --------------------------
@@ -78,23 +78,23 @@ Just like any other *Read Register* command, we first need to instantiate our ``
 .. code-block:: c++
    :caption: Instantiating Register Object
 
-   VpeBasicControl vpeBasicControl;
+   Registers::VelocityAiding::VelAidingMeas velAidRegister;
 
-We then can produce a ``Command`` object for the *Read Register* command using the :func:`VN::Register::toReadCommand` method.
-
-.. code-block:: c++
-   :caption: Register To Read Command
-
-   Command vpeBasicControlRRGCommand = vpeBasicControl.toReadCommand();
-
-Now that we have a ``Command`` object, we can send it non-blocking using the steps in :ref:`pages/AdvancedFunctionality:Non-Blocking Commands`. After checking for a response and ensuring the response is valid, we can repopulate the original ``Register`` object fields using :func:`VN::Register::fromCommand`.
+We then can produce a ``GenericCommand`` object for the *Read Register* command using the :func:`VN::Register::toReadCommand` method.
 
 .. code-block:: c++
-   :caption: Register From Read Command
+   :caption: Register To Read GenericCommand
 
-   bool errorOccured = vpeBasicControl.fromCommand(vpeBasicControlRRGCommand);
+   GenericCommand velAidRRGCommand = velAidRegister.toReadCommand();
 
-Assuming the command received a non-error, valid response, the fields of ``vpeBasicControl`` are now populated with the values from the VectorNav unit, and we can access them as normal members of the object.
+Now that we have a ``GenericCommand`` object, we can send it non-blocking using the steps in :ref:`pages/AdvancedFunctionality:Non-Blocking Commands`. After checking for a response and ensuring the response is valid, we can repopulate the original ``Register`` object fields using :func:`VN::Register::fromCommand`.
+
+.. code-block:: c++
+   :caption: Register From Read GenericCommand
+
+   bool errorOccured = velAidRegister.fromCommand(velAidRRGCommand);
+
+Assuming the command received a non-error, valid response, the fields of ``velAidRegister`` are now populated with the values from the VectorNav unit, and we can access them as normal members of the object.
 
 Non-Blocking Write Register
 ---------------------------
@@ -103,25 +103,33 @@ Writing a register without blocking is very similar to reading a register withou
 
 Very similar to the first step in :ref:`pages/KeyFunctionality:Writing Registers`, we create our ``Register`` object, populating it with the desired configuration values.
 
-.. literalinclude:: ../../Examples/Commands/main.cpp
+.. literalinclude:: ../../examples/NonBlockingCommands/main.cpp
    :linenos:
    :lineno-match:
    :language: c++
-   :start-after: using VpeBasicControl
-   :end-before: toWriteCommand
-   :caption: Instantiating Register Object (Examples/Commands/main.cpp)
+   :start-at: velAidRegister
+   :end-at: velAidRegister
+   :caption: Instantiating Register Object (examples/NonBlockingCommands/main.cpp)
 
-We then can produce a ``Command`` object for the *Write Register* command using the :func:`VN::ConfigurationRegister::toWriteCommand` method.
+.. literalinclude:: ../../examples/NonBlockingCommands/main.cpp
+   :linenos:
+   :lineno-match:
+   :language: c++
+   :start-at: velAidRegister.velocityX
+   :end-at: velAidRegister.velocityZ
+   :caption: Populate Register Object (examples/NonBlockingCommands/main.cpp)
 
-.. literalinclude:: ../../Examples/Commands/main.cpp
+We then can produce a ``GenericCommand`` object for the *Write Register* command using the :func:`VN::ConfigurationRegister::toWriteCommand` method.
+
+.. literalinclude:: ../../examples/NonBlockingCommands/main.cpp
    :linenos:
    :lineno-match:
    :language: c++
    :start-at: toWriteCommand
    :end-at: toWriteCommand
-   :caption: Register To Write Command (Examples/Commands/main.cpp)
+   :caption: Register To Write GenericCommand (examples/NonBlockingCommands/main.cpp)
 
-Now that we have our ``Command`` object for the *Write Register* command, we can send it to the unit and validate acceptance following the steps in :ref:`pages/AdvancedFunctionality:Non-Blocking Commands`.
+Now that we have our ``GenericCommand`` object for the *Write Register* command, we can send it to the unit and validate acceptance following the steps in :ref:`pages/AdvancedFunctionality:Non-Blocking Commands`.
 
 Subscribe to an Unparsed Packet
 ===============================

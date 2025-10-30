@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,15 +21,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Exporter.hpp"
-#include "ExporterCsvUtils.hpp"
-#include "Implementation/FaPacketProtocol.hpp"
-#include "Implementation/AsciiPacketProtocol.hpp"
+
+#include "vectornav/ExporterCsvUtils.hpp"
+
+#include "vectornav/Exporter.hpp"
+#include "vectornav/Implementation/AsciiPacketProtocol.hpp"
+#include "vectornav/Implementation/FaPacketProtocol.hpp"
 
 namespace VN
 {
 
-std::array<std::array<CsvTypeInfo, 19>, 7> dataTypes{{
+std::array<std::array<CsvTypeInfo, 19>, 13> dataTypes{{
     {CsvTypeInfo{U64, 1},
      {U64, 1},
      {U64, 1},
@@ -80,7 +82,7 @@ std::array<std::array<CsvTypeInfo, 19>, 7> dataTypes{{
      {FLO, 3},
      {FLO, 3},
      {U16, 1},
-     {NON, 0},
+     {UNK, 40},
      {NON, 0},
      {NON, 0},
      {NON, 0},
@@ -116,8 +118,8 @@ std::array<std::array<CsvTypeInfo, 19>, 7> dataTypes{{
      {FLO, 3},
      {FLO, 3},
      {UNK, 12},
-     {NON, 0},
-     {NON, 0},
+     {UNK, 28},
+     {UNK, 24},
      {FLO, 3},
      {FLO, 1},
      {NON, 0},
@@ -136,8 +138,8 @@ std::array<std::array<CsvTypeInfo, 19>, 7> dataTypes{{
      {FLO, 3},
      {FLO, 1},
      {FLO, 1},
-     {NON, 0},
-     {NON, 0},
+     {UNK, 68},
+     {UNK, 64},
      {NON, 0},
      {NON, 0},
      {NON, 0},
@@ -162,7 +164,31 @@ std::array<std::array<CsvTypeInfo, 19>, 7> dataTypes{{
      {NON, 0},
      {RAW, 1},
      {U16, 1},
-     {DUB, 1}}  // GNSS2
+     {DUB, 1}},  // GNSS2
+    {},
+    {},
+    {},
+    {},
+    {},
+    {CsvTypeInfo{UTC, 1},
+     {U64, 1},
+     {U16, 1},
+     {U8, 1},
+     {U8, 1},
+     {DUB, 3},
+     {DUB, 3},
+     {FLO, 3},
+     {FLO, 3},
+     {FLO, 3},
+     {FLO, 1},
+     {FLO, 1},
+     {U16, 1},
+     {FLO, 7},
+     {SAT, 1},
+     {NON, 0},
+     {RAW, 1},
+     {U16, 1},
+     {DUB, 1}},  // GNSS3
 }};
 
 CsvTypeInfo csvTypeLookup(size_t group, size_t field) { return dataTypes[group][field]; }
@@ -252,65 +278,63 @@ const char* getMeasurementName(const size_t binaryGroup, const size_t binaryFiel
             {
                 case 0:
                 {
-                    return "timeStartup";
+                    return "TimeStartup";
                 }
                 case 1:
                 {
-                    return "timeGps";
+                    return "TimeGps";
                 }
                 case 2:
                 {
-                    return "timeSyncIn";
+                    return "TimeSyncIn";
                 }
                 case 3:
                 {
-                    return "yaw,pitch,roll";
+                    return "Yaw,Pitch,Roll";
                 }
                 case 4:
                 {
-                    return "quatX,quatY,quatZ,quatW";
+                    return "QuatX,QuatY,QuatZ,QuatS";
                 }
                 case 5:
                 {
-                    return "angularRateX,angularRateY,angularRateZ";
+                    return "GyroX,GyroY,GyroZ";
                 }
                 case 6:
                 {
-                    return "lat,lon,alt";
+                    return "PosLat,PosLon,PosAlt";
                 }
                 case 7:
                 {
-                    return "velNedX,velNedY,velNedZ";
+                    return "VelN,VelE,VelD";
                 }
                 case 8:
                 {
-                    return "accelX,accelY,accelZ";
+                    return "AccelX,AccelY,AccelZ";
                 }
                 case 9:
                 {
-                    return "uncompAccelX,uncompAccelY,uncompAccelZ,"
-                           "uncompGyroX,uncompGyroY,uncompGyroZ";
+                    return "UncompAccX,UncompAccY,UncompAccZ,UncompGyroX,UncompGyroY,UncompGyroZ";
                 }
                 case 10:
                 {
-                    return "magX,magY,magZ,pressure,temperature";
+                    return "MagX,MagY,MagZ,Temperature,Pressure";
                 }
                 case 11:
                 {
-                    return "deltaTime,deltaThetaX,deltaThetaY,deltaThetaZ,"
-                           "deltaVelX,deltaVelY,deltaVelZ";
+                    return "DeltaTime,DeltaThetaX,DeltaThetaY,DeltaThetaZ,DeltaVelX,DeltaVelY,DeltaVelZ";
                 }
                 case 12:
                 {
-                    return "insStatus";
+                    return "InsStatus";
                 }
                 case 13:
                 {
-                    return "syncInCnt";
+                    return "SyncInCnt";
                 }
                 case 14:
                 {
-                    return "timeGpsPps";
+                    return "TimeGpsPps";
                 }
                 default:
                 {
@@ -324,43 +348,43 @@ const char* getMeasurementName(const size_t binaryGroup, const size_t binaryFiel
             {
                 case 0:
                 {
-                    return "timeStartup";
+                    return "TimeStartup";
                 }
                 case 1:
                 {
-                    return "timeGps";
+                    return "TimeGps";
                 }
                 case 2:
                 {
-                    return "timeGpsTow";
+                    return "TimeGpsTow";
                 }
                 case 3:
                 {
-                    return "timeGpsWeek";
+                    return "TimeGpsWeek";
                 }
                 case 4:
                 {
-                    return "timeSyncIn";
+                    return "TimeSyncIn";
                 }
                 case 5:
                 {
-                    return "timeGpsPps";
+                    return "TimeGpsPps";
                 }
                 case 6:
                 {
-                    return "utcYear,utcMonth,utcDay,utcHour,utcMinute,utcSecond,utcFracsec";
+                    return "UtcYear,UtcMonth,UtcDay,UtcHour,UtcMinute,UtcSecond,UtcFracSec";
                 }
                 case 7:
                 {
-                    return "syncInCnt";
+                    return "SyncInCnt";
                 }
                 case 8:
                 {
-                    return "syncOutCnt";
+                    return "SyncOutCnt";
                 }
                 case 9:
                 {
-                    return "timeStatus";
+                    return "TimeStatus";
                 }
                 default:
                 {
@@ -374,51 +398,51 @@ const char* getMeasurementName(const size_t binaryGroup, const size_t binaryFiel
             {
                 case 0:
                 {
-                    return "imuStatus";
+                    return "ImuStatus";
                 }
                 case 1:
                 {
-                    return "uncompMagX,uncompMagY,uncompMagZ";
+                    return "UncompMagX,UncompMagY,UncompMagZ";
                 }
                 case 2:
                 {
-                    return "uncompAccelX,uncompAccelY,uncompAccelZ";
+                    return "UncompAccX,UncompAccY,UncompAccZ";
                 }
                 case 3:
                 {
-                    return "uncompGyroX,uncompGyroY,uncompGyroZ";
+                    return "UncompGyroX,UncompGyroY,UncompGyroZ";
                 }
                 case 4:
                 {
-                    return "temperature";
+                    return "Temperature";
                 }
                 case 5:
                 {
-                    return "pressure";
+                    return "Pressure";
                 }
                 case 6:
                 {
-                    return "deltaTime,deltaThetaX,deltaThetaY,deltaThetaZ";
+                    return "DeltaTime,DeltaThetaX,DeltaThetaY,DeltaThetaZ";
                 }
                 case 7:
                 {
-                    return "deltaVelX,deltaVelY,deltaVelZ";
+                    return "DeltaVelX,DeltaVelY,DeltaVelZ";
                 }
                 case 8:
                 {
-                    return "magX,magY,magZ";
+                    return "MagX,MagY,MagZ";
                 }
                 case 9:
                 {
-                    return "accelX,accelY,accelZ";
+                    return "AccelX,AccelY,AccelZ";
                 }
                 case 10:
                 {
-                    return "angularRateX,angularRateY,angularRateZ";
+                    return "GyroX,GyroY,GyroZ";
                 }
                 case 11:
                 {
-                    return "sensSat";
+                    return "SensSat";
                 }
                 default:
                 {
@@ -432,76 +456,75 @@ const char* getMeasurementName(const size_t binaryGroup, const size_t binaryFiel
             {
                 case 0:
                 {
-                    return "gps1UtcYear,gps1UtcMonth,gps1UtcDay,gps1UtcHour,gps1UtcMinute,gps1UtcSecond,gps1UtcFracsec";
+                    return "Gps1UtcYear,Gps1UtcMonth,Gps1UtcDay,Gps1UtcHour,Gps1UtcMinute,Gps1UtcSecond,Gps1UtcFracSec";
                 }
                 case 1:
                 {
-                    return "gps1Tow";
+                    return "Gps1Tow";
                 }
                 case 2:
                 {
-                    return "gps1Week";
+                    return "Gps1Week";
                 }
                 case 3:
                 {
-                    return "gnss1NumSats";
+                    return "Gnss1NumSats";
                 }
                 case 4:
                 {
-                    return "gnss1Fix";
+                    return "Gnss1Fix";
                 }
                 case 5:
                 {
-                    return "gnss1PosLat,gnss1PosLon,gnss1PosAlt";
+                    return "Gnss1Lat,Gnss1Lon,Gnss1Alt";
                 }
                 case 6:
                 {
-                    return "gnss1PosEcefX,gnss1PosEcefY,gnss1PosEcefY";
+                    return "Gnss1PosX,Gnss1PosY,Gnss1PosZ";
                 }
                 case 7:
                 {
-                    return "gnss1VelNedX,gnss1VelNedY,gnss1VelNedZ";
+                    return "Gnss1VelN,Gnss1VelE,Gnss1VelD";
                 }
                 case 8:
                 {
-                    return "gnss1VelEcefX,gnss1VelEcefY,gnss1VelEcefZ";
+                    return "Gnss1VelX,Gnss1VelY,Gnss1VelZ";
                 }
                 case 9:
                 {
-                    return "gnss1PosUncertaintyN,gnss1PosUncertaintyE,gnss1PosUncertaintyD";
+                    return "Gnss1PosUncertaintyN,Gnss1PosUncertaintyE,Gnss1PosUncertaintyD";
                 }
                 case 10:
                 {
-                    return "gnss1VelUncertainty";
+                    return "Gnss1VelUncertainty";
                 }
                 case 11:
                 {
-                    return "gnss1TimeUncertainty";
+                    return "Gnss1TimeUncertainty";
                 }
                 case 12:
                 {
-                    return "gnss1TimeInfo";
+                    return "Gnss1TimeStatus,Gnss1LeapSeconds";
                 }
                 case 13:
                 {
-                    return "gnss1GDop,gnss1PDop,gnss1TDop,gnss1VDop,gnss1HDop,gnss1NDop,gnss1EDop";
+                    return "Gnss1Gdop,Gnss1Pdop,Gnss1Tdop,Gnss1Vdop,Gnss1Hdop,Gnss1Ndop,Gnss1Edop";
                 }
                 case 14:
                 {
-                    return "numSats,sys_??,svid_??,flags_??,cno_??,qi_??,el_??,az_??";
+                    return "Gnss1NumSats,Gnss1Sys_??,Gnss1SvId_??,Gnss1Flags_??,Gnss1Cno_??,Gnss1Qi_??,Gnss1El_??,Gnss1Az_??";
                 }
                 case 16:
                 {
-                    return "tow,week,numMeas,sys,svId,freq,chan,slot,"
-                           "cno,flags,pr,cp,dp";
+                    return "Gnss1Tow,Gnss1Week,Gnss1NumMeas,Gnss1Sys,Gnss1SvId,Gnss1Band,Gnss1Chan,Gnss1FreqNum,Gnss1Cno,Gnss1Flags,Gnss1Pr,Gnss1Cp,Gnss1Dp";
                 }
                 case 17:
                 {
-                    return "gnss1Status";
+                    return "Gnss1Status";
                 }
                 case 18:
                 {
-                    return "gnss1AltMsl";
+                    return "Gnss1AltMSL";
                 }
                 default:
                 {
@@ -513,49 +536,45 @@ const char* getMeasurementName(const size_t binaryGroup, const size_t binaryFiel
         {
             switch (binaryField)
             {
-                case 0:
-                {
-                    return "ahrsStatus";
-                }
                 case 1:
                 {
-                    return "yaw,pitch,roll";
+                    return "Yaw,Pitch,Roll";
                 }
                 case 2:
                 {
-                    return "quatX,quatY,quatZ,quatW";
+                    return "QuatX,QuatY,QuatZ,QuatS";
                 }
                 case 3:
                 {
-                    return "dcm00,dcm01,dcm02,dcm10,dcm11,dcm12,dcm20,dcm21,dcm22";
+                    return "DCM00,DCM01,DCM02,DCM10,DCM11,DCM12,DCM20,DCM21,DCM22";
                 }
                 case 4:
                 {
-                    return "magNedX,magNedY,magNedZ";
+                    return "MagN,MagE,MagD";
                 }
                 case 5:
                 {
-                    return "accelNedX,accelNedY,accelNedZ";
+                    return "AccelN,AccelE,AccelD";
                 }
                 case 6:
                 {
-                    return "linBodyAccX,linBodyAccY,linBodyAccZ";
+                    return "LinAccelX,LinAccelY,LinAccelZ";
                 }
                 case 7:
                 {
-                    return "linAccelNedX,linAccelNedY,linAccelNedZ";
+                    return "LinAccelN,LinAccelE,LinAccelD";
                 }
                 case 8:
                 {
-                    return "yawU,pitchU,rollU";
+                    return "YawU,PitchU,RollU";
                 }
                 case 12:
                 {
-                    return "heave,heaveRate,delayedHeave";
+                    return "Heave,HeaveRate,DelayedHeave";
                 }
                 case 13:
                 {
-                    return "attU";
+                    return "AttUncertainty";
                 }
                 default:
                 {
@@ -569,47 +588,47 @@ const char* getMeasurementName(const size_t binaryGroup, const size_t binaryFiel
             {
                 case 0:
                 {
-                    return "insStatus";
+                    return "InsStatus";
                 }
                 case 1:
                 {
-                    return "lat,lon,alt";
+                    return "PosLat,PosLon,PosAlt";
                 }
                 case 2:
                 {
-                    return "posEcefX,posEcefY,posEcefZ";
+                    return "PosEX,PosEY,PosEZ";
                 }
                 case 3:
                 {
-                    return "velBodyX,velBodyY,velBodyZ";
+                    return "VelX,VelY,VelZ";
                 }
                 case 4:
                 {
-                    return "velNedX,velNedY,velNedZ";
+                    return "VelN,VelE,VelD";
                 }
                 case 5:
                 {
-                    return "velEcefX,velEcefY,velEcefZ";
+                    return "VelEX,VelEY,VelEZ";
                 }
                 case 6:
                 {
-                    return "magEcefX,magEcefY,magEcefZ";
+                    return "MagEX,MagEY,MagEZ";
                 }
                 case 7:
                 {
-                    return "accelEcefX,accelEcefY,accelEcefZ";
+                    return "AccelEX,AccelEY,AccelEZ";
                 }
                 case 8:
                 {
-                    return "linAccelEcefX,linAccelEcefY,linAccelEcefZ";
+                    return "LinAccelEX,LinAccelEY,LinAccelEZ";
                 }
                 case 9:
                 {
-                    return "posU";
+                    return "PosUncertainty";
                 }
                 case 10:
                 {
-                    return "velU";
+                    return "VelUncertainty";
                 }
                 default:
                 {
@@ -623,76 +642,157 @@ const char* getMeasurementName(const size_t binaryGroup, const size_t binaryFiel
             {
                 case 0:
                 {
-                    return "gps2UtcYear,gps2UtcMonth,gps2UtcDay,gps2UtcHour,gps2UtcMinute,gps2UtcSecond,gps2UtcFracsec";
+                    return "Gps2UtcYear,Gps2UtcMonth,Gps2UtcDay,Gps2UtcHour,Gps2UtcMinute,Gps2UtcSecond,Gps2UtcFracSec";
                 }
                 case 1:
                 {
-                    return "gps2Tow";
+                    return "Gps2Tow";
                 }
                 case 2:
                 {
-                    return "gps2Week";
+                    return "Gps2Week";
                 }
                 case 3:
                 {
-                    return "gnss2NumSats";
+                    return "Gnss2NumSats";
                 }
                 case 4:
                 {
-                    return "gnss2Fix";
+                    return "Gnss2Fix";
                 }
                 case 5:
                 {
-                    return "gnss2PosLat,gnss2PosLon,gnss2PosAlt";
+                    return "Gnss2Lat,Gnss2Lon,Gnss2Alt";
                 }
                 case 6:
                 {
-                    return "gnss2PosEcefX,gnss2PosEcefY,gnss2PosEcefY";
+                    return "Gnss2PosX,Gnss2PosY,Gnss2PosZ";
                 }
                 case 7:
                 {
-                    return "gnss2VelNedX,gnss2VelNedY,gnss2VelNedZ";
+                    return "Gnss2VelN,Gnss2VelE,Gnss2VelD";
                 }
                 case 8:
                 {
-                    return "gnss2VelEcefX,gnss2VelEcefY,gnss2VelEcefZ";
+                    return "Gnss2VelX,Gnss2VelY,Gnss2VelZ";
                 }
                 case 9:
                 {
-                    return "gnss2PosUncertaintyN,gnss2PosUncertaintyE,gnss2PosUncertaintyD";
+                    return "Gnss2PosUncertaintyN,Gnss2PosUncertaintyE,Gnss2PosUncertaintyD";
                 }
                 case 10:
                 {
-                    return "gnss2VelUncertainty";
+                    return "Gnss2VelUncertainty";
                 }
                 case 11:
                 {
-                    return "gnss2TimeUncertainty";
+                    return "Gnss2TimeUncertainty";
                 }
                 case 12:
                 {
-                    return "gnss2TimeInfo";
+                    return "Gnss2TimeStatus,Gnss2LeapSeconds";
                 }
                 case 13:
                 {
-                    return "gnss2GDop,gnss2PDop,gnss2TDop,gnss2VDop,gnss2HDop,gnss2NDop,gnss2EDop";
+                    return "Gnss2Gdop,Gnss2Pdop,Gnss2Tdop,Gnss2Vdop,Gnss2Hdop,Gnss2Ndop,Gnss2Edop";
                 }
                 case 14:
                 {
-                    return "numSats,sys_??,svId_??,flags_??,cno_??,qi_??,el_??,az_??";
+                    return "Gnss2NumSats,Gnss2Sys_??,Gnss2SvId_??,Gnss2Flags_??,Gnss2Cno_??,Gnss2Qi_??,Gnss2El_??,Gnss2Az_??";
                 }
                 case 16:
                 {
-                    return "tow,week,numMeas,sys,svId,freq,chan,slot,"
-                           "cno,flags,pr,cp,dp";
+                    return "Gnss2Tow,Gnss2Week,Gnss2NumMeas,Gnss2Sys,Gnss2SvId,Gnss2Band,Gnss2Chan,Gnss2FreqNum,Gnss2Cno,Gnss2Flags,Gnss2Pr,Gnss2Cp,Gnss2Dp";
                 }
                 case 17:
                 {
-                    return "gnss2Status";
+                    return "Gnss2Status";
                 }
                 case 18:
                 {
-                    return "gnss2AltMsl";
+                    return "Gnss2AltMSL";
+                }
+                default:
+                {
+                    return "";
+                }
+            }
+        }
+        case 12:
+        {
+            switch (binaryField)
+            {
+                case 0:
+                {
+                    return "Gps3UtcYear,Gps3UtcMonth,Gps3UtcDay,Gps3UtcHour,Gps3UtcMinute,Gps3UtcSecond,Gps3UtcFracSec";
+                }
+                case 1:
+                {
+                    return "Gps3Tow";
+                }
+                case 2:
+                {
+                    return "Gps3Week";
+                }
+                case 3:
+                {
+                    return "Gnss3NumSats";
+                }
+                case 4:
+                {
+                    return "Gnss3Fix";
+                }
+                case 5:
+                {
+                    return "Gnss3Lat,Gnss3Lon,Gnss3Alt";
+                }
+                case 6:
+                {
+                    return "Gnss3PosX,Gnss3PosY,Gnss3PosZ";
+                }
+                case 7:
+                {
+                    return "Gnss3VelN,Gnss3VelE,Gnss3VelD";
+                }
+                case 8:
+                {
+                    return "Gnss3VelX,Gnss3VelY,Gnss3VelZ";
+                }
+                case 9:
+                {
+                    return "Gnss3PosUncertaintyN,Gnss3PosUncertaintyE,Gnss3PosUncertaintyD";
+                }
+                case 10:
+                {
+                    return "Gnss3VelUncertainty";
+                }
+                case 11:
+                {
+                    return "Gnss3TimeUncertainty";
+                }
+                case 12:
+                {
+                    return "Gnss3TimeStatus,Gnss3LeapSeconds";
+                }
+                case 13:
+                {
+                    return "Gnss3Gdop,Gnss3Pdop,Gnss3Tdop,Gnss3Vdop,Gnss3Hdop,Gnss3Ndop,Gnss3Edop";
+                }
+                case 14:
+                {
+                    return "Gnss3NumSats,Gnss3Sys_??,Gnss3SvId_??,Gnss3Flags_??,Gnss3Cno_??,Gnss3Qi_??,Gnss3El_??,Gnss3Az_??";
+                }
+                case 16:
+                {
+                    return "Gnss3Tow,Gnss3Week,Gnss3NumMeas,Gnss3Sys,Gnss3SvId,Gnss3Band,Gnss3Chan,Gnss3FreqNum,Gnss3Cno,Gnss3Flags,Gnss3Pr,Gnss3Cp,Gnss3Dp";
+                }
+                case 17:
+                {
+                    return "Gnss3Status";
+                }
+                case 18:
+                {
+                    return "Gnss3AltMSL";
                 }
                 default:
                 {
@@ -713,66 +813,51 @@ const char* getMeasurementString(const AsciiPacketProtocol::AsciiMeasurementHead
     switch (msg)
     {
         case AsciiPacketProtocol::AsciiMeasurementHeader::YPR:
-            return "yaw,pitch,roll";
+            return "Yaw,Pitch,Roll";
         case AsciiPacketProtocol::AsciiMeasurementHeader::QTN:
-            return "quatX,quatY,quatZ,quatW";
+            return "QuatX,QuatY,QuatZ,QuatS";
         case AsciiPacketProtocol::AsciiMeasurementHeader::QMR:
-            return "quatX,quatY,quatZ,quatW,magX,magY,magZ,accelX,accelY,accelZ,angularRateX,angularRateY,angularRateX";
+            return "QuatX,QuatY,QuatZ,QuatS,MagX,MagY,MagZ,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::MAG:
-            return "magX,magY,magZ";
+            return "MagX,MagY,MagZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::ACC:
-            return "accelX,accelY,accelZ";
+            return "AccelX,AccelY,AccelZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::GYR:
-            return "angularRateX,angularRateY,angularRateX";
+            return "GyroX,GyroY,GyroZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::MAR:
-            return "magX,magY,magZ,accelX,accelY,accelZ,angularRateX,angularRateY,angularRateX";
+            return "MagX,MagY,MagZ,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::YMR:
-            return "yaw,pitch,roll,magX,magY,magZ,accelX,accelY,accelZ,angularRateX,angularRateY,angularRateX";
-        case AsciiPacketProtocol::AsciiMeasurementHeader::YBA:
-            return "yaw,pitch,roll,linBodyAccelX,linBodyAccelY,linBodyAccelZ,angularRateX,angularRateY,angularRateX";
-        case AsciiPacketProtocol::AsciiMeasurementHeader::YIA:
-            return "yaw,pitch,roll,linAccelNedX,linAccelNedY,linAccelNedZ,angularRateX,angularRateY,angularRateX";
+            return "Yaw,Pitch,Roll,MagX,MagY,MagZ,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::IMU:
-            return "uncompMagX,uncompMagY,uncompMagZ,"
-                   "uncompAccelX,uncompAccelY,uncompAccelZ,"
-                   "uncompGyroX,uncompGyroY,uncompGyroZ,temperature,pressure";
+            return "UncompMagX,UncompMagY,UncompMagZ,UncompAccX,UncompAccY,UncompAccZ,UncompGyroX,UncompGyroY,UncompGyroZ,Temperature,Pressure";
         case AsciiPacketProtocol::AsciiMeasurementHeader::GPS:
-            return "gps1Tow,gps1Week,gnss1Fix,gnss1NumSats,"
-                   "gnss1PosLat,gnss1PosLon,gnss1PosAlt,"
-                   "gnss1VelN,gnss1VelE,gnss1VelD,"
-                   "gnss1PosUncertaintyN,gnss1PosUncertaintyE,gnss1PosUncertaintyD,"
-                   "gnss1VelUncertainty,gnss1TimeUncertainty";
+            return "Gps1Tow,Gps1Week,Gnss1Fix,Gnss1NumSats,gnss1Lat,gnss1Lon,gnss1Alt,gnss1VelN,gnss1VelE,gnss1VelD,gnss1PosUncertaintyN,gnss1PosUncertaintyE,"
+                   "gnss1PosUncertaintyD,Gnss1VelUncertainty,Gnss1TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::GPE:
-            return "gps1Tow,gps1Week,gnss1Fix,gnss1NumSats,"
-                   "gnss1PosEcefX,gnss1PosEcefY,gnss1PosEcefZ,"
-                   "gnss1VelEcefX,gnss1VelEcefY,gnss1VelEcefZ,"
-                   "gnss1PosUncertaintyN,gnss1PosUncertaintyE,gnss1PosUncertaintyD,"
-                   "gnss1VelUncertainty,gnss1TimeUncertainty";
+            return "Gps1Tow,Gps1Week,Gnss1Fix,Gnss1NumSats,gnss1PosX,gnss1PosY,gnss1PosZ,gnss1VelX,gnss1VelY,gnss1VelZ,gnss1PosUncertaintyX,"
+                   "gnss1PosUncertaintyY,gnss1PosUncertaintyZ,Gnss1VelUncertainty,Gnss1TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::INS:
-            return "timeGpsTow,timeGpsWeek,insStatus,yaw,pitch,roll,"
-                   "posLat,posLon,posAlt,velNedN,velNedE,velNedD,attU,posU,velU";
-        case AsciiPacketProtocol::AsciiMeasurementHeader::ISE:
-            return "timeGpsTow,timeGpsWeek,insStatus,yaw,pitch,roll,"
-                   "posEcefX,posEcefY,posEcefZ,velEcefX,velEcefY,velEcefZ,attU,posU,velU";
+            return "TimeGpsTow,TimeGpsWeek,InsStatus,Yaw,Pitch,Roll,PosLat,PosLon,PosAlt,VelN,VelE,VelD,AttUncertainty,PosUncertainty,VelUncertainty";
+        case AsciiPacketProtocol::AsciiMeasurementHeader::INE:
+            return "TimeGpsTow,TimeGpsWeek,InsStatus,Yaw,Pitch,Roll,PosEX,PosEY,PosEZ,VelEX,VelEY,VelEZ,AttUncertainty,PosUncertainty,VelUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::ISL:
-            return "yaw,pitch,roll,posEcefX,posEcefY,posEcefZ,velEcefX,velEcefY,velEcefZ,"
-                   "accelX,accelY,accelZ,angularRateX,angularRateY,angularRateZ";
+            return "Yaw,Pitch,Roll,PosLat,PosLon,PosAlt,VelN,VelE,VelD,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ";
+        case AsciiPacketProtocol::AsciiMeasurementHeader::ISE:
+            return "Yaw,Pitch,Roll,PosEX,PosEY,PosEZ,VelEX,VelEY,VelEZ,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::DTV:
-            return "deltaTime,deltaThetaX,deltaThetaY,deltaThetaZ,deltaVelX,deltaVelY,deltaVelZ";
+            return "DeltaTime,DeltaThetaX,DeltaThetaY,DeltaThetaZ,DeltaVelX,DeltaVelY,DeltaVelZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::G2S:
-            return "gps2Tow,gps2Week,gnss2Fix,gnss2NumSats,"
-                   "gnss2PosLat,gnss2PosLon,gnss2PosAlt,"
-                   "gnss2VelN,gnss2VelE,gnss2VelD,"
-                   "gnss2PosUncertaintyN,gnss2PosUncertaintyE,gnss2PosUncertaintyD,"
-                   "gnss2VelUncertainty,gnss2TimeUncertainty";
+            return "Gps2Tow,Gps2Week,Gnss2Fix,Gnss2NumSats,gnss2Lat,gnss2Lon,gnss2Alt,gnss2VelN,gnss2VelE,gnss2VelD,gnss2PosUncertaintyN,gnss2PosUncertaintyE,"
+                   "gnss2PosUncertaintyD,Gnss2VelUncertainty,Gnss2TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::G2E:
-            return "gps2Tow,gps2Week,gnss2Fix,gnss2NumSats,"
-                   "gnss2PosLat,gnss2PosLon,gnss2PosAlt,"
-                   "gnss2VelN,gnss2VelE,gnss2VelD,"
-                   "gnss2PosUncertaintyN,gnss2PosUncertaintyE,gnss2PosUncertaintyD,"
-                   "gnss2VelUncertainty,gnss2TimeUncertainty";
+            return "Gps2Tow,Gps2Week,Gnss2Fix,Gnss2NumSats,gnss2PosX,gnss2PosY,gnss2PosZ,gnss2VelX,gnss2VelY,gnss2VelZ,gnss2PosUncertaintyX,"
+                   "gnss2PosUncertaintyY,gnss2PosUncertaintyZ,Gnss2VelUncertainty,Gnss2TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::HVE:
-            return "heave,heaveRate,delayedHeave";
+            return "Heave,HeaveRate,DelayedHeave";
+        case AsciiPacketProtocol::AsciiMeasurementHeader::YBA:
+            return "Yaw,Pitch,Roll,LinAccelX,LinAccelY,LinAccelZ,GyroX,GyroY,GyroZ";
+        case AsciiPacketProtocol::AsciiMeasurementHeader::YIA:
+            return "Yaw,Pitch,Roll,LinAccelN,LinAccelE,LinAccelD,GyroX,GyroY,GyroZ";
         default:
             return "";
     }

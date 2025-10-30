@@ -53,7 +53,7 @@ While on the VNSDK, the sensor is connected using the *AutoConnect* attribute be
 
 .. tab::  MATLAB
 
-    .. literalinclude::  ../../../matlab/examples/GettingStarted.m
+    .. literalinclude::  ../../../matlab/examples/GettingStarted/GettingStarted.m
         :linenos:
         :lineno-match:
         :language: matlab
@@ -98,7 +98,7 @@ In the VNSDK, the user will create a Sensor object, create a Register object, an
 
 .. tab:: MATLAB
 
-    .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+    .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
         :linenos:
         :lineno-match:
         :language: matlab
@@ -136,7 +136,7 @@ In the VNSDK, the same process as reading from registers is followed:
     
 .. tab:: MATLAB
 
-    .. literalinclude:: ../../../matlab/examples/GettingStarted.m
+    .. literalinclude:: ../../../matlab/examples/GettingStarted/GettingStarted.m
         :linenos:
         :lineno-match:
         :language: matlab

@@ -3,7 +3,7 @@
 Template Function VN::operator==(const Vector<T, Capacity>&, const Vector<T, Capacity>&)
 ========================================================================================
 
-- Defined in :ref:`file_include_TemplateLibrary_Vector.hpp`
+- Defined in :ref:`file_include_vectornav_TemplateLibrary_Vector.hpp`
 
 
 Function Documentation

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "VnXml.hpp"
+#include "vectornav/VnXml.hpp"
 
-#include "Interface/Command.hpp"
+#include "vectornav/Interface/GenericCommand.hpp"
 
 namespace VN
 {
@@ -62,7 +62,7 @@ Metadata extractMetadata(InputFile& vnXmlFile)
 
         // std::cout << line.c_str() << std::endl;
         // Enter the "Components" node
-        if (line.find("<Components") == std::string::npos) { continue; }
+        if (line.find("<Components") == AsciiMessage::npos) { continue; }
 
         bool processingComponents = true;
         while (processingComponents)
@@ -70,7 +70,7 @@ Metadata extractMetadata(InputFile& vnXmlFile)
             // Continue to the next line, discarding "Components" tag
             vnXmlFile.getLine(line.begin(), line.capacity());
             ++lineNumber;
-            if (line.find("</Components>") != std::string::npos) { break; }
+            if (line.find("</Components>") != AsciiMessage::npos) { break; }
 
             ExtractComponentReturn componentReturn = extractComponent(vnXmlFile, line);
             switch (componentReturn.status)
@@ -110,14 +110,14 @@ ExtractComponentReturn extractComponent(InputFile& vnXmlFile, AsciiMessage line)
 {  // Check if the line contains a Component definition
     ExtractComponentReturn retVal;
 
-    if (line.find("<Component") == std::string::npos) { return retVal; }  // If we didn't find a component tag, return right away.
+    if (line.find("<Component") == AsciiMessage::npos) { return retVal; }  // If we didn't find a component tag, return right away.
 
     // Set status to failed for early returns
     retVal.status = ExtractComponentReturn::Status::Failed;
 
     // Parse the Component attributes
     size_t attribPosBegin;
-    if ((attribPosBegin = line.find("Type=")) != std::string::npos)
+    if ((attribPosBegin = line.find("Type=")) != AsciiMessage::npos)
     {
         retVal.component.memoryType =
             static_cast<MemoryType>(std::stoi(line.substr(attribPosBegin + 6, line.find('"', attribPosBegin + 6) - attribPosBegin - 6)));
@@ -128,7 +128,7 @@ ExtractComponentReturn extractComponent(InputFile& vnXmlFile, AsciiMessage line)
         return retVal;
     }
 
-    if ((attribPosBegin = line.find("HwId=")) != std::string::npos)
+    if ((attribPosBegin = line.find("HwId=")) != AsciiMessage::npos)
     {
         retVal.component.hardwareId =
             static_cast<HardwareId>(std::stoi(line.substr(attribPosBegin + 6, line.find('"', attribPosBegin + 6) - attribPosBegin - 6)));
@@ -144,13 +144,13 @@ ExtractComponentReturn extractComponent(InputFile& vnXmlFile, AsciiMessage line)
     {
         ++retVal.linesConsumed;
 
-        if (line.find("</Data>") != std::string::npos)
+        if (line.find("</Data>") != AsciiMessage::npos)
         {
             retVal.component.dataLineEnd = retVal.linesConsumed - 1;
             break;
         }
 
-        if (line.find(':') != std::string::npos)
+        if (line.find(':') != AsciiMessage::npos)
         {
             if (retVal.component.dataLineBegin == 0) { retVal.component.dataLineBegin = retVal.linesConsumed; }
         }
@@ -162,7 +162,7 @@ ExtractComponentReturn extractComponent(InputFile& vnXmlFile, AsciiMessage line)
     {
         ++retVal.linesConsumed;
 
-        if (line.find("</Component>") != std::string::npos)
+        if (line.find("</Component>") != AsciiMessage::npos)
         {
             foundEndOfComponent = true;
             break;

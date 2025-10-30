@@ -3,7 +3,7 @@
 Variable VN::CommonGroupMapping
 ===============================
 
-- Defined in :ref:`file_include_Implementation_BinaryMeasurementDefinitions.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_BinaryMeasurementDefinitions.hpp`
 
 
 Variable Documentation

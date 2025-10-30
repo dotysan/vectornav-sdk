@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 set(SOURCES
     Interface/Sensor.cpp
-    Interface/Command.cpp
+    Interface/GenericCommand.cpp
     Interface/Registers.cpp
     Implementation/BinaryHeader.cpp
     Implementation/CommandProcessor.cpp

@@ -12,12 +12,10 @@ Directory include
 
 *Directory path:* ``plugins\FirmwareUpdate\include``
 
+Subdirectories
+--------------
 
-Files
------
+- :ref:`dir_plugins_FirmwareUpdate_include_vectornav`
 
-- :ref:`file_plugins_FirmwareUpdate_include_Bootloader.hpp`
-- :ref:`file_plugins_FirmwareUpdate_include_FirmwareUpdater.hpp`
-- :ref:`file_plugins_FirmwareUpdate_include_VnXml.hpp`
 
 

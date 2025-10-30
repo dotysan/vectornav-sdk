@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,13 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <cstdint>
 #include <iostream>
+#include <string>
 
-#include "HAL/Timer.hpp"
-#include "Interface/Errors.hpp"
-#include "Interface/Sensor.hpp"
-#include "Interface/Registers.hpp"
+#include "vectornav/HAL/Timer.hpp"
+#include "vectornav/Interface/Errors.hpp"
+#include "vectornav/Interface/Registers.hpp"
+#include "vectornav/Interface/Sensor.hpp"
 
 using namespace VN;
 
@@ -45,13 +45,13 @@ int main(int argc, char* argv[])
     // 5. Configure the first binary output to output timeStartup, accel, and angRate, all from common group, with a 200 rate divisor
     // 6. Enter a loop for 5 seconds where it:
     //    Determines which measurement it received (VNYPR or the necessary binary header)
-    //    Prints out the relevant measurement from the CD struct
+    //    Prints out the relevant measurement from the CompositeData struct
     // 7. Disconnect from sensor
 
     // Define the port connection parameters to be used later
-    const std::string portName = (argc > 1) ? argv[1] : "COM33";  // Change the sensor port name to the comm port of your local machine
+    const std::string portName = (argc > 1) ? argv[1] : "COM33";  // Change the sensor port name to the COM port of your local machine
 
-    // [1] Instantiate a sensor object we'll use to interact with the sensor, and connect to the unit
+    // [1] Instantiate a sensor object we'll use to connect to and interact with the unit
     Sensor sensor;
     Error latestError = sensor.autoConnect(portName);
     if (latestError != Error::None)
@@ -68,7 +68,8 @@ int main(int argc, char* argv[])
     latestError = sensor.readRegister(&modelRegister);
     if (latestError != Error::None)
     {
-        std::cout << "Error" << latestError << " encountered when reading register " << modelRegister.id() << " (" << modelRegister.name() << ")" << std::endl;
+        std::cout << "Error " << latestError << " encountered when reading register " << std::to_string(modelRegister.id()) << " (" << modelRegister.name()
+                  << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     std::string modelNumber = modelRegister.model;
@@ -79,7 +80,8 @@ int main(int argc, char* argv[])
     latestError = sensor.readRegister(&yprRegister);
     if (latestError != Error::None)
     {
-        std::cout << "Error" << latestError << " encountered when reading register " << yprRegister.id() << " (" << yprRegister.name() << ")" << std::endl;
+        std::cout << "Error " << latestError << " encountered when reading register " << std::to_string(yprRegister.id()) << " (" << yprRegister.name() << ")"
+                  << std::endl;
         return static_cast<int>(latestError);
     }
     std::cout << "Current Reading:  Yaw - " << yprRegister.yaw << " , Pitch - " << yprRegister.pitch << " , Roll - " << yprRegister.roll << std::endl;
@@ -91,19 +93,19 @@ int main(int argc, char* argv[])
     latestError = sensor.writeRegister(&asyncDataOutputType);
     if (latestError != Error::None)
     {
-        std::cout << "Error" << latestError << " encountered when configuring register " << asyncDataOutputType.id() << " (" << asyncDataOutputType.name()
-                  << ")" << std::endl;
+        std::cout << "Error " << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputType.id()) << " ("
+                  << asyncDataOutputType.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     else { std::cout << "ADOR configured\n"; }
 
     Registers::System::AsyncOutputFreq asyncDataOutputFrequency;
-    asyncDataOutputFrequency.adof = Registers::System::AsyncOutputFreq::Adof::Rate1Hz;
+    asyncDataOutputFrequency.adof = Registers::System::AsyncOutputFreq::Adof::Rate2Hz;
     asyncDataOutputFrequency.serialPort = Registers::System::AsyncOutputFreq::SerialPort::Serial1;
     latestError = sensor.writeRegister(&asyncDataOutputFrequency);
     if (latestError != Error::None)
     {
-        std::cout << "Error" << latestError << " encountered when configuring register " << asyncDataOutputFrequency.id() << " ("
+        std::cout << "Error " << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputFrequency.id()) << " ("
                   << asyncDataOutputFrequency.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     }
@@ -122,8 +124,8 @@ int main(int argc, char* argv[])
     latestError = sensor.writeRegister(&binaryOutput1Register);
     if (latestError != Error::None)
     {
-        std::cout << "Error" << latestError << " encountered when configuring register " << binaryOutput1Register.id() << " (" << binaryOutput1Register.name()
-                  << ")" << std::endl;
+        std::cout << "Error " << latestError << " encountered when configuring register " << std::to_string(binaryOutput1Register.id()) << " ("
+                  << binaryOutput1Register.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     else { std::cout << "Binary output 1 message configured.\n"; }

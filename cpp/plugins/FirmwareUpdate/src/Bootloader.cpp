@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,19 +21,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Bootloader.hpp"
-#include <cstdint>
-#include <algorithm>
+#include "vectornav/Bootloader.hpp"
 
-#include "Interface/Command.hpp"
-#include "Interface/Commands.hpp"
-#include "Interface/Errors.hpp"
-#include "Interface/Sensor.hpp"
-#include "Interface/Registers.hpp"
-#include "HAL/Timer.hpp"
-#include "TemplateLibrary/String.hpp"
-#include "TemplateLibrary/Vector.hpp"
-#include "Config.hpp"
+#include <algorithm>
+#include <cstdint>
+
+#include "vectornav/Config.hpp"
+#include "vectornav/HAL/Timer.hpp"
+#include "vectornav/Interface/Commands.hpp"
+#include "vectornav/Interface/Errors.hpp"
+#include "vectornav/Interface/GenericCommand.hpp"
+#include "vectornav/Interface/Registers.hpp"
+#include "vectornav/Interface/Sensor.hpp"
+#include "vectornav/TemplateLibrary/String.hpp"
+#include "vectornav/TemplateLibrary/Vector.hpp"
 
 namespace VN
 {
@@ -82,7 +83,7 @@ bool tryEnterBootloader(Sensor* sensor, const Sensor::BaudRate firmwareBaudRate,
     std::cout << "Entering bootloader...\n";
     bool enteringFailed = false;
 
-    Command enterBootloader("FWU", 3);
+    GenericCommand enterBootloader("FWU", 3);
     sensor->sendCommand(&enterBootloader, Sensor::SendCommandBlockMode::BlockWithRetry, 6s);
     // No need to sleep, because worst case scenario we are sending spaces too early.
     if (autoconfigureBootloader(sensor, bootloaderBaudRate))
@@ -123,7 +124,7 @@ bool autoconfigureBootloader(Sensor* sensor, const Sensor::BaudRate bootloaderBa
     const uint8_t numAllowedRetries = 40;
     for (int attemptNumber = 0; attemptNumber <= numAllowedRetries; ++attemptNumber)
     {
-        VN::Error serialError = sensor->serialSend(autobaudSequence);
+        VN::Error serialError = sensor->serialSend(autobaudSequence.c_str(), autobaudSequence.length());
         if (serialError != VN::Error::None)
         {
             std::cout << "Error " << serialError << " encountered when configuring the bootloader on attempt " << (attemptNumber + 1) << ": " << std::endl;
@@ -153,6 +154,8 @@ FailureMode sendRecords(Sensor* sensor, InputFile& firmwareStream, const size_t 
 {
     AsciiMessage progressBar;
     std::fill_n(progressBar.begin(), 100, '-');
+    bool retry = false;
+    AsciiMessage currentLine;
 
     size_t lineNum = 0;
     uint8_t percentComplete = 0;
@@ -169,8 +172,7 @@ FailureMode sendRecords(Sensor* sensor, InputFile& firmwareStream, const size_t 
             std::cout << std::flush;
         }
 
-        AsciiMessage currentLine;
-        if (firmwareStream.getLine(currentLine.begin(), currentLine.capacity()))
+        if (!retry && (firmwareStream.getLine(currentLine.begin(), currentLine.capacity())))
         {
             std::cout << "Failed to get line.\n";
             return FailureMode::Abort;
@@ -181,14 +183,16 @@ FailureMode sendRecords(Sensor* sensor, InputFile& firmwareStream, const size_t 
             case (Error::None):
             {
                 lineNum++;
+                retry = false;
                 break;
             }
             case (Error::CommError):
             {
                 // Retry the same line
-                std::cout << "Error " << error << " encountered while loading the firmware on line " << lineNum << "." << std::endl;
-                // TODO: VN_ABORT or return FailureMode...?
-                VN_ABORT();  // Todo: No mechanism exists to go back one line and resend. Minor rewrite necessary.
+                std::cout << "Warning: " << error << " encountered while loading the firmware on line " << lineNum << ".\n";
+                std::cout << "Retrying line." << std::endl;
+                retry = true;
+                break;
             }
             case (Error::InvalidProgramCRC):
             case (Error::InvalidProgramSize):
@@ -232,7 +236,6 @@ bool exitBootloader(Sensor* sensor)
     if (latestError != VN::Error::None)
     {
         std::cout << "Error " << latestError << " encountered when resetting the sensor." << std::endl;
-        ;
         return true;
     }
     return false;
@@ -243,7 +246,7 @@ namespace
 Bootloader::Error _sendRecord(Sensor* sensor, const AsciiMessage& currentLine)
 {
     const auto record = StringUtils::extractAfter(currentLine, ':');
-    Command programCommand("BLD," + record, 3);  // Expecting response with "BLD"
+    GenericCommand programCommand("BLD," + record, 3);  // Expecting response with "BLD"
     sensor->sendCommand(&programCommand, Sensor::SendCommandBlockMode::Block, 6s);
     Bootloader::Error error = _getSensorError(programCommand.getResponse());
     return error;

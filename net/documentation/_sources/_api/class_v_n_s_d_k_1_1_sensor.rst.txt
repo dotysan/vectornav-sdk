@@ -3,7 +3,7 @@
 Class Sensor
 ============
 
-- Defined in :ref:`file_documentation__include_CLI_Sensor.hpp`
+- Defined in :ref:`file_documentation__include_vectornav_CLI_Sensor.hpp`
 
 
 Class Documentation

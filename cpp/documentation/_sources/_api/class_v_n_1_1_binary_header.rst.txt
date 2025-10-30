@@ -3,7 +3,7 @@
 Class BinaryHeader
 ==================
 
-- Defined in :ref:`file_include_Implementation_BinaryHeader.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_BinaryHeader.hpp`
 
 
 Class Documentation

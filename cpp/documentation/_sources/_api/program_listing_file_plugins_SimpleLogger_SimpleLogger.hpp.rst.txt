@@ -10,14 +10,14 @@ Program Listing for File SimpleLogger.hpp
 
 .. code-block:: cpp
 
-   #ifndef SIMPLELOGGER_HPP
-   #define SIMPLELOGGER_HPP
+   #ifndef VN_SIMPLELOGGER_HPP_
+   #define VN_SIMPLELOGGER_HPP_
    
    #include <cstdint>
    
-   #include "Interface/Sensor.hpp"
-   #include "HAL/File.hpp"
-   #include "TemplateLibrary/ByteBuffer.hpp"
+   #include "vectornav/HAL/File.hpp"
+   #include "vectornav/Interface/Sensor.hpp"
+   #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
    
    namespace VN
    {
@@ -88,13 +88,13 @@ Program Listing for File SimpleLogger.hpp
            _logFile.close();
        }
    
-       Microseconds sleepDuration = 1ms;
-       std::atomic<bool> _logging = false;
-       OutputFile _logFile;
-       ByteBuffer& _bufferToLog;
-       std::unique_ptr<Thread> _loggingThread = nullptr;
-       size_t _numBytesLogged = 0;
+       Microseconds sleepDuration = 1ms;                  
+       std::atomic<bool> _logging = false;                
+       OutputFile _logFile;                               
+       ByteBuffer& _bufferToLog;                          
+       std::unique_ptr<Thread> _loggingThread = nullptr;  
+       size_t _numBytesLogged = 0;                        
    };
    
    }  // namespace VN
-   #endif  // SIMPLELOGGER_HPP
+   #endif  // VN_SIMPLELOGGER_HPP_

@@ -11,13 +11,14 @@ Highlights
 * Significant performance improvements
 * Memory and behavior configurability
 * Added measurements and registers
-* Ability to parse dynamically sized measurements (e.g. SatInfo)
+* Ability to parse dynamically sized measurements (e.g. GnssSatInfo, GnssRawMeas)
 * Compatibility with embedded systems
 * New plugin support (For a list of available plugins in the VNSDK, see :ref:`pages/MigrationGuide:Plugin List`)
 * Compatibility with FB packets
 
-Config File
-^^^^^^^^^^^
+Configuration File
+^^^^^^^^^^^^^^^^^^
+This file is located in the C++ *include* folder.
 Any memory or behavior configurability variables are located in this file.
 This allows the user to change any variables needed and reduces the need to look through and edit the source code for memory or timing adjustments.
 
@@ -72,7 +73,7 @@ Using the VNSDK, the error code handling appears as
 
     // Handling the error output
     if (latestError != Error::None) {
-        std::cout << "Error" << latestError << " encountered when configuring register " << asyncDataOutputFrequency.id() << " ("
+        std::cout << "Error" << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputFrequency.id()) << " ("
                   << asyncDataOutputFrequency.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     } else {
@@ -131,7 +132,7 @@ All enumerations in the VNSDK are defined as `scoped classes <https://en.cpprefe
 Reading Registers
 -----------------
 Using the Programming Library, the user would create a VnSensor object and call the respective read register method.
-For example, the following code reads the YPR register (Register 8) using the Programming Library.
+For example, the following code reads the *Yaw, Pitch, Roll* register (Register 8) using the Programming Library.
 
 .. code-block:: cpp
     :emphasize-lines: 8
@@ -146,7 +147,7 @@ For example, the following code reads the YPR register (Register 8) using the Pr
     vec3f ypr = vs.readYawPitchRoll();
 	cout << "Current YPR: " << ypr << endl;
 
-In the VNSDK, the user creates the Sensor object and passes a pointer to a Register object they'd like to read to the ``readRegister`` method.
+In the VNSDK, the user creates the Sensor object and passes a pointer to a Register object they would like to read to the ``readRegister`` method.
 This looks like
 
 .. code-block:: cpp
@@ -177,8 +178,8 @@ This looks like
 Writing Registers
 -----------------
 Writing to the registers incorporates the same changes as reading the registers.
-The following examples will show the difference between writing to the *AsyncDataOutputType* register (Register 6).
-To configure the VectorNav Programming Library to output the *VNYPR* message, create the sensor object and then write to the *AsyncDataOutputType* register:
+The following examples will show the difference between writing to the *Async Data Output Type* register (Register 6).
+To configure the VectorNav Programming Library to output the *VNYPR* message, create the sensor object and then write to the *Async Data Output Type* register:
 
 .. code-block:: cpp
     
@@ -235,9 +236,9 @@ Both the Programming Library and VNSDK provide a ``CompositeData`` class that ar
 The Programming Library's ``CompositeData`` class maintains public data members, getters, setters, and present booleans.
 The VNSDK's ``CompositeData`` only contains public data members, instead opting to report which variables are present using a `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_. In this way, the Programming Library's ``CompositeData`` class feels more like a true class, whereas the VNSDK feels more like a data structure.
 
-The first distinction is in organization; the Programming Library's ``CompositeData`` contains each measurement type accessor by getter methods at the top level, whereas the VNSDK's ``CompositeData`` contains each measurement type directly accessable, organized in their respective binary groups, as defined by the Interface Control Document (ICD).
+The first distinction is in organization; the Programming Library's ``CompositeData`` contains each measurement type accessor by getter methods at the top level, whereas the VNSDK's ``CompositeData`` contains each measurement type directly accessible, organized in their respective binary groups, as defined by the Interface Control Document (ICD).
 
-For example, to access the ypr field in the Programming Library's ``CompositeData`` object would be accessed by ``cd.yawPitchRoll()``, whereas using the SDK's ``CompositeData`` object would be ``cd.attitdue.ypr``.
+For example, to access the ypr field in the Programming Library's ``CompositeData`` object would be accessed by ``cd.yawPitchRoll()``, whereas using the SDK's ``CompositeData`` object would be ``cd.attitude.ypr``.
 
 The second distinction is in the reporting of updated or nonupdated measurement types; the Programming Library's ``CompositeData`` provides ``has`` methods which return a bool of whether the requested measurement type is present.
 The VNSDK's ``CompositeData`` object natively holds each measurement type inside a `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_, eliminating the need for a separate method to check if it is present.
@@ -275,35 +276,38 @@ Plugin List
 Enhanced Firmware Update
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 While this plugin is available in the Programming Library, it has been updated with the issuance of the VNSDK.
-The new Firmware Update plugin has the ability to accept both *VNX* and *VNXML* files, contains significant stability improvements, and must more flexible and simple syntax.
+The new Firmware Update plugin has the ability to accept both *VNX* and *VNXML* files, contains significant stability improvements, and has more flexible and simple syntax.
 This plugin allows the users to update their unit's firmware without having to connect it to VectorNav's GUI, Control Center, or creating their own embedded updater.
 All firmware updates must be performed over the main port, UART-1, and communication must be established before an update can occur.
-More information on this plugin can be found in the :ref:`pages/Plugins:Firmware Update` section.
+More information on this plugin can be found in the :ref:`plugins/FirmwareUpdate` section.
 
 Register Scan
 ^^^^^^^^^^^^^
 The Register Scan plugin is a newly added plugin unique to the VNSDK.
-This plugin is capable of producing an XML file containing the non-default registers on the unit, or uploading an XML file of register values to the unit. It is similar to and interoperable with the "Save Config" and "Load Config" buttons on Control Center.
-Additional information can be found on the :ref:`pages/Plugins:Register Scan` page.
+This plugin is capable of producing an XML or text file containing the non-default registers on the unit, or uploading an XML or text file of register values to the unit. It is similar to and interoperable with the "Save Config" and "Load Config" buttons on Control Center.
+Additional information can be found on the :ref:`RegisterScanPage` page.
 
 Simple Logger
 ^^^^^^^^^^^^^
 The Simple Logger plugin allows users to easily log all bytes received from the unit to a binary file without the need to parse the packets.
 The Programming Library did not have any native capability to do this, and was most often accomplished by custom code utilizing the `RawDataReceivedHandler`.
+More information on this plugin can be found in the :ref:`plugins/SimpleLogger` section.
 
-File Export
+Data Export
 ^^^^^^^^^^^
-The File Export plugin can export data into formats such as a *CSV*, *TXT*, or *RINEX* file.
+The Data Export plugin can export data into formats such as a *CSV*, *TXT*, or *RINEX* file.
 The plugin can handle data from either previously logged binary files or data directly from a VectorNav unit.
 Additionally, it can handle outputting to multiple different formats at once.
+More information on this plugin can be found in the :ref:`plugins/DataExport` section.
 
 ROS2
-^^^^^
+^^^^
 The new ROS2 plugin allows the user to integrate a VectorNav unit in a system running ROS2.
 The plugin will configure the connected unit according to an included yaml file upon startup and subsequently publish each received measurement under custom topics.
 There is a message for each group in the Binary output messages and each group can be subscribed to individually.
+More information on this plugin can be found in the :ref:`plugins/Ros2` section.
 
 Math
 ^^^^
-The Math plugin that includes data conversions, matrix, and linear algebra.
-The Conversions file contains angle, temperature, and attitude conversions; the Matrix file contains basic matrix operations; the Linear Algebra file contains any math pertaining to vectors and matrices.
+The Math plugin expands upon the Programming Library's previous vector and matrix math by also including data conversions and expanded linear algebra functions.
+More information on this plugin can be found in the :ref:`plugins/Math` section.

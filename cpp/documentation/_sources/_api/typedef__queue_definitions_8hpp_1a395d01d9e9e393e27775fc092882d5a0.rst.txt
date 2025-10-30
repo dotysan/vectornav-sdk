@@ -3,7 +3,7 @@
 Typedef VN::PacketQueue
 =======================
 
-- Defined in :ref:`file_include_Implementation_QueueDefinitions.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_QueueDefinitions.hpp`
 
 
 Typedef Documentation

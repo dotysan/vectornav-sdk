@@ -3,7 +3,7 @@
 Typedef VNSDK::Registers::ById::reg2
 ====================================
 
-- Defined in :ref:`file_documentation__include_CLI_Registers.hpp`
+- Defined in :ref:`file_documentation__include_vectornav_CLI_Registers.hpp`
 
 
 Typedef Documentation

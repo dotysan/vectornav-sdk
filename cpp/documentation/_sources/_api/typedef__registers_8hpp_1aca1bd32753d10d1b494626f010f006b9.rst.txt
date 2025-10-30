@@ -3,7 +3,7 @@
 Typedef VN::Registers::ById::Reg23
 ==================================
 
-- Defined in :ref:`file_include_Interface_Registers.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Registers.hpp`
 
 
 Typedef Documentation

@@ -3,7 +3,7 @@
 Enum CsvType
 ============
 
-- Defined in :ref:`file_plugins_DataExport_include_ExporterCsvUtils.hpp`
+- Defined in :ref:`file_plugins_DataExport_include_vectornav_ExporterCsvUtils.hpp`
 
 
 Enum Documentation

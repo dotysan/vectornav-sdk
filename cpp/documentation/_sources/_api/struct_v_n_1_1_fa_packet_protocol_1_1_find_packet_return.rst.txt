@@ -3,7 +3,7 @@
 Struct FindPacketReturn
 =======================
 
-- Defined in :ref:`file_include_Implementation_FaPacketProtocol.hpp`
+- Defined in :ref:`file_include_vectornav_Implementation_FaPacketProtocol.hpp`
 
 
 Struct Documentation

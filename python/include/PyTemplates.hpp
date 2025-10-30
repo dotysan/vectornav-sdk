@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,13 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// clang-format off
+#ifndef VN_PYTEMPLATES_HPP_
+#define VN_PYTEMPLATES_HPP_
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 #include <iostream>
 #include <string>
 
-#include "Implementation/QueueDefinitions.hpp"
+#include "vectornav/Implementation/QueueDefinitions.hpp"
 
 namespace py = pybind11;
 
@@ -98,3 +101,6 @@ void declare_direct_access_queue_base(py::module& m, const std::string& typestr)
   using Class = VN::DirectAccessQueue_Interface<T>;
   py::class_<Class>(m, typestr.c_str());
 }
+
+#endif  // VN_PYTEMPLATES_HPP_
+// clang-format on

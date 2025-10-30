@@ -3,7 +3,7 @@
 Struct GnssRawMeas
 ==================
 
-- Defined in :ref:`file_documentation__include_CLI_MeasurementDatatypes.hpp`
+- Defined in :ref:`file_documentation__include_vectornav_CLI_MeasurementDatatypes.hpp`
 
 
 Struct Documentation

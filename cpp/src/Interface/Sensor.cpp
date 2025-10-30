@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,11 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Debug.hpp"
-#include "Interface/Sensor.hpp"
-#include "Interface/Command.hpp"
-#include "Interface/Commands.hpp"
-#include "Interface/Errors.hpp"
+#include "vectornav/Interface/Sensor.hpp"
+
+#include "vectornav/Debug.hpp"
+#include "vectornav/Interface/Commands.hpp"
+#include "vectornav/Interface/Errors.hpp"
+#include "vectornav/Interface/GenericCommand.hpp"
 
 namespace VN
 {
@@ -98,21 +99,41 @@ bool Sensor::verifySensorConnectivity() noexcept
     return (modelRegister.model != "");
 }
 
-Error Sensor::changeBaudRate(const BaudRate newBaudRate) noexcept
+Error Sensor::changeBaudRate(const BaudRate newBaudRate, Registers::System::BaudRate::SerialPort serialPort) noexcept
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
     if (!_serial.isSupportedBaudRate(static_cast<uint32_t>(newBaudRate))) { return Error::UnsupportedBaudRate; }
 
+    // Check to see if the serial port selected is the active serial port
+    bool isActiveSerial{true};
+    Error latestError;
+    if (serialPort == Registers::System::BaudRate::SerialPort::ActiveSerial) { isActiveSerial = true; }
+    else
+    {
+        Registers::System::BaudRate baudRateRegister;
+        baudRateRegister.serialPort = Registers::System::BaudRate::SerialPort::Poll;
+        latestError = readRegister(&baudRateRegister);
+        if (latestError != VN::Error::None) { return latestError; }
+        if (baudRateRegister.serialPort == Registers::System::BaudRate::SerialPort::Poll) { return Error::SerialReadFailed; }
+        isActiveSerial = (serialPort == baudRateRegister.serialPort);
+    }
+
+    // Change the sensor baud rate on the selected serial line
     Registers::System::BaudRate reg5;
     reg5.baudRate = newBaudRate;
-    reg5.serialPort = Registers::System::BaudRate::SerialPort::ActiveSerial;
-    Error latestError = writeRegister(&reg5, true);
+    reg5.serialPort = serialPort;
+    latestError = writeRegister(&reg5, true);
     if (latestError != Error::None) { return latestError; }
-    // Host baud rate may switch quicker than unit can switch its baud rate, so we need to give time to the unit before sending any subsequent verify calls
-    thisThread::sleepFor(50ms);  // Appears that the sensor may take time to correctly configure, even if changing from and to the same baud rate. Tested by
-                                 // changing baud rate in loop, and occasionally received invalid checksum.
 
-    return changeHostBaudRate(newBaudRate);
+    // Change the host baud rate if connected to active serial
+    if (isActiveSerial)
+    {
+        // Host baud rate may switch quicker than unit can switch its baud rate, so we need to give time to the unit before sending any subsequent verify calls
+        thisThread::sleepFor(50ms);  // Appears that the sensor may take time to correctly configure, even if changing from and to the same baud rate. Tested by
+                                     // changing baud rate in loop, and occasionally received invalid checksum.
+        latestError = changeHostBaudRate(newBaudRate);
+    }
+    return latestError;
 }
 
 Error Sensor::changeHostBaudRate(const BaudRate newBaudRate) noexcept
@@ -190,7 +211,7 @@ Sensor::CompositeDataQueueReturn Sensor::_blockOnMeasurement(Timer& timer, [[may
     return queueReturn;
 }
 
-Error Sensor::_blockOnCommand(Command* command, Timer& timer) noexcept
+Error Sensor::_blockOnCommand(GenericCommand* command, Timer& timer) noexcept
 {
     bool hasTimedOut = false;
 #if (!THREADING_ENABLE)
@@ -239,7 +260,7 @@ Error Sensor::_blockOnCommand(Command* command, Timer& timer) noexcept
 Error Sensor::readRegister(Register* registerToRead, const bool retryOnFailure) noexcept
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
-    Command readCommand = registerToRead->toReadCommand();
+    GenericCommand readCommand = registerToRead->toReadCommand();
     SendCommandBlockMode waitMode;
     if (retryOnFailure) { waitMode = SendCommandBlockMode::BlockWithRetry; }
     else { waitMode = SendCommandBlockMode::Block; }
@@ -253,7 +274,7 @@ Error Sensor::readRegister(Register* registerToRead, const bool retryOnFailure) 
 Error Sensor::writeRegister(ConfigurationRegister* registerToWrite, const bool retryOnFailure) noexcept
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
-    Command writeCommand = registerToWrite->toWriteCommand();
+    GenericCommand writeCommand = registerToWrite->toWriteCommand();
     SendCommandBlockMode waitMode;
     if (retryOnFailure) { waitMode = SendCommandBlockMode::BlockWithRetry; }
     else { waitMode = SendCommandBlockMode::Block; }
@@ -367,7 +388,8 @@ Error Sensor::setBootloader(const SetBootLoader::Processor processorId) noexcept
     return sendCommand(&sbl, SendCommandBlockMode::Block, 6s);
 }
 
-Error Sensor::sendCommand(Command* commandToSend, SendCommandBlockMode waitMode, const Microseconds waitLengthMs, const Microseconds timeoutThreshold) noexcept
+Error Sensor::sendCommand(GenericCommand* commandToSend, SendCommandBlockMode waitMode, const Microseconds waitLengthMs,
+                          const Microseconds timeoutThreshold) noexcept
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
     CommandProcessor::RegisterCommandReturn regCommandReturn = _commandProcessor.registerCommand(commandToSend, timeoutThreshold);
@@ -377,7 +399,7 @@ Error Sensor::sendCommand(Command* commandToSend, SendCommandBlockMode waitMode,
         else if (regCommandReturn.error == CommandProcessor::RegisterCommandReturn::Error::CommandResent) { return Error::CommandResent; }
         else { VN_ABORT(); }
     }
-    Error lastError = _serial.send(regCommandReturn.message);
+    Error lastError = _serial.send(regCommandReturn.message.c_str(), regCommandReturn.message.length());
     if (lastError != Error::None) { return lastError; }
 
     if (waitMode == SendCommandBlockMode::None) { return Error::None; }
@@ -402,7 +424,7 @@ Error Sensor::sendCommand(Command* commandToSend, SendCommandBlockMode waitMode,
             else { VN_ABORT(); }
         }
 
-        lastError = _serial.send(regCommandReturn.message);
+        lastError = _serial.send(regCommandReturn.message.c_str(), regCommandReturn.message.length());
         if (lastError != Error::None) { return lastError; }
 
         lastError = _blockOnCommand(commandToSend, timer);
@@ -418,9 +440,9 @@ Error Sensor::sendCommand(Command* commandToSend, SendCommandBlockMode waitMode,
     return Error::None;
 }
 
-Error Sensor::serialSend(const AsciiMessage& msgToSend) noexcept
+Error Sensor::serialSend(const char* buffer, size_t len) noexcept
 {
-    Error lastError = _serial.send(msgToSend);
+    Error lastError = _serial.send(buffer, len);
     if (lastError != Error::None) { return lastError; }
     return Error::None;
 }
@@ -516,7 +538,7 @@ void Sensor::_stopListening() noexcept
 // Error Handling
 // --------------
 
-size_t Sensor::asynchronousErrorQueueSize() const noexcept { return _asyncErrorQueue.size(); }
+uint16_t Sensor::asynchronousErrorQueueSize() const noexcept { return _asyncErrorQueue.size(); }
 
 std::optional<AsyncError> Sensor::getAsynchronousError() noexcept { return _asyncErrorQueue.get(); }
 

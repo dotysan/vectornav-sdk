@@ -1201,12 +1201,12 @@ GnssCompassSignalHealthStatus
   
   Highest CN0 reported on receiver B.
   
-  .. py:attribute:: numComSatsPVT
+  .. py:attribute:: numComSatsPvt
     :type: float
   
   The number of common satellites that are used in the PVT solutions of both receiver A and receiver B.
   
-  .. py:attribute:: numComSatsRTK
+  .. py:attribute:: numComSatsRtk
     :type: float
   
   The number of common satellites that are used in the RTK solutions of both receiver A and receiver B.
@@ -1727,31 +1727,31 @@ RefFrameRot
   Configuration register, ID 26
   
 
-  .. py:attribute:: rFR00
+  .. py:attribute:: rfr00
     :type: float
   
-  .. py:attribute:: rFR01
+  .. py:attribute:: rfr01
     :type: float
   
-  .. py:attribute:: rFR02
+  .. py:attribute:: rfr02
     :type: float
   
-  .. py:attribute:: rFR10
+  .. py:attribute:: rfr10
     :type: float
   
-  .. py:attribute:: rFR11
+  .. py:attribute:: rfr11
     :type: float
   
-  .. py:attribute:: rFR12
+  .. py:attribute:: rfr12
     :type: float
   
-  .. py:attribute:: rFR20
+  .. py:attribute:: rfr20
     :type: float
   
-  .. py:attribute:: rFR21
+  .. py:attribute:: rfr21
     :type: float
   
-  .. py:attribute:: rFR22
+  .. py:attribute:: rfr22
     :type: float
   
   
@@ -2205,32 +2205,32 @@ InsSolEcef
   
   Roll angle.
   
-  .. py:attribute:: posEX
+  .. py:attribute:: posEx
     :type: double
   
   Position in ECEF-frame x-axis.
   
-  .. py:attribute:: posEY
+  .. py:attribute:: posEy
     :type: double
   
   Position in ECEF-frame y-axis.
   
-  .. py:attribute:: posEZ
+  .. py:attribute:: posEz
     :type: double
   
   Position in ECEF-frame z-axis.
   
-  .. py:attribute:: velEX
+  .. py:attribute:: velEx
     :type: float
   
   Velocity in ECEF-frame x-axis.
   
-  .. py:attribute:: velEY
+  .. py:attribute:: velEy
     :type: float
   
   Velocity in ECEF-frame y-axis.
   
-  .. py:attribute:: velEZ
+  .. py:attribute:: velEz
     :type: float
   
   Velocity in ECEF-frame z-axis.
@@ -2439,32 +2439,32 @@ InsStateEcef
   
   Roll angle.
   
-  .. py:attribute:: posEX
+  .. py:attribute:: posEx
     :type: double
   
   Position in ECEF-frame x-axis.
   
-  .. py:attribute:: posEY
+  .. py:attribute:: posEy
     :type: double
   
   Position in ECEF-frame y-axis.
   
-  .. py:attribute:: posEZ
+  .. py:attribute:: posEz
     :type: double
   
   Position in ECEF-frame z-axis.
   
-  .. py:attribute:: velEX
+  .. py:attribute:: velEx
     :type: float
   
   Velocity in ECEF-frame x-axis.
   
-  .. py:attribute:: velEY
+  .. py:attribute:: velEy
     :type: float
   
   Velocity in ECEF-frame y-axis.
   
-  .. py:attribute:: velEZ
+  .. py:attribute:: velEz
     :type: float
   
   Velocity in ECEF-frame z-axis.
@@ -3151,7 +3151,7 @@ BinaryOutput
       :type: bool
     .. py:attribute:: gnss1Status
       :type: bool
-    .. py:attribute:: gnss1AltMSL
+    .. py:attribute:: gnss1AltMsl
       :type: bool
     
   
@@ -3247,7 +3247,7 @@ BinaryOutput
       :type: bool
     .. py:attribute:: gnss2Status
       :type: bool
-    .. py:attribute:: gnss2AltMSL
+    .. py:attribute:: gnss2AltMsl
       :type: bool
     
   
@@ -3289,7 +3289,7 @@ BinaryOutput
       :type: bool
     .. py:attribute:: gnss3Status
       :type: bool
-    .. py:attribute:: gnss3AltMSL
+    .. py:attribute:: gnss3AltMsl
       :type: bool
     
   

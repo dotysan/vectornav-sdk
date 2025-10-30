@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Implementation/FbPacketDispatcher.hpp"
+#include "vectornav/Implementation/FbPacketDispatcher.hpp"
 
 namespace VN
 {
@@ -70,11 +70,11 @@ void FbPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const size
     _previousPacketMetadata = _latestPacketMetadata;
 }
 
-bool FbPacketDispatcher::_moveBytesFromMainBufferToFbBuffer(SplitPacketDetails splitPacketDetails, const ByteBuffer& byteBuffer, const size_t numOfBytesToMove,
-                                                            const size_t startingIndex) noexcept
+bool FbPacketDispatcher::_moveBytesFromMainBufferToFbBuffer(SplitPacketDetails splitPacketDetails, const ByteBuffer& byteBuffer,
+                                                            const uint16_t numOfBytesToMove, const size_t startingIndex) noexcept
 {
     if (splitPacketDetails.payloadLength > byteBuffer.size()) { return true; }
-    for (size_t i = 0; i < numOfBytesToMove; i++)
+    for (uint16_t i = 0; i < numOfBytesToMove; i++)
     {
         auto tmpByte = byteBuffer.peek_unchecked(startingIndex + i);
         _fbByteBuffer.put(&tmpByte, 1);

@@ -3,7 +3,7 @@
 Class AsyncOutputType
 =====================
 
-- Defined in :ref:`file_include_Interface_Registers.hpp`
+- Defined in :ref:`file_include_vectornav_Interface_Registers.hpp`
 
 
 Inheritance Relationships

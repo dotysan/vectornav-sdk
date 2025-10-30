@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.19.0)
+// VectorNav SDK (v0.22.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,12 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <memory>
 #include <filesystem>
 
-#include "FileExporter.hpp"
-#include "ExporterCsv.hpp"
-#include "ExporterAscii.hpp"
+#include "vectornav/ExporterAscii.hpp"
+#include "vectornav/ExporterCsv.hpp"
+#include "vectornav/FileExporter.hpp"
 
 using namespace VN;
 namespace fs = std::filesystem;
@@ -44,7 +43,7 @@ int main(int argc, char* argv[])
     }
 
     std::cout << "Exporting " << filePath << std::endl;
-    std::cout << "Outputting to " << outputDirectory << std::endl;
+    std::cout << "Outputting to " << outputDirectory << '\n' << std::endl;
 
     fileExporter.addExporter(std::make_unique<ExporterCsv>(outputDirectory));
     fileExporter.addExporter(std::make_unique<ExporterAscii>(outputDirectory));
@@ -58,5 +57,5 @@ int main(int argc, char* argv[])
 
     std::cout << fileExporter.getParsingStats() << std::endl;
 
-    std::cout << "FileExport example complete." << std::endl;
+    std::cout << "ExportFromFile example complete." << std::endl;
 }
