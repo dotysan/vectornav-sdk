@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,7 +28,7 @@
 
 #include <filesystem>
 #include <iostream>
-#define VN_CURRENT_DEBUG_LEVEL 0
+#define VN_DEBUG_LEVEL 0
 #define VN_USING_LIGHTWEIGHT_DEBUG false
 
 #ifndef VN_PROFILING_ENABLE
@@ -53,26 +53,32 @@ static std::vector<std::string> LIGHTWEIGHT_DEBUG_VECTOR;
 #define VN_ASSERT(assert_expression)                                     \
     if (!(assert_expression))                                            \
     {                                                                    \
-        std::cout << "(" << __FILENAME__ << ":" << __LINE__ << ") "      \
+        std::cerr << "(" << __FILENAME__ << ":" << __LINE__ << ") "      \
                   << "Assertion failed: " << #assert_expression << "\n"; \
         abort();                                                         \
     }
 
 #define VN_ABORT()                                              \
-    std::cout << "(" << __FILENAME__ << ":" << __LINE__ << ") " \
+    std::cerr << "(" << __FILENAME__ << ":" << __LINE__ << ") " \
               << "Abort called."                                \
               << "\n";                                          \
     abort();
 
-#define FORCE_DEBUG(debug_expression) std::cout << "(" << __FILENAME__ << ":" << __LINE__ << ") " << (debug_expression) << "\n";
+#define FORCE_DEBUG(debug_expression) std::clog << "(" << __FILENAME__ << ":" << __LINE__ << ") " << (debug_expression) << std::endl;
 
-#if (VN_CURRENT_DEBUG_LEVEL >= 1)
+#if (VN_DEBUG_LEVEL >= 0)
+#define VN_DEBUG_0(debug_expression) std::clog << debug_expression
+#else
+#define VN_DEBUG_0(debug_expression)
+#endif
+
+#if (VN_DEBUG_LEVEL >= 1)
 #define VN_DEBUG_1(debug_expression) FORCE_DEBUG(debug_expression)
 #else
 #define VN_DEBUG_1(debug_expression)
 #endif
 
-#if (VN_CURRENT_DEBUG_LEVEL >= 2)
+#if (VN_DEBUG_LEVEL >= 2)
 #define VN_DEBUG_2(debug_expression) FORCE_DEBUG(debug_expression)
 #else
 #define VN_DEBUG_2(debug_expression)

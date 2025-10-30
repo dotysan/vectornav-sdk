@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,16 +24,13 @@
 #ifndef VN_CLI_COMMANDS_HPP_
 #define VN_CLI_COMMANDS_HPP_
 
-#include "Windows.h"
-#include <conio.h>
-#include <msclr/marshal.h>
 #include "CLI_GenericCommand.hpp"
+
+#include <msclr/marshal.h>
 
 #pragma managed(push, off)
 #include "vectornav/Interface/Commands.hpp"
 #pragma managed(pop)
-
-#include <string>
 
 using namespace System;
 using namespace msclr::interop;
@@ -73,6 +70,8 @@ namespace VNSDK
 		KnownMagneticDisturbance(State state) : GenericCommand(new VN::KnownMagneticDisturbance(static_cast<VN::KnownMagneticDisturbance::State>(state))) {};
 	};
 
+	inline VN::KnownMagneticDisturbance::State ToNativeInstance(KnownMagneticDisturbance::State state) { return static_cast<VN::KnownMagneticDisturbance::State>(static_cast<int>(state)); }
+
 	public ref class KnownAccelerationDisturbance : public GenericCommand
 	{
 	public:
@@ -80,6 +79,8 @@ namespace VNSDK
 
 		KnownAccelerationDisturbance(State state) : GenericCommand(new VN::KnownAccelerationDisturbance(static_cast<VN::KnownAccelerationDisturbance::State>(state))) {};
 	};
+
+	inline VN::KnownAccelerationDisturbance::State ToNativeInstance(KnownAccelerationDisturbance::State state) { return static_cast<VN::KnownAccelerationDisturbance::State>(static_cast<int>(state)); }
 
 	public ref class SetInitialHeading : public GenericCommand
 	{
@@ -94,6 +95,8 @@ namespace VNSDK
 
 		AsyncOutputEnable(uint8_t state) : GenericCommand(new VN::AsyncOutputEnable(static_cast<VN::AsyncOutputEnable::State>(state))) {};
 	};
+
+	inline VN::AsyncOutputEnable::State ToNativeInstance(AsyncOutputEnable::State state) { return static_cast<VN::AsyncOutputEnable::State>(static_cast<int>(state)); }
 
 	public ref class SetFilterBias : public GenericCommand
 	{

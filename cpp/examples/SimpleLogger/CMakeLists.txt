@@ -10,6 +10,6 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE oVnSensor)
 target_link_libraries(${PROJECT_NAME} PRIVATE oVnSensor)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CPP_ROOT}/plugins/SimpleLogger)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CPP_ROOT}/plugins/Logger)
 
 message(STATUS "Built ${PROJECT_NAME}")

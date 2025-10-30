@@ -6,10 +6,12 @@
 VectorNav CLI SDK
 #################
 
-The VectorNav CLI SDK provides a software interface to communicate with, configure, and parse the outputs of any VectorNav sensor. 
-It contains definitions of the complete protocol of VectorNav register definitions, commands, and measurement outputs, matching the latest ICD. Both synchronous and asynchronous messages are supported, and it is all polling-based.
+.. admonition:: MATLAB and C# Users:
 
-The CLI SDK wraps the C++ SDK using `C++/CLI <https://learn.microsoft.com/en-us/cpp/dotnet/dotnet-programming-with-cpp-cli-visual-cpp?view=msvc-170>`_ to provide a .NET-accessible dll file for use in MATLAB or C#. Examples in this documentation are given in both C# and MATLAB.
+   Access to VectorNav units in MATLAB or C# is given by a .NET-accessible dll file that is generated from the VectorNav CLI SDK. If you landed here from the MATLAB or C# documentation page, more details on the available features and functionality in MATLAB and C# can be found in this VectorNav CLI SDK documentation. The .NET-accessible dll file is available in the 'net' folder. 
+
+The VectorNav CLI SDK provides a software interface to communicate with, configure, and parse the outputs of any VectorNav sensor. 
+It contains definitions of the complete protocol of VectorNav register definitions, commands, and measurement outputs, matching the latest ICD. Both synchronous and asynchronous messages are supported, and it is all polling-based. The CLI SDK wraps the C++ SDK using `C++/CLI <https://learn.microsoft.com/en-us/cpp/dotnet/dotnet-programming-with-cpp-cli-visual-cpp?view=msvc-170>`_ to provide a .NET-accessible dll file for use in MATLAB or C#. Examples in this documentation are given in both C# and MATLAB.
 
 Threaded operation is not currently supported by the CLI library.
 
@@ -37,5 +39,5 @@ Contents
    pages/MigrationGuide
    pages/GettingStarted
    pages/KeyFunctionality
-   plugins/index
    pages/api_index
+   plugins/index

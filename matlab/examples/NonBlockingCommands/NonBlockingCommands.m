@@ -1,6 +1,6 @@
 % The MIT License (MIT)
 % 
-% VectorNav SDK (v0.22.0)
+% VectorNav SDK (v0.99.0)
 % Copyright (c) 2024 VectorNav Technologies, LLC
 % 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,65 +21,81 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-%% Interacting with a VectorNav Sensor
-% This GettingStarted example will walk through using the MATLAB usage of
-% the SDK to connect to and interact with a VectorNav sensor.
-
-disp('Starting NonBlockPollingCommands.m example.')
+%% Make .NET assembly visible to MATLAB
+vnsdkAssembly = NET.addAssembly([pwd '\..\..\..\net\VnSdk_Net.dll']); % change to file path
+import VNSDK.* % Get rid of 'VNSDK' namespace qualifications
 
 %{
 This example demonstrates how to send commands without blocking, validating each command was received correctly
 with different types of commands.
 
 This example will achieve the following:
-1. Connect to the sensor
-2. Configure the ADOR and ADOF to YPR at 100Hz
-3. Send generic command (known magnetic disturbance)
-4. Wait and check response
-5. Enter a loop for 5 seconds where it outputs VNYPR at 100 Hz and sends velocity aiding commands at 10 Hz:
+1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+2. Configure the asynchronous ASCII output to YPR at 100 Hz
+3. Send generic command (Known Magnetic Disturbance command)
+4. Wait and check response from the unit
+5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds:
     5.1. Check if a valid response has been received from the velocity aiding command
     5.2. Print response and send new command
-6. Disconnect from the sensor
+6. Disconnect from the VectorNav unit
 %}
 
-%% Make .NET assembly visible to MATLAB
-vnsdkAssembly = NET.addAssembly([pwd '\..\..\..\net\VnSdk_Net.dll']); % change to file path
-import VNSDK.* % Get rid of 'VNSDK' namespace qualifications
 
-%% Create a Sensor Object
+%% 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+if ~exist('portName', 'var')
+    portName = 'COM1'; % Change the sensor port name to the comm port of your local machine
+end
 if exist('sensor','var')
     sensor.Disconnect();
 else
     sensor = Sensor();
 end
 
-%% 1. Instantiate Sensor and Establish Connection
-if ~exist('port_name', 'var')
-    port_name = 'COM6'; % Change the sensor port name to the comm port of your local machine
+try
+    sensor.AutoConnect(portName);
+catch latestError
+    error('Error encountered when connecting to %s.\n%s\n', portName, latestError.message);
 end
-sensor.AutoConnect(port_name);
-fprintf('\nConnected to %s at %d\n', port_name, sensor.ConnectedBaudRate());
+fprintf('\nConnected to %s at %d\n', portName, sensor.ConnectedBaudRate());
 
-%% 2. Configure ADOR (Asynchronous Data Output Register) and ADOF (Asynchronous Data Output Frequency)
+modelRegister = Registers.System.Model();
+try
+    sensor.ReadRegister(modelRegister);
+catch latestError
+    error('Error encountered when reading register 1 (Model).\n%s\n', latestError.message);
+end
+fprintf('Sensor model number: %s\n', modelRegister.model)
+
+%% 2. Configure the asynchronous ASCII output to YPR at 100 Hz
 asyncDataOutputType = Registers.System.AsyncOutputType();
 asyncDataOutputType.ador = Registers.System.('AsyncOutputType+Ador').YPR; % Configure for Yaw, Pitch, Roll data.
 asyncDataOutputType.serialPort = Registers.System.('AsyncOutputType+SerialPort').Serial1;
-sensor.WriteRegister(asyncDataOutputType);
+try
+    sensor.WriteRegister(asyncDataOutputType);
+catch latestError
+    error('Error encountered when writing register 6 (AsyncOutputType).\n%s\n', latestError.message);
+end
 disp("ADOR configured.");
 
-asyncDataOutputFreq = Registers.System.AsyncOutputFreq();
-asyncDataOutputFreq.adof = Registers.System.('AsyncOutputFreq+Adof').Rate100Hz; % Set output rate to 100Hz.
-asyncDataOutputFreq.serialPort = Registers.System.('AsyncOutputFreq+SerialPort').Serial1;
-sensor.WriteRegister(asyncDataOutputFreq);
+asyncDataOutputFrequency = Registers.System.AsyncOutputFreq();
+asyncDataOutputFrequency.adof = Registers.System.('AsyncOutputFreq+Adof').Rate100Hz; % Set output rate to 100Hz.
+asyncDataOutputFrequency.serialPort = Registers.System.('AsyncOutputFreq+SerialPort').Serial1;
+try
+    sensor.WriteRegister(asyncDataOutputFrequency);
+catch latestError
+    error('Error encountered when writing register 7 (AsyncOutputFreq).\n%s\n', latestError.message);
+end
 disp("ADOF configured.")
 
-%% 3. Send Known Magnetic Disturbance Command
-availableEnums = vnsdkAssembly.Enums;  % Get available enums
-
+%% 3. Send generic command (Known Magnetic Disturbance command)
 kmd = KnownMagneticDisturbance(VNSDK.('KnownMagneticDisturbance+State').Present);
-sensor.SendCommand(kmd, VNSDK.('Sensor+SendCommandBlockMode').None); % Non-blocking
+try
+    sensor.SendCommand(kmd, VNSDK.('Sensor+SendCommandBlockMode').None); % Non-blocking
+catch latestError
+    error('Error received while sending the Known Magnetic Disturbance Command.\n%s\n', latestError.message)
+end
 
-%% 4. Wait and Check Response
+%% 4. Wait and check response
 pause(0.25);
 % We could check kmd.awaitingResponse() but it will be removed from the command queue (setting kmd.awaitingResponse to false) after commandRemovalTimeoutLength
 % (default 200ms), if any command has been sent or received since.
@@ -93,12 +109,17 @@ else
     error('Error: KMD did not receive a valid response.');
 end
 
-
-%% 5. Enter Loop for 5 Seconds to Process Commands and Measurements
+%% 5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds
 
 % Initialize velocity aiding register, command, counters, flags, and timers
 velAidRegister = Registers.VelocityAiding.VelAidingMeas();
+velAidRegister.velocityX = 0;
+velAidRegister.velocityY = 0;
+velAidRegister.velocityZ = 0;
 velAidWRGCommand = velAidRegister.ToWriteCommand();
+if isempty(velAidWRGCommand)
+    error('Error: Failed to create velocity aiding command.');
+end
 
 asciiCount = 0;
 velAidSentCount = 0;
@@ -106,12 +127,10 @@ validResponseReceived = false;
 
 totalTimeLimit = 5;
 resendInterval = 0.5;
-
 timer = tic;
 resendTimer = tic;
 
 while toc(timer) < totalTimeLimit
-    % Handle ASCII YPR measurement
     measurement = sensor.GetNextMeasurement();
     if measurement.HasValue && measurement.Value.MatchesMessage("VNYPR")
         ypr = measurement.Value.attitude.ypr;
@@ -119,7 +138,7 @@ while toc(timer) < totalTimeLimit
         asciiCount = asciiCount + 1;
     end
 
-    %% 5.1.Check for Valid Response
+    %% 5.1. Check if a valid response has been received from the velocity aiding command
     if (~validResponseReceived && ~velAidWRGCommand.IsAwaitingResponse())
         error_maybe = velAidWRGCommand.GetError();
         if (velAidWRGCommand.HasValidResponse())
@@ -130,8 +149,7 @@ while toc(timer) < totalTimeLimit
         end
     end
 
-
-    %% 5.2. Resend Command If Timeout Occurs
+    %% 5.2. Print response and send new command
     if toc(resendTimer) > resendInterval
         if (~validResponseReceived && velAidSentCount > 0)
             error('\nError: Response Timeout\n');
@@ -142,11 +160,25 @@ while toc(timer) < totalTimeLimit
         velAidRegister.velocityY = rand();
         velAidRegister.velocityZ = rand();
         velAidWRGCommand = velAidRegister.ToWriteCommand();
-        sensor.SendCommand(velAidWRGCommand, VNSDK.('Sensor+SendCommandBlockMode').None); % Non-blocking
+        if isempty(velAidWRGCommand)
+            error('Error: Failed to create velocity aiding command.');
+        end
+        try
+            sensor.SendCommand(velAidWRGCommand, VNSDK.('Sensor+SendCommandBlockMode').None); % Non-blocking
+        catch latestError
+            fprintf('Error encountered when writing to register.\n%s', latestError.message);
+        end
 
         validResponseReceived = false;
         velAidSentCount = velAidSentCount + 1;
-        resendTimer = tic;  % Reset the resend timer
+        resendTimer = tic;  % Restart send timer
+    end
+
+    % Handle async errors
+    try
+        sensor.ThrowIfAsyncError();
+    catch asyncError
+        fprintf('Received async error: %s\n',  asyncError.message);
     end
 end
 
@@ -154,5 +186,5 @@ fprintf('\nTotal ASCII YPR Packets Received: %d\n', asciiCount);
 fprintf('Total VelAid Commands Sent: %d\n', velAidSentCount);
 fprintf('\nNonBlockingCommands example complete\n');
 
-%% 6. Disconnect from Sensor
+%% 6. Disconnect from the VectorNav unit
 sensor.Disconnect();

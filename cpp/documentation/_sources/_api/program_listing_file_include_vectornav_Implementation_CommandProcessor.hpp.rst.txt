@@ -36,12 +36,7 @@ Program Listing for File CommandProcessor.hpp
    
        struct RegisterCommandReturn
        {
-           enum class Error
-           {
-               None,
-               CommandQueueFull,
-               CommandResent
-           } error;
+           Error error;
            AsciiMessage message;
        };
    
@@ -56,7 +51,7 @@ Program Listing for File CommandProcessor.hpp
        RegisterCommandReturn registerCommand(GenericCommand* pCommand,
                                              const Microseconds timeoutThreshold = Config::CommandProcessor::commandRemovalTimeoutLength) noexcept;
    
-       bool matchResponse(const AsciiMessage& response, const AsciiPacketProtocol::Metadata& metadata) noexcept;
+       Errored matchResponse(const AsciiMessage& response, const AsciiPacketProtocol::Metadata& metadata) noexcept;
        int queueSize() const noexcept;
        int queueCapacity() const noexcept;
        void popCommandFromQueueBack() noexcept;

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -73,7 +73,6 @@ private:
     // ***************
     void _flush();
     static std::optional<tcflag_t> _getOsBaudRate(uint32_t baudRate);
-    std::array<uint8_t, _numBytesToReadPerGetData> _inputBuffer = {0};
 };
 
 // ######################
@@ -145,14 +144,21 @@ inline Error Serial::getData() noexcept
 {
     if (!_isOpen) { return Error::SerialPortClosed; }
 
-    size_t numBytesAvailable = 0;
-    ioctl(_portHandle, FIONREAD, &numBytesAvailable);
-    if (numBytesAvailable == 0) { return Error::None; }
+    size_t bytesRemaining = 0;
+    ioctl(_portHandle, FIONREAD, &bytesRemaining);
 
-    ssize_t numBytesActuallyRead = ::read(_portHandle, &_inputBuffer[0], std::min(numBytesAvailable, _inputBuffer.size()));
-    if (numBytesActuallyRead == -1) { return Error::SerialReadFailed; }
+    size_t linearBytes = _byteBuffer.numLinearBytesToPut();
+    while (bytesRemaining > 0 && linearBytes > 0)
+    {
+        ssize_t bytes_read = ::read(_portHandle, const_cast<uint8_t*>(_byteBuffer.tail()), std::min(bytesRemaining, linearBytes));
+        if (bytes_read == -1) { return Error::SerialReadFailed; }
+        _byteBuffer.put(static_cast<size_t>(bytes_read));
+        linearBytes = _byteBuffer.numLinearBytesToPut();
+        bytesRemaining -= static_cast<size_t>(bytes_read);
+    }
 
-    if (_byteBuffer.put(&_inputBuffer[0], static_cast<size_t>(numBytesActuallyRead))) { return Error::PrimaryBufferFull; }
+    if (bytesRemaining > 0) { return Error::PrimaryBufferFull; }
+
     return Error::None;
 }
 
@@ -200,7 +206,7 @@ inline std::optional<tcflag_t> Serial::_getOsBaudRate(uint32_t baudRate)
     return std::make_optional(baudRateFlag);
 }
 
-inline bool Serial::_configurePort(const tcflag_t osBaudRate)
+inline Errored Serial::_configurePort(const tcflag_t osBaudRate)
 {
     termios portSettings;
     if (tcgetattr(_portHandle, &portSettings) == -1) { return true; }

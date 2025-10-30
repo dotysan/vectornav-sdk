@@ -40,7 +40,7 @@
 
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="VectorNav CLI Migration Guide" href="pages/MigrationGuide.html" /> 
+    <link rel="next" title="Migration Guide" href="pages/MigrationGuide.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -52,7 +52,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="pages/MigrationGuide.html" title="VectorNav CLI Migration Guide"
+          <a href="pages/MigrationGuide.html" title="Migration Guide"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
     <li><a href="#">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
@@ -69,9 +69,12 @@
             
   <section id="vectornav-cli-sdk">
 <h1>VectorNav CLI SDK<a class="headerlink" href="#vectornav-cli-sdk" title="Link to this heading">¶</a></h1>
+<div class="admonition-matlab-and-c-users admonition">
+<p class="admonition-title">MATLAB and C# Users:</p>
+<p>Access to VectorNav units in MATLAB or C# is given by a .NET-accessible dll file that is generated from the VectorNav CLI SDK. If you landed here from the MATLAB or C# documentation page, more details on the available features and functionality in MATLAB and C# can be found in this VectorNav CLI SDK documentation. The .NET-accessible dll file is available in the ‘net’ folder.</p>
+</div>
 <p>The VectorNav CLI SDK provides a software interface to communicate with, configure, and parse the outputs of any VectorNav sensor.
-It contains definitions of the complete protocol of VectorNav register definitions, commands, and measurement outputs, matching the latest ICD. Both synchronous and asynchronous messages are supported, and it is all polling-based.</p>
-<p>The CLI SDK wraps the C++ SDK using <a class="reference external" href="https://learn.microsoft.com/en-us/cpp/dotnet/dotnet-programming-with-cpp-cli-visual-cpp?view=msvc-170">C++/CLI</a> to provide a .NET-accessible dll file for use in MATLAB or C#. Examples in this documentation are given in both C# and MATLAB.</p>
+It contains definitions of the complete protocol of VectorNav register definitions, commands, and measurement outputs, matching the latest ICD. Both synchronous and asynchronous messages are supported, and it is all polling-based. The CLI SDK wraps the C++ SDK using <a class="reference external" href="https://learn.microsoft.com/en-us/cpp/dotnet/dotnet-programming-with-cpp-cli-visual-cpp?view=msvc-170">C++/CLI</a> to provide a .NET-accessible dll file for use in MATLAB or C#. Examples in this documentation are given in both C# and MATLAB.</p>
 <p>Threaded operation is not currently supported by the CLI library.</p>
 <section id="migration-guide">
 <h2>Migration Guide<a class="headerlink" href="#migration-guide" title="Link to this heading">¶</a></h2>
@@ -91,13 +94,10 @@ Please consult the <a class="reference internal" href="pages/GettingStarted.html
 <h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pages/MigrationGuide.html">VectorNav CLI Migration Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#highlights">Highlights</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#migrating-from-the-vectornav-programming-library-to-the-vnsdk">Migrating from the VectorNav Programming Library to the VNSDK</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#accessing-registers">Accessing Registers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#naming-convention">Naming Convention</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/MigrationGuide.html">Migration Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#notable-changes-and-features">Notable Changes and Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#added-plugins">Added PlugIns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#migrating-from-the-vectornav-programming-library-to-the-vnsdk">Migrating from the VectorNav Programming Library to the VNSDK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pages/MigrationGuide.html#plugin-list">Plugin List</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pages/GettingStarted.html">Getting Started</a><ul>
@@ -113,18 +113,20 @@ Please consult the <a class="reference internal" href="pages/GettingStarted.html
 <li class="toctree-l2"><a class="reference internal" href="pages/KeyFunctionality.html#error-handling">Error Handling</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="plugins/index.html">Plugins</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="plugins/DataExport.html">Data Export</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins/FirmwareUpdate.html">Firmware Update</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins/RegisterScan.html">Register Scan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugins/SimpleLogger.html">Simple Logger</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="pages/api_index.html">VNSDK API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="_api/class_v_n_s_d_k_1_1_sensor.html">Class Sensor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/class_v_n_s_d_k_1_1_composite_data.html">Class CompositeData</a></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/registers_api.html">Register API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/full_api_index.html">Full API Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plugins/index.html">Plugins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plugins/Calibration.html">Calibration (<em>BETA</em>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins/DataExport.html">Data Export (<em>BETA</em>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins/FirmwareProgrammer.html">Firmware Programmer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins/Logger.html">Logger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins/Math.html">Math (<em>BETA</em>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins/RegisterScan.html">Register Scan</a></li>
 </ul>
 </li>
 </ul>
@@ -152,17 +154,17 @@ Please consult the <a class="reference internal" href="pages/GettingStarted.html
 <div class="sphinx-toc sphinxglobaltoc">
 <h3><a href="#">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pages/MigrationGuide.html">VectorNav CLI Migration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/MigrationGuide.html">Migration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/KeyFunctionality.html">Key Functionality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plugins/index.html">Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/api_index.html">VNSDK API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins/index.html">Plugins</a></li>
 </ul>
 </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
     <p class="topless"><a href="pages/MigrationGuide.html"
-                          title="Next page">&rarr; VectorNav CLI Migration Guide</a></p>
+                          title="Next page">&rarr; Migration Guide</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -201,7 +203,7 @@ Please consult the <a class="reference internal" href="pages/GettingStarted.html
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="pages/MigrationGuide.html" title="VectorNav CLI Migration Guide"
+          <a href="pages/MigrationGuide.html" title="Migration Guide"
              >next</a> &nbsp; &nbsp;</li>
     <li><a href="#">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 

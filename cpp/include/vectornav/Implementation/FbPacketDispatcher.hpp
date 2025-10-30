@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,18 +51,53 @@ public:
 
     PacketDispatcher::FindPacketRetVal findPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
 
-    void dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
+    Error dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
+
+    struct SubscriberFilter
+    {
+        uint8_t packet : 1;
+        uint8_t completedFaMessage : 1;
+        uint8_t : 6;  // Resv
+        SubscriberFilter() : packet(false), completedFaMessage(false) {}
+        SubscriberFilter(const bool packet, const bool completedFaMessage) : packet(packet), completedFaMessage(completedFaMessage) {}
+    };
+
+    Error addSubscriber(PacketQueue_Interface* subscriber, SubscriberFilter filter) noexcept
+    {
+        if (subscriber == nullptr) { return Error::PacketQueueNull; }
+        if (_subscribers.push_back(Subscriber{subscriber, filter})) { return Error::MessageSubscriberCapacityReached; }
+        else { return Error::None; }
+    }
+
+    void removeSubscriber(PacketQueue_Interface* subscriberToRemove) noexcept
+    {
+        for (auto itr = _subscribers.begin(); itr != _subscribers.end();)
+        {
+            auto& subscriber = *itr;
+            if (subscriberToRemove == subscriber.queueToPush) { itr = _subscribers.erase(itr); }
+            else { ++itr; }
+        }
+    }
 
 private:
     void _resetFbBuffer() noexcept;
     void _addFaPacketCrc() noexcept;
-    bool _moveBytesFromMainBufferToFbBuffer(SplitPacketDetails splitPacketDetails, const ByteBuffer& byteBuffer, const uint16_t numOfBytesToMove,
-                                            const size_t startingIndex) noexcept;
+    Error _moveBytesFromMainBufferToFbBuffer(FbPacketProtocol::Header splitPacketDetails, const ByteBuffer& byteBuffer, const uint16_t numOfBytesToMove,
+                                             const size_t startingIndex) noexcept;
 
     FaPacketDispatcher* _faPacketDispatcher;
     ByteBuffer _fbByteBuffer;
     FbPacketProtocol::Metadata _latestPacketMetadata{};
     FbPacketProtocol::Metadata _previousPacketMetadata{};
+
+    struct Subscriber
+    {
+        PacketQueue_Interface* queueToPush{nullptr};
+        SubscriberFilter filter;
+    };
+    static const auto SUBSCRIBER_CAPACITY = 1;
+    using Subscribers = Vector<Subscriber, SUBSCRIBER_CAPACITY>;
+    Subscribers _subscribers;
 };
 }  // namespace VN
 

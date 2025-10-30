@@ -76,23 +76,25 @@
 <p>The overwhelming use of memory by the SDK is to store measurement data and make it available to the user. After that, it is in the main and FB byte buffers used in packet finding.</p>
 <section id="composite-data-memory-reduction">
 <h2>Composite Data Memory Reduction<a class="headerlink" href="#composite-data-memory-reduction" title="Link to this heading">¶</a></h2>
-<p>The amount of memory allocated for a <cite>Composite Data</cite> object must be determined at compile time and, as such, should be allocated for the superset of all the measurements it is desired to hold through the lifetime of the binary file. By default, it consumes memory for all measurements (except the dynamically-sized Gnss SatInfo and Gnss RawMeas) which requires XXX bytes per <cite>Composite Data</cite> object.
+<p>The amount of memory allocated for a <a class="reference internal" href="../_api/class_v_n_1_1_composite_data.html#_CPPv4N2VN13CompositeDataE" title="VN::CompositeData"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">CompositeData</span></code></a> object must be determined at compile time and, as such, should be allocated for the superset of all the measurements it is desired to hold through the lifetime of the binary file. By default, it consumes memory for all measurements (except the dynamically-sized Gnss SatInfo and Gnss RawMeas) which requires XXX bytes per <a class="reference internal" href="../_api/class_v_n_1_1_composite_data.html#_CPPv4N2VN13CompositeDataE" title="VN::CompositeData"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">CompositeData</span></code></a> object.
 In many applications, only a subset of measurements will ever be used, and the rest can safely be disabled upon compile time for significant memory reduction.</p>
-<p>The mechanism to reduce the Composite Data memory usage is in <code class="docutils literal notranslate"><span class="pre">Config.hpp</span></code>, via the <cite>#define {MEASUREMENTGROUP}_GROUP_ENABLE</cite> statements. These can be set to zero to completely disable the measurement group (as may be the case for the GNSS group for the VN-100, shown below)</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">#define</span> <span class="pre">GNSS_GROUP_ENABLE</span> <span class="pre">0</span>
-<span class="pre">`</span></code></p>
+<p>The mechanism to reduce the Composite Data memory usage is in <a class="reference internal" href="../_api/file_include_vectornav_Config.hpp.html#file-include-vectornav-config-hpp"><span class="std std-ref">Config.hpp</span></a>, via the <cite>#define {MEASUREMENTGROUP}_GROUP_ENABLE</cite> statements. These can be set to zero to completely disable the measurement group (as may be the case for the GNSS group for the VN-100, shown below)</p>
+<p>``
+#define GNSS_GROUP_ENABLE 0
+``</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When a group is disabled, it is never declared in the <cite>CompositeData</cite> class. Consequently, if the GNSS group were disabled as in the example above, the following would be invalid code and result in a compilation error</p>
-<p>CompositeData compositeData;
-std::cout &lt;&lt; std::to_string(compositeData.gnss.TimeStatus.has_value());</p>
-<p>because the GNSS group does not exist as a member of the Composite data class. Any access or reference to the GNSS structure inside the <cite>CompositeData</cite> class is an invalid code.</p>
+<p>When a group is disabled, it is never declared in the <a class="reference internal" href="../_api/class_v_n_1_1_composite_data.html#_CPPv4N2VN13CompositeDataE" title="VN::CompositeData"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">CompositeData</span></code></a> class. Consequently, if the GNSS group were disabled as in the example above, the following would be invalid code and result in a compilation error</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CompositeData</span><span class="w"> </span><span class="n">compositeData</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">compositeData</span><span class="p">.</span><span class="n">gnss</span><span class="p">.</span><span class="n">TimeStatus</span><span class="p">.</span><span class="n">has_value</span><span class="p">());</span>
+</pre></div>
 </div>
-<p>While many cases allow for the disabling of whole measurement groups, in many others a subset of measurement types in a group is required. To accomplish this, it is possible to enable measurement types bit-by-bit. For example, if only <code class="docutils literal notranslate"><span class="pre">InsStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">PosEcef</span></code> are required in the <code class="docutils literal notranslate"><span class="pre">INS</span></code> group, the relevant line in <code class="docutils literal notranslate"><span class="pre">Config.hpp</span></code> would look as follows:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">#define</span> <span class="pre">INS_GROUP_ENABLE</span> <span class="pre">(INS_INSSTATUS_BIT</span> <span class="pre">|</span> <span class="pre">INS_POSECEF_BIT)</span>
-<span class="pre">`</span></code></p>
+<p>because the GNSS group does not exist as a member of the Composite data class. Any access or reference to the GNSS structure inside the <a class="reference internal" href="../_api/class_v_n_1_1_composite_data.html#_CPPv4N2VN13CompositeDataE" title="VN::CompositeData"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">CompositeData</span></code></a> class is an invalid code.</p>
+</div>
+<p>While many cases allow for the disabling of whole measurement groups, in many others a subset of measurement types in a group is required. To accomplish this, it is possible to enable measurement types bit-by-bit. For example, if only <code class="docutils literal notranslate"><span class="pre">insStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">posEcef</span></code> are required in the <code class="docutils literal notranslate"><span class="pre">Ins</span></code> group, the relevant line in <a class="reference internal" href="../_api/file_include_vectornav_Config.hpp.html#file-include-vectornav-config-hpp"><span class="std std-ref">Config.hpp</span></a> would look as follows:</p>
+<p>``
+#define INS_GROUP_ENABLE (INS_INSSTATUS_BIT | INS_POSECEF_BIT)
+``</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>While the define bits can be set in any order, they must be delimited by the bit-or | operator.</p>
@@ -100,27 +102,31 @@ std::cout &lt;&lt; std::to_string(compositeData.gnss.TimeStatus.has_value());</p
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>As with the measurement group example above, a measurement type that is not enabled in the preprocessor definition is not a valid member of the corresponding measurement group structure. As such, any code reference to it is invalid code. For example, with the INS_GROUP_ENABLE as defined above, the following is valid code:</p>
-<p>CompositeData compositeData;
-std::cout &lt;&lt; std::to_string(compositeData.ins.InsStatus.has_value());
-std::cout &lt;&lt; std::to_string(compositeData.ins.PosEcef.has_value());</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CompositeData</span><span class="w"> </span><span class="n">compositeData</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">compositeData</span><span class="p">.</span><span class="n">ins</span><span class="p">.</span><span class="n">insStatus</span><span class="p">.</span><span class="n">has_value</span><span class="p">());</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">compositeData</span><span class="p">.</span><span class="n">ins</span><span class="p">.</span><span class="n">posEcef</span><span class="p">.</span><span class="n">has_value</span><span class="p">());</span>
+</pre></div>
+</div>
 <p>whereas the following is invalid code, resulting in a compilation error:</p>
-<p>CompositeData compositeData;
-std::cout &lt;&lt; std::to_string(compositeData.ins.PosLla.has_value());</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CompositeData</span><span class="w"> </span><span class="n">compositeData</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">compositeData</span><span class="p">.</span><span class="n">ins</span><span class="p">.</span><span class="n">posLla</span><span class="p">.</span><span class="n">has_value</span><span class="p">());</span>
+</pre></div>
+</div>
 </div>
 <p>Because a composite data object can only contain enabled measurement types, measurements sent by the sensor that are not enabled may be lost.
 If only some of the measurement types in a binary message are enabled, the enabled measurements will be placed on the composite data object and the disabled measurements will be lost (unless another queue is set up to receive these measurements, see <a class="reference internal" href="AdvancedFunctionality.html#subscribe-to-an-unparsed-packet"><span class="std std-ref">Subscribe to an Unparsed Packet</span></a>). If only some of the measurement types in an ASCII message are enabled, no object will be created or added to the <code class="docutils literal notranslate"><span class="pre">CompositeDataQueue</span></code>.
-If there are no <code class="docutils literal notranslate"><span class="pre">CompositeData</span></code>-enabled measurements in a message, no object will be created or added to the <code class="docutils literal notranslate"><span class="pre">CompositeDataQueue</span></code>.</p>
+If there are no <a class="reference internal" href="../_api/class_v_n_1_1_composite_data.html#_CPPv4N2VN13CompositeDataE" title="VN::CompositeData"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">CompositeData</span></code></a>-enabled measurements in a message, no object will be created or added to the <code class="docutils literal notranslate"><span class="pre">CompositeDataQueue</span></code>.</p>
 <p>In other cases it may be desired to disable measurements which are present in messages from the sensor, but necessary to capture in a lower memory way. To accomplish this, a custom queue filter can be set up to capture the measurements which are composite data disabled. For more information, see <a class="reference internal" href="AdvancedFunctionality.html#subscribe-to-an-unparsed-packet"><span class="std std-ref">Subscribe to an Unparsed Packet</span></a>.</p>
 </section>
 <section id="queue-size-reduction">
 <h2>Queue Size Reduction<a class="headerlink" href="#queue-size-reduction" title="Link to this heading">¶</a></h2>
 <section id="composite-data-queue">
 <h3>Composite Data Queue<a class="headerlink" href="#composite-data-queue" title="Link to this heading">¶</a></h3>
-<p>Queues are the interface between the listening thread and the user thread, on which all data is placed. By default, the largest queue is the <code class="docutils literal notranslate"><span class="pre">CompositeDataQueue</span></code>, default-initialized to size 5. The queue sizes are set in <code class="docutils literal notranslate"><span class="pre">Config.hpp</span></code>. This allows for 5 measurements to be placed on the queue while the application thread works through to process them. To entirely disable the Composite Data queue (eliminating the memory allocation to composite data altogether), the queue size can be set to 0. THe queue can safely be set to size 1, but any size below what can be consumed per loop may result in dropped data. The smaller the queue size, the more likely data is dropped.</p>
+<p>Queues are the interface between the listening thread and the user thread, on which all data is placed. By default, the largest queue is the <code class="docutils literal notranslate"><span class="pre">CompositeDataQueue</span></code>, default-initialized to size 5. The queue sizes are set in <a class="reference internal" href="../_api/file_include_vectornav_Config.hpp.html#file-include-vectornav-config-hpp"><span class="std std-ref">Config.hpp</span></a>. This allows for 5 measurements to be placed on the queue while the application thread works through to process them. To entirely disable the Composite Data queue (eliminating the memory allocation to composite data altogether), the queue size can be set to 0. THe queue can safely be set to size 1, but any size below what can be consumed per loop may result in dropped data. The smaller the queue size, the more likely data is dropped.</p>
 </section>
 <section id="command-queue">
 <h3>Command queue<a class="headerlink" href="#command-queue" title="Link to this heading">¶</a></h3>
-<p>If no commands are to be sent or received by the sensor, the command queue capacity can be set to 0, disabling the sending of commands or receiving of responses altogether. Alternatively, if only a single command will be sent at a time (e.g. each command is sent as <code class="docutils literal notranslate"><span class="pre">blocking</span></code>), the command queue capacity can safely be set to 1 without any side effects. Disabling the command processor altogether from default settings results in a total XXX memory reduction.</p>
+<p>If no commands are to be sent or received by the sensor, the command queue capacity can be set to 0, disabling the sending of commands or receiving of responses altogether. Alternatively, if only a single command will be sent at a time (e.g. each command is sent as blocking), the command queue capacity can safely be set to 1 without any side effects.</p>
 </section>
 </section>
 <section id="byte-buffer-size-reduction">

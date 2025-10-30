@@ -11,10 +11,10 @@ Subdirectories
 --------------
 
 - :ref:`dir_plugins_DataExport`
-- :ref:`dir_plugins_FirmwareUpdate`
+- :ref:`dir_plugins_FirmwareProgrammer`
+- :ref:`dir_plugins_Logger`
 - :ref:`dir_plugins_Math`
 - :ref:`dir_plugins_RegisterScan`
-- :ref:`dir_plugins_SimpleLogger`
 
 
 

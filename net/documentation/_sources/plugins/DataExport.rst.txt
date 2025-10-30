@@ -1,10 +1,24 @@
-Data Export
-###########
+.. _cliDataExportPage:
 
-:class:`VNSDK::Exporter`
+Data Export (*BETA*)
+####################
 
-:class:`VNSDK::ExporterAscii`
+.. warning::
+	This plugin is currently in *BETA* and may be subject to interface changes in the future.
 
-:class:`VNSDK::ExporterCsv`
+Usage
+=====
 
-:class:`VNSDK::FileExporter`
+API
+===
+
+The CLI API for the DataExport plugin is modeled from the C++ API which can be found here:
+:ref:`DataExport <plugins_cpp:namespace_VN__DataExport>`
+
+.. :class:`VNSDK::Exporter`
+
+.. :class:`VNSDK::ExporterAscii`
+
+.. :class:`VNSDK::ExporterCsv`
+
+.. :class:`VNSDK::FileExporter`

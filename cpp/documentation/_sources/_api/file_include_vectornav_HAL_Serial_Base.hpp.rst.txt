@@ -48,12 +48,6 @@ Included By
 
 - :ref:`file_include_vectornav_HAL_Serial_Linux.hpp`
 
-- :ref:`file_include_vectornav_HAL_Serial_Mbed.hpp`
-
-- :ref:`file_include_vectornav_HAL_Serial_Wasm.hpp`
-
-- :ref:`file_include_vectornav_HAL_Serial_Windows.hpp`
-
 - :ref:`file_include_vectornav_Interface_Sensor.hpp`
 
 

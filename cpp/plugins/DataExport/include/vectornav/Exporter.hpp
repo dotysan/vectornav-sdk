@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,8 +27,7 @@
 #include <atomic>
 #include <cstdio>
 
-#include "vectornav/HAL/Thread.hpp"
-
+#include "vectornav/Config.hpp"
 #if THREADING_ENABLE
 #include "vectornav/HAL/Thread.hpp"
 #endif
@@ -36,18 +35,25 @@
 
 namespace VN
 {
+namespace DataExport
+{
 
 class Exporter
 {
+private:
+    static constexpr uint16_t PACKET_QUEUE_SIZE = 256;
+
 public:
-    Exporter(const size_t& packetCapacity) : _queue{packetCapacity} {}
+    using PacketQueueMode = PacketQueue<PACKET_QUEUE_SIZE>::PutMode;
+
+    Exporter(const size_t& packetCapacity, const PacketQueueMode& mode) : _queue{mode, packetCapacity} {}
 
     virtual ~Exporter() = default;
 
     virtual void exportToFile() = 0;
 
 #if THREADING_ENABLE
-    bool start()
+    Errored start()
     {
         if (_thread == nullptr) { _logging = true; }
         else { return true; }
@@ -67,7 +73,7 @@ public:
     PacketQueue_Interface* getQueuePtr() { return &_queue; }
 
 protected:
-    PacketQueue<1000> _queue;
+    PacketQueue<PACKET_QUEUE_SIZE> _queue;
 #if THREADING_ENABLE
     std::atomic<bool> _logging = false;
     std::unique_ptr<Thread> _thread = nullptr;
@@ -85,6 +91,7 @@ private:
 #endif
 };
 
+}  // namespace DataExport
 }  // namespace VN
 
 #endif  // VN_EXPORTER_HPP_

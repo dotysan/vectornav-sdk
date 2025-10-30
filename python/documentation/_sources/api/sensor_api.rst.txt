@@ -7,18 +7,22 @@ Class Documentation
 
 .. py:class:: vectornav.Sensor
 
-    This is the top-level class used by the SDK. In nominal operation, the user will instantiate a sensor object and interact directly with it.
+        This is the top-level class used by the SDK. In nominal operation, the user will instantiate a sensor object and interact directly with it.
 
-Serial Connectivity Methods
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Serial Connectivity Methods
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    .. py:method:: connect(portName: str | PortName, baudRate: Sensor.BaudRate)
+    .. py:method:: connect(portName: str | PortName, baudRate: Sensor.BaudRate, monitorAsyncErrors: bool = False)
+
+        :param monitorAsyncErrors: If true, exceptions from the asynchronous error monitoring thread will be thrown.
         
         :raises VnError: If the COM port is not accessible.
 
         Opens the serial port at the specified baud rate and starts the Listening Thread. This does not verify any connectivity, and as such only validates that the serial port is available for opening.
     
-    .. py:method:: autoConnect(portName : str | PortName)
+    .. py:method:: autoConnect(portName : str | PortName, monitorAsyncErrors: bool = False)
+
+        :param monitorAsyncErrors: If true, exceptions from the asynchronous error monitoring thread will be thrown.
 
         :raises VnError: If the COM port is not accessible or if the unit does not reply to connection verification.
 
@@ -44,9 +48,17 @@ Serial Connectivity Methods
     
     .. py:method:: changeBaudRate(newBaudRate: Sensor.BaudRate)
 
-        :raises VnError: If passed a baud rate the system doesn't support or if the unit did not reply to baud rate change command.
+        :raises VnError: If passed an unsupported baud rate, if the command queue is full, if reading the current serial port configuration fails, or if the unit did not reply to the change baud rate command
 
         Sends a Write Register for the new baud rate to the unit and reopens to the serial port under the new baud rate. Will retry on failure.
+
+    .. py:method:: changeBaudRate(newBaudRate: Sensor.BaudRate, serialPort: Registers.System.BaudRate.SerialPort)
+        :no-index:
+
+        :raises VnError: If passed an unsupported baud rate, if the command queue is full, if reading current serial port configuration fails, or if the unit did not reply to the baud rate change command
+
+        Changes the baud rate on a specified serial port of the sensor. If the targeted port is the currently active one, it also 
+        updates the host's baud rate to match.  Will retry on failure
 
     .. py:method:: changeHostBaudRate()
 
@@ -70,27 +82,27 @@ Serial Connectivity Methods
         .. py:attribute:: Baud460800    
         .. py:attribute:: Baud921600
 
-Measurement Accessor Methods
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Measurement Accessor Methods
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     .. py:method:: hasMeasurement() -> bool
 
         Checks to see if there is a new measurement available on the MeasurementQueue.
     
-    .. py:method:: getNextMeasurement(block: bool) -> Optional[vectornav.CompositeData]
+    .. py:method:: getNextMeasurement(block: bool) -> optional[vectornav.CompositeData]
 
         :param block: If true, wait a maximum of getMeasurementTimeoutLength for a new measurement.
 
         Gets (and pops) the front of the MeasurementQueue.
     
-    .. py:method:: getMostRecentMeasurement(block: bool) -> Optional[vectornav.CompositeData]
+    .. py:method:: getMostRecentMeasurement(block: bool) -> optional[vectornav.CompositeData]
 
         :param block: If true, wait a maximum of getMeasurementTimeoutLength for a new measurement.
 
         Gets the back (most recent) of the MeasurementQueue, popping every measurement in the queue.
     
-Command Sending Methods
-^^^^^^^^^^^^^^^^^^^^^^^
+    Command Sending Methods
+    ^^^^^^^^^^^^^^^^^^^^^^^
     .. py:method:: readRegister(registerToRead: vectornav.Registers.Register, retryOnFailure: bool)
 
         :raises VnError: If serial fails to send, no response is received, the received response is a synchronous VnErr, or the received response can not be parsed into the Register object.
@@ -199,8 +211,8 @@ Command Sending Methods
 
         Sends an arbitary message to the unit without any message modification or response validation. Not recommended for use.
         
-Additional Logging Methods
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Additional Logging Methods
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     .. py:method:: registerSkippedByteBuffer(skippedByteBuffer: vectornav.ByteBuffer)
 
@@ -241,9 +253,9 @@ Additional Logging Methods
         
         Unsubscribes the passed queue from all messages matching the passed filter.
 
-Error Handling Methods
-^^^^^^^^^^^^^^^^^^^^^^
+    Error Handling Methods
+    ^^^^^^^^^^^^^^^^^^^^^^
 
-    .. py:method:: getAsynchronousError() -> Optional[AsyncError]
+    .. py:method:: throwIfAsyncError() 
 
-        Gets the next asynchronous error in the queue.
+        Checks the queue of asynchronous errors and raises the next one, if any.

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,8 @@
 
 namespace VN
 {
+namespace DataExport
+{
 
 class ExporterAscii : public Exporter
 {
@@ -46,10 +48,10 @@ public:
         OutputFile file;
     };
 
-    ExporterAscii(const Filesystem::FilePath& outputDir, bool enableSystemTimeStamps = false)
-        : Exporter(EXPORTER_PACKET_CAPACITY), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
+    ExporterAscii(const Filesystem::FilePath& outputDir, PacketQueueMode mode = PacketQueueMode::Force, bool enableSystemTimeStamps = false)
+        : Exporter(EXPORTER_PACKET_CAPACITY, mode), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
     {
-        if (!_filePath.empty() && _filePath.to_string().back() != std::filesystem::path::preferred_separator)
+        if (!_filePath.empty() && _filePath.back() != std::filesystem::path::preferred_separator)
         {
             _filePath = _filePath + std::filesystem::path::preferred_separator;
         }
@@ -82,9 +84,15 @@ public:
 
             ascii.write(reinterpret_cast<const char*>(p->buffer), p->details.asciiMetadata.length);
         }
+        flushAllFiles();
     }
 
 private:
+    void flushAllFiles()
+    {
+        for (auto& asciiInfo : _asciiInfo) { asciiInfo.file.flush(); }
+    }
+
     Filesystem::FilePath _filePath;
     const bool _enableSystemTimeStamps = false;
 
@@ -107,6 +115,7 @@ private:
     }
 };
 
+}  // namespace DataExport
 }  // namespace VN
 
 #endif  // VN_EXPORTERASCII_HPP_

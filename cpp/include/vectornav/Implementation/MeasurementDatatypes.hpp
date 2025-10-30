@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -116,6 +116,9 @@ struct InsStatus
     }
 };
 static_assert(sizeof(InsStatus) == 2);
+
+inline bool operator==(const InsStatus& lhs, const InsStatus& rhs) { return static_cast<uint16_t>(lhs) == static_cast<uint16_t>(rhs); }
+inline bool operator!=(const InsStatus& lhs, const InsStatus& rhs) { return !(lhs == rhs); }
 
 struct TimeStatus
 {
@@ -394,6 +397,7 @@ struct GnssRawMeas
 
 constexpr uint8_t binaryGroupMaxSize = 3;
 constexpr uint8_t binaryTypeMaxSize = 10;
+constexpr uint8_t binaryHeaderMaxLength = binaryGroupMaxSize + 2 * binaryTypeMaxSize;
 }  // namespace VN
 
 #endif  // VN_MEASUREMENTDATATYPES_HPP_

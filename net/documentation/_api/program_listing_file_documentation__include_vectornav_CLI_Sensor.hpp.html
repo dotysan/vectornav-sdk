@@ -70,13 +70,16 @@
 <span class="cp">#define VN_CLI_SENSOR_HPP_</span>
 
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_ByteBuffer.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_Commands.hpp&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_CompositeData.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_Exceptions.hpp&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_GenericCommand.hpp&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_Registers.hpp&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_SteadyClock.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/CLI_QueueDefinitions.hpp&quot;</span>
 
 <span class="cp">#pragma managed(push, off)</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/TemplateLibrary/ByteBuffer.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/Interface/BridgeSensor.hpp&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/Interface/Sensor.hpp&quot;</span>
 <span class="cp">#pragma managed(pop)</span>
 
@@ -86,7 +89,10 @@
 <span class="p">{</span>
 
 <span class="cp">#if (PLUGIN_DATAEXPORT)</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">DataExport</span>
+<span class="p">{</span>
 <span class="w">   </span><span class="k">class</span><span class="w"> </span><span class="nc">Exporter</span><span class="p">;</span>
+<span class="p">}</span>
 <span class="cp">#endif</span>
 <span class="cp">#if (PLUGIN_CALIBRATION)</span>
 <span class="k">namespace</span><span class="w"> </span><span class="nn">Calibration</span>
@@ -94,14 +100,6 @@
 <span class="w">   </span><span class="k">class</span><span class="w"> </span><span class="nc">HsiCalibration_Base</span><span class="p">;</span>
 <span class="p">}</span><span class="w">  </span><span class="c1">// namespace Calibration</span>
 <span class="cp">#endif</span>
-
-<span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">VnException</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Exception</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="n">VnException</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">Error</span><span class="w"> </span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Exception</span><span class="p">(</span><span class="n">gcnew</span><span class="w"> </span><span class="n">String</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">errorCodeToString</span><span class="p">(</span><span class="n">error</span><span class="p">)))</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">};</span>
 
 <span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">AsyncError</span>
 <span class="p">{</span>
@@ -112,26 +110,139 @@
 <span class="w">    </span><span class="n">System</span><span class="o">::</span><span class="n">DateTime</span><span class="w"> </span><span class="n">Timestamp</span><span class="p">;</span>
 <span class="p">};</span>
 
+
+<span class="k">public</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">MeasQueueMode</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">Off</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="o">::</span><span class="n">Off</span><span class="p">),</span>
+<span class="w">    </span><span class="n">Force</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="o">::</span><span class="n">Force</span><span class="p">),</span>
+<span class="w">    </span><span class="n">Try</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="o">::</span><span class="n">Try</span><span class="p">),</span>
+<span class="cp">#if THREADING_ENABLE</span>
+<span class="w">    </span><span class="n">Retry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="o">::</span><span class="n">Retry</span><span class="p">)</span>
+<span class="cp">#endif</span>
+<span class="p">};</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="w"> </span><span class="nf">ToNativeInstance</span><span class="p">(</span><span class="n">MeasQueueMode</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mode</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">MeasQueueMode</span><span class="w"> </span><span class="nf">ToManagedInstance</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">MeasQueueMode</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mode</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">BinaryOutputMeasurements</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">private</span><span class="o">:</span>
+<span class="w">        </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">BinaryOutputMeasurements</span><span class="o">*</span><span class="w"> </span><span class="n">_output_measurements</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">public</span><span class="o">:</span>
+<span class="w">        </span><span class="n">BinaryOutputMeasurements</span><span class="p">()</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="n">_output_measurements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">BinaryOutputMeasurements</span><span class="p">{};</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="o">~</span><span class="n">BinaryOutputMeasurements</span><span class="p">()</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="k">this</span><span class="o">-&gt;!</span><span class="n">BinaryOutputMeasurements</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="o">!</span><span class="n">BinaryOutputMeasurements</span><span class="p">()</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="k">delete</span><span class="w"> </span><span class="n">_output_measurements</span><span class="p">;</span>
+<span class="w">            </span><span class="n">_output_measurements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">BinaryOutputMeasurements</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ToNativePointer</span><span class="p">()</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">_output_measurements</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">public</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">FaSubscriberFilterType</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">ExactMatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">FaSubscriberFilterType</span><span class="o">::</span><span class="n">ExactMatch</span><span class="p">),</span>
+<span class="w">    </span><span class="n">AnyMatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">FaSubscriberFilterType</span><span class="o">::</span><span class="n">AnyMatch</span><span class="p">),</span>
+<span class="w">    </span><span class="n">NotExactMatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">FaSubscriberFilterType</span><span class="o">::</span><span class="n">NotExactMatch</span><span class="p">),</span>
+<span class="p">};</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">FaSubscriberFilterType</span><span class="w"> </span><span class="nf">ToNativeInstance</span><span class="p">(</span><span class="n">FaSubscriberFilterType</span><span class="w"> </span><span class="n">filterType</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">FaSubscriberFilterType</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">filterType</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">FaSubscriberFilterType</span><span class="w"> </span><span class="nf">ToManagedInstance</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">FaSubscriberFilterType</span><span class="w"> </span><span class="n">filterType</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">FaSubscriberFilterType</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">filterType</span><span class="p">));</span>
+<span class="p">}</span>
+
+
+<span class="k">public</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AsciiSubscriberFilterType</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">StartsWith</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">AsciiSubscriberFilterType</span><span class="o">::</span><span class="n">StartsWith</span><span class="p">),</span>
+<span class="w">    </span><span class="n">DoesNotStartWith</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">AsciiSubscriberFilterType</span><span class="o">::</span><span class="n">DoesNotStartWith</span><span class="p">)</span>
+<span class="p">};</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">AsciiSubscriberFilterType</span><span class="w"> </span><span class="nf">ToNativeInstance</span><span class="p">(</span><span class="n">AsciiSubscriberFilterType</span><span class="w"> </span><span class="n">filterType</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">AsciiSubscriberFilterType</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">filterType</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">AsciiSubscriberFilterType</span><span class="w"> </span><span class="nf">ToManagedInstance</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">AsciiSubscriberFilterType</span><span class="w"> </span><span class="n">filterType</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">AsciiSubscriberFilterType</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">filterType</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="k">public</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">SyncByte</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">Ascii</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SyncByte</span><span class="o">::</span><span class="n">Ascii</span><span class="p">),</span>
+<span class="w">    </span><span class="n">FA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SyncByte</span><span class="o">::</span><span class="n">FA</span><span class="p">),</span>
+<span class="w">    </span><span class="n">FB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SyncByte</span><span class="o">::</span><span class="n">FB</span><span class="p">),</span>
+<span class="w">    </span><span class="n">None</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SyncByte</span><span class="o">::</span><span class="n">None</span><span class="p">),</span>
+<span class="p">};</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SyncByte</span><span class="w"> </span><span class="nf">ToNativeInstance</span><span class="p">(</span><span class="n">SyncByte</span><span class="w"> </span><span class="n">filterType</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SyncByte</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">filterType</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kr">inline</span><span class="w"> </span><span class="n">SyncByte</span><span class="w"> </span><span class="nf">ToManagedInstance</span><span class="p">(</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SyncByte</span><span class="w"> </span><span class="n">filterType</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SyncByte</span><span class="o">&gt;</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">filterType</span><span class="p">));</span>
+<span class="p">}</span>
+
 <span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Sensor</span>
 <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
-<span class="w">    </span><span class="n">VN</span><span class="o">::</span><span class="n">Sensor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">_sensor</span><span class="p">;</span>
+<span class="w">    </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">_sensor</span><span class="p">;</span>
 <span class="w">    </span><span class="n">SteadyClock</span><span class="w"> </span><span class="n">_clock</span><span class="p">{};</span>
+
 
 <span class="k">public</span><span class="o">:</span>
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">BaudRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Registers</span><span class="o">::</span><span class="n">System</span><span class="o">::</span><span class="n">BaudRate</span><span class="o">::</span><span class="n">BaudRates</span><span class="p">;</span>
 <span class="w">    </span><span class="n">Sensor</span><span class="p">()</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="n">_sensor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">Sensor</span><span class="p">();</span>
+<span class="w">        </span><span class="n">_sensor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">Sensor</span><span class="p">(</span><span class="n">MeasQueueMode</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">MeasQueueMode</span><span class="w"> </span><span class="n">native_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ToNativeInstance</span><span class="p">(</span><span class="n">mode</span><span class="p">);</span>
+<span class="w">        </span><span class="n">_sensor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="p">(</span><span class="n">native_mode</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="o">~</span><span class="n">Sensor</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="o">-&gt;!</span><span class="n">Sensor</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="o">!</span><span class="n">Sensor</span><span class="p">()</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">        </span><span class="k">delete</span><span class="w"> </span><span class="n">_sensor</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 
-<span class="w">    </span><span class="n">VN</span><span class="o">::</span><span class="n">Sensor</span><span class="w"> </span><span class="o">&amp;</span><span class="n">GetNativeInstance</span><span class="p">()</span>
+<span class="w">    </span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="w"> </span><span class="o">&amp;</span><span class="n">GetNativeInstance</span><span class="p">()</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="n">_sensor</span><span class="p">;</span>
 <span class="w">    </span><span class="p">};</span>
@@ -139,9 +250,20 @@
 <span class="w">    </span><span class="c1">// ------------------------------------------ //@{</span>
 <span class="w">    </span><span class="c1">// ------------------------------------------</span>
 
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Connect</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">portName</span><span class="p">,</span><span class="w"> </span><span class="n">BaudRate</span><span class="w"> </span><span class="n">baudRate</span><span class="p">);</span>
+
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Connect</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">portName</span><span class="p">,</span><span class="w"> </span><span class="n">UInt32</span><span class="w"> </span><span class="n">baudRate</span><span class="p">);</span>
 
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Connect</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">portName</span><span class="p">,</span><span class="w"> </span><span class="n">UInt32</span><span class="w"> </span><span class="n">baudRate</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">monitorAsyncErrors</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Connect</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">portName</span><span class="p">,</span><span class="w"> </span><span class="n">BaudRate</span><span class="w"> </span><span class="n">baudRate</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">monitorAsyncErrors</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Connect</span><span class="p">(</span><span class="n">String</span><span class="o">*</span><span class="w"> </span><span class="n">fileName</span><span class="p">);</span>
+
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">AutoConnect</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">portName</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">AutoConnect</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">portName</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">moniforAsyncErrors</span><span class="p">);</span>
+
 
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">VerifySensorConnectivity</span><span class="p">();</span>
 
@@ -149,7 +271,15 @@
 
 <span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">ConnectedBaudRate</span><span class="p">();</span>
 
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ChangeBaudRate</span><span class="p">(</span><span class="n">BaudRate</span><span class="w"> </span><span class="n">baudRate</span><span class="p">);</span>
+
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ChangeBaudRate</span><span class="p">(</span><span class="n">UInt32</span><span class="w"> </span><span class="n">baudRate</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ChangeBaudRate</span><span class="p">(</span><span class="n">BaudRate</span><span class="w"> </span><span class="n">baudRate</span><span class="p">,</span><span class="w"> </span><span class="n">Registers</span><span class="o">::</span><span class="n">System</span><span class="o">::</span><span class="n">BaudRate</span><span class="o">::</span><span class="n">SerialPort</span><span class="w"> </span><span class="n">serialPort</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ChangeBaudRate</span><span class="p">(</span><span class="n">UInt32</span><span class="w"> </span><span class="n">baudRate</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="o">::</span><span class="n">Byte</span><span class="w"> </span><span class="n">serialPort</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ChangeHostBaudRate</span><span class="p">(</span><span class="n">BaudRate</span><span class="w"> </span><span class="n">baudRate</span><span class="p">);</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ChangeHostBaudRate</span><span class="p">(</span><span class="n">UInt32</span><span class="w"> </span><span class="n">baudRate</span><span class="p">);</span>
 
@@ -166,17 +296,18 @@
 
 <span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">SendCommandBlockMode</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="n">None</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">VN</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">SendCommandBlockMode</span><span class="o">::</span><span class="n">None</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Block</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">VN</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">SendCommandBlockMode</span><span class="o">::</span><span class="n">Block</span><span class="p">,</span>
-<span class="w">        </span><span class="n">BlockWithRetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">VN</span><span class="o">::</span><span class="n">Sensor</span><span class="o">::</span><span class="n">SendCommandBlockMode</span><span class="o">::</span><span class="n">BlockWithRetry</span><span class="p">,</span>
+<span class="w">        </span><span class="n">None</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SendCommandBlockMode</span><span class="o">::</span><span class="n">None</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Block</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SendCommandBlockMode</span><span class="o">::</span><span class="n">Block</span><span class="p">,</span>
+<span class="w">        </span><span class="n">BlockWithRetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">VN</span><span class="o">::</span><span class="n">BridgeSensor</span><span class="o">::</span><span class="n">SendCommandBlockMode</span><span class="o">::</span><span class="n">BlockWithRetry</span><span class="p">,</span>
 <span class="w">    </span><span class="p">};</span>
 
 <span class="w">    </span><span class="c1">// ------------------------------------------ //@{</span>
 <span class="w">    </span><span class="c1">// ------------------------------------------</span>
 
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ReadRegister</span><span class="p">(</span><span class="n">Registers</span><span class="o">::</span><span class="n">Register</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">reg</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ReadRegister</span><span class="p">(</span><span class="n">Registers</span><span class="o">::</span><span class="n">ConfigRegister</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">reg</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ReadRegister</span><span class="p">(</span><span class="n">Registers</span><span class="o">::</span><span class="n">MeasRegister</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">reg</span><span class="p">);</span>
 
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">WriteRegister</span><span class="p">(</span><span class="n">Registers</span><span class="o">::</span><span class="n">Register</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">reg</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">WriteRegister</span><span class="p">(</span><span class="n">Registers</span><span class="o">::</span><span class="n">ConfigRegister</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">reg</span><span class="p">);</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">WriteSettings</span><span class="p">();</span>
 
@@ -184,13 +315,19 @@
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RestoreFactorySettings</span><span class="p">();</span>
 
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">KnownMagneticDisturbance</span><span class="p">(</span><span class="n">KnownMagneticDisturbance</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">KnownMagneticDisturbance</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">KnownAccelerationDisturbance</span><span class="p">(</span><span class="n">KnownAccelerationDisturbance</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">KnownAccelerationDisturbance</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SetInitialHeading</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">heading</span><span class="p">);</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SetInitialHeading</span><span class="p">(</span><span class="n">Ypr</span><span class="w"> </span><span class="n">ypr</span><span class="p">);</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SetInitialHeading</span><span class="p">(</span><span class="n">Quaternion</span><span class="w"> </span><span class="n">quat</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Sensor::AsyncOutputEnable</span><span class="p">(</span><span class="n">AsyncOutputEnable</span><span class="o">::</span><span class="n">State</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">AsyncOutputEnable</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
 
@@ -208,27 +345,36 @@
 <span class="w">    </span><span class="c1">// Error Handling</span>
 <span class="w">    </span><span class="c1">// ------------------------------------------</span>
 
-<span class="w">    </span><span class="n">Nullable</span><span class="o">&lt;</span><span class="n">AsyncError</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Sensor</span><span class="o">::</span><span class="n">GetAsynchronousError</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">ThrowIfAsyncError</span><span class="p">();</span>
 
-<span class="w">    </span><span class="n">System</span><span class="o">::</span><span class="n">DateTime</span><span class="w"> </span><span class="nf">Sensor::Now</span><span class="p">();</span>
+<span class="w">    </span><span class="n">System</span><span class="o">::</span><span class="n">DateTime</span><span class="w"> </span><span class="nf">Now</span><span class="p">();</span>
 
 <span class="w">    </span><span class="c1">// -----------------------------------------</span>
 <span class="w">    </span><span class="c1">// Additional logging</span>
 <span class="w">    </span><span class="c1">// ------------------------------------------</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SubscribeToMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToSubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">BinaryOutputMeasurements</span><span class="o">*</span><span class="w"> </span><span class="n">binaryOutputMeasurementFilter</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SubscribeToMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToSubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">BinaryOutputMeasurements</span><span class="o">*</span><span class="w"> </span><span class="n">binaryOutputMeasurementFilter</span><span class="p">,</span><span class="w"> </span><span class="n">FaSubscriberFilterType</span><span class="w"> </span><span class="n">filterType</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">UnsubscribeFromMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToUnsubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">BinaryOutputMeasurements</span><span class="o">*</span><span class="w"> </span><span class="n">binaryOutputMeasurementFilter</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SubscribeToMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToSubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="o">::</span><span class="n">String</span><span class="o">*</span><span class="w"> </span><span class="n">asciiHeaderFilter</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SubscribeToMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToSubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="o">::</span><span class="n">String</span><span class="o">*</span><span class="w"> </span><span class="n">asciiHeaderFilter</span><span class="p">,</span><span class="w"> </span><span class="n">AsciiSubscriberFilterType</span><span class="w"> </span><span class="n">filterType</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">UnsubscribeFromMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToUnsubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="o">::</span><span class="n">String</span><span class="o">*</span><span class="w"> </span><span class="n">asciiHeaderFilter</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">SubscribeToMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToSubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">SyncByte</span><span class="w"> </span><span class="n">syncByte</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">UnsubscribeFromMessage</span><span class="p">(</span><span class="n">ManagedQueuePointer</span><span class="o">*</span><span class="w"> </span><span class="n">queueToUnsubscribe</span><span class="p">,</span><span class="w"> </span><span class="n">SyncByte</span><span class="w"> </span><span class="n">syncByte</span><span class="p">);</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RegisterReceivedByteBuffer</span><span class="p">(</span><span class="n">ByteBuffer</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span>
+
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">DeregisterReceivedByteBuffer</span><span class="p">();</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RegisterSkippedByteBuffer</span><span class="p">(</span><span class="n">ByteBuffer</span><span class="o">*</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">DeregisterSkippedByteBuffer</span><span class="p">();</span>
 
 <span class="cp">#if (PLUGIN_DATAEXPORT)</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RegisterDataExporter</span><span class="p">(</span><span class="n">Exporter</span><span class="o">*</span><span class="w"> </span><span class="n">exporter</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">DeregisterDataExporter</span><span class="p">(</span><span class="n">Exporter</span><span class="o">*</span><span class="w"> </span><span class="n">exporter</span><span class="p">);</span>
-<span class="cp">#endif</span>
-
-<span class="cp">#if (PLUGIN_CALIBRATION)</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RegisterHsiCalibration</span><span class="p">(</span><span class="n">Calibration</span><span class="o">::</span><span class="n">HsiCalibration_Base</span><span class="o">*</span><span class="w"> </span><span class="n">hsi</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">DeregisterHsiCalibration</span><span class="p">(</span><span class="n">Calibration</span><span class="o">::</span><span class="n">HsiCalibration_Base</span><span class="o">*</span><span class="w"> </span><span class="n">hsi</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">RegisterDataExporter</span><span class="p">(</span><span class="n">DataExport</span><span class="o">::</span><span class="n">Exporter</span><span class="o">*</span><span class="w"> </span><span class="n">exporter</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">DeregisterDataExporter</span><span class="p">(</span><span class="n">DataExport</span><span class="o">::</span><span class="n">Exporter</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">exporter</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="w">    </span><span class="c1">// ------------------------------------------</span>
 <span class="w">    </span><span class="c1">// Unthreaded Packet Processing</span>
@@ -265,11 +411,11 @@
 <div class="sphinx-toc sphinxglobaltoc">
 <h3><a href="../Documentation.html">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../pages/MigrationGuide.html">VectorNav CLI Migration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/MigrationGuide.html">Migration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/KeyFunctionality.html">Key Functionality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/api_index.html">VNSDK API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 </ul>
 </div>
   <div role="note" aria-label="source link">

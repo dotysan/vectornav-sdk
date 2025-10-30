@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,7 +36,11 @@ namespace VN
 
 namespace Filesystem
 {
-inline bool exists(const FilePath& filePath) noexcept { return std::filesystem::exists(filePath.c_str()); }
+inline bool exists(const FilePath& filePath) noexcept
+{
+    std::error_code ec;
+    return std::filesystem::exists(filePath.c_str(), ec);
+}
 }  // namespace Filesystem
 
 inline Filesystem::FilePath operator/(Filesystem::FilePath lhs, const char* rhs) { return Filesystem::FilePath(lhs + "/" + rhs); }
@@ -44,7 +48,7 @@ inline Filesystem::FilePath operator/(Filesystem::FilePath lhs, const char* rhs)
 class InputFile : public InputFile_Base
 {
 public:
-    InputFile() = default;
+    InputFile(const bool nullTerminateRead = true) : _nullTerminateRead(nullTerminateRead) {};
     InputFile(const Filesystem::FilePath& filePath, const bool nullTerminateRead = true)
         : _file(filePath, std::ios::binary), _nullTerminateRead(nullTerminateRead) {};
 
@@ -56,9 +60,10 @@ public:
         return *this;
     }
 
-    virtual bool open(const Filesystem::FilePath& filePath) override final
+    virtual Errored open(const Filesystem::FilePath& filePath) override final
     {
-        if (!_file.is_open() && !std::filesystem::exists(filePath.c_str())) { return true; }
+        std::error_code ec;
+        if (!_file.is_open() && !std::filesystem::exists(filePath.c_str(), ec)) { return true; }
 
         _file.open(filePath.c_str(), std::ios_base::binary);
         return !_file.good();
@@ -66,7 +71,7 @@ public:
 
     virtual void close() override final { _file.close(); };
 
-    virtual bool read(char* buffer, const size_t bufferCapacity, const char endChar) override final
+    virtual Errored read(char* buffer, const size_t bufferCapacity, const char endChar) override final
     {
         if (!_file.is_open() || !_file.good())
         {
@@ -86,23 +91,19 @@ public:
         return !_file.good();
     }
 
-    virtual bool read(char* buffer, const size_t count) override final
+    virtual size_t read(char* buffer, const size_t count) override final
     {
-        if (!_file.is_open() || !_file.good())
+        size_t bytesRead = 0;
+        if (_file.is_open() && _file.good())
         {
-            buffer[0] = '\0';
-            return true;
-        };
-        if (_nullTerminateRead)
-        {
-            _file.read(buffer, count - 1);
-            buffer[_file.gcount()] = '\0';
+            _file.read(buffer, count);
+            bytesRead = static_cast<size_t>(_file.gcount());
         }
-        else { _file.read(buffer, count); }
-        return !_file.good();
+        if (_nullTerminateRead) { buffer[bytesRead] = '\0'; }
+        return bytesRead;
     }
 
-    virtual bool getLine(char* buffer, const size_t capacity) override final
+    virtual Errored getLine(char* buffer, const size_t capacity) override final
     {
         if (!_file.is_open() || !_file.good())
         {
@@ -127,7 +128,7 @@ public:
 
 private:
     std::ifstream _file;
-    bool _nullTerminateRead = true;
+    bool _nullTerminateRead;
 };
 
 class OutputFile : public OutputFile_Base
@@ -136,7 +137,14 @@ public:
     OutputFile() {};
     OutputFile(const Filesystem::FilePath& filePath) : _file(filePath, std::ios::binary) {};
 
-    virtual ~OutputFile() {};
+    virtual ~OutputFile()
+    {
+        if (_file.is_open())
+        {
+            flush();
+            _file.close();
+        }
+    };
 
     OutputFile(const OutputFile&) = delete;
     OutputFile operator=(const OutputFile&) = delete;
@@ -149,30 +157,37 @@ public:
         return *this;
     }
 
-    virtual bool open(const Filesystem::FilePath& filePath) override final
+    virtual Errored open(const Filesystem::FilePath& filePath) override final
     {
         _file.open(filePath.c_str(), std::ios_base::binary | std::ios_base::trunc);
         return !_file.good();
     }
 
-    virtual void close() override final { _file.close(); };
+    virtual void close() override final
+    {
+        if (_file.is_open())
+        {
+            flush();
+            _file.close();
+        }
+    };
 
-    virtual bool write(const char* buffer, const size_t count) override final
+    virtual Errored write(const char* buffer, const size_t count) override final
     {
         if (!_file.is_open() && !_file.good()) { return true; };
         _file.write(buffer, count);
         return !_file.good();
     }
 
-    virtual bool write(const char* buffer) override final { return write(buffer, std::strlen(buffer)); }
+    virtual Errored write(const char* buffer) override final { return write(buffer, std::strlen(buffer)); }
 
-    virtual bool writeLine(const char* buffer, const size_t count) override final
+    virtual Errored writeLine(const char* buffer, const size_t count) override final
     {
         if (write(buffer, count)) { return true; }
         return write("\n", 1);
     }
 
-    virtual bool writeLine(const char* buffer) override final { return writeLine(buffer, std::strlen(buffer)); }
+    virtual Errored writeLine(const char* buffer) override final { return writeLine(buffer, std::strlen(buffer)); }
 
     virtual bool is_open() const override final { return _file.is_open(); }
 
@@ -180,6 +195,11 @@ public:
     {
         _file.clear();
         _file.seekp(0, std::ios::beg);
+    }
+
+    virtual void flush() override final
+    {
+        if (_file.is_open() && _file.good()) { _file.flush(); }
     }
 
 private:

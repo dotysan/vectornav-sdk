@@ -34,7 +34,7 @@ Includes
 
 - ``cstdio``
 
-- ``vectornav/HAL/Thread.hpp``
+- ``vectornav/Config.hpp``
 
 - ``vectornav/Implementation/QueueDefinitions.hpp``
 
@@ -52,9 +52,7 @@ Included By
 
 - :ref:`file_plugins_DataExport_include_vectornav_ExporterRinex.hpp`
 
-- :ref:`file_plugins_DataExport_include_vectornav_FileExporter.hpp`
-
-- :ref:`file_plugins_DataExport_include_vectornav_SkippedByteExporter.hpp`
+- :ref:`file_plugins_DataExport_include_vectornav_ExporterSkippedByte.hpp`
 
 
 
@@ -65,10 +63,12 @@ Namespaces
 
 - :ref:`namespace_VN`
 
+- :ref:`namespace_VN__DataExport`
+
 
 Classes
 -------
 
 
-- :ref:`exhale_class_class_v_n_1_1_exporter`
+- :ref:`exhale_class_class_v_n_1_1_data_export_1_1_exporter`
 

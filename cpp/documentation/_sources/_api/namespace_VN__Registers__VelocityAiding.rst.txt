@@ -26,6 +26,10 @@ Functions
 ---------
 
 
+- :ref:`exhale_function__registers_8hpp_1a62fc8e84a41694fc5a4f74a4e3e34b40`
+
+- :ref:`exhale_function__registers_8hpp_1a04a764304409da6d8ab684e778cafa93`
+
 - :ref:`exhale_function__registers_8hpp_1af1ed8a0a793c95d7b07f4ac41eedbdce`
 
 - :ref:`exhale_function__registers_8hpp_1ae5746a6359bae36abacef81bc10763f1`

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,6 +29,7 @@
 
 #include "vectornav/Config.hpp"
 #include "vectornav/Implementation/PacketDispatcher.hpp"
+#include "vectornav/Implementation/QueueDefinitions.hpp"
 #include "vectornav/Interface/Errors.hpp"
 #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 #include "vectornav/TemplateLibrary/Vector.hpp"
@@ -43,20 +44,21 @@ class PacketSynchronizer
 public:
     using AsyncErrorQueuePush = std::function<void(AsyncError&&)>;
 
-    PacketSynchronizer(ByteBuffer& byteBuffer, AsyncErrorQueuePush asyncErrorQueuePush = nullptr,
-                       size_t nominalSerialPush = Config::Serial::numBytesToReadPerGetData)
-        : _primaryByteBuffer(byteBuffer), _asyncErrorQueuePush{asyncErrorQueuePush}, _nominalSerialPush(nominalSerialPush)
+    PacketSynchronizer(ByteBuffer& byteBuffer, AsyncErrorQueuePush asyncErrorQueuePush = nullptr, size_t packetMax = Config::PacketFinders::packetMaxLength)
+        : _primaryByteBuffer(byteBuffer), _asyncErrorQueuePush{asyncErrorQueuePush}, _packetMaxLength(packetMax)
     {
     }
-    bool addDispatcher(PacketDispatcher* packetParser) noexcept;
+    Errored addDispatcher(PacketDispatcher* packetParser) noexcept;
 
-    bool dispatchNextPacket() noexcept;
+    Errored dispatchNextPacket() noexcept;
 
-    void registerSkippedByteBuffer(ByteBuffer* const skippedByteBuffer) noexcept { _pSkippedByteBuffer = skippedByteBuffer; };
-    void deregisterSkippedByteBuffer() noexcept { _pSkippedByteBuffer = nullptr; };
-
-    void registerReceivedByteBuffer(ByteBuffer* const receivedByteBuffer) noexcept { _pReceivedByteBuffer = receivedByteBuffer; }
-    void deregisterReceivedByteBuffer() noexcept { _pReceivedByteBuffer = nullptr; }
+    Error registerSkippedByteQueue(PacketQueue_Interface* const skippedByteQueue) noexcept
+    {
+        if (skippedByteQueue == nullptr) { return Error::PacketQueueNull; }
+        _pSkippedByteQueue = skippedByteQueue;
+        return Error::None;
+    };
+    void deregisterSkippedByteQueue() noexcept { _pSkippedByteQueue = nullptr; };
 
     using SyncBytes = Vector<uint8_t, SYNC_BYTE_CAPACITY>;
 
@@ -75,23 +77,20 @@ private:
         mutable size_t numInvalidPackets = 0;
     };
 
-    void _copyToSkippedByteBufferIfEnabled(const size_t numBytesToCopy) const noexcept;
-    void _copyToReceivedByteBufferIfEnabled(const size_t numBytesToCopy) const noexcept;
+    Error _copyToSkippedByteQueueIfEnabled(const size_t numBytesToCopy) const noexcept;
 
     Vector<InternalItem, PACKET_PARSER_CAPACITY> _dispatchers{};
 
     mutable uint64_t _skippedByteCount = 0;
-    ByteBuffer* _pSkippedByteBuffer = nullptr;
+    PacketQueue_Interface* _pSkippedByteQueue = nullptr;
     mutable uint64_t _receivedByteCount = 0;
-    ByteBuffer* _pReceivedByteBuffer = nullptr;
-    mutable std::array<uint8_t, Config::PacketFinders::skippedReceivedByteBufferMaxPutLength> _copySkippedReceivedLinearBuffer{};
 
     ByteBuffer& _primaryByteBuffer;
     uint64_t _prevByteBufferSize = 0;
     size_t _prevBytesRequested = 0;
     PacketDispatcher::FindPacketRetVal::Validity _prevValidity = PacketDispatcher::FindPacketRetVal::Validity::Invalid;
     AsyncErrorQueuePush _asyncErrorQueuePush = nullptr;
-    const size_t _nominalSerialPush;
+    const size_t _packetMaxLength;
 };
 }  // namespace VN
 

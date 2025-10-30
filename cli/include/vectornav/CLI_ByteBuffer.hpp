@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,7 +24,9 @@
 #ifndef VN_CLI_BYTEBUFFER_HPP_
 #define VN_CLI_BYTEBUFFER_HPP_
 
+#pragma managed(push, off)
 #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
+#pragma managed(pop)
 
 namespace VNSDK
 {
@@ -32,24 +34,40 @@ namespace VNSDK
     ref class ByteBuffer
     {
     private:
-        VN::ByteBuffer *buffer = nullptr;
+        VN::ByteBuffer *_buffer = nullptr;
+        bool _isOwner;
 
     public:
         ByteBuffer(int size)
         {
-            buffer = new VN::ByteBuffer(size);
-        };
+            _buffer = new VN::ByteBuffer(size);
+            _isOwner = true;
+        }
+
+        ByteBuffer(VN::ByteBuffer* buffer)
+        {
+            _buffer = buffer;
+            _isOwner = false;
+        }
 
         ~ByteBuffer()
         {
-            delete buffer;
-            buffer = nullptr;
-        };
-        
-        VN::ByteBuffer* GetReference()
+            this->!ByteBuffer();
+        }
+
+        !ByteBuffer()
         {
-            return buffer;
-        };
+            if (_isOwner)
+            {
+                delete _buffer;
+            }
+            _buffer = nullptr;
+        }
+        
+        VN::ByteBuffer* GetNativePointer()
+        {
+            return _buffer;
+        }
     };
 
 }

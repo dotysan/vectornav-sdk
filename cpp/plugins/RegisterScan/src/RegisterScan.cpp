@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,7 +32,7 @@ namespace RegisterScan
 VN::Error _setConfigurationRegister(Sensor& sensor, const AsciiMessage& msg)
 {
     Error error = Error::None;
-    std::cout << "Loading setting: " << msg.c_str() << "\n";
+    VN_DEBUG_0("Loading setting: " << msg.c_str() << std::endl);
     const uint16_t start = msg.find(',', 0);
     const uint16_t end = msg.find(',', start + 1);
     if (start == AsciiMessage::npos || start >= msg.length() || end == AsciiMessage::npos || end >= msg.length())
@@ -53,8 +53,10 @@ VN::Error _setConfigurationRegister(Sensor& sensor, const AsciiMessage& msg)
     if (regId.value() == 5)
     {
         Registers::System::BaudRate baudReg;
+        baudReg.baudRate = Registers::System::BaudRate::BaudRates::Baud115200;
+        baudReg.serialPort = Registers::System::BaudRate::SerialPort::ActiveSerial;
         if (baudReg.fromString(msg)) { error = Error::InvalidParameter; }
-        else { error = sensor.changeBaudRate(baudReg.baudRate, baudReg.serialPort); }
+        else { error = sensor.changeBaudRate(baudReg.baudRate.value(), baudReg.serialPort); }
     }
     else { error = sensor.sendCommand(&wrg, Sensor::SendCommandBlockMode::Block); }
 

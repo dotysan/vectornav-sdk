@@ -1,219 +1,244 @@
-Data Export
-###########
+.. _pythonDataExportPage:
 
-The DataExport plugin provides the necessary classes to export data form the sensor directly to various file formats such as Csv,Ascii,Rinex, and Imr files. In addition, the same classes can be used to export data from a file.
+Data Export (*BETA*)
+####################
+
+The DataExport plugin provides the necessary classes to export data form the sensor directly to various file formats such as Csv, Ascii, and Rinex files. In addition, the same classes can be used to export data from a file.
+
+.. warning::
+	This plugin is currently in *BETA* and may be subject to interface changes in the future.
 
 Usage
 =====
 
-The DataExport plugin works via the Exporter class. It is an abstract base class where other exporters like :py:class:`vectornav.Plugins.ExporterCsv`, :py:class:`~vectornav.Plugins.ExporterAscii`, etc.. are derived from insuring a common interface. The mechanism from a file and in real-time are slightly different. The examples of both are in the subsequent sections. 
+The DataExport plugin works via the Exporter class. It is an abstract base class where other exporters like :py:class:`~vectornav.Plugins.DataExport.ExporterCsv`, :py:class:`~vectornav.Plugins.DataExport.ExporterAscii`, etc.. are derived from insuring a common interface. The mechanism from a file and in real-time are slightly different. The examples of both are in the subsequent sections. 
 
 Exporting in Real-Time
 ^^^^^^^^^^^^^^^^^^^^^^
 
 To export data from a CSV in real-time requires the following imports
 
-.. code-block:: python
-
-	import vectornav
-	from vectornav import Sensor
-	from vectornav.Plugins import ExporterCsv
+.. literalinclude:: ../../examples/data_export/from_sensor/data_export_from_sensor.py
+   :language: python
+   :start-at: import Sensor
+   :end-at: DataExport
+   :dedent: 0
 
 We can create a ExporterCsv class which has two arguments -- the folder to log the CSV files, and whether to include system timestamps (the time reported by the computer when a packet of data was received). The ExporterCsv class requires a **folder** not a file path. This is because each unique packet output by the sensor will generate its own CSV file.
 
-.. code-block:: python
-
-	vs = Sensor()
-	csvExporter = ExporterCsv(local_folder, True) # exporting with system timestamps
-
+.. literalinclude:: ../../examples/data_export/from_sensor/data_export_from_sensor.py
+   :language: python
+   :start-at: csvExporter
+   :end-at: csvExporter
+   :dedent: 4
 
 Before exporting data from the sensor, the exporter needs to provide its internal queue to a subscriber of your choice. For all data from the sensor subscribe to both Ascii and Binary packets:
 
-.. code-block:: python
+.. literalinclude:: ../../examples/data_export/from_sensor/data_export_from_sensor.py
+   :language: python
+   :start-at: Sensor()
+   :end-at: Sensor()
+   :dedent: 4
+.. literalinclude:: ../../examples/data_export/from_sensor/data_export_from_sensor.py
+   :language: python
+   :start-at: # 3. Add a subscriber to all binary and ASCII packets
+   :end-before: # 4. Log data from the VectorNav unit
+   :dedent: 4
 
-	# subscribe to binary FA packets
-	vs.subscribeToMessage(
-		csvExporter.getQueuePtr(),
-		vectornav.Registers.BinaryOutputMeasurements(),
-		vectornav.FaPacketDispatcher.SubscriberFilterType.AnyMatch
-	)
-	
-	# subscribe to binary VectorNav ascii packets
-	vs.subscribeToMessage(
-		csvExporter.getQueuePtr(),
-		"VN",
-		vectornav.AsciiPacketDispatcher.SubscriberFilterType.StartsWith
-	)
 
 With the subscribers setup, connect to the sensor and begin logging:
 
-.. code-block:: python
-
-	vs.autoConnect(your_port)
-
-	csvExporter.start()
-
-	time.sleep(5)
-
-	csvExporter.stop()
+.. literalinclude:: ../../examples/data_export/from_sensor/data_export_from_sensor.py
+   :language: python
+   :start-at: autoConnect
+   :end-at: autoConnect
+   :dedent: 8
+.. literalinclude:: ../../examples/data_export/from_sensor/data_export_from_sensor.py
+   :language: python
+   :start-at: csvExporter.start()
+   :end-at: csvExporter.stop()
+   :dedent: 4
 
 Exporting from a file
 ^^^^^^^^^^^^^^^^^^^^^
 
-Exporting data from a file requires quite a few pieces, so there is a convenience class to easily allow exporting data from a file. Only one import is required:
+Exporting data from a file requires quite a few pieces. First create a sensor with the :py:class:`~vectornav.Sensor.MeasQueueMode`` set to Off.
 
-.. code-block:: python
+.. literalinclude:: ../../examples/data_export/from_file/data_export_from_file.py
+   :language: python
+   :start-at: pushToCompositeData
+   :end-at: Sensor(pushToCompositeData)
+   :dedent: 4
 
-	from vectornav.Plugins import FileExporter
+Create the exporters to your desired file types and subscribe the sensor to their Queue pointers
 
-A factory pattern allows adding exporters easily:
+.. literalinclude:: ../../examples/data_export/from_file/data_export_from_file.py
+   :language: python
+   :start-at: asciiExporter
+   :end-before: skippedByteExporter
+   :dedent: 4
 
-.. code-block:: python
+Start the desired exporter threads.
 
-	fileExporter.addCsvExporter(outputPath, False) # system timestamps are not necessary
-	fileExporter.addAsciiExporter(outputPath)
-	
-With the desired exporters added, pass the file location of a binary file to the fileExporter to export the data:
+.. literalinclude:: ../../examples/data_export/from_file/data_export_from_file.py
+   :language: python
+   :start-at: asciiExporter.start()
+   :end-before: csvExporter.start()
+   :dedent: 4
 
-.. code-block:: python
+Connect the sensor to the input file and monitor for errors.
 
-	fileExporter.processFile(filePath)
-	
+.. literalinclude:: ../../examples/data_export/from_file/data_export_from_file.py
+   :language: python
+   :start-at: sensor.connect(filePath)
+   :end-at: sensor.disconnect()
+   :dedent: 4
+
+Lastly, stop the exporter threads
+
+.. literalinclude:: ../../examples/data_export/from_file/data_export_from_file.py
+   :language: python
+   :start-at: asciiExporter.stop()
+   :end-before: csvExporter.stop()
+   :dedent: 4
 
 API
 ===
 
-ExporterCsv
-^^^^^^^^^^^
+The Python API for the DataExport plugin is modeled from the C++ API which can be found here:
+:ref:`DataExport <plugins_cpp:namespace_VN__DataExport>`
 
-.. py:class:: vectornav.Plugins.ExporterCsv(path: str, enableSystemTimeStamps: bool = false)
+.. ExporterCsv
+.. ^^^^^^^^^^^
 
-    An Exporter that will parse data packets from the sensor and export that data to a unique CSV file.
+.. .. py:class:: vectornav.Plugins..DataExport.ExporterCsv(path: str, enableSystemTimeStamps: bool = false)
 
-    .. py:method:: start
+..     An Exporter that will parse data packets from the sensor and export that data to a unique CSV file.
 
-        Starts a thread that logs data in the background
+..     .. py:method:: start
 
-    .. py:method:: stop
+..         Starts a thread that logs data in the background
 
-        Stops the logging thread and closes created files
+..     .. py:method:: stop
 
-    .. py:method:: isLogging
+..         Stops the logging thread and closes created files
 
-        Returns if the logger is currently logging data
+..     .. py:method:: isLogging
 
-    .. py:method:: getQueuePtr
+..         Returns if the logger is currently logging data
 
-        Returns a pointer to the internal queue. Required for real-time exporting
+..     .. py:method:: getQueuePtr
 
-    .. py:method:: exportToFile
+..         Returns a pointer to the internal queue. Required for real-time exporting
 
-        Method to manually control when the Exporter writes to a file
+..     .. py:method:: exportToFile
+
+..         Method to manually control when the Exporter writes to a file
     
-ExporterAscii
-^^^^^^^^^^^^^
+.. ExporterAscii
+.. ^^^^^^^^^^^^^
 
-.. py:class:: vectornav.Plugins.ExporterAscii(path: str)
+.. .. py:class:: vectornav.Plugins.DataExport.ExporterAscii(path: str)
 
-    An Exporter to export data all ASCII based data from the sensor into their respective file.
+..     An Exporter to export data all ASCII based data from the sensor into their respective file.
     
-    .. py:method:: start
+..     .. py:method:: start
 
-        Starts a thread that logs data in the background
+..         Starts a thread that logs data in the background
 
-    .. py:method:: stop
+..     .. py:method:: stop
 
-        Stops the logging thread and closes created files
+..         Stops the logging thread and closes created files
 
-    .. py:method:: isLogging
+..     .. py:method:: isLogging
 
-        Returns if the logger is currently logging data
+..         Returns if the logger is currently logging data
 
-    .. py:method:: getQueuePtr
+..     .. py:method:: getQueuePtr
 
-        Returns a pointer to the internal queue. Required for real-time exporting
+..         Returns a pointer to the internal queue. Required for real-time exporting
 
-    .. py:method:: exportToFile
+..     .. py:method:: exportToFile
 
-        Method to manually control when the Exporter writes to a file
+..         Method to manually control when the Exporter writes to a file
     
-ExporterRinex
-^^^^^^^^^^^^^
+.. ExporterRinex
+.. ^^^^^^^^^^^^^
 
-.. py:class:: vectornav.Plugins.ExporterRinex(path: str, gnssGroup: int)
+.. .. py:class:: vectornav.Plugins.DataExport.ExporterRinex(path: str, gnssGroup: int)
 
-    An Exporter to export data to the RINEXv3 format. Requries gnssRawMeas to be enabled.
+..     An Exporter to export data to the RINEXv3 format. Requries gnssRawMeas to be enabled.
 
-    .. py:method:: start
+..     .. py:method:: start
 
-        Starts a thread that logs data in the background
+..         Starts a thread that logs data in the background
 
-    .. py:method:: stop
+..     .. py:method:: stop
 
-        Stops the logging thread and closes created files
+..         Stops the logging thread and closes created files
 
-    .. py:method:: isLogging
+..     .. py:method:: isLogging
 
-        Returns if the logger is currently logging data
+..         Returns if the logger is currently logging data
 
-    .. py:method:: getQueuePtr
+..     .. py:method:: getQueuePtr
 
-        Returns a pointer to the internal queue. Required for real-time exporting
+..         Returns a pointer to the internal queue. Required for real-time exporting
 
-    .. py:method:: exportToFile
+..     .. py:method:: exportToFile
 
-        Method to manually control when the Exporter writes to a file
+..         Method to manually control when the Exporter writes to a file
     
-ExporterImr
-^^^^^^^^^^^
+.. .. ExporterImr
+.. .. ^^^^^^^^^^^
 
-.. py:class:: vectornav.Plugins.ExporterImr(path: str)
+.. .. .. py:class:: vectornav.Plugins.DataExport.ExporterImr(path: str)
 
-    An Exporter class that will export data into the IMR file format. Requires gpsTow, uncompAccel and uncompGyro to be enabled in the same output message.
+.. ..     An Exporter class that will export data into the IMR file format. Requires gpsTow, uncompAccel and uncompGyro to be enabled in the same output message.
 
-    .. py:method:: start
+.. ..     .. py:method:: start
 
-        Starts a thread that logs data in the background
+.. ..         Starts a thread that logs data in the background
 
-    .. py:method:: stop
+.. ..     .. py:method:: stop
 
-        Stops the logging thread and closes created files
+.. ..         Stops the logging thread and closes created files
 
-    .. py:method:: isLogging
+.. ..     .. py:method:: isLogging
 
-        Returns if the logger is currently logging data
+.. ..         Returns if the logger is currently logging data
 
-    .. py:method:: getQueuePtr
+.. ..     .. py:method:: getQueuePtr
 
-        Returns a pointer to the internal queue. Required for real-time exporting
+.. ..         Returns a pointer to the internal queue. Required for real-time exporting
 
-    .. py:method:: exportToFile
+.. ..     .. py:method:: exportToFile
 
-        Method to manually control when the Exporter writes to a file
+.. ..         Method to manually control when the Exporter writes to a file
     
-FileExporter
-^^^^^^^^^^^^
-.. py:class:: vectornav.Plugins.FileExporter 
+.. FileExporter
+.. ^^^^^^^^^^^^
+.. .. py:class:: vectornav.Plugins.DataExport.FileExporter 
 
-    A convenience class for helping export data from a binary file.
+..     A convenience class for helping export data from a binary file.
 
-    .. py:method:: processFile(path: str)
+..     .. py:method:: processFile(path: str)
 
-        Processes the file into all exporters that have been added
+..         Processes the file into all exporters that have been added
 
-    .. py:method:: addCsvExporter(path: str, enableSystemTimeStamps: bool = false)
+..     .. py:method:: addCsvExporter(path: str, enableSystemTimeStamps: bool = false)
 
-        Adds a ExporterCsv class to the list of exporters
+..         Adds a ExporterCsv class to the list of exporters
     
-    .. py:method:: addAsciiExporter(path: str)
+..     .. py:method:: addAsciiExporter(path: str)
     
-        Adds a ExporterAscii class to the list of exporters
+..         Adds a ExporterAscii class to the list of exporters
         
-    .. py:method:: addRinexExporter(path: str, gnssGroup: int)
+..     .. py:method:: addRinexExporter(path: str, gnssGroup: int)
     
-        Adds a ExporterRinex class to the list of exporters
+..         Adds a ExporterRinex class to the list of exporters
         
-    .. py:method:: addImrExporter(path: str)
+..     .. py:method:: addImrExporter(path: str)
     
-        Adds a ExporterImr class to the list of exporters
+..         Adds a ExporterImr class to the list of exporters
     

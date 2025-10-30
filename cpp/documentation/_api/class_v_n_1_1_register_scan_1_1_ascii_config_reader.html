@@ -92,17 +92,34 @@
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan17AsciiConfigReaderE">
 <span id="_CPPv3N2VN12RegisterScan17AsciiConfigReaderE"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigReaderE"></span><span id="VN::RegisterScan::AsciiConfigReader"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_reader"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AsciiConfigReader</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RegisterScan</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="struct_v_n_1_1_register_scan_1_1_config_reader.html#_CPPv4I0EN2VN12RegisterScan12ConfigReaderE" title="VN::RegisterScan::ConfigReader"><span class="n"><span class="pre">ConfigReader</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N2VN12RegisterScan17AsciiConfigReaderE" title="VN::RegisterScan::AsciiConfigReader"><span class="n"><span class="pre">AsciiConfigReader</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigReaderE" title="Link to this definition">¶</a><br /></dt>
-<dd><div class="breathe-sectiondef docutils container">
+<dd><p>A reader that reads VectorNav configurations from ASCII text files line by line. </p>
+<p>Reads one line at a time from the specified file into the provided message buffer, using newline characters as line delimiters. Returns an error if the read operation fails. </p>
+<div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan17AsciiConfigReader17AsciiConfigReaderERKN10Filesystem8FilePathE">
 <span id="_CPPv3N2VN12RegisterScan17AsciiConfigReader17AsciiConfigReaderERKN10Filesystem8FilePathE"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigReader17AsciiConfigReaderERKN10Filesystem8FilePathE"></span><span id="VN::RegisterScan::AsciiConfigReader::AsciiConfigReader__Filesystem::FilePathCR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_reader_1a1038dfa12ea57d114fa40ebef61bca4a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AsciiConfigReader</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Filesystem</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="typedef__file___base_8hpp_1ad0d258b70c67e56fec5a1647fbb64fd7.html#_CPPv4N2VN10Filesystem8FilePathE" title="VN::Filesystem::FilePath"><span class="n"><span class="pre">FilePath</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">path</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigReader17AsciiConfigReaderERKN10Filesystem8FilePathE" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Constructs an <a class="reference internal" href="#class_v_n_1_1_register_scan_1_1_ascii_config_reader"><span class="std std-ref">AsciiConfigReader</span></a> that reads from the specified file path. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – The file path containing ASCII configuration commands. </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan17AsciiConfigReader4nextER12AsciiMessage">
 <span id="_CPPv3N2VN12RegisterScan17AsciiConfigReader4nextER12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigReader4nextER12AsciiMessage"></span><span id="VN::RegisterScan::AsciiConfigReader::next__AsciiMessageR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_reader_1a0bfca9a840c92909285b8a91203e2c48"></span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">next</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigReader4nextER12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Reads the next line from the ASCII configuration file into the provided message buffer. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> – <strong>[out]</strong> Reference to an AsciiMessage object that will be populated with the next line. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Error code indicating success or failure of the read operation. </p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 </dd></dl>

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,21 +33,47 @@ namespace VN
 {
 namespace Math
 {
+/**
+ * @brief Calculates the course over ground (COG).
+ * @param velNedX Velocity in the North direction (m/s).
+ * @param velNedY Velocity in the East direction (m/s).
+ * @return Course over ground in radians.
+ */
 inline float course_over_ground(float velNedX, float velNedY) noexcept { return std::atan2(velNedY, velNedX); }
 
+/**
+ * @brief Calculates the course over ground (COG).
+ * @param velNed A 3D velocity vector in NED (North-East-Down) frame.
+ * @return Course over ground in radians.
+ */
 inline float course_over_ground(const Vec3f& velNed) noexcept { return course_over_ground(velNed[0], velNed[1]); }
 
+/**
+ * @brief Calculates the speed over ground (SOG).
+ * @param velNedX Velocity in the North direction (m/s).
+ * @param velNedY Velocity in the East direction (m/s).
+ * @return Speed over ground in m/s.
+ */
 inline float speed_over_ground(const float velNedX, const float velNedY) noexcept { return std::sqrt(velNedX * velNedX + velNedY * velNedY); }
 
+/**
+ * @brief Calculates the speed over ground (SOG).
+ * @param velNed A 3D velocity vector in NED (North-East-Down) frame.
+ * @return Speed over ground in m/s.
+ */
 inline float speed_over_ground(const Vec3f& velNed) noexcept { return speed_over_ground(velNed[0], velNed[1]); }
 
-constexpr double C_EARTHF = 0.003352810664747;
-constexpr double C_EARTHR = 6378137.0;
-constexpr double C_E2 = 0.0066943799901413295;
-constexpr double C_EPSILON = 0.99664718933525254;
-constexpr double C_ABAR = 42697.672707180049;
-constexpr double C_BBAR = 42841.31151331366;
-
+constexpr double C_EARTHF = 0.003352810664747;     ///< Earth flattening factor (WGS84)
+constexpr double C_EARTHR = 6378137.0;             ///< Earth equatorial radius (meters) (WGS84)
+constexpr double C_E2 = 0.0066943799901413295;     ///< Square of Earth's first eccentricity (WGS84)
+constexpr double C_EPSILON = 0.99664718933525254;  ///< Epsilon = 1 - Earth's flattening factor (WGS84)
+constexpr double C_ABAR = 42697.672707180049;      ///< A-bar constant used in geodetic calculations
+constexpr double C_BBAR = 42841.31151331366;       ///< B-bar constant used in geodetic calculations
+/**
+ * @brief Converts position in Earth centered Earth fixed (ECEF) frame to latitude, longitude, altitude (LLA).
+ * @param ecef A 3D ECEF position vector (X, Y, Z in meters).
+ * @return Position given as LLA.
+ */
 inline Lla ecef2lla(const Vec3d& ecef) noexcept
 {
     double rho = std::sqrt(ecef[0] * ecef[0] + ecef[1] * ecef[1]);
@@ -74,6 +100,11 @@ inline Lla ecef2lla(const Vec3d& ecef) noexcept
     return Lla{rad2deg(phi), rad2deg(std::atan2(ecef[1], ecef[0])), rho * std::cos(phi) + (ecef[2] + C_E2 * betaNew * beta) * beta - betaNew};
 }
 
+/**
+ * @brief Converts position given as latitude, longitude, altitude (LLA) to the Earth centered Earth fixed (ECEF) frame.
+ * @param lla Position given as LLA.
+ * @return A 3D ECEF coordinate vector (X, Y, Z in meters).
+ */
 inline Vec3d lla2ecef(const Lla& lla) noexcept
 {
     Lla llar{deg2rad(lla.lat), deg2rad(lla.lon), lla.alt};

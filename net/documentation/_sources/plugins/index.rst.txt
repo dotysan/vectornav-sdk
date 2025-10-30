@@ -6,8 +6,9 @@ Plugins
 .. toctree::
     :maxdepth: 1
 
+    Calibration
     DataExport
-    FirmwareUpdate
+    FirmwareProgrammer
+    Logger
     Math
     RegisterScan
-    SimpleLogger

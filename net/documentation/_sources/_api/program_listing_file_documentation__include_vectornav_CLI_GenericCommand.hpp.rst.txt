@@ -13,16 +13,11 @@ Program Listing for File CLI_GenericCommand.hpp
    #ifndef VN_CLI_GENERICCOMMAND_HPP_
    #define VN_CLI_GENERICCOMMAND_HPP_
    
-   #include "Windows.h"
-   #include <conio.h>
    #include <msclr/marshal.h>
    
    #pragma managed(push, off)
    #include "vectornav/Interface/GenericCommand.hpp"
-   #include "vectornav/Interface/Commands.hpp"
    #pragma managed(pop)
-   
-   #include <string>
    
    using namespace System;
    using namespace msclr::interop;

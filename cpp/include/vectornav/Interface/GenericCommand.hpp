@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -145,7 +145,7 @@ public:
     /// @param responseToCheck The unit's response to attempt to match.
     /// @param timestamp The timestamp that will be saved as the response time if the response matches.
     /// @return Response was matched.
-    virtual bool matchResponse(const AsciiMessage& responseToCheck, const time_point timestamp) noexcept;
+    virtual bool isMatchingResponse(const AsciiMessage& responseToCheck, const time_point timestamp) noexcept;
 
     /// @brief Sets necessary flags to send this command to the unit.
     void prepareToSend() noexcept;

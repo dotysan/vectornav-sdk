@@ -74,6 +74,8 @@ Included By
 
 - :ref:`file_plugins_Math_vectornav_PosVelMath.hpp`
 
+- :ref:`file_plugins_Math_vectornav_SampleStats.hpp`
+
 
 
 
@@ -129,6 +131,10 @@ Functions
 
 - :ref:`exhale_function__measurement_datatypes_8hpp_1a6ac7df478c5da6d0885a10fc3560fc19`
 
+- :ref:`exhale_function__measurement_datatypes_8hpp_1a4f63b2034961910ce87443a82b751cc3`
+
+- :ref:`exhale_function__measurement_datatypes_8hpp_1ab188c553dd13f5aa302f04bfffc06dfb`
+
 - :ref:`exhale_function__measurement_datatypes_8hpp_1ad00b56d84fe72260570fe651e633cfe7`
 
 
@@ -144,6 +150,8 @@ Variables
 
 
 - :ref:`exhale_variable__measurement_datatypes_8hpp_1a1777181a95e6d1023f93a2e7f3262852`
+
+- :ref:`exhale_variable__measurement_datatypes_8hpp_1a6b1866190ff7655014606f633bc61f58`
 
 - :ref:`exhale_variable__measurement_datatypes_8hpp_1af15cebc8d291813bd2a70e192625d281`
 

@@ -54,6 +54,8 @@ Included By
 
 - :ref:`file_plugins_DataExport_include_vectornav_ExporterAscii.hpp`
 
+- :ref:`file_plugins_DataExport_include_vectornav_ExporterSkippedByte.hpp`
+
 - :ref:`file_plugins_Math_vectornav_EigenDecomposition.hpp`
 
 - :ref:`file_plugins_Math_vectornav_LinearAlgebra.hpp`
@@ -75,11 +77,13 @@ Defines
 
 - :ref:`exhale_define__debug_8hpp_1a1359f8bc653803648cad82553a57915b`
 
-- :ref:`exhale_define__debug_8hpp_1ab8c00e0f390025b85b3b9e828c668cec`
+- :ref:`exhale_define__debug_8hpp_1a94621ff7e9decb7cc5bc20fe993d0cd0`
 
 - :ref:`exhale_define__debug_8hpp_1acadfbc43b59b8a8f4cde990d581c17f7`
 
 - :ref:`exhale_define__debug_8hpp_1aa98994cf2864438b51eba9bfa50e60a1`
+
+- :ref:`exhale_define__debug_8hpp_1a7d00b046315eba32b82bd712c3fd62d4`
 
 - :ref:`exhale_define__debug_8hpp_1a93ae5cc28468e017cbeadf26be97ecfa`
 

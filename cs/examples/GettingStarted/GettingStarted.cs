@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,9 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 using System;
 using VNSDK;
+using VNSDK.Registers;
+
 
 namespace GettingStarted
 {
@@ -31,149 +32,139 @@ namespace GettingStarted
     {
         static int Main(string[] args)
         {
-            Console.WriteLine($"Starting Getting Started example.");
+            /*
+            This getting started example walks through the C# usage of the SDK to connect to and interact with a VectorNav unit.
 
-            // This getting started example will walk you throgh the C# usage of the SDK to connect to and interact with a VectorNav sensor.
-
-            // This example will achieve the following:
-            // 1. Connect to the sensor
-            // 2. Poll and print the model number using a read register command
-            // 3. Poll and print the current yaw, pitch, and roll using a read register command
-            // 4. Configure the ADOR and ADOF to YPR at 2Hz
-            // 5. Configure the first binary output to output timeStartup, accel, and angRate, all from common group, with a 200 rate divisor
-            // 6. Enter a loop for 5 seconds where it:
-            //    Determines which measurement it received (VNYPR or the necessary binary header)
-            //    Prints out the relevant measurement from the CD struct
-            // 7. Disconnect from sensor
+            This example will achieve the following:
+            1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            2. Poll and print the model number using a read register command
+            3. Poll and print the current yaw, pitch, and roll using a read register command
+            4. Configure the asynchronous ASCII output to YPR at 2 Hz
+            5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group, at a 2 Hz output rate (1 Hz if VN-300) through both serial ports
+            6. Enter a loop for 5 seconds where it:
+               Determines which measurement it received (VNYPR or the necessary binary header)
+               Prints out the relevant measurement from the CompositeData struct
+            7. Disconnect from the VectorNav unit
+            */
 
             // Define the port connection parameters to be used later
-            String port = "COM7";           // Change the sensor port name to the comm port of your local machine
+            String portName = "COM1"; // Change the sensor port name to the comm port of your local machine
             if (args.Length > 0)
             {
-                port = args[0];
+                portName = args[0];
             }
 
-            // Instantiate a Sensor object that we'll use to interact with the sensor
+            // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
             Sensor sensor = new Sensor();
-
-            // ------------------------
-            // 1. Connect to the sensor
-            sensor.AutoConnect(port);
-
-            if (!sensor.VerifySensorConnectivity())
+            try { sensor.AutoConnect(portName); }
+            catch (Exception latestError)
             {
-                Console.WriteLine("Error: Failed to connect to sensor.");
+                Console.WriteLine($"Error: {latestError.Message} encountered when connecting to {portName}.");
                 return 1;
             }
+            Console.WriteLine($"Connected to {portName} at {sensor.ConnectedBaudRate()}");
 
-            // -------------------------------
-            // 2. Print the sensor model number
+            // 2. Poll and print the model number using a read register command
+            // Create an empty register object of the necessary type, where the data member will be populated when the sensor responds to our "read register" request
+            VNSDK.Registers.System.Model modelRegister = new VNSDK.Registers.System.Model();
+            try { sensor.ReadRegister(modelRegister); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when reading register 1 (Model).");
+                return 1;
+            }
+            Console.WriteLine($"Sensor Model Number: {modelRegister.model}");
 
-            // The Register base class object is needed for the SDK API calls
-            // You can access the data by casting the object as the derived object
-            VNSDK.Registers.System.Model modelReg = new VNSDK.Registers.System.Model();
-            sensor.ReadRegister(modelReg);
-            Console.WriteLine($"Sensor Model Number: {modelReg.model}");
+            // 3. Poll and print the current yaw, pitch, and roll using a read register command
+            VNSDK.Registers.Attitude.YawPitchRoll yprRegister = new VNSDK.Registers.Attitude.YawPitchRoll();
+            try { sensor.ReadRegister(yprRegister); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when reading register 8 (YawPitchRoll).");
+                return 1;
+            }
+            Console.WriteLine($"Current Reading:" + $"\n\tYaw: {yprRegister.yaw} , " + $"Pitch: {yprRegister.pitch} , " + $"Roll: {yprRegister.roll}");
 
-            // ------------------------
-            // 3. Print the current YPR
-
-            // Another approach to accessing register is to define the derived object to more easily access the data members
-            VNSDK.Registers.Attitude.YawPitchRoll ypr = new VNSDK.Registers.Attitude.YawPitchRoll();
-            // And then making an base class alias of the derived object to pass to the SDK API
-            // This is because .NET does not all polymorphism at the method parameter level
-            // And .NET does not allow casting the derived object as an argument in the function call
-            sensor.ReadRegister(ypr);
-            Console.WriteLine($"Current Reading: " +
-                $"Yaw {ypr.yaw}, " +
-                $"Pitch {ypr.pitch}, " +
-                $"Roll {ypr.roll}");
-
-            // -------------------------------------------------------
-            // 4. Configure the asynchronous ASCII output to YPR at 2Hz
-
-            String messageType = "VNYPR";       // Used when identifying measurements
-
-            // Set ASCII messages to YPR
-            VNSDK.Registers.System.AsyncOutputType asyncOutputType = new VNSDK.Registers.System.AsyncOutputType();
-            asyncOutputType.ador = VNSDK.Registers.System.AsyncOutputType.Ador.YPR;                       // YPR
-            asyncOutputType.serialPort = VNSDK.Registers.System.AsyncOutputType.SerialPort.ActiveSerial;       // Active Serial Port
-
-            sensor.WriteRegister(asyncOutputType);
+            // 4. Configure the asynchronous ASCII output to YPR at 2 Hz
+            VNSDK.Registers.System.AsyncOutputType asyncDataOutputType = new VNSDK.Registers.System.AsyncOutputType();
+            asyncDataOutputType.ador = VNSDK.Registers.System.AsyncOutputType.Ador.YPR;
+            asyncDataOutputType.serialPort = VNSDK.Registers.System.AsyncOutputType.SerialPort.Serial1;
+            try { sensor.WriteRegister(asyncDataOutputType); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when writing register 6 (AsyncOutputType).");
+                return 1;
+            }
             Console.WriteLine("ADOR configured.");
 
-            VNSDK.Registers.System.AsyncOutputFreq asyncOutputFreq = new VNSDK.Registers.System.AsyncOutputFreq();
-            asyncOutputFreq.adof = VNSDK.Registers.System.AsyncOutputFreq.Adof.Rate1Hz;           // 1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200 Hz
-            asyncOutputFreq.serialPort = VNSDK.Registers.System.AsyncOutputFreq.SerialPort.ActiveSerial;       // Active Serial Port
-
-            sensor.WriteRegister(asyncOutputFreq);
-
+            VNSDK.Registers.System.AsyncOutputFreq asyncDataOutputFrequency = new VNSDK.Registers.System.AsyncOutputFreq();
+            asyncDataOutputFrequency.adof = VNSDK.Registers.System.AsyncOutputFreq.Adof.Rate2Hz;
+            asyncDataOutputFrequency.serialPort = VNSDK.Registers.System.AsyncOutputFreq.SerialPort.Serial1;
+            try { sensor.WriteRegister(asyncDataOutputFrequency); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when writing register 7 (AsyncOutputFreq).");
+                return 1;
+            }
+            Console.WriteLine("ADOR configured.");
             Console.WriteLine("ADOF configured.");
 
-            // ----------------------------
-            // 5. Configure a binary output
-
-            VNSDK.Registers.System.BinaryOutput1 binaryOutput1 = new VNSDK.Registers.System.BinaryOutput1();
-            binaryOutput1.rateDivisor = 400;         // 2 Hz on all but VN-300
-            binaryOutput1.asyncMode.serial1 = true;
-            binaryOutput1.asyncMode.serial2 = true;
-            binaryOutput1.common.timeStartup = true;
-            binaryOutput1.common.accel = true;
-            binaryOutput1.common.angularRate = true;
-            binaryOutput1.common.imu = true;
-
-            // The Register base object is also used when identifying measurements
-            sensor.WriteRegister(binaryOutput1);
-
-            Console.WriteLine("Binary Output 1 message configured.");
-
-            // ------------------------------------------------------------------
-            // 6. Listen to data from the sensor and print recognized packets
-
-            Int32 secondsToRun = 5;
-            Int32 asciiMessageCount = 0;
-            Int32 binaryMessageCount = 0;
-            System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
-            s.Start();
-            while (s.Elapsed < TimeSpan.FromSeconds(secondsToRun))
+            // 5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group, at a 2 Hz output rate (1 Hz if VN-300) through both serial ports
+            VNSDK.Registers.System.BinaryOutput1 binaryOutput1Register = new VNSDK.Registers.System.BinaryOutput1();
+            binaryOutput1Register.asyncMode.serial1 = true;
+            binaryOutput1Register.asyncMode.serial2 = true;
+            binaryOutput1Register.rateDivisor = 400;
+            binaryOutput1Register.common.timeStartup = true;
+            binaryOutput1Register.common.accel = true;
+            binaryOutput1Register.common.angularRate = true;
+            binaryOutput1Register.common.imu = true;
+            try { sensor.WriteRegister(binaryOutput1Register); }
+            catch (Exception latestError)
             {
-                Nullable<CompositeData> measurement = sensor.GetNextMeasurement();
-                if (measurement.HasValue)
-                {
-                    if (measurement.Value.MatchesMessage(messageType))
-                    {
-                        Console.WriteLine($"Ascii");
-                        asciiMessageCount++;
-                        Console.WriteLine($"YPR = {measurement.Value.attitude.ypr.Value.yaw}, {measurement.Value.attitude.ypr.Value.pitch}, {measurement.Value.attitude.ypr.Value.roll}");
-                    }
+                Console.WriteLine($"Error: {latestError.Message} encountered when writing register 75 (BinaryOutput1).");
+                return 1;
+            }
+            Console.WriteLine("Binary output 1 message configured.");
 
-                    else if (measurement.Value.MatchesMessage(binaryOutput1))
-                    {
-                        Console.WriteLine($"Binary");
-                        binaryMessageCount++;
-                        if (measurement.Value.time.timeStartup.HasValue)
-                        {
-                            Console.WriteLine($"Time: {measurement.Value.time.timeStartup.Value}");
-                        }
-                        if (measurement.Value.imu.accel.HasValue)
-                        {
-                            Console.WriteLine($"Accel: X {measurement.Value.imu.accel.Value.x}, Y {measurement.Value.imu.accel.Value.y}, Z {measurement.Value.imu.accel.Value.z}");
-                        }
-                    }
-                    // else
-                    // {
-                    //     Console.WriteLine($"none");
-                    // }
+            // 6. Enter a loop for 5 seconds where it:
+            //     Determines which measurement it received (VNYPR or the necessary binary header)
+            //     Prints out the relevant measurement from the CompositeData struct
+            System.Diagnostics.Stopwatch t0 = new System.Diagnostics.Stopwatch();
+            t0.Start();
+            while (t0.Elapsed < TimeSpan.FromSeconds(5))
+            {
+                Nullable<CompositeData> compositeData = sensor.GetNextMeasurement();
+                // Check to make sure that a measurement is available
+                if (!compositeData.HasValue) continue;
+
+                if (compositeData.Value.MatchesMessage(binaryOutput1Register))
+                {
+                    Console.WriteLine($"Found binary 1 measurment.");
+
+                    Console.WriteLine($"\tTime: {compositeData.Value.time.timeStartup.Value.nanoseconds()}");
+                    Vec3f accel = compositeData.Value.imu.accel.Value;
+                    Console.WriteLine($"\tAccel: X {accel.x}\n\tAccel Y: {accel.y}\n\tAccel Z: {accel.z}");
+                }
+                else if (compositeData.Value.MatchesMessage($"VNYPR"))
+                {
+                    Console.WriteLine($"Found Ascii ypr measurement.");
+
+                    Ypr ypr = compositeData.Value.attitude.ypr.Value;
+                    Console.WriteLine($"\tYaw: {ypr.yaw}\n\tPitch: {ypr.pitch}\n\tPitch: {ypr.roll}");
+                }
+
+                // Handle asynchronous errors
+                try { sensor.ThrowIfAsyncError(); }
+                catch (Exception asyncError)
+                {
+                    Console.WriteLine($"Received async error: {asyncError.Message}");
                 }
             }
-            s.Stop();
-            Console.WriteLine($"Ascii Messages: {asciiMessageCount}, Binary Messages: {binaryMessageCount}");
+            t0.Stop();
 
-            // --------------------------------------------------------------------------------
-            // 7. Disconnect from the sensor, freeing resources and closing the started thread.
-
+            // 7. Disconnect from the VectorNav unit
             sensor.Disconnect();
-            Console.WriteLine($"Sensor Disconnected.");
+            Console.WriteLine($"Sensor disconnected.");
             Console.WriteLine($"Getting Started example complete.");
 
             return 0;

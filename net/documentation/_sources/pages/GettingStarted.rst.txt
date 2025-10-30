@@ -14,15 +14,17 @@ Installation
 
 To build and install the VectorNav MATLAB library, download and install MATLAB from the `Mathworks website <https://www.mathworks.com/help/install/ug/install-products-with-internet-connection.html>`_ if you have not already done so. The VnSdk_Net.dll file is distributed in the `./net` directory. To use the dll, you must import that file into your MATLAB instance using: 
 
-.. code-block:: matlab
-
-    NET.addAssembly(VnDotNetAssemblyPath);
+.. literalinclude::  ../../../matlab/examples/GettingStarted/GettingStarted.m
+    :language: matlab
+    :start-at: vnsdkAssembly
+    :end-before: import
 
 All of the values in the assembly are nested in the `VNSDK` namespace. You must then import the namespace `VNSDK` which also strips the namespace qualifier.
 
-.. code-block:: matlab
-
-    import VNSDK.*
+.. literalinclude::  ../../../matlab/examples/GettingStarted/GettingStarted.m
+    :language: matlab
+    :start-at: import
+    :end-at: import
 
 The namespace importing is scope-tied, so it must be called in each new function. 
 
@@ -37,10 +39,9 @@ The best way to validate the installation is by running the Getting Started exam
 
     .. code-block:: matlab
 
-        vnSdkAssembly = NET.addAssembly(VnDotNetAssemblyPath);
         disp(vnSdkAssembly.Enums);
 
-    An enum is accessed via `('ClassName+EnumName')` inside the correct namespace. For example, for the `HeadingMode` enum inside the `VpeBasicControl` class (defined in :class:`VNSDK::Registers::Attitude::VpeBasicControl`) can be accessed via:
+    An enum is accessed via `('ClassName+EnumName')` inside the correct namespace. For example, for the `HeadingMode` enum inside the `VpeBasicControl` class (defined in :class:`~VNSDK::Registers::Attitude::VpeBasicControl`) can be accessed via:
 
     .. code-block:: matlab
 
@@ -51,7 +52,6 @@ The best way to validate the installation is by running the Getting Started exam
     .. code-block:: matlab
 
         enumType = vnSdkAssembly.Assemblyhandle.GetType();
-
         allNames = System.Enum.GetNames(enumType); 
         
     By looking at the list present in `allNames`, we can find the name of the enum class in which we are interested. Supposing we are interested in `VpeBasicControl+HeadingMode`, we can get the possible enum values available for that enum class using 

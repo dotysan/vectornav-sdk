@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # 
-# VectorNav SDK (v0.22.0)
+# VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,10 +26,11 @@ from pybind11.setup_helpers import Pybind11Extension
 from pathlib import Path
 import platform 
 regScan = Path('plugins/PyRegisterScan.cpp')
-firUpdt = Path('plugins/PyFirmwareUpdate.cpp')
-simpleLogger = Path('plugins/PySimpleLogger.cpp')
+firUpdt = Path('plugins/PyFirmwareProgrammer.cpp')
+logger = Path('plugins/PyLogger.cpp')
 dataExp = Path('plugins/PyDataExport.cpp')
 calibration = Path('plugins/PyCalibration.cpp')
+math = Path('plugins/PyMath.cpp')
 
 # Overwrite GNSS groups to enable satInfo and rawMeas, which are disabled by default in c++
 macros = [('__PYTHON__', None),('GNSS_GROUP_ENABLE', 0xFFFFFFFF),('GNSS2_GROUP_ENABLE', 0xFFFFFFFF)]
@@ -48,24 +49,24 @@ if regScan.exists():
     includes.append('../cpp/plugins/RegisterScan/include')
 
 if firUpdt.exists():
-    print("Adding Firmware Update Plugin")
-    macros.append(('__FIRMWARE_UPDATE__', None))
+    print("Adding Firmware Programmer Plugin")
+    macros.append(('__FIRMWARE_PROGRAMMER__', None))
     plugins.append(str(firUpdt))
     plugins.extend([
-        '../cpp/plugins/FirmwareUpdate/src/Bootloader.cpp',
-        '../cpp/plugins/FirmwareUpdate/src/FirmwareUpdater.cpp',   
-        '../cpp/plugins/FirmwareUpdate/src/VnXml.cpp',   
+        '../cpp/plugins/FirmwareProgrammer/src/Bootloader.cpp',
+        '../cpp/plugins/FirmwareProgrammer/src/FirmwareUpdater.cpp',   
+        '../cpp/plugins/FirmwareProgrammer/src/VnXml.cpp',   
     ])
-    includes.append('../cpp/plugins/FirmwareUpdate/include')
+    includes.append('../cpp/plugins/FirmwareProgrammer/include')
 
-if simpleLogger.exists():
-    print("Adding Simple Logger Plugin")
-    macros.append(('__SIMPLE_LOGGER__', None))
-    plugins.append(str(simpleLogger))
-    includes.append('../cpp/plugins/SimpleLogger')
+if logger.exists():
+    print("Adding Logger Plugin")
+    macros.append(('__LOGGER__', None))
+    plugins.append(str(logger))
+    includes.append('../cpp/plugins/Logger')
 
 if dataExp.exists():
-    print("Adding Data Exprot Plugin")
+    print("Adding Data Export Plugin")
     macros.append(('__DATAEXPORT__', None))
     plugins.append(str(dataExp))
     plugins.extend([
@@ -73,18 +74,24 @@ if dataExp.exists():
     ])
     includes.append('../cpp/plugins/DataExport/include')
 
-if calibration.exists():
-    print("Adding Calibration Plugin")
-    macros.append(('__CALIBRATION__', None))
-    plugins.append(str(calibration))
-    plugins.extend([
-        '../cpp/plugins/Calibration/src/Hsi.cpp',
-        '../cpp/plugins/Calibration/src/HsiDipole.cpp',
-        '../cpp/plugins/Calibration/src/HsiPatch.cpp',
-        '../cpp/plugins/Calibration/src/AccBias.cpp'
-    ])
-    includes.append('../cpp/plugins/Calibration/include')
+# if calibration.exists():
+#     print("Adding Calibration Plugin")
+#     macros.append(('__CALIBRATION__', None))
+#     plugins.append(str(calibration))
+#     plugins.extend([
+#         '../cpp/plugins/Calibration/src/DynamicAccelBias.cpp',
+#         '../cpp/plugins/Calibration/src/DynamicAccelBiasAuto.cpp',
+#         '../cpp/plugins/Calibration/src/Hsi.cpp',
+#         '../cpp/plugins/Calibration/src/HsiDipole.cpp',
+#         '../cpp/plugins/Calibration/src/HsiPatch.cpp',
+#         '../cpp/plugins/Calibration/src/StaticRfrAndAccelBias.cpp',
+#     ])
+#     includes.append('../cpp/plugins/Calibration/include')
 
+if math.exists():
+    print("Adding Math Plugin")
+    macros.append(('__MATH__', None))
+    plugins.append(str(math))
 
 ext_libs = []
 if platform.system() == 'Windows':
@@ -96,8 +103,15 @@ ext_modules = [
         [
             # Pybind Files
             'src/vectornav.cpp',
+            'src/PySensor.cpp',   
             'src/PyRegisters.cpp',
-            'src/PyCommands.cpp',   
+            'src/PyCompositeData.cpp',
+            'src/PyCommands.cpp',
+            'src/PyVnTypes.cpp',
+            'src/PyErrors.cpp',
+            "src/PyPackets.cpp",
+            "src/PyByteBuffer.cpp",
+            "src/PyUtils.cpp",
 
             # Implemenation
             '../cpp/src/Implementation/AsciiPacketDispatcher.cpp',

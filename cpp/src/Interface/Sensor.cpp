@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,12 +35,13 @@ namespace VN
 // Constructor and Desctructor
 // ------------------------------------------
 
-Sensor::Sensor()
+Sensor::Sensor(MeasQueueMode mode) : _measQueueMode{mode}, _parseToCD{mode != MeasQueueMode::Off}
 {
     // Set up packet synchronizer
     _packetSynchronizer.addDispatcher(&_faPacketDispatcher);
     _packetSynchronizer.addDispatcher(&_asciiPacketDispatcher);
     _packetSynchronizer.addDispatcher(&_fbPacketDispatcher);
+    if (_parseToCD) { _measurementQueue.setPutMode(static_cast<MeasurementQueue::PutMode>(_measQueueMode)); }
 }
 
 Sensor::~Sensor()
@@ -59,8 +60,22 @@ Sensor::~Sensor()
 
 Error Sensor::connect(const Serial_Base::PortName& portName, const BaudRate baudRate) noexcept
 {
+    if (_connectionType != ConnectionType::None) { return Error::AlreadyConnected; }
     Error lastError = _serial.open(portName, static_cast<uint32_t>(baudRate));
     if (lastError != Error::None) { return lastError; }
+    _connectionType = ConnectionType::Serial;
+#if (THREADING_ENABLE)
+    _startListening();
+#endif
+    return Error::None;
+}
+
+Error Sensor::connect(const Filesystem::FilePath& fileName) noexcept
+{
+    if (_connectionType != ConnectionType::None) { return Error::AlreadyConnected; }
+    Errored lastError = _file.open(fileName);
+    if (lastError) { return Error::FileOpenFailed; }
+    _connectionType = ConnectionType::File;
 #if (THREADING_ENABLE)
     _startListening();
 #endif
@@ -70,22 +85,11 @@ Error Sensor::connect(const Serial_Base::PortName& portName, const BaudRate baud
 Error Sensor::autoConnect(const Serial_Base::PortName& portName) noexcept
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
-    std::array<BaudRate, 9> possibleBaudRates{
-        BaudRate::Baud115200, BaudRate::Baud921600, BaudRate::Baud9600,   BaudRate::Baud19200,  BaudRate::Baud38400,
-        BaudRate::Baud57600,  BaudRate::Baud128000, BaudRate::Baud230400, BaudRate::Baud460800,
-    };
+
     Error error = connect(portName, BaudRate::Baud115200);
     if (error != Error::None) { return error; }
-    for (const auto activeBaudRate : possibleBaudRates)
-    {
-        error = changeHostBaudRate(activeBaudRate);
-        if (error == Error::UnsupportedBaudRate) { continue; }
-        if (error != Error::None) { return error; }
 
-        if (verifySensorConnectivity()) { return Error::None; }
-    }
-    disconnect();
-    return Error::ResponseTimeout;
+    return autoBaud();
 }
 
 bool Sensor::verifySensorConnectivity() noexcept
@@ -155,7 +159,9 @@ void Sensor::disconnect() noexcept
 #if (THREADING_ENABLE)
     _stopListening();
 #endif
-    _serial.close();
+    if (_connectionType == ConnectionType::Serial) { _serial.close(); }
+    else if (_connectionType == ConnectionType::File) { _file.close(); }
+    _connectionType = ConnectionType::None;
 }
 
 // ----------------------
@@ -201,7 +207,7 @@ Sensor::CompositeDataQueueReturn Sensor::_blockOnMeasurement(Timer& timer, [[may
         if (needsMoreData)
         {
             Error lastError = loadMainBufferFromSerial();
-            if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError)); }
+            if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError, now())); }
         }
 #endif
         queueReturn = _measurementQueue.get();
@@ -216,7 +222,7 @@ Error Sensor::_blockOnCommand(GenericCommand* command, Timer& timer) noexcept
     bool hasTimedOut = false;
 #if (!THREADING_ENABLE)
     Error lastError = loadMainBufferFromSerial();
-    if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError)); }
+    if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError, now())); }
 #endif
     while (command->isAwaitingResponse())
     {
@@ -228,14 +234,14 @@ Error Sensor::_blockOnCommand(GenericCommand* command, Timer& timer) noexcept
         {
             thisThread::sleepFor(Config::Sensor::commandSendSleepDuration);
             lastError = loadMainBufferFromSerial();
-            if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError)); }
+            if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError, now())); }
         }
 #endif
         hasTimedOut = timer.hasTimedOut();
         if (hasTimedOut)
         {
-            _commandProcessor.popCommandFromQueueBack();   // Since we're not tracking the command, let's remove it from the queue so that we can resend it
-            command->matchResponse("FAIL", time_point());  // Ensure awaiting flag is set false
+            _commandProcessor.popCommandFromQueueBack();        // Since we're not tracking the command, let's remove it from the queue so that we can resend it
+            command->isMatchingResponse("FAIL", time_point());  // Ensure awaiting flag is set false
             VN_DEBUG_1("Command timed out.");
             return Error::ResponseTimeout;
         }
@@ -274,13 +280,14 @@ Error Sensor::readRegister(Register* registerToRead, const bool retryOnFailure) 
 Error Sensor::writeRegister(ConfigurationRegister* registerToWrite, const bool retryOnFailure) noexcept
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
-    GenericCommand writeCommand = registerToWrite->toWriteCommand();
+    std::optional<GenericCommand> writeCommand = registerToWrite->toWriteCommand();
+    if (!writeCommand.has_value()) { return Error::NotEnoughParameters; }
     SendCommandBlockMode waitMode;
     if (retryOnFailure) { waitMode = SendCommandBlockMode::BlockWithRetry; }
     else { waitMode = SendCommandBlockMode::Block; }
-    const Error sendCommandError = sendCommand(&writeCommand, waitMode);
+    const Error sendCommandError = sendCommand(&writeCommand.value(), waitMode);
     if (sendCommandError != Error::None) { return sendCommandError; }
-    if (registerToWrite->fromCommand(writeCommand)) { return Error::ReceivedInvalidResponse; };
+    if (registerToWrite->fromCommand(writeCommand.value())) { return Error::ReceivedInvalidResponse; };
     return Error::None;
 }
 
@@ -294,17 +301,20 @@ Error Sensor::writeSettings() noexcept
 Error Sensor::reset() noexcept
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
+    uint16_t errQueueSize0 = asyncErrorQueueSize();
     Reset rst{};
     const Error sendCommandError = sendCommand(&rst, SendCommandBlockMode::BlockWithRetry);
     if (sendCommandError != Error::None) { return sendCommandError; }
     thisThread::sleepFor(Config::Sensor::resetSleepDuration);  // Give sensor time to start up
     if (!verifySensorConnectivity())
     {
-        auto portName = _serial.connectedPortName();
-        if (!portName.has_value()) { return Error::UnexpectedSerialError; }
-        Error latestError = autoConnect(portName.value());
+        Error latestError = autoBaud();
         if (latestError != Error::None) { return latestError; }
     }
+
+    // Remove any async errors since we connected successfully
+    uint16_t errQueueSizef = asyncErrorQueueSize();
+    for (uint16_t i{0}; i < errQueueSizef - errQueueSize0; ++i) { _asyncErrorQueue.popBack(); }
 
     return Error::None;
 }
@@ -331,13 +341,24 @@ Error Sensor::restoreFactorySettings() noexcept
 #endif
     const Error changeBaudRateError = _serial.changeBaudRate(115200);
     if (changeBaudRateError != Error::None) { return changeBaudRateError; }
-    thisThread::sleepFor(Config::Sensor::resetSleepDuration);  // Give sensor time to start up
+    const auto cachedMeasQSize = _measurementQueue.size();
 #if (THREADING_ENABLE)
     _startListening();
 #endif
-    if (!verifySensorConnectivity()) { return Error::ResponseTimeout; }
-
-    return Error::None;
+    // Assume connectivity if we have received a message
+    Timer timer(Config::Sensor::resetSleepDuration);
+    timer.start();
+    while (!timer.hasTimedOut())
+    {
+        if (_measurementQueue.size() > cachedMeasQSize)
+        {
+            // We've received a validated measurement, the sensor must have started up and is correctly communicating.
+            return Error::None;
+        }
+        thisThread::sleepFor(Config::Sensor::getMeasurementSleepDuration);
+    }
+    // This shouldn't happen, because the sensor should default to outputting a 40Hz ascii message.
+    return verifySensorConnectivity() ? Error::None : Error::ResponseTimeout;
 }
 
 Error Sensor::knownMagneticDisturbance(const KnownMagneticDisturbance::State state) noexcept
@@ -393,12 +414,7 @@ Error Sensor::sendCommand(GenericCommand* commandToSend, SendCommandBlockMode wa
 {
     if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
     CommandProcessor::RegisterCommandReturn regCommandReturn = _commandProcessor.registerCommand(commandToSend, timeoutThreshold);
-    if (regCommandReturn.error != CommandProcessor::RegisterCommandReturn::Error::None)
-    {
-        if (regCommandReturn.error == CommandProcessor::RegisterCommandReturn::Error::CommandQueueFull) { return Error::CommandQueueFull; }
-        else if (regCommandReturn.error == CommandProcessor::RegisterCommandReturn::Error::CommandResent) { return Error::CommandResent; }
-        else { VN_ABORT(); }
-    }
+    if (regCommandReturn.error != Error::None) { return regCommandReturn.error; }
     Error lastError = _serial.send(regCommandReturn.message.c_str(), regCommandReturn.message.length());
     if (lastError != Error::None) { return lastError; }
 
@@ -417,12 +433,7 @@ Error Sensor::sendCommand(GenericCommand* commandToSend, SendCommandBlockMode wa
         // We can resend because the command string will not have been overwriten by the response
         regCommandReturn = _commandProcessor.registerCommand(commandToSend);
 
-        if (regCommandReturn.error != CommandProcessor::RegisterCommandReturn::Error::None)
-        {
-            if (regCommandReturn.error == CommandProcessor::RegisterCommandReturn::Error::CommandQueueFull) { return Error::CommandQueueFull; }
-            else if (regCommandReturn.error == CommandProcessor::RegisterCommandReturn::Error::CommandResent) { return Error::CommandResent; }
-            else { VN_ABORT(); }
-        }
+        if (regCommandReturn.error != Error::None) { return regCommandReturn.error; }
 
         lastError = _serial.send(regCommandReturn.message.c_str(), regCommandReturn.message.length());
         if (lastError != Error::None) { return lastError; }
@@ -447,26 +458,111 @@ Error Sensor::serialSend(const char* buffer, size_t len) noexcept
     return Error::None;
 }
 
+Error Sensor::autoBaud() noexcept
+{
+    if constexpr (Config::CommandProcessor::commandProcQueueCapacity == 0) { return Error::CommandQueueFull; }
+
+    if (_connectionType != ConnectionType::Serial) { return Error::SerialPortClosed; }
+
+    std::array<BaudRate, 9> possibleBaudRates{
+        BaudRate::Baud115200, BaudRate::Baud921600, BaudRate::Baud9600,   BaudRate::Baud19200,  BaudRate::Baud38400,
+        BaudRate::Baud57600,  BaudRate::Baud128000, BaudRate::Baud230400, BaudRate::Baud460800,
+    };
+
+    for (const auto activeBaudRate : possibleBaudRates)
+    {
+        Error error = changeHostBaudRate(activeBaudRate);
+        if (error == Error::UnsupportedBaudRate) { continue; }
+        if (error != Error::None) { return error; }
+
+        if (verifySensorConnectivity()) { return Error::None; }
+    }
+
+    disconnect();
+    return Error::ResponseTimeout;
+}
+
 // ------------------
 // Additional logging
 // ------------------
 
+void Sensor::registerReceivedByteBuffer(ByteBuffer* const receivedByteBuffer) noexcept
+{
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
+    _receivedByteBuffer = receivedByteBuffer;
+}
+
+void Sensor::deregisterReceivedByteBuffer() noexcept
+{
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
+    _receivedByteBuffer = nullptr;
+}
+
+Error Sensor::subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const SyncByte syncByte) noexcept
+{
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
+    switch (syncByte)
+    {
+        case (SyncByte::Ascii):
+        {
+            return subscribeToMessage(queueToSubscribe, AsciiHeader{});
+        }
+        case (SyncByte::FA):
+        {
+            return subscribeToMessage(queueToSubscribe, BinaryOutputMeasurements{});
+        }
+        case (SyncByte::FB):
+        {
+            return subscribeToMessage(queueToSubscribe, Fb00SubscriberFilter(true, true));
+        }
+        case (SyncByte::None):
+        {
+            return _packetSynchronizer.registerSkippedByteQueue(queueToSubscribe);
+        }
+        default:
+            return Error::InvalidParameter;
+    }
+}
+
 Error Sensor::subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const BinaryOutputMeasurements& binaryOutputMeasurmenetFilter,
                                  const FaSubscriberFilterType filterType) noexcept
 {
-    const bool failed = _faPacketDispatcher.addSubscriber(queueToSubscribe, binaryOutputMeasurmenetFilter.toBinaryHeader().toMeasurementHeader(), filterType);
-    return failed ? Error::MessageSubscriberCapacityReached : Error::None;
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
+    std::optional<EnabledMeasurements> filterMeas = binaryOutputMeasurmenetFilter.toBinaryHeader().toMeasurementHeader();
+    if (!filterMeas.has_value()) { return Error::ParsingFailed; }
+    return _faPacketDispatcher.addSubscriber(queueToSubscribe, filterMeas.value(), filterType);
 }
 
 Error Sensor::subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const AsciiHeader& asciiHeaderFilter,
                                  const AsciiSubscriberFilterType filterType) noexcept
 {
-    const bool failed = _asciiPacketDispatcher.addSubscriber(queueToSubscribe, asciiHeaderFilter, filterType);
-    return failed ? Error::MessageSubscriberCapacityReached : Error::None;
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
+    return _asciiPacketDispatcher.addSubscriber(queueToSubscribe, asciiHeaderFilter, filterType);
+}
+
+Error Sensor::subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const Fb00SubscriberFilter fb00Filter) noexcept
+{
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
+    return _fbPacketDispatcher.addSubscriber(queueToSubscribe, fb00Filter);
 }
 
 void Sensor::unsubscribeFromMessage(PacketQueue_Interface* queueToUnsubscribe, const SyncByte syncByte) noexcept
 {
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
     switch (syncByte)
     {
         case (SyncByte::Ascii):
@@ -479,18 +575,36 @@ void Sensor::unsubscribeFromMessage(PacketQueue_Interface* queueToUnsubscribe, c
             _faPacketDispatcher.removeSubscriber(queueToUnsubscribe);
             break;
         }
+        case (SyncByte::FB):
+        {
+            _fbPacketDispatcher.removeSubscriber(queueToUnsubscribe);
+            break;
+        }
+        case (SyncByte::None):
+        {
+            _packetSynchronizer.deregisterSkippedByteQueue();
+            break;
+        }
         default:
-            VN_ABORT();
+            break;
     }
 }
 
 void Sensor::unsubscribeFromMessage(PacketQueue_Interface* queueToUnsubscribe, const BinaryOutputMeasurements& filter) noexcept
 {
-    _faPacketDispatcher.removeSubscriber(queueToUnsubscribe, filter.toBinaryHeader().toMeasurementHeader());
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
+    std::optional<EnabledMeasurements> filterMeas = filter.toBinaryHeader().toMeasurementHeader();
+    if (!filterMeas.has_value()) { return; }
+    _faPacketDispatcher.removeSubscriber(queueToUnsubscribe, filterMeas.value());
 }
 
 void Sensor::unsubscribeFromMessage(PacketQueue_Interface* queueToUnsubscribe, const AsciiHeader& filter) noexcept
 {
+#if THREADING_ENABLE
+    LockGuard lock(_sensorMutex);
+#endif
     _asciiPacketDispatcher.removeSubscriber(queueToUnsubscribe, filter);
 }
 
@@ -498,22 +612,80 @@ void Sensor::unsubscribeFromMessage(PacketQueue_Interface* queueToUnsubscribe, c
 // Unthreaded Packet Processing
 // ----------------------------
 
-Error Sensor::loadMainBufferFromSerial() noexcept { return _serial.getData(); }
+Error Sensor::loadMainBufferFromSerial() noexcept
+{
+    size_t initBufferIndex = _mainByteBuffer.size();
+    Error err = _serial.getData();
+    if (_receivedByteBuffer) { _copyToReceivedByteBuffer(initBufferIndex); }
+    return err;
+}
 
-bool Sensor::processNextPacket() noexcept { return _packetSynchronizer.dispatchNextPacket(); }
+void Sensor::_copyToReceivedByteBuffer(size_t mainBufferIndex) noexcept
+{
+    size_t bytesToCopy = _mainByteBuffer.size() - mainBufferIndex;
+    size_t linearBytes = _receivedByteBuffer->numLinearBytesToPut();
+    while (bytesToCopy > 0 && linearBytes > 0)
+    {
+        const size_t peekBytes = std::min(bytesToCopy, linearBytes);
+        _mainByteBuffer.peek(const_cast<uint8_t*>(_receivedByteBuffer->tail()), peekBytes, mainBufferIndex);
+        _receivedByteBuffer->put(peekBytes);
+        bytesToCopy -= peekBytes;
+        mainBufferIndex += peekBytes;
+        linearBytes = _receivedByteBuffer->numLinearBytesToPut();
+    }
+    if (bytesToCopy > 0) { _asyncErrorQueue.put(AsyncError(Error::ReceivedByteBufferFull, now())); }
+}
+
+Error Sensor::loadMainBufferFromFile() noexcept
+{
+    size_t linearBytes = _mainByteBuffer.numLinearBytesToPut();
+    size_t numBytes = _file.read((char*)(const_cast<uint8_t*>(_mainByteBuffer.tail())), linearBytes);
+    if (numBytes == 0) { return Error::FileReadFailed; }
+    _mainByteBuffer.put(numBytes);
+    if (linearBytes = _mainByteBuffer.numLinearBytesToPut(); linearBytes > 0)
+    {
+        numBytes = _file.read((char*)(const_cast<uint8_t*>(_mainByteBuffer.tail())), linearBytes);
+        if (numBytes == 0) { return Error::FileReadFailed; }
+        _mainByteBuffer.put(numBytes);
+    }
+    return Error::None;
+}
+
+Errored Sensor::processNextPacket() noexcept { return _packetSynchronizer.dispatchNextPacket(); }
 
 #if (THREADING_ENABLE)
 
 void Sensor::_listen() noexcept
 {
-    _mainByteBuffer.reset();
-    while (_listening)
+    if (_connectionType == ConnectionType::File)
     {
-        Error lastError = loadMainBufferFromSerial();
-        if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError)); }
-        bool needsMoreData = false;
-        while (!needsMoreData) { needsMoreData = processNextPacket(); }
-        thisThread::sleepFor(Config::Sensor::listenSleepDuration);
+        _mainByteBuffer.reset();
+        while (_listening)
+        {
+            {
+                LockGuard lock(_sensorMutex);
+                Error lastError = loadMainBufferFromFile();
+                if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError, now())); }
+                bool needsMoreData = false;
+                while (!needsMoreData) { needsMoreData = processNextPacket(); }
+            }
+            thisThread::sleepFor(Config::Sensor::listenSleepDuration);
+        }
+    }
+    else
+    {
+        _mainByteBuffer.reset();
+        while (_listening)
+        {
+            {
+                LockGuard lock(_sensorMutex);
+                Error lastError = loadMainBufferFromSerial();
+                if (lastError != Error::None) { _asyncErrorQueue.put(AsyncError(lastError, now())); }
+                bool needsMoreData = false;
+                while (!needsMoreData) { needsMoreData = processNextPacket(); }
+            }
+            thisThread::sleepFor(Config::Sensor::listenSleepDuration);
+        }
     }
 }
 
@@ -532,14 +704,6 @@ void Sensor::_stopListening() noexcept
     _listening = false;
     _listeningThread->join();
 }
-#endif
-
-// --------------
-// Error Handling
-// --------------
-
-uint16_t Sensor::asynchronousErrorQueueSize() const noexcept { return _asyncErrorQueue.size(); }
-
-std::optional<AsyncError> Sensor::getAsynchronousError() noexcept { return _asyncErrorQueue.get(); }
+#endif  // THREADING_ENABLE
 
 }  // namespace VN

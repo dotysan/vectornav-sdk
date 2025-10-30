@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -43,7 +43,7 @@ public:
     /// @brief Opens the specified file for reading.
     /// @param filePath
     /// @return An error occurred.
-    virtual bool open(const Filesystem::FilePath& filePath) = 0;
+    virtual Errored open(const Filesystem::FilePath& filePath) = 0;
 
     /// @brief Closes the file.
     virtual void close() = 0;
@@ -57,20 +57,21 @@ public:
     /// @brief Reads the next bytes from the file into the buffer, advancing file head.
     /// @param buffer Output buffer to receive the bytes.
     /// @param count Number of bytes to read from the file.
-    /// @return An error occurred.
-    virtual bool read(char* buffer, const size_t count) = 0;
+    /// @return Number of bytes read from file.
+    virtual size_t read(char* buffer, const size_t count) = 0;
 
     /// @brief Reads the next bytes from the file into the buffer, advancing file head, until endChar is reached.
     /// @param buffer Output buffer to receive the bytes.
+    /// @param bufferCapacity Capacity of output buffer.
     /// @param endChar The character at which to stop.
     /// @return An error occurred.
-    virtual bool read(char* buffer, const size_t bufferCapacity, const char endChar) = 0;
+    virtual Errored read(char* buffer, const size_t bufferCapacity, const char endChar) = 0;
 
     /// @brief Gets the next line (until \\n) from the file into the buffer. Strips off \\r if present. Null-terminates output.
     /// @param buffer Output buffer to receive the bytes.
     /// @param capacity Capacity of output buffer, serving as max line length.
     /// @return An error occurred.
-    virtual bool getLine(char* buffer, const size_t capacity) = 0;
+    virtual Errored getLine(char* buffer, const size_t capacity) = 0;
 };
 
 /// @brief SDK object of a file to write to.
@@ -82,7 +83,7 @@ public:
     /// @brief Opens the specified file for writing.
     /// @param filePath The file to open.
     /// @return An error occurred.
-    virtual bool open(const Filesystem::FilePath& filePath) = 0;
+    virtual Errored open(const Filesystem::FilePath& filePath) = 0;
 
     /// @brief Closes the file.
     virtual void close() = 0;
@@ -93,27 +94,30 @@ public:
     /// @brief Resets the file head to the beginning of the file, clearing any error flags.
     virtual void reset() = 0;
 
+    /// @brief Forces buffered data to be written to the underlying file system.
+    virtual void flush() = 0;
+
     /// @brief Write bytes to the file.
     /// @param buffer Input buffer head to write to the file.
     /// @param count Number of bytes to write to the file.
     /// @return An error occurred.
-    virtual bool write(const char* buffer, const size_t count) = 0;
+    virtual Errored write(const char* buffer, const size_t count) = 0;
 
     /// @brief Writes full buffer to the file.
     /// @param buffer Input buffer head to write to the file. Must be null-terminated.
     /// @return A error occurred.
-    virtual bool write(const char* buffer) = 0;
+    virtual Errored write(const char* buffer) = 0;
 
     /// @brief Writes a line to the file, terminating with \\n.
     /// @param buffer Input buffer head to write to the file.
     /// @param count Number of bytes from the buffer to write to the file (\\n character is additional, not counted in count)
     /// @return An error occurred.
-    virtual bool writeLine(const char* buffer, const size_t count) = 0;
+    virtual Errored writeLine(const char* buffer, const size_t count) = 0;
 
     /// @brief Writes a line to the file, terminating with \\n.
     /// @param buffer Input buffer head to write to the file. Must be null-terminated.
     /// @return An error occurred.
-    virtual bool writeLine(const char* buffer) = 0;
+    virtual Errored writeLine(const char* buffer) = 0;
 };
 
 }  // namespace VN

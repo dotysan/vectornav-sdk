@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -80,13 +80,13 @@ namespace PacketFinders
 {
 // Universal
 constexpr uint64_t mainBufferCapacity = 4096;
-constexpr uint8_t maxNumPacketFinders = 3;                        // FA , Ascii and FB
-constexpr uint16_t skippedReceivedByteBufferMaxPutLength = 1024;  // bytes in a single loop
+constexpr uint64_t packetMaxLength = 3000;
+constexpr uint8_t maxNumPacketFinders = 3;  // FA , Ascii and FB
 
 // Fa
 constexpr uint16_t faPacketMaxLength = 2000;
-constexpr uint8_t gnssSatInfoMaxCount = GNSS_SAT_INFO_MAX_COUNT;  // Defiend in MeasurementDatatypes.hpp to avoid circular dependancy
-constexpr uint8_t gnssRawMeasMaxCount = GNSS_RAW_MEAS_MAX_COUNT;  // Defiend in MeasurementDatatypes.hpp to avoid circular dependancy
+constexpr uint8_t gnssSatInfoMaxCount = GNSS_SAT_INFO_MAX_COUNT;  // Defiend in MeasurementDatatypes.hpp to avoid circular dependency
+constexpr uint8_t gnssRawMeasMaxCount = GNSS_RAW_MEAS_MAX_COUNT;  // Defiend in MeasurementDatatypes.hpp to avoid circular dependency
 
 // Ascii
 constexpr uint8_t asciiMaxFieldCount = 40;
@@ -115,7 +115,6 @@ constexpr uint8_t asciiPacketSubscriberCapacity = 5;
 
 namespace Serial
 {
-constexpr uint64_t numBytesToReadPerGetData = 2000;
 constexpr uint16_t PortNameMaxLength = 32;
 }  // namespace Serial
 
@@ -154,7 +153,10 @@ constexpr uint16_t asyncErrorMessageCapacity = 256;
 static_assert(CommandProcessor::messageMaxLength >= PacketFinders::asciiPacketMaxLength);  // No use to find a packet larger than we can propagate
 static_assert(PacketFinders::asciiPacketMaxLength > PacketFinders::asciiFieldMaxLength);
 static_assert(PacketFinders::asciiPacketMaxLength > PacketFinders::asciiHeaderMaxLength);
-static_assert(PacketFinders::mainBufferCapacity >= Serial::numBytesToReadPerGetData);
+static_assert(PacketFinders::mainBufferCapacity >= PacketFinders::packetMaxLength);
+static_assert(PacketFinders::packetMaxLength > CommandProcessor::messageMaxLength);
+static_assert(PacketFinders::packetMaxLength > PacketFinders::faPacketMaxLength);
+static_assert(PacketFinders::packetMaxLength > PacketFinders::fbPacketMaxLength);
 
 }  // namespace Config
 

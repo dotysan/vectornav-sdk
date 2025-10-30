@@ -30,10 +30,11 @@ Program Listing for File EigenDecomposition.hpp
    
    public:
        EigenDecomposition() : _maxIter{50} {}
+   
        EigenDecomposition(int maxIter) : _maxIter{maxIter} {}
    
        template <uint16_t m, typename T>
-       bool computeDecomposition(Matrix<m, m, T>& mat, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors) noexcept
+       Errored computeDecomposition(Matrix<m, m, T>& mat, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors) noexcept
        {
            if (m < 1) return true;  // Returned an error
    
@@ -50,17 +51,41 @@ Program Listing for File EigenDecomposition.hpp
            Matrix<m, 1, int> count(0);  // Initialize iteration counter
            Matrix<m, 1, T> scale(0.0);
            uint16_t low{0}, high{0};
-           if (balanceMatrix(mat, scale, low, high)) return true;
+           if (balanceMatrix(mat, scale, low, high))
+           {
+               VN_DEBUG_1("computeDecomposition: balanceMatrix failed");
+               return true;
+           }
    
-           if (computeUpperHessenberg(mat, count, low, high)) return true;
+           if (computeUpperHessenberg(mat, count, low, high))
+           {
+               VN_DEBUG_1("computeDecomposition: computeUpperHessenberg failed");
+               return true;
+           }
    
-           if (transformToUpperHessenberg(mat, count, low, high, eigenVectors)) return true;
+           if (transformToUpperHessenberg(mat, count, low, high, eigenVectors))
+           {
+               VN_DEBUG_1("computeDecomposition: transformToUpperHessenberg failed");
+               return true;
+           }
    
-           if (computeEigenValuesAndVectors(mat, count, eigenValuesR, eigenValuesI, eigenVectors, low, high)) return true;
+           if (computeEigenValuesAndVectors(mat, count, eigenValuesR, eigenValuesI, eigenVectors, low, high))
+           {
+               VN_DEBUG_1("computeDecomposition: computeEigenValuesAndVectors failed");
+               return true;
+           }
    
-           if (undoBalance(eigenVectors, scale, low, high)) return true;
+           if (undoBalance(eigenVectors, scale, low, high))
+           {
+               VN_DEBUG_1("computeDecomposition: undoBalance failed");
+               return true;
+           }
    
-           if (normalizeEigenVectors(eigenVectors, eigenValuesI)) return true;
+           if (normalizeEigenVectors(eigenVectors, eigenValuesI))
+           {
+               VN_DEBUG_1("computeDecomposition: normalizeEigenVectors failed");
+               return true;
+           }
    
            // while loop in n_eigeng
            uint16_t j{0};
@@ -90,7 +115,7 @@ Program Listing for File EigenDecomposition.hpp
    
    protected:
        template <uint16_t m, typename T>
-       bool balanceMatrix(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t& low, uint16_t& high) noexcept
+       Errored balanceMatrix(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t& low, uint16_t& high) noexcept
        {
            int basis = computeBasis();
            T basisSquared = static_cast<T>(basis * basis);
@@ -117,6 +142,7 @@ Program Listing for File EigenDecomposition.hpp
                            for (uint16_t i{0}; i <= k; ++i) std::swap(mat(i, j), mat(i, k));
                            for (uint16_t i{n}; i < m; ++i) std::swap(mat(j, i), mat(k, i));
                        }
+                       if (k == 0) { return true; }
                        --k;
                        iter = true;
                    }
@@ -194,7 +220,7 @@ Program Listing for File EigenDecomposition.hpp
        }
    
        template <uint16_t m, typename T>
-       bool undoBalance(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t low, uint16_t high) noexcept
+       Errored undoBalance(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t low, uint16_t high) noexcept
        {
            for (uint16_t i{low}; i <= high; ++i)
            {
@@ -220,7 +246,7 @@ Program Listing for File EigenDecomposition.hpp
        }
    
        template <uint16_t m, typename T>
-       bool computeUpperHessenberg(Matrix<m, m, T>& mat, Matrix<m, 1, int>& count, uint16_t low, uint16_t high) noexcept
+       Errored computeUpperHessenberg(Matrix<m, m, T>& mat, Matrix<m, 1, int>& count, uint16_t low, uint16_t high) noexcept
        {
            if (low > m || high > m) return true;  // Zero matrix
    
@@ -265,7 +291,7 @@ Program Listing for File EigenDecomposition.hpp
        }
    
        template <uint16_t m, typename T>
-       bool transformToUpperHessenberg(const Matrix<m, m, T>& mat, const Matrix<m, 1, int>& count, uint16_t low, uint16_t high, Matrix<m, m, T>& hes) noexcept
+       Errored transformToUpperHessenberg(const Matrix<m, m, T>& mat, const Matrix<m, 1, int>& count, uint16_t low, uint16_t high, Matrix<m, m, T>& hes) noexcept
        {
            hes = Matrix<m, m, T>::identity();
    
@@ -291,8 +317,8 @@ Program Listing for File EigenDecomposition.hpp
        }
    
        template <uint16_t m, typename T>
-       bool computeEigenValuesAndVectors(Matrix<m, m, T>& hes, Matrix<m, 1, int>& count, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI,
-                                         Matrix<m, m, T>& eigenVectors, uint16_t low, uint16_t high) noexcept
+       Errored computeEigenValuesAndVectors(Matrix<m, m, T>& hes, Matrix<m, 1, int>& count, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI,
+                                            Matrix<m, m, T>& eigenVectors, uint16_t low, uint16_t high) noexcept
        {
            // Compute eigenvalues and vectors using Francis QR algorithm
            for (uint16_t i{0}; i != m; ++i)
@@ -502,8 +528,8 @@ Program Listing for File EigenDecomposition.hpp
        }
    
        template <uint16_t m, typename T>
-       bool transformEigenVectors(Matrix<m, m, T>& hes, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors, uint16_t low,
-                                  uint16_t high) noexcept
+       Errored transformEigenVectors(Matrix<m, m, T>& hes, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors,
+                                     uint16_t low, uint16_t high) noexcept
        {
            uint16_t l, n, en, na;
            T p, q, r{0.0}, s{0.0}, t, w, x, y, z{0.0};
@@ -693,9 +719,9 @@ Program Listing for File EigenDecomposition.hpp
        }
    
        template <uint16_t m, typename T>
-       bool normalizeEigenVectors(Matrix<m, m, T>& eigenVectors, Matrix<m, 1, T>& eigenValuesI) noexcept
+       Errored normalizeEigenVectors(Matrix<m, m, T>& eigenVectors, Matrix<m, 1, T>& eigenValuesI) noexcept
        {
-           if (m < 1) return true;
+           static_assert(m >= 1);
    
            float maxI, tr, ti;
            for (uint16_t j{0}; j < m; ++j)

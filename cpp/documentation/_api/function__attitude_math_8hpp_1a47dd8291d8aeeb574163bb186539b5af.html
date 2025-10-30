@@ -83,7 +83,20 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN4Math7mag2yawERK5Vec3fRK5Vec2fRKf">
 <span id="_CPPv3N2VN4Math7mag2yawERK5Vec3fRK5Vec2fRKf"></span><span id="_CPPv2N2VN4Math7mag2yawERK5Vec3fRK5Vec2fRKf"></span><span id="VN::Math::mag2yaw__Vec3fCR.Vec2fCR.floatCR"></span><span class="target" id="_attitude_math_8hpp_1a47dd8291d8aeeb574163bb186539b5af"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Math</span></span><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">mag2yaw</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef__matrix_8hpp_1adf2ea782d6429f0b4c647e9f857bcabd.html#_CPPv4N2VN5Vec3fE" title="VN::Vec3f"><span class="n"><span class="pre">Vec3f</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">magBody</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef__matrix_8hpp_1a8b1caae5630fe8187f8341011004a19b.html#_CPPv4N2VN5Vec2fE" title="VN::Vec2f"><span class="n"><span class="pre">Vec2f</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pitchAndRoll</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">declination</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N2VN4Math7mag2yawERK5Vec3fRK5Vec2fRKf" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Calculates a tilt-corrected yaw (heading) given magnetic measurements, pitch &amp; roll and (optional) magnetic declination. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>magBody</strong> – Magnetometer measurements in body-frame. </p></li>
+<li><p><strong>pitchAndRoll</strong> – Pitch and roll when magnetometer measurement was taken (deg). </p></li>
+<li><p><strong>declination</strong> – Magnetic declination to correct from magnetic north to true north (deg). Defaults to 0. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Yaw (heading) in degrees. </p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 </section>

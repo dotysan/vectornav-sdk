@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,8 +24,11 @@
 #ifndef VN_CLI_MEASUREMENTDATATYPES_HPP_
 #define VN_CLI_MEASUREMENTDATATYPES_HPP_
 
-#include "vectornav/Implementation/MeasurementDatatypes.hpp"
 #include "vectornav/CLI_Matrix.hpp"
+
+#pragma managed(push, off)
+#include "vectornav/Implementation/MeasurementDatatypes.hpp"
+#pragma managed(pop)
 
 namespace VNSDK {
 public
@@ -253,9 +256,13 @@ private:
 public
 value struct Ypr {
     float yaw, pitch, roll;
-
     Ypr(float y, float p, float r) : yaw(y), pitch(p), roll(r) {}
     Ypr(const VN::Ypr& other) : yaw(other.yaw), pitch(other.pitch), roll(other.roll) {}
+    
+    VN::Ypr GetNative()
+    {
+        return VN::Ypr(yaw, pitch, roll);
+    }
 };
 
 public
@@ -263,6 +270,11 @@ value struct DeltaTheta {
     DeltaTheta(const VN::DeltaTheta& other) : deltaTime(other.deltaTime), deltaTheta(other.deltaTheta) {}
     float deltaTime;
     Vec3f deltaTheta;
+
+    VN::DeltaTheta GetNative()
+    {
+        return VN::DeltaTheta( deltaTime, deltaTheta.GetNative());
+    }
 };
 
 public
@@ -271,6 +283,11 @@ value struct Quaternion
     Quaternion(const VN::Quat& other) : vector(other.vector), scalar(other.scalar) {}
     Vec3f vector;
     float scalar;
+
+    VN::Quat GetNative()
+    {
+        return VN::Quat(vector.GetNative(), scalar);
+    }
 };
 
 public
@@ -278,6 +295,11 @@ value struct Lla {
     double lat, lon, alt;
     Lla(const VN::Lla& other) : lat(other.lat), lon(other.lon), alt(other.alt) { }
     Lla(double lat, double lon, float alt) : lat(lat), lon(lon), alt(alt) {}
+
+    VN::Lla GetNative()
+    {
+        return VN::Lla(lat, lon, alt);
+    }
 };
 
 public
@@ -309,8 +331,6 @@ value struct GnssDop {
     GnssDop(const VN::GnssDop& other)
         : gDop(other.gDop), pDop(other.pDop), tDop(other.tDop), vDop(other.vDop), hDop(other.hDop), nDop(other.nDop), eDop(other.eDop){};
 };
-
-constexpr uint8_t SATELLITE_MAX_COUNT = 50;
 
 public
 value struct GnssSatInfo {

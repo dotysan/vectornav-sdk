@@ -92,22 +92,40 @@
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan17AsciiConfigWriterE">
 <span id="_CPPv3N2VN12RegisterScan17AsciiConfigWriterE"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigWriterE"></span><span id="VN::RegisterScan::AsciiConfigWriter"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_writer"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AsciiConfigWriter</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RegisterScan</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="struct_v_n_1_1_register_scan_1_1_config_writer.html#_CPPv4I0EN2VN12RegisterScan12ConfigWriterE" title="VN::RegisterScan::ConfigWriter"><span class="n"><span class="pre">ConfigWriter</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N2VN12RegisterScan17AsciiConfigWriterE" title="VN::RegisterScan::AsciiConfigWriter"><span class="n"><span class="pre">AsciiConfigWriter</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigWriterE" title="Link to this definition">¶</a><br /></dt>
-<dd><div class="breathe-sectiondef docutils container">
+<dd><p>A writer that saves VectorNav configurations to ASCII text files. </p>
+<p>Writes configuration commands directly to a file without formatting changes. </p>
+<div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan17AsciiConfigWriter17AsciiConfigWriterERKN10Filesystem8FilePathE">
 <span id="_CPPv3N2VN12RegisterScan17AsciiConfigWriter17AsciiConfigWriterERKN10Filesystem8FilePathE"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigWriter17AsciiConfigWriterERKN10Filesystem8FilePathE"></span><span id="VN::RegisterScan::AsciiConfigWriter::AsciiConfigWriter__Filesystem::FilePathCR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_writer_1a71b724d4a97484b474a9e3b217f46b4b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AsciiConfigWriter</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Filesystem</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="typedef__file___base_8hpp_1ad0d258b70c67e56fec5a1647fbb64fd7.html#_CPPv4N2VN10Filesystem8FilePathE" title="VN::Filesystem::FilePath"><span class="n"><span class="pre">FilePath</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">path</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigWriter17AsciiConfigWriterERKN10Filesystem8FilePathE" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Constructs an <a class="reference internal" href="#class_v_n_1_1_register_scan_1_1_ascii_config_writer"><span class="std std-ref">AsciiConfigWriter</span></a> that writes to the specified file path. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – The file path where configurations will be saved. </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan17AsciiConfigWriter5writeERK12AsciiMessage">
-<span id="_CPPv3N2VN12RegisterScan17AsciiConfigWriter5writeERK12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigWriter5writeERK12AsciiMessage"></span><span id="VN::RegisterScan::AsciiConfigWriter::write__AsciiMessageCR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_writer_1a197fbac8959aded00d8371ebdafb8f18"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigWriter5writeERK12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<span id="_CPPv3N2VN12RegisterScan17AsciiConfigWriter5writeERK12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigWriter5writeERK12AsciiMessage"></span><span id="VN::RegisterScan::AsciiConfigWriter::write__AsciiMessageCR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_writer_1a0728e354f66da44624d3b951c3d4675e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigWriter5writeERK12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Writes an ASCII message to the output file. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> – The ASCII message to write. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Error code indicating success or failure of the operation. </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan17AsciiConfigWriter8finalizeEv">
 <span id="_CPPv3N2VN12RegisterScan17AsciiConfigWriter8finalizeEv"></span><span id="_CPPv2N2VN12RegisterScan17AsciiConfigWriter8finalizeEv"></span><span id="VN::RegisterScan::AsciiConfigWriter::finalize"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_ascii_config_writer_1a1dbe637bf84c10eb6a50af51f6fbf541"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">finalize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan17AsciiConfigWriter8finalizeEv" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Finalizes the writing process by closing the output file. </p>
+</dd></dl>
 
 </div>
 </dd></dl>

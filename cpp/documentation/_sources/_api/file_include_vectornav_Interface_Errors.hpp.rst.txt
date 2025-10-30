@@ -32,6 +32,8 @@ Includes
 
 - ``stdint.h``
 
+- ``variant``
+
 - ``vectornav/Config.hpp``
 
 - ``vectornav/HAL/Timer.hpp``
@@ -50,15 +52,21 @@ Included By
 
 - :ref:`file_include_vectornav_Implementation_CommandProcessor.hpp`
 
+- :ref:`file_include_vectornav_Implementation_PacketDispatcher.hpp`
+
 - :ref:`file_include_vectornav_Implementation_PacketSynchronizer.hpp`
 
 - :ref:`file_include_vectornav_Interface_GenericCommand.hpp`
 
 - :ref:`file_include_vectornav_Interface_Sensor.hpp`
 
-- :ref:`file_plugins_FirmwareUpdate_include_vectornav_VnXml.hpp`
+- :ref:`file_include_vectornav_TemplateLibrary_ByteBuffer.hpp`
 
-- :ref:`file_plugins_RegisterScan_src_ConfigWriter.cpp`
+- :ref:`file_plugins_FirmwareProgrammer_include_vectornav_Bootloader.hpp`
+
+- :ref:`file_plugins_FirmwareProgrammer_include_vectornav_FirmwareUpdater.hpp`
+
+- :ref:`file_plugins_FirmwareProgrammer_include_vectornav_VnXml.hpp`
 
 
 
@@ -75,6 +83,8 @@ Classes
 
 
 - :ref:`exhale_struct_struct_v_n_1_1_async_error`
+
+- :ref:`exhale_struct_struct_v_n_1_1_error_all`
 
 - :ref:`exhale_class_class_v_n_1_1_enum_check`
 
@@ -94,27 +104,44 @@ Functions
 ---------
 
 
-- :ref:`exhale_function__errors_8hpp_1a48a0d4e28bdfe3eb34e6518e9bf68533`
+- :ref:`exhale_function__errors_8hpp_1aa222360f63ba885d4a33a35204d4254c`
 
-- :ref:`exhale_function__errors_8hpp_1a3d123bd4576b3f4e309f9f490317ccb7`
+- :ref:`exhale_function__errors_8hpp_1a093c61ae7397754bf3aa150f16ddc544`
 
-- :ref:`exhale_function__errors_8hpp_1a330a009fd14755c55a5a2c40e2cf4583`
+- :ref:`exhale_function__firmware_programmer_errors_8hpp_1ab856e059bda44121e5f3f018357d0af3`
 
-- :ref:`exhale_function__errors_8hpp_1a7ec6dd141f2d55d3d6d6c8c9ffac27fd`
+- :ref:`exhale_function__errors_8hpp_1ac0fdc1412dbe31bbfb9a04eaedd883d7`
+
+- :ref:`exhale_function__errors_8hpp_1ae439ba621563d2b7e116a5eb8931672c`
+
+- :ref:`exhale_function__errors_8hpp_1a64098a03ece461c5e73a00a7fb0da439`
 
 
 Defines
 -------
 
 
-- :ref:`exhale_define__errors_8hpp_1a824517c54dc515081505f464e98ad68d`
+- :ref:`exhale_define__errors_8hpp_1ae513be44956eaa6258a647c54b362b02`
+
+- :ref:`exhale_define__errors_8hpp_1ae904ad6431c72085c0114c9dac1b1127`
+
+- :ref:`exhale_define__errors_8hpp_1aaa9713eb2f41e08a20eff475fe59cfb3`
 
 
 Typedefs
 --------
 
 
+- :ref:`exhale_typedef__errors_8hpp_1add8cd27f9bb274bbf1fbb34a1331a4c1`
+
 - :ref:`exhale_typedef__errors_8hpp_1a21bf15df0ad9aaadc6d9eb5832b660ea`
 
 - :ref:`exhale_typedef__errors_8hpp_1ae3837d21bd03010a1e70aa2bec8a4639`
+
+
+Variables
+---------
+
+
+- :ref:`exhale_variable__errors_8hpp_1a4f6b6857d8e5b5967df27225f2f80417`
 

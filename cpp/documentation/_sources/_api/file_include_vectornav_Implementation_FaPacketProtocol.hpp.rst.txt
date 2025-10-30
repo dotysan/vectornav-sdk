@@ -82,8 +82,6 @@ Classes
 
 - :ref:`exhale_struct_struct_v_n_1_1_fa_packet_protocol_1_1_find_packet_return`
 
-- :ref:`exhale_struct_struct_v_n_1_1_fa_packet_protocol_1_1_metadata`
-
 - :ref:`exhale_class_class_v_n_1_1_fa_packet_extractor`
 
 
@@ -99,6 +97,8 @@ Functions
 Typedefs
 --------
 
+
+- :ref:`exhale_typedef__fa_packet_protocol_8hpp_1a7184740770d1059bee2a3cf61772cd84`
 
 - :ref:`exhale_typedef__fa_packet_protocol_8hpp_1a8d0f03ffeebc24b335ae2981317a6f72`
 

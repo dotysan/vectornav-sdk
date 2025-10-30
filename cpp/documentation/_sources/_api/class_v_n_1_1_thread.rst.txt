@@ -3,16 +3,15 @@
 Class Thread
 ============
 
-- Defined in :ref:`file_include_vectornav_HAL_Thread_Mbed.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_Thread_PC.hpp`
 
 
 Inheritance Relationships
 -------------------------
 
-Base Types
-**********
+Base Type
+*********
 
-- ``public VN::Thread_Base`` (:ref:`exhale_class_class_v_n_1_1_thread___base`)
 - ``public VN::Thread_Base`` (:ref:`exhale_class_class_v_n_1_1_thread___base`)
 
 

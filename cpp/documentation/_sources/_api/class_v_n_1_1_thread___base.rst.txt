@@ -9,10 +9,9 @@ Class Thread_Base
 Inheritance Relationships
 -------------------------
 
-Derived Types
-*************
+Derived Type
+************
 
-- ``public VN::Thread`` (:ref:`exhale_class_class_v_n_1_1_thread`)
 - ``public VN::Thread`` (:ref:`exhale_class_class_v_n_1_1_thread`)
 
 

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,10 +26,10 @@
 #include <iostream>
 #include <string>
 
-#include "SimpleLogger.hpp"
 #include "vectornav/Interface/Errors.hpp"
 #include "vectornav/Interface/Registers.hpp"
 #include "vectornav/Interface/Sensor.hpp"
+#include "vectornav/SimpleLogger.hpp"
 #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 
 using namespace VN;
@@ -39,46 +39,56 @@ std::string usage = "[port] [path]\n";
 
 int main(int argc, char* argv[])
 {
+    /*
+    This simple logger example walks through the C++ usage of the SDK to log data from a VectorNav unit.
+
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Set up resources needed for data logging
+    3. Register the logger's input buffer to receive all bytes from the unit
+    4. Log data from the VectorNav unit
+        4.1. Check for any asynchronous errors
+    5. Disconnect from the VectorNav unit
+    */
+
     // Pass in port name and path as positional arguments, or edit them here
-    const std::string portName = (argc > 1) ? argv[1] : "COM18";
+    const std::string portName = (argc > 1) ? argv[1] : "COM1";
     const std::string filePath = (argc > 2) ? argv[2] : (fs::path(__FILE__).parent_path() / "log.bin").string();
 
+    // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
     Sensor sensor;
-
     Error latestError = sensor.autoConnect(portName);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
+        std::cerr << latestError << " encountered when connecting to " + portName << std::endl;
         return static_cast<int>(latestError);
     }
     std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
 
     Registers::System::Model modelRegister;
-
     latestError = sensor.readRegister(&modelRegister);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when reading register " << std::to_string(modelRegister.id()) << " (" << modelRegister.name()
-                  << ")" << std::endl;
+        std::cerr << latestError << " encountered when reading register " << std::to_string(modelRegister.id()) << " (" << modelRegister.name() << ")"
+                  << std::endl;
         return static_cast<int>(latestError);
     }
     std::string modelNumber = modelRegister.model;
     std::cout << "Sensor Model Number: " << modelNumber << std::endl;
 
-    // Set up resources needed for data logging
+    // 2. Set up resources needed for data logging
     ByteBuffer bufferToLog{1024 * 3};
-    SimpleLogger logger{bufferToLog, filePath};
+    Logger::SimpleLogger logger{bufferToLog, filePath};
 
-    // Register the logger's input buffer to receive all bytes from the sensor
+    // 3. Register the logger's input buffer to receive all bytes from the sensor
     sensor.registerReceivedByteBuffer(&bufferToLog);
 
-    // Create the log file and start logging to it
+    // 4. Log data from the VectorNav unit
     if (logger.start())
     {
         std::cout << "Error: Failed to write to file." << std::endl;
         return 1;
     }
-
     std::cout << "Logging to " << filePath << std::endl;
 
     Timer timer{5s};
@@ -87,16 +97,17 @@ int main(int argc, char* argv[])
     while (!timer.hasTimedOut())
     {
         std::this_thread::sleep_for(1ms);
-        // Check to make sure we didn't get any async errors. Any buffer overruns means we have dropped data.
-        asyncError = sensor.getAsynchronousError();
+        // 4.1. Check for any asynchronous errors - Any buffer overruns means data has been dropped.
+        asyncError = sensor.getNextAsyncError();
         if (asyncError) { std::cout << "Received async error: " << asyncError->error << std::endl; }
     }
-    logger.stop();
 
+    logger.stop();
     sensor.deregisterReceivedByteBuffer();
-    sensor.disconnect();
 
     std::cout << "Logged " << std::to_string(logger.numBytesLogged()) << " bytes." << std::endl;
 
-    std::cout << "SimpleLogger example complete.\n";
+    // 5. Disconnect from the VectorNav unit
+    sensor.disconnect();
+    std::cout << "SimpleLogger example complete.";
 }

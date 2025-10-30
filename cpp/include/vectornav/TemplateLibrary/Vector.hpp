@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,6 +37,8 @@
 namespace VN
 {
 
+using Errored = bool;
+
 template <typename T, size_t Capacity>
 class Vector
 {
@@ -47,11 +49,10 @@ public:
 
     constexpr Vector(std::initializer_list<T> init) noexcept
     {
-        // There should be a static VN_ASSERT here, but initilizer list size is not constexpr until c++14
         VN_ASSERT(init.size() <= Capacity);
         for (const auto& itr : init)
         {
-            bool retVal = push_back(itr);
+            Errored retVal = push_back(itr);
             VN_ASSERT(!retVal);
         }
     }
@@ -62,32 +63,32 @@ public:
         static_assert(inputArraySize <= Capacity, "[Error]: Input array exceeds the capacity of the Vector");
         for (const auto& element : arr)
         {
-            bool retVal = array.push_back(element);
+            Errored retVal = array.push_back(element);
             VN_ASSERT(!retVal);
         }
     }
 
-    constexpr bool push_back(T&& input) noexcept
+    constexpr Errored push_back(T&& input) noexcept
     {
         if (_size >= Capacity) { return true; }
         else
         {
-            array.at(_size++) = std::move(input);
+            array[_size++] = std::move(input);
             return false;
         }
     }
 
-    constexpr bool push_back(const T& input) noexcept
+    constexpr Errored push_back(const T& input) noexcept
     {
         if (_size >= Capacity) { return true; }
         else
         {
-            array.at(_size++) = input;
+            array[_size++] = input;
             return false;
         }
     }
 
-    bool pop_back() noexcept
+    Errored pop_back() noexcept
     {
         if (_size == 0) { return true; }
         else
@@ -118,10 +119,10 @@ public:
     }
 #endif
 
-    const T& front() const noexcept { return array.at(0); }         // Undefined behavior when empty, as std::vector
-    T& front() noexcept { return array.at(0); }                     // Undefined behavior when empty, as std::vector
-    const T& back() const noexcept { return array.at(_size - 1); }  // Undefined behavior when empty, as std::vector
-    T& back() noexcept { return array.at(_size - 1); }              // Undefined behavior when empty, as std::vector
+    const T& front() const noexcept { return array[0]; }         // Undefined behavior when empty, as std::vector
+    T& front() noexcept { return array[0]; }                     // Undefined behavior when empty, as std::vector
+    const T& back() const noexcept { return array[_size - 1]; }  // Undefined behavior when empty, as std::vector
+    T& back() noexcept { return array[_size - 1]; }              // Undefined behavior when empty, as std::vector
 
     using iterator = typename std::array<T, Capacity + 1>::iterator;
     using const_iterator = typename std::array<T, Capacity + 1>::const_iterator;
@@ -143,29 +144,23 @@ public:
 
     const T& at(const size_t i) const noexcept
     {
-        if (_size <= i)
-        {
-            VN_ABORT();  // We don't have an optional return, so we will just fault here. You should be checking the size before using.
-        }
-        else { return array.at(i); }
+        VN_ASSERT(i < _size);  // We don't have an optional return, so we will just fault here. You should be checking the size before using.
+        return array[i];
     }
 
     T& at(const size_t i) noexcept
     {
-        if (_size <= i)
-        {
-            VN_ABORT();  // We don't have an optional return, so we will just fault here. You should be checking the size before using.
-        }
-        else { return array.at(i); }
+        VN_ASSERT(i < _size);  // We don't have an optional return, so we will just fault here. You should be checking the size before using.
+        return array[i];
     }
 
-    bool insert(const_iterator position, const T& value) noexcept
+    Errored insert(const_iterator position, const T& value) noexcept
     {
         const size_t index = std::distance<const_iterator>(begin(), position);
 
         if (index > _size || _size >= Capacity) { return true; }
 
-        for (size_t i = _size; i > index; --i) { std::swap(array[i], array[i - 1]); }
+        std::move_backward(begin() + index, begin() + _size, begin() + _size + 1);
 
         array[index] = value;
         ++_size;
@@ -173,17 +168,16 @@ public:
         return false;
     }
 
-    bool erase(const_iterator position) noexcept
+    iterator erase(const_iterator position) noexcept
     {
         const size_t index = std::distance<const_iterator>(begin(), position);
 
-        // Invalid index or empty container
-        if (index >= _size || _size == 0) { return true; }
+        if (index >= _size || _size == 0) { return end(); }
 
-        for (size_t i = index; i < _size - 1; ++i) { std::swap(array[i], array[i + 1]); }
+        std::move(begin() + index + 1, begin() + _size, begin() + index);
 
         --_size;
-        return false;
+        return begin() + index;
     }
 
     // Getters
@@ -207,7 +201,7 @@ bool operator==(const Vector<T, Capacity>& lhs, const Vector<T, Capacity>& rhs)
     if (lhs.size() != rhs.size()) { return false; }
     for (size_t i = 0; i < lhs.size(); i++)
     {
-        if (lhs.at(i) != rhs.at(i)) { return false; }
+        if (lhs[i] != rhs[i]) { return false; }
     }
     return true;
 }

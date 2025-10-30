@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -41,33 +41,44 @@ int main(int argc, char* argv[])
     /*
     This example demonstrates how to send commands without blocking, validating each command was received correctly
     with different types of commands. For more information on non-blocking commands, please refer to the 'Advanced Functionality'
-    section of documentation/Documentation.html.
-    This example will achieve the following:
+    section of the documentation.
 
-    1. Connect to the sensor
-    2. Configure the ADOR and ADOF to YPR at 100Hz
-    3. Send generic command (known magnetic disturbance)
-    4. Wait and check response
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Configure the asychronous ASCII output to YPR at 100 Hz
+    3. Send generic command (Known Magnetic Disturbance command)
+    4. Wait and check response from the unit
     5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds:
         5.1. Check if a valid response has been received from the velocity aiding command
         5.2. Print response and send new command
-    6. Disconnect from the sensor
+    6. Disconnect from the VectorNav unit
     */
 
-    // [1] **Instantiate Sensor and Establish Connection**
-    const std::string portName = (argc > 1) ? argv[1] : "COM33";  // Default port COM33 or as passed by user.
+    // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    const std::string portName = (argc > 1) ? argv[1] : "COM1";  // Change the sensor port name to the COM port of your local machine
     Sensor sensor;
     Error latestError = static_cast<Error>(sensor.autoConnect(portName));
     if (latestError != Error::None)
     {
-        std::cerr << "Error: " << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
+        std::cerr << "Error: " << latestError << " encountered when connecting to " + portName << std::endl;
         return static_cast<int>(latestError);
     }
     std::cout << "\nConnected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
 
-    // [2] **Configure ADOR (Asynchronous Data Output Register) and ADOF (Asynchronous Data Output Frequency)**
+    Registers::System::Model modelRegister;
+    latestError = sensor.readRegister(&modelRegister);
+    if (latestError != Error::None)
+    {
+        std::cout << "Error " << latestError << " encountered when reading register " << std::to_string(modelRegister.id()) << " (" << modelRegister.name()
+                  << ")" << std::endl;
+        return static_cast<int>(latestError);
+    }
+    std::string modelNumber = modelRegister.model;
+    std::cout << "Sensor Model Number: " << modelNumber << std::endl;
+
+    // 2. Configure the asynchronous ASCII output to YPR at 100 Hz
     Registers::System::AsyncOutputType asyncDataOutputType;
-    asyncDataOutputType.ador = Registers::System::AsyncOutputType::Ador::YPR;  // Configure for Yaw, Pitch, Roll data.
+    asyncDataOutputType.ador = Registers::System::AsyncOutputType::Ador::YPR;  // Configure for Yaw, Pitch, Roll data
     asyncDataOutputType.serialPort = Registers::System::AsyncOutputType::SerialPort::Serial1;
     latestError = sensor.writeRegister(&asyncDataOutputType);
     if (latestError != Error::None)
@@ -78,7 +89,7 @@ int main(int argc, char* argv[])
     else { std::cout << "ADOR configured\n"; }
 
     Registers::System::AsyncOutputFreq asyncDataOutputFrequency;
-    asyncDataOutputFrequency.adof = Registers::System::AsyncOutputFreq::Adof::Rate100Hz;  // Set output rate to 100Hz.
+    asyncDataOutputFrequency.adof = Registers::System::AsyncOutputFreq::Adof::Rate100Hz;  // Set output rate to 100Hz
     asyncDataOutputFrequency.serialPort = Registers::System::AsyncOutputFreq::SerialPort::Serial1;
     latestError = sensor.writeRegister(&asyncDataOutputFrequency);
     if (latestError != Error::None)
@@ -88,7 +99,7 @@ int main(int argc, char* argv[])
     }
     else { std::cout << "ADOF configured\n\n"; }
 
-    // [3] **Send Known Magnetic Disturbance Command**
+    // 3. Send generic command (Known Magnetic Disturbance command)
     KnownMagneticDisturbance kmd(KnownMagneticDisturbance::State::Present);
     latestError = sensor.sendCommand(&kmd, Sensor::SendCommandBlockMode::None);  // Non-blocking
     if (latestError != Error::None)
@@ -97,8 +108,7 @@ int main(int argc, char* argv[])
         return static_cast<int>(latestError);
     }
 
-    // [4] **Check Response**
-
+    // 4. Wait and check response from the unit
 #if (THREADING_ENABLE)
     thisThread::sleepFor(250ms);
 
@@ -133,11 +143,21 @@ int main(int argc, char* argv[])
     }
     else { std::cerr << "Error: KMD did not receive a valid response." << std::endl; }
 
-    // [5] **Enter Loop for 5 Seconds to Process Commands and Measurements**
+    // 5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds
 
     // Initialize velocity aiding register, command, counters, flags, and timers
     Registers::VelocityAiding::VelAidingMeas velAidRegister;
-    GenericCommand velAidWRGCommand = velAidRegister.toWriteCommand();
+    velAidRegister.velocityX = 0.0f;
+    velAidRegister.velocityY = 0.0f;
+    velAidRegister.velocityZ = 0.0f;
+    GenericCommand velAidWRGCommand;
+    std::optional<GenericCommand> velAidWRGCmdOpt = velAidRegister.toWriteCommand();
+    if (!velAidWRGCmdOpt.has_value())
+    {
+        std::cerr << "Error: Failed to create velocity aiding command." << std::endl;
+        return static_cast<int>(Error::NotEnoughParameters);
+    }
+    else { velAidWRGCommand = velAidWRGCmdOpt.value(); }
 
     uint16_t asciiCount = 0;
     uint16_t velAidSentCount = 0;
@@ -160,7 +180,7 @@ int main(int argc, char* argv[])
             asciiCount++;
         }
 
-        // [5.1] **Check for Valid Response**
+        // 5.1. Check if a valid response has been received from the velocity aiding command
         if (!validResponseReceived && !velAidWRGCommand.isAwaitingResponse())
         {
             const std::optional<Error> error_maybe = velAidWRGCommand.getError();
@@ -176,14 +196,20 @@ int main(int argc, char* argv[])
             }
         }
 
-        // [5.2] **Send command and check response at 2 Hz**
+        // 5.2. Print response and send new command
         if (resendTimer.hasTimedOut())
         {
             if (!validResponseReceived && velAidSentCount > 0) { std::cerr << "\nError: Response Timeout\n" << std::endl; }
-            velAidRegister.velocityX = std::rand();  // std::rand() to simulate different velocities
-            velAidRegister.velocityY = std::rand();
-            velAidRegister.velocityZ = std::rand();
-            velAidWRGCommand = velAidRegister.toWriteCommand();  // The GenericCommand object was instantiated before the loop.
+            velAidRegister.velocityX = static_cast<float>(std::rand());  // std::rand() to simulate different velocities
+            velAidRegister.velocityY = static_cast<float>(std::rand());
+            velAidRegister.velocityZ = static_cast<float>(std::rand());
+            velAidWRGCmdOpt = velAidRegister.toWriteCommand();  // The GenericCommand object was instantiated before the loop.
+            if (!velAidWRGCmdOpt.has_value())
+            {
+                std::cerr << "\tError: Failed to create velocity aiding command." << std::endl;
+                return static_cast<int>(Error::NotEnoughParameters);
+            }
+            else { velAidWRGCommand = velAidWRGCmdOpt.value(); }
             latestError = sensor.sendCommand(&velAidWRGCommand, Sensor::SendCommandBlockMode::None);  // Non-blocking
             if (latestError != Error::None) { std::cerr << "Error " << latestError << " encountered when writing to register." << std::endl; }
 
@@ -197,7 +223,7 @@ int main(int argc, char* argv[])
     std::cout << "Total VelAid Commands Sent: " << velAidSentCount << std::endl;
     std::cout << "\nNonBlockingCommands example complete" << std::endl;
 
-    // [6] **Disconnect the Sensor**
+    // 6. Disconnect from the VectorNav unit
     sensor.disconnect();
 
     return 0;

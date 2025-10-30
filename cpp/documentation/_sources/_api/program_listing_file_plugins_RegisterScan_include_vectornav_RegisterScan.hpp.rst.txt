@@ -27,31 +27,31 @@ Program Listing for File RegisterScan.hpp
    
    constexpr uint16_t NUM_REG = 256;
    
-   VN::Error _setConfigurationRegister(Sensor& sensor, const AsciiMessage& msg);
+   Error _setConfigurationRegister(Sensor& sensor, const AsciiMessage& msg);
    
    template <typename T>
-   VN::Error setConfigurationRegisters(Sensor& sensor, ConfigReader<T>& configReader)
+   Error setConfigurationRegisters(Sensor& sensor, ConfigReader<T>& configReader)
    {
        AsciiMessage msg;
-       VN::Error err{VN::Error::None};
+       Error err{Error::None};
        bool readFlag = false;
-       while (configReader.getNextConfig(msg) == VN::Error::None)
+       while (configReader.getNextConfig(msg) == Error::None)
        {
            readFlag = true;
-           VN::Error err = _setConfigurationRegister(sensor, msg);
-           if (err != VN::Error::None) { return err; };
+           Error err = _setConfigurationRegister(sensor, msg);
+           if (err != Error::None) { return err; };
        }
-       if (readFlag == false) { err = VN::Error::FileReadFailed; }
+       if (readFlag == false) { err = Error::FileReadFailed; }
        return err;
    }
    
    template <typename T>
-   VN::Error loadConfiguration(Sensor& sensor, ConfigReader<T>& configReader)
+   Error loadConfiguration(Sensor& sensor, ConfigReader<T>& configReader)
    {
-       VN::Error error = sensor.restoreFactorySettings();
-       if (error != VN::Error::None) { return error; }
-       VN::Error err = setConfigurationRegisters(sensor, configReader);
-       if (err != VN::Error::None) return err;
+       Error error = sensor.restoreFactorySettings();
+       if (error != Error::None) { return error; }
+       Error err = setConfigurationRegisters(sensor, configReader);
+       if (err != Error::None) return err;
    
        error = sensor.writeSettings();
        if (error != Error::None) { return error; }
@@ -72,12 +72,12 @@ Program Listing for File RegisterScan.hpp
    };
    
    template <typename T>
-   VN::Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWriter, uint8_t regId)
+   Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWriter, uint8_t regId)
    {
-       std::cout << "Polling register " << std::to_string(regId) << "...\n";
+       VN_DEBUG_0("Polling register " << std::to_string(regId) << "...\n");
        AsciiMessage msg;
        GenericCommand cmd;
-       Error err{VN::Error::None};
+       Error err{Error::None};
    
        if (!((regId == 5) || (regId == 6) || (regId == 7) || (regId == 99)))
        {
@@ -87,14 +87,14 @@ Program Listing for File RegisterScan.hpp
            std::snprintf(msg.data(), msg.capacity(), "RRG,%d", regId);
            cmd = GenericCommand(msg);
            err = sensor.sendCommand(&cmd, Sensor::SendCommandBlockMode::BlockWithRetry);
-           if (err == Error::InvalidRegister || err == Error::UnauthorizedAccess || err == Error::NotEnoughParameters) { return VN::Error::None; }
+           if (err == Error::InvalidRegister || err == Error::UnauthorizedAccess || err == Error::NotEnoughParameters) { return Error::None; }
            else if (err != Error::None) { return err; }
    
            AsciiMessage tmp = cmd.getResponse();
            const auto start = tmp.find(',');
            const auto end = tmp.find('*');
    
-           if (tmp.find(',', start + 1) == AsciiMessage::npos) { return VN::Error::None; }  // catches responses with no arguments
+           if (tmp.find(',', start + 1) == AsciiMessage::npos) { return Error::None; }  // catches responses with no arguments
    
            std::snprintf(tmp.data(), tmp.capacity(), "WRG%.*s", int(end - start), &tmp[start]);
            auto wrg = GenericCommand(tmp);
@@ -103,12 +103,12 @@ Program Listing for File RegisterScan.hpp
            if (err == Error::InvalidRegister || err == Error::UnauthorizedAccess)
            {
                // Read-only reg. (Some registers incorrectly report InvalidRegister, i.e. VN-100 WRG 101)
-               err = VN::Error::None;
+               err = Error::None;
                return err;
            }
            else if (err != Error::None) { return err; }
            err = configWriter.writeConfig(cmd.getResponse());
-           if (err != VN::Error::None) { return err; }
+           if (err != Error::None) { return err; }
        }
        else  // (regId == 5) || (regId == 6) || (regId == 7) || (regId == 99))
        {
@@ -127,11 +127,11 @@ Program Listing for File RegisterScan.hpp
            if (err == Error::None)
            {
                err = configWriter.writeConfig(cmd.getResponse());
-               if (err != VN::Error::None) { return err; }
+               if (err != Error::None) { return err; }
            }
            else if (err == Error::InvalidRegister)  // Unsupported reg
            {
-               err = VN::Error::None;
+               err = Error::None;
                return err;
            }
            else if (err == Error::TooManyParameters)
@@ -151,11 +151,11 @@ Program Listing for File RegisterScan.hpp
                if (err == Error::None)
                {
                    err = configWriter.writeConfig(cmd.getResponse());
-                   if (err != VN::Error::None) { return err; }
+                   if (err != Error::None) { return err; }
                }
                else if (err == Error::InvalidParameter)
                {
-                   err = VN::Error::None;
+                   err = Error::None;
                    return err;
                }
                else { return err; }
@@ -176,10 +176,10 @@ Program Listing for File RegisterScan.hpp
    }
    
    template <typename T>
-   VN::Error saveConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter,
-                               SaveConfigurationFilter filter = SaveConfigurationFilter{SaveConfigurationFilter::Type::Include, getDefaultConfigRegisters()})
+   Error saveConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter,
+                           SaveConfigurationFilter filter = SaveConfigurationFilter{SaveConfigurationFilter::Type::Include, getDefaultConfigRegisters()})
    {
-       VN::Error error{VN::Error::None};
+       Error error{Error::None};
        Vector<uint8_t, NUM_REG> reg_to_poll;
        if (filter.type == SaveConfigurationFilter::Type::Include) { reg_to_poll = filter.list; }
        else
@@ -188,11 +188,7 @@ Program Listing for File RegisterScan.hpp
            {
                if (std::find(filter.list.begin(), filter.list.end(), i) == filter.list.end())
                {
-                   if (reg_to_poll.push_back(i))
-                   {
-                       std::cerr << "Filter vector overload.\n";
-                       VN_ABORT();
-                   }
+                   if (reg_to_poll.push_back(i)) { return Error::BufferFull; }
                }
            }
        }
@@ -203,7 +199,7 @@ Program Listing for File RegisterScan.hpp
        for (uint8_t regId : reg_to_poll)
        {
            error = _saveConfigurationRegister(sensor, configWriter, regId);
-           if (error != VN::Error::None) { return error; }
+           if (error != Error::None) { return error; }
        }
    
        configWriter.close();
@@ -214,12 +210,12 @@ Program Listing for File RegisterScan.hpp
    }
    
    template <typename T>
-   VN::Error saveNonDefaultConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter)
+   Error saveNonDefaultConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter)
    {
        const Filesystem::FilePath tmpFileName = "UserSettings.tmp.txt";
        AsciiConfigWriter tmpWriter(tmpFileName);
-       std::cout << "Collecting user settings...\n";
-       VN::Error error = saveConfiguration(sensor, tmpWriter);
+       VN_DEBUG_0("Collecting user settings...\n");
+       Error error = saveConfiguration(sensor, tmpWriter);
        if (error != Error::None) { return error; }
        error = sensor.restoreFactorySettings();
        if (error != Error::None) { return error; }
@@ -228,8 +224,8 @@ Program Listing for File RegisterScan.hpp
        GenericConfigWriter writeNonDefault{[&tmpReader, &sensor, &configWriter](const AsciiMessage& defaultMsg)
                                            {
                                                AsciiMessage userMsg;
-                                               VN::Error err = tmpReader.next(userMsg);
-                                               if (err != VN::Error::None) { return err; }
+                                               Error err = tmpReader.next(userMsg);
+                                               if (err != Error::None) { return err; }
                                                // Only compare until the asterisk (crc might be different formats, and line endings change when reading from file
                                                // due to getLine)
                                                const auto userAsteriskPos = std::find(userMsg.begin(), userMsg.end(), '*');
@@ -239,7 +235,7 @@ Program Listing for File RegisterScan.hpp
                                                if (userLength != defaultLength || !std::equal(userMsg.begin(), userAsteriskPos, defaultMsg.begin()))
                                                {
                                                    err = _setConfigurationRegister(sensor, userMsg);
-                                                   if (err != VN::Error::None) { return err; }
+                                                   if (err != Error::None) { return err; }
                                                    err = configWriter.writeConfig(userMsg);
                                                    return err;
                                                }
@@ -247,11 +243,11 @@ Program Listing for File RegisterScan.hpp
                                            },
                                            [&configWriter]() { configWriter.close(); }};
    
-       std::cout << "Collecting default settings and writing diffs...\n";
+       VN_DEBUG_0("Collecting default settings and writing diffs...\n");
        error = saveConfiguration(sensor, writeNonDefault);
-       if (error != VN::Error::None) { return error; }
+       if (error != Error::None) { return error; }
    
-       std::cout << "Issuing Write Settings and Reset...\n";
+       VN_DEBUG_0("Issuing Write Settings and Reset...\n");
        error = sensor.writeSettings();
        if (error != Error::None) { return error; }
        error = sensor.reset();

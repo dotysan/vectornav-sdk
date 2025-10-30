@@ -52,8 +52,6 @@ Included By
 
 - :ref:`file_plugins_RegisterScan_include_vectornav_RegisterScan.hpp`
 
-- :ref:`file_plugins_RegisterScan_src_ConfigWriter.cpp`
-
 
 
 

@@ -52,8 +52,6 @@ Included By
 
 - :ref:`file_include_vectornav_Interface_Sensor.hpp`
 
-- :ref:`file_plugins_DataExport_include_vectornav_FileExporter.hpp`
-
 
 
 
@@ -66,6 +64,8 @@ Namespaces
 
 Classes
 -------
+
+
 
 
 - :ref:`exhale_class_class_v_n_1_1_fb_packet_dispatcher`

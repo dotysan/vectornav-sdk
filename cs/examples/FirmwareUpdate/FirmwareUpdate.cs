@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,18 +21,105 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 using System;
 using System.Collections.Generic;
 using VNSDK;
 
-namespace Examples
+namespace FirmwareUpdate
 {
+    class Program
+    {
+        static int Main(string[] args)
+        {
+            /*
+            This firmware update example walks through the C# usage of the SDK to connect to and update the firmware on a VectorNav unit.
+
+            This example will achieve the following:
+            1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            2. Create a FirmwareUpdater object
+            3. Update the firmware based on the file type
+            4. Disconnect from the VectorNav unit
+            */
+
+            Parameters parameters = new Parameters(args);
+            if (!parameters.valid)
+            {
+                Console.WriteLine(("Usage: " + parameters.usage));
+                return 1;
+            }
+
+            // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            // We are not autoconnecting or verifying connectivity because we cannot assume the sensor has a valid firmware
+            Sensor sensor = new Sensor();
+            try { sensor.Connect(parameters.portName, parameters.firmwareBaudRate); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when connecting to {parameters.portName}.");
+                return 1;
+            }
+
+            // 2. Create FirmwareUpdater object
+            FirmwareProgrammer.FirmwareUpdater firmwareUpdater = new FirmwareProgrammer.FirmwareUpdater();
+
+            // 3. Update firmware based on the file type - There are two file types that can be used to update the firmware: VNX or VNXML
+            FirmwareProgrammer.FirmwareUpdater.Params fwUpdateParams = new FirmwareProgrammer.FirmwareUpdater.Params(parameters.firmwareBaudRate, parameters.bootloaderBaudRate);
+            Console.WriteLine($"Begin updating.");
+
+            if (!string.IsNullOrEmpty(parameters.vnxmlPath))
+            {
+                // Run using a VNXML file
+                Console.WriteLine($"Update firmware with vnxml: {parameters.vnxmlPath}");
+                try
+                {
+                    firmwareUpdater.UpdateFirmware(ref sensor, parameters.vnxmlPath, fwUpdateParams);
+                }
+                catch (Exception latestError)
+                {
+                    Console.WriteLine($"{latestError.Message}: firmware update failed.");
+                    return 1;
+                }
+
+            }
+            else
+            {
+                // Run loading individual VNX files
+                try
+                {
+                    firmwareUpdater.UpdateFirmware(ref sensor, parameters.files, fwUpdateParams);
+                }
+                catch (Exception latestError)
+                {
+                    Console.WriteLine($"{latestError.Message}: firmware update failed.");
+                    return 1;
+                }
+
+            }
+
+            // Handle asynchronous errors that occurred during firmware upgrade
+            while (true)
+            {
+                try
+                {
+                    sensor.ThrowIfAsyncError();
+                    break;
+                }
+                catch (Exception asyncError)
+                {
+                    Console.WriteLine($"Received async error: {asyncError.Message}");
+                }
+            }
+
+            // 4. Disconnect from the VectorNav unit
+            sensor.Disconnect();
+            return 0;
+        }
+    }
+
     public class Parameters
     {
         public string usage { get; }
         public bool valid { get; }
-        public string port { get; }
+        public string portName { get; }
         public string vnxmlPath { get; }
         public string navPath { get; }
         public string gnssPath { get; }
@@ -40,10 +127,12 @@ namespace Examples
         public uint firmwareBaudRate { get; }
         public uint bootloaderBaudRate { get; }
 
+        public List<FirmwareProgrammer.FirmwareUpdater.FirmwareFile> files { get; } = new List<FirmwareProgrammer.FirmwareUpdater.FirmwareFile>();
+
         public Parameters(string[] args)
         {
             usage = "[--PortName={port_name}] [--{Processor}={file_path}... | --vnXml={file_path}] --firmwareBaudRate={firmware_baudrate} --bootloaderBaudRate={bootloader_baudrate}";
-            port = string.Empty;
+            portName = string.Empty;
             vnxmlPath = string.Empty;
             navPath = string.Empty;
             gnssPath = string.Empty;
@@ -52,16 +141,17 @@ namespace Examples
             bootloaderBaudRate = 115200;
             valid = true;
 
+            // Define the port connection parameters to be used later
             if (args.Length == 0)
             {
-                // Change these to your local machine to run executable without arguments
-                port = "COM11";
-                navPath = "ReferenceModels_v3.vn100.vnx";
+                // No paths were provided via command line, so run loading individual packaged reference model VNX files
+                portName = "COM1"; // Change the sensor port name to the COM port of your local machine              
+                navPath = "ReferenceModels_v3.vn100.vnx"; // Change this to your desired VNX file
             }
 
             int index = 0;
-
             uint tempBaudRate;
+
             foreach (string parameter in args)
             {
                 index = parameter.IndexOf('=');
@@ -75,21 +165,27 @@ namespace Examples
                 // [--PortName={port_name}]
                 if (parameter.StartsWith("--PortName"))
                 {
-                    port = value;
+                    portName = value;
                 }
 
                 // [--{Processor}={file_path}...]
                 if (parameter.StartsWith("--Nav"))
                 {
-                    navPath = value;
+                    Console.WriteLine($"Update NAV Firmware : {value}");
+                    FirmwareProgrammer.FirmwareUpdater.FirmwareFile file = new FirmwareProgrammer.FirmwareUpdater.FirmwareFile(FirmwareProgrammer.FirmwareUpdater.Processor.Nav, value);
+                    files.Add(file);
                 }
                 if (parameter.StartsWith("--Gnss"))
                 {
-                    gnssPath = value;
+                    Console.WriteLine($"Update GNSS Firmware: {value}");
+                    FirmwareProgrammer.FirmwareUpdater.FirmwareFile file = new FirmwareProgrammer.FirmwareUpdater.FirmwareFile(FirmwareProgrammer.FirmwareUpdater.Processor.Gnss, value);
+                    files.Add(file);
                 }
                 if (parameter.StartsWith("--Imu"))
                 {
-                    imuPath = value;
+                    Console.WriteLine($"Update IMU Firmware : {value}");
+                    FirmwareProgrammer.FirmwareUpdater.FirmwareFile file = new FirmwareProgrammer.FirmwareUpdater.FirmwareFile(FirmwareProgrammer.FirmwareUpdater.Processor.Imu, value);
+                    files.Add(file);
                 }
 
                 // [--vnXml={file_path}]
@@ -117,57 +213,6 @@ namespace Examples
                 }
 
             }
-        }
-    }
-
-    class Program
-    {
-        static int Main(string[] args)
-        {
-            Parameters parameters = new Parameters(args);
-            if (!parameters.valid)
-            {
-                Console.WriteLine(("Usage: " + parameters.usage));
-                return 1;
-            }
-
-            Sensor sensor = new Sensor();
-            // Connect to sensor. We are not autoconnecting or verifying connectivity because we can not assume the sensor has a valid firmware
-            sensor.Connect(parameters.port, parameters.firmwareBaudRate);
-
-            List<VNSDK.FirmwareUpdater.FirmwareFile> files = new List<VNSDK.FirmwareUpdater.FirmwareFile>();
-            if (!string.IsNullOrEmpty(parameters.gnssPath)) {
-                VNSDK.FirmwareUpdater.FirmwareFile file = new VNSDK.FirmwareUpdater.FirmwareFile(VNSDK.FirmwareUpdater.Processor.Gnss, parameters.gnssPath);
-                files.Add(file);
-            }
-            if (!string.IsNullOrEmpty(parameters.navPath)) {
-                VNSDK.FirmwareUpdater.FirmwareFile file = new VNSDK.FirmwareUpdater.FirmwareFile(VNSDK.FirmwareUpdater.Processor.Nav, parameters.navPath);
-                files.Add(file);
-            }
-            if (!string.IsNullOrEmpty(parameters.imuPath)) {
-                VNSDK.FirmwareUpdater.FirmwareFile file = new VNSDK.FirmwareUpdater.FirmwareFile(VNSDK.FirmwareUpdater.Processor.Imu, parameters.imuPath);
-                files.Add(file);
-            }
-
-            VNSDK.FirmwareUpdater firmwareUpdater = new VNSDK.FirmwareUpdater();
-
-            VNSDK.FirmwareUpdater.Params fwUpdateParams = new VNSDK.FirmwareUpdater.Params(parameters.firmwareBaudRate, parameters.bootloaderBaudRate);
-            Console.WriteLine($"Begin updating.");
-
-            if (!string.IsNullOrEmpty(parameters.vnxmlPath))
-            {
-                Console.WriteLine($"Update firmware with vnxml: {parameters.vnxmlPath}");
-                firmwareUpdater.UpdateFirmware(ref sensor, parameters.vnxmlPath, fwUpdateParams);
-            }
-            else
-            {
-                Console.WriteLine($"Update NAV Firmware : {parameters.navPath}");
-                Console.WriteLine($"Update GNSS Firmware: {parameters.gnssPath}");
-                Console.WriteLine($"Update IMU Firmware : {parameters.imuPath}");
-                firmwareUpdater.UpdateFirmware(ref sensor, files, fwUpdateParams);
-            }
-            sensor.Disconnect();
-            return 0;
         }
     }
 }

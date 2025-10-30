@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,16 +35,40 @@ namespace VN
 namespace Math
 {
 
+/**
+ * @brief Class for performing Eigen Decomposition of a matrix.
+ * This class provides an implementation for computing the eigenvalues and eigenvectors
+ * of a square matrix.
+ */
 class EigenDecomposition
 {
     static constexpr double _MACH_EPS = std::numeric_limits<double>::epsilon();
 
 public:
+    /**
+     * @brief Default constructor for EigenDecomposition.
+     * The default constructor sets the maximum number of iterations to 50.
+     */
     EigenDecomposition() : _maxIter{50} {}
+
+    /**
+     * @brief Constructor for EigenDecomposition with custom number of maximum iterations.
+     * @param maxIter The maximum number of iterations for the decomposition.
+     */
     EigenDecomposition(int maxIter) : _maxIter{maxIter} {}
 
+    /**
+     * @brief Computes the eigenvalues and eigenvectors of a square matrix.
+     * @tparam m The size of the matrix (m x m) and vectors (m x 1).
+     * @tparam T The type of elements in the matrix and vectors.
+     * @param mat The square matrix.
+     * @param[out] eigenValuesR The real parts of the eigenvalues.
+     * @param[out] eigenValuesI The imaginary parts of the eigenvalues.
+     * @param[out] eigenVectors The matrix containing the eigenvectors.
+     * @return Indicates if an error occurred. True if an error occurred, false if successful.
+     */
     template <uint16_t m, typename T>
-    bool computeDecomposition(Matrix<m, m, T>& mat, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors) noexcept
+    Errored computeDecomposition(Matrix<m, m, T>& mat, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors) noexcept
     {
         if (m < 1) return true;  // Returned an error
 
@@ -61,17 +85,41 @@ public:
         Matrix<m, 1, int> count(0);  // Initialize iteration counter
         Matrix<m, 1, T> scale(0.0);
         uint16_t low{0}, high{0};
-        if (balanceMatrix(mat, scale, low, high)) return true;
+        if (balanceMatrix(mat, scale, low, high))
+        {
+            VN_DEBUG_1("computeDecomposition: balanceMatrix failed");
+            return true;
+        }
 
-        if (computeUpperHessenberg(mat, count, low, high)) return true;
+        if (computeUpperHessenberg(mat, count, low, high))
+        {
+            VN_DEBUG_1("computeDecomposition: computeUpperHessenberg failed");
+            return true;
+        }
 
-        if (transformToUpperHessenberg(mat, count, low, high, eigenVectors)) return true;
+        if (transformToUpperHessenberg(mat, count, low, high, eigenVectors))
+        {
+            VN_DEBUG_1("computeDecomposition: transformToUpperHessenberg failed");
+            return true;
+        }
 
-        if (computeEigenValuesAndVectors(mat, count, eigenValuesR, eigenValuesI, eigenVectors, low, high)) return true;
+        if (computeEigenValuesAndVectors(mat, count, eigenValuesR, eigenValuesI, eigenVectors, low, high))
+        {
+            VN_DEBUG_1("computeDecomposition: computeEigenValuesAndVectors failed");
+            return true;
+        }
 
-        if (undoBalance(eigenVectors, scale, low, high)) return true;
+        if (undoBalance(eigenVectors, scale, low, high))
+        {
+            VN_DEBUG_1("computeDecomposition: undoBalance failed");
+            return true;
+        }
 
-        if (normalizeEigenVectors(eigenVectors, eigenValuesI)) return true;
+        if (normalizeEigenVectors(eigenVectors, eigenValuesI))
+        {
+            VN_DEBUG_1("computeDecomposition: normalizeEigenVectors failed");
+            return true;
+        }
 
         // while loop in n_eigeng
         uint16_t j{0};
@@ -100,8 +148,19 @@ public:
     }
 
 protected:
+    /**
+     * @brief Balances a matrix so that the rows with zero entries off the diagonal are isolated and the remaining columns and rows are resized to have one norm
+     * close to 1.
+     * @tparam m The size of the square matrix (m x m) and vector (m x 1).
+     * @tparam T The type of elements in the matrix and vector.
+     * @param mat The square matrix.
+     * @param scale A vector of scaling factors.
+     * @param low The first relevant row index.
+     * @param high The last relevant row index.
+     * @return Indicates if an error occurred. True if an error occurred, false if the balancing process was successful.
+     */
     template <uint16_t m, typename T>
-    bool balanceMatrix(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t& low, uint16_t& high) noexcept
+    Errored balanceMatrix(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t& low, uint16_t& high) noexcept
     {
         int basis = computeBasis();
         T basisSquared = static_cast<T>(basis * basis);
@@ -128,6 +187,7 @@ protected:
                         for (uint16_t i{0}; i <= k; ++i) std::swap(mat(i, j), mat(i, k));
                         for (uint16_t i{n}; i < m; ++i) std::swap(mat(j, i), mat(k, i));
                     }
+                    if (k == 0) { return true; }
                     --k;
                     iter = true;
                 }
@@ -204,8 +264,18 @@ protected:
         return false;
     }
 
+    /**
+     * @brief Reverts the matrix balancing by restoring rows and columns to their original positions.
+     * @tparam m The size of the square matrix (m x m) and vector (m x 1).
+     * @tparam T The type of elements in the matrix and vector.
+     * @param mat The balanced square matrix.
+     * @param scale The vector of scaling factors that were applied during the matrix balancing.
+     * @param low The first nonzero row.
+     * @param high The last nonzero row.
+     * @return Indicates if an error occurred. True if an error occurred, false if execution of the undo operation was successful.
+     */
     template <uint16_t m, typename T>
-    bool undoBalance(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t low, uint16_t high) noexcept
+    Errored undoBalance(Matrix<m, m, T>& mat, Matrix<m, 1, T>& scale, uint16_t low, uint16_t high) noexcept
     {
         for (uint16_t i{low}; i <= high; ++i)
         {
@@ -230,8 +300,18 @@ protected:
         return false;
     }
 
+    /**
+     * @brief Transforms a matrix to upper Hessenberg form.
+     * @tparam m The size of the square matrix (m x m).
+     * @tparam T The type of elements in the matrix.
+     * @param mat The matrix.
+     * @param count Permutation vector.
+     * @param low The first nonzero row.
+     * @param high The last nonzero row.
+     * @return Indicates if an error occurred. True if there was an issue with the matrix size, false if successful.
+     */
     template <uint16_t m, typename T>
-    bool computeUpperHessenberg(Matrix<m, m, T>& mat, Matrix<m, 1, int>& count, uint16_t low, uint16_t high) noexcept
+    Errored computeUpperHessenberg(Matrix<m, m, T>& mat, Matrix<m, 1, int>& count, uint16_t low, uint16_t high) noexcept
     {
         if (low > m || high > m) return true;  // Zero matrix
 
@@ -275,8 +355,19 @@ protected:
         return false;
     }
 
+    /**
+     * @brief Copies the Hessenberg matrix stored in mat to hes.
+     * @tparam m The size of the square matrix (m x m) and vector (m x 1).
+     * @tparam The type of elements in the matrix and vector.
+     * @param mat The matrix in Hessenberg form.
+     * @param count Permutation vector.
+     * @param low The first nonzero row.
+     * @param high The last nonzero row.
+     * @param hes The matrix to store the resulting upper Hessenberg form.
+     * @return Indicates if an error occurred. False if successful completion of the transformation.
+     */
     template <uint16_t m, typename T>
-    bool transformToUpperHessenberg(const Matrix<m, m, T>& mat, const Matrix<m, 1, int>& count, uint16_t low, uint16_t high, Matrix<m, m, T>& hes) noexcept
+    Errored transformToUpperHessenberg(const Matrix<m, m, T>& mat, const Matrix<m, 1, int>& count, uint16_t low, uint16_t high, Matrix<m, m, T>& hes) noexcept
     {
         hes = Matrix<m, m, T>::identity();
 
@@ -301,9 +392,22 @@ protected:
         return false;
     }
 
+    /**
+     * @brief Computes the eigenvalues and eigenvectors of a matrix in upper Hessenberg form.
+     * @tparam m The size of the matrix (m x m) and vectors (m x 1).
+     * @tparam T The type of elements in the matrix and vectors.
+     * @param hes The matrix in upper Hessenberg form, where the eigenvalues and eigenvectors are computed.
+     * @param count Iteration counter.
+     * @param eigenValuesR A vector to store the real parts of the eigenvalues.
+     * @param eigenValuesI A vector to store the imaginary parts of the eigenvalues.
+     * @param eigenVectors A matrix to store the eigenvectors.
+     * @param low The first nonzero row.
+     * @param high The last nonzero row.
+     * @return Indicates if an error occurred. True if the algorithm reached the maximum number of iterations or encountered an issue, false if successful.
+     */
     template <uint16_t m, typename T>
-    bool computeEigenValuesAndVectors(Matrix<m, m, T>& hes, Matrix<m, 1, int>& count, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI,
-                                      Matrix<m, m, T>& eigenVectors, uint16_t low, uint16_t high) noexcept
+    Errored computeEigenValuesAndVectors(Matrix<m, m, T>& hes, Matrix<m, 1, int>& count, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI,
+                                         Matrix<m, m, T>& eigenVectors, uint16_t low, uint16_t high) noexcept
     {
         // Compute eigenvalues and vectors using Francis QR algorithm
         for (uint16_t i{0}; i != m; ++i)
@@ -512,9 +616,21 @@ protected:
         return false;
     }
 
+    /**
+     * @brief Computes the eigenvectors for the eigenvalues found in computeEigenValuesAndVectors.
+     * @tparam m The size of the matrix (m x m) and vectors (m x 1).
+     * @tparam T The type of elements in the matrix and vectors.
+     * @param hes The matrix in Hessenberg form.
+     * @param eigenValuesR The real parts of the eigenvalues of the matrix.
+     * @param eigenValuesI The imaginary parts of the eigenvalues of the matrix.
+     * @param eigenVectors The matrix of eigenvectors that will be updated after transformation.
+     * @param low The first nonzero row.
+     * @param high The last nonzero row.
+     * @return Indicates if an error occurred. True if an error or early termination occurs, false if successful in transforming eigenvectors.
+     */
     template <uint16_t m, typename T>
-    bool transformEigenVectors(Matrix<m, m, T>& hes, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors, uint16_t low,
-                               uint16_t high) noexcept
+    Errored transformEigenVectors(Matrix<m, m, T>& hes, Matrix<m, 1, T>& eigenValuesR, Matrix<m, 1, T>& eigenValuesI, Matrix<m, m, T>& eigenVectors,
+                                  uint16_t low, uint16_t high) noexcept
     {
         uint16_t l, n, en, na;
         T p, q, r{0.0}, s{0.0}, t, w, x, y, z{0.0};
@@ -693,6 +809,10 @@ protected:
         return false;
     }
 
+    /**
+     * @brief Find basis used for computer number representation.
+     * @return The basis of the floating-point system.
+     */
     int computeBasis() noexcept
     {
         float x{1.0}, eins{1.0}, b{1.0};
@@ -703,10 +823,18 @@ protected:
         return static_cast<int>((x + b) - x);
     }
 
+    /**
+     * @brief Normalizes the eigenvectors to have a norm of 1.
+     * @tparam m The size of the matrix (m x m) and vector (m x 1).
+     * @tparam T The type of elements in the matrix and vector.
+     * @param eigenVectors The matrix of eigenvectors.
+     * @param eigenValuesI The imaginary parts of the eigenvalues of the matrix.
+     * @return Indicates if an error occurred. True if there was an error (e.g. invalid matrix size), false if the eigenvectors were successfully normalized.
+     */
     template <uint16_t m, typename T>
-    bool normalizeEigenVectors(Matrix<m, m, T>& eigenVectors, Matrix<m, 1, T>& eigenValuesI) noexcept
+    Errored normalizeEigenVectors(Matrix<m, m, T>& eigenVectors, Matrix<m, 1, T>& eigenValuesI) noexcept
     {
-        if (m < 1) return true;
+        static_assert(m >= 1);
 
         float maxI, tr, ti;
         for (uint16_t j{0}; j < m; ++j)
@@ -757,6 +885,9 @@ protected:
         return false;
     }
 
+    /**
+     * @brief Maximum number of iterations.
+     */
     int _maxIter;
 };
 

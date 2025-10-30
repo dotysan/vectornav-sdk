@@ -16,11 +16,21 @@ Program Listing for File PacketDispatcher.hpp
    #include <cstdint>
    
    #include "vectornav/Config.hpp"
+   #include "vectornav/Interface/Errors.hpp"
    #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
    #include "vectornav/TemplateLibrary/Vector.hpp"
    
    namespace VN
    {
+   
+   template <typename T>
+   struct PacketMetadata
+   {
+       T header;
+       uint16_t length = 0;
+       time_point timestamp;
+       bool operator==(const PacketMetadata<T>& other) const noexcept { return header == other.header && length == other.length; }
+   };
    
    constexpr uint8_t SYNC_BYTE_CAPACITY = 1;
    
@@ -44,7 +54,7 @@ Program Listing for File PacketDispatcher.hpp
    
        virtual FindPacketRetVal findPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept = 0;
    
-       virtual void dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept = 0;
+       virtual Error dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept = 0;
    
    private:
        Vector<uint8_t, SYNC_BYTE_CAPACITY> _syncBytes{};

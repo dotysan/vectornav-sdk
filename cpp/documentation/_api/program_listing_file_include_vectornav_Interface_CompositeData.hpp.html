@@ -144,8 +144,7 @@
 <span class="w">            </span><span class="n">pressure</span><span class="p">;</span>
 <span class="cp">#endif</span>
 <span class="cp">#if (IMU_GROUP_ENABLE &amp; IMU_DELTATHETA_BIT)</span>
-<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">DeltaTheta</span><span class="o">&gt;</span>
-<span class="w">            </span><span class="n">deltaTheta</span><span class="p">;</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">DeltaTheta</span><span class="o">&gt;</span><span class="w"> </span><span class="n">deltaTheta</span><span class="p">;</span>
 <span class="cp">#endif</span>
 <span class="cp">#if (IMU_GROUP_ENABLE &amp; IMU_DELTAVEL_BIT)</span>
 <span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">Vec3f</span><span class="o">&gt;</span><span class="w"> </span><span class="n">deltaVel</span><span class="p">;</span>
@@ -471,7 +470,7 @@
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">asciiAppendStatus</span><span class="p">;</span>
 
 <span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Extractor</span><span class="o">&gt;</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">copyFromBuffer</span><span class="p">(</span><span class="n">Extractor</span><span class="o">&amp;</span><span class="w"> </span><span class="n">extractor</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measGroupIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measTypeIndex</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Errored</span><span class="w"> </span><span class="n">copyFromBuffer</span><span class="p">(</span><span class="n">Extractor</span><span class="o">&amp;</span><span class="w"> </span><span class="n">extractor</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measGroupIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measTypeIndex</span><span class="p">);</span>
 
 <span class="k">private</span><span class="o">:</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">AsciiHeader</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_asciiHeader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">nullopt</span><span class="p">;</span>
@@ -480,7 +479,7 @@
 <span class="p">};</span><span class="w">  </span><span class="c1">// class CompositeData</span>
 
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Extractor</span><span class="o">&gt;</span>
-<span class="kt">bool</span><span class="w"> </span><span class="n">CompositeData</span><span class="o">::</span><span class="n">copyFromBuffer</span><span class="p">(</span><span class="n">Extractor</span><span class="o">&amp;</span><span class="w"> </span><span class="n">extractor</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measGroupIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measTypeIndex</span><span class="p">)</span>
+<span class="n">Errored</span><span class="w"> </span><span class="n">CompositeData</span><span class="o">::</span><span class="n">copyFromBuffer</span><span class="p">(</span><span class="n">Extractor</span><span class="o">&amp;</span><span class="w"> </span><span class="n">extractor</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measGroupIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">measTypeIndex</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">measGroupIndex</span><span class="p">)</span>
 <span class="w">    </span><span class="p">{</span>

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,12 +32,12 @@
 namespace VN
 {
 
-inline void _calculateCheckSum(uint8_t* checksum, uint8_t byte) noexcept { *checksum ^= byte; }
+inline void _calculateChecksum(uint8_t* checksum, uint8_t byte) noexcept { *checksum ^= byte; }
 
-inline uint8_t CalculateCheckSum(uint8_t* buffer, uint64_t bufferSize) noexcept
+inline uint8_t calculateChecksum(uint8_t* buffer, uint64_t bufferSize) noexcept
 {
     uint8_t checksum = 0;
-    for (uint64_t i = 0; i < bufferSize; i++) { _calculateCheckSum(&checksum, buffer[i]); }
+    for (uint64_t i = 0; i < bufferSize; i++) { _calculateChecksum(&checksum, buffer[i]); }
     return checksum;
 }
 
@@ -50,7 +50,7 @@ inline void _calculateCRC(uint16_t* crc, uint8_t byte) noexcept
     *crc ^= (((*crc & 0xFF) << 4) << 1);
 }
 
-inline uint16_t CalculateCRC(uint8_t* buffer, size_t bufferSize) noexcept
+inline uint16_t calculateCRC(uint8_t* buffer, size_t bufferSize) noexcept
 {
     uint16_t crc = 0;
     for (size_t i = 0; i < bufferSize; i++) { _calculateCRC(&crc, buffer[i]); }
@@ -61,7 +61,7 @@ inline bool frameVnAsciiString(const char* inputHead, char* outputHead, [[maybe_
 {
     sprintf(outputHead, "$VN%s", inputHead);
     const uint16_t len = strlen(outputHead);
-    uint16_t crcValue = CalculateCRC((uint8_t*)outputHead + 1, len - 1);
+    uint16_t crcValue = calculateCRC((uint8_t*)outputHead + 1, len - 1);
     sprintf(outputHead + len, "*%04X\r\n", crcValue);
     return false;
 }

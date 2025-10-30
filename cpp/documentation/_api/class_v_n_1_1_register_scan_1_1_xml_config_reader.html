@@ -92,17 +92,36 @@
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan15XmlConfigReaderE">
 <span id="_CPPv3N2VN12RegisterScan15XmlConfigReaderE"></span><span id="_CPPv2N2VN12RegisterScan15XmlConfigReaderE"></span><span id="VN::RegisterScan::XmlConfigReader"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_xml_config_reader"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">XmlConfigReader</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RegisterScan</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="struct_v_n_1_1_register_scan_1_1_config_reader.html#_CPPv4I0EN2VN12RegisterScan12ConfigReaderE" title="VN::RegisterScan::ConfigReader"><span class="n"><span class="pre">ConfigReader</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N2VN12RegisterScan15XmlConfigReaderE" title="VN::RegisterScan::XmlConfigReader"><span class="n"><span class="pre">XmlConfigReader</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan15XmlConfigReaderE" title="Link to this definition">¶</a><br /></dt>
-<dd><div class="breathe-sectiondef docutils container">
+<dd><p>A reader that converts VectorNav configurations from XML format into ASCII messages. </p>
+<p>Parses <a class="reference internal" href="class_v_n_1_1_register.html#class_v_n_1_1_register"><span class="std std-ref">Register</span></a> elements from an XML document and converts them to VNWRG ASCII messages. Returns an error if the read operation fails. </p>
+<div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan15XmlConfigReader15XmlConfigReaderERKN10Filesystem8FilePathE">
 <span id="_CPPv3N2VN12RegisterScan15XmlConfigReader15XmlConfigReaderERKN10Filesystem8FilePathE"></span><span id="_CPPv2N2VN12RegisterScan15XmlConfigReader15XmlConfigReaderERKN10Filesystem8FilePathE"></span><span id="VN::RegisterScan::XmlConfigReader::XmlConfigReader__Filesystem::FilePathCR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_xml_config_reader_1a558a7bd5490f0988e18e02a1f535ab9d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">XmlConfigReader</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Filesystem</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="typedef__file___base_8hpp_1ad0d258b70c67e56fec5a1647fbb64fd7.html#_CPPv4N2VN10Filesystem8FilePathE" title="VN::Filesystem::FilePath"><span class="n"><span class="pre">FilePath</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">path</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan15XmlConfigReader15XmlConfigReaderERKN10Filesystem8FilePathE" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Constructs an <a class="reference internal" href="#class_v_n_1_1_register_scan_1_1_xml_config_reader"><span class="std std-ref">XmlConfigReader</span></a> that reads from the specified XML file path. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – The file path to the XML configuration document. </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan15XmlConfigReader4nextER12AsciiMessage">
 <span id="_CPPv3N2VN12RegisterScan15XmlConfigReader4nextER12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan15XmlConfigReader4nextER12AsciiMessage"></span><span id="VN::RegisterScan::XmlConfigReader::next__AsciiMessageR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_xml_config_reader_1af889671d2d67a081b41ad3709c7fd5d9"></span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">next</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan15XmlConfigReader4nextER12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Reads the next register configuration from the XML document and formats it as a VNWRG ASCII message. </p>
+<p>
+Handles special cases where register values contain delimiters that require splitting into multiple commands. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> – <strong>[out]</strong> Reference to an AsciiMessage object that will be populated with the formatted configuration command. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Error code indicating success or failure of the operation.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 </dd></dl>

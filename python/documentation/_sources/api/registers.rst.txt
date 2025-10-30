@@ -8,7 +8,7 @@ Attitude
 YawPitchRoll
 ************
 
-.. py:class:: vnpy.Registers.Attitude.YawPitchRoll
+.. py:class:: vectornav.Registers.Attitude.YawPitchRoll
 
   Measurement register, ID 8
   
@@ -35,7 +35,7 @@ YawPitchRoll
 Quaternion
 **********
 
-.. py:class:: vnpy.Registers.Attitude.Quaternion
+.. py:class:: vectornav.Registers.Attitude.Quaternion
 
   Measurement register, ID 9
   
@@ -67,7 +67,7 @@ Quaternion
 QuatMagAccelRate
 ****************
 
-.. py:class:: vnpy.Registers.Attitude.QuatMagAccelRate
+.. py:class:: vectornav.Registers.Attitude.QuatMagAccelRate
 
   Measurement register, ID 15
   
@@ -144,7 +144,7 @@ QuatMagAccelRate
 MagGravRefVec
 *************
 
-.. py:class:: vnpy.Registers.Attitude.MagGravRefVec
+.. py:class:: vectornav.Registers.Attitude.MagGravRefVec
 
   Configuration register, ID 21
   
@@ -172,7 +172,7 @@ MagGravRefVec
 YprMagAccelAngularRates
 ***********************
 
-.. py:class:: vnpy.Registers.Attitude.YprMagAccelAngularRates
+.. py:class:: vectornav.Registers.Attitude.YprMagAccelAngularRates
 
   Measurement register, ID 27
   
@@ -244,7 +244,7 @@ YprMagAccelAngularRates
 VpeBasicControl
 ***************
 
-.. py:class:: vnpy.Registers.Attitude.VpeBasicControl
+.. py:class:: vectornav.Registers.Attitude.VpeBasicControl
 
   Configuration register, ID 35
   
@@ -282,7 +282,7 @@ VpeBasicControl
 VpeMagBasicTuning
 *****************
 
-.. py:class:: vnpy.Registers.Attitude.VpeMagBasicTuning
+.. py:class:: vectornav.Registers.Attitude.VpeMagBasicTuning
 
   Configuration register, ID 36
   
@@ -319,7 +319,7 @@ VpeMagBasicTuning
 VpeAccelBasicTuning
 *******************
 
-.. py:class:: vnpy.Registers.Attitude.VpeAccelBasicTuning
+.. py:class:: vectornav.Registers.Attitude.VpeAccelBasicTuning
 
   Configuration register, ID 38
   
@@ -356,7 +356,7 @@ VpeAccelBasicTuning
 YprLinearBodyAccelAngularRates
 ******************************
 
-.. py:class:: vnpy.Registers.Attitude.YprLinearBodyAccelAngularRates
+.. py:class:: vectornav.Registers.Attitude.YprLinearBodyAccelAngularRates
 
   Measurement register, ID 239
   
@@ -413,7 +413,7 @@ YprLinearBodyAccelAngularRates
 YprLinearInertialAccelAngularRates
 **********************************
 
-.. py:class:: vnpy.Registers.Attitude.YprLinearInertialAccelAngularRates
+.. py:class:: vectornav.Registers.Attitude.YprLinearInertialAccelAngularRates
 
   Measurement register, ID 240
   
@@ -473,7 +473,7 @@ GNSS
 GnssBasicConfig
 ***************
 
-.. py:class:: vnpy.Registers.GNSS.GnssBasicConfig
+.. py:class:: vectornav.Registers.GNSS.GnssBasicConfig
 
   Configuration register, ID 55
   
@@ -528,7 +528,7 @@ GnssBasicConfig
 GnssAOffset
 ***********
 
-.. py:class:: vnpy.Registers.GNSS.GnssAOffset
+.. py:class:: vectornav.Registers.GNSS.GnssAOffset
 
   Configuration register, ID 57
   
@@ -547,87 +547,55 @@ GnssAOffset
 GnssSolLla
 **********
 
-.. py:class:: vnpy.Registers.GNSS.GnssSolLla
+.. py:class:: vectornav.Registers.GNSS.GnssSolLla
 
-  Measurement register, ID 58
-  
-  Primary GNSS receiver measurement with lat/lon/alt position and velocity in NED frame.
+  Configuration register, ID 58
   
 
   .. py:attribute:: gps1Tow
     :type: double
   
-  GPS time of week.
-  
   .. py:attribute:: gps1Week
     :type: uint16_t
-  
-  The current GPS week.
   
   .. py:attribute:: gnss1Fix
     :type: GnssSolLla.Gnss1Fix
   
-  Type of GNSS fix.
-  
   .. py:attribute:: gnss1NumSats
     :type: uint8_t
   
-  Number of satellites tracked by GNSS receiver.
-  
-  .. py:attribute:: lat
+  .. py:attribute:: gnss1Lat
     :type: double
   
-  GNSS geodetic latitude.
-  
-  .. py:attribute:: lon
+  .. py:attribute:: gnss1Lon
     :type: double
   
-  GNSS longitude.
-  
-  .. py:attribute:: alt
+  .. py:attribute:: gnss1Alt
     :type: double
   
-  GNSS altitude above WGS84 ellipsoid.
-  
-  .. py:attribute:: velN
+  .. py:attribute:: gnss1VelN
     :type: float
   
-  GNSS velocity in North direction.
-  
-  .. py:attribute:: velE
+  .. py:attribute:: gnss1VelE
     :type: float
   
-  GNSS velocity in East direction.
-  
-  .. py:attribute:: velD
+  .. py:attribute:: gnss1VelD
     :type: float
   
-  GNSS velocity in Down direction.
-  
-  .. py:attribute:: posUncertaintyN
+  .. py:attribute:: gnss1PosUncertaintyN
     :type: float
   
-  GNSS position uncertainty, North direction.
-  
-  .. py:attribute:: posUncertaintyE
+  .. py:attribute:: gnss1PosUncertaintyE
     :type: float
   
-  GNSS position uncertainty, East direction.
-  
-  .. py:attribute:: posUncertaintyD
+  .. py:attribute:: gnss1PosUncertaintyD
     :type: float
-  
-  GNSS position uncertainty, Down direction.
   
   .. py:attribute:: gnss1VelUncertainty
     :type: float
   
-  GNSS velocity uncertainty (scalar).
-  
   .. py:attribute:: gnss1TimeUncertainty
     :type: float
-  
-  GNSS time uncertainty.
   
   .. py:class:: Gnss1Fix
   
@@ -644,87 +612,55 @@ GnssSolLla
 GnssSolEcef
 ***********
 
-.. py:class:: vnpy.Registers.GNSS.GnssSolEcef
+.. py:class:: vectornav.Registers.GNSS.GnssSolEcef
 
-  Measurement register, ID 59
-  
-  Primary GNSS receiver measurement in ECEF frame.
+  Configuration register, ID 59
   
 
   .. py:attribute:: gps1Tow
     :type: double
   
-  GPS time of week.
-  
   .. py:attribute:: gps1Week
     :type: uint16_t
-  
-  The current GPS week.
   
   .. py:attribute:: gnss1Fix
     :type: GnssSolEcef.Gnss1Fix
   
-  Type of GNSS fix.
-  
   .. py:attribute:: gnss1NumSats
     :type: uint8_t
   
-  Number of satellites tracked by GNSS receiver.
-  
-  .. py:attribute:: posX
+  .. py:attribute:: gnss1PosX
     :type: double
   
-  GNSS position in ECEF-frame x-axis.
-  
-  .. py:attribute:: posY
+  .. py:attribute:: gnss1PosY
     :type: double
   
-  GNSS position in ECEF-frame y-axis.
-  
-  .. py:attribute:: posZ
+  .. py:attribute:: gnss1PosZ
     :type: double
   
-  GNSS position in ECEF-frame z-axis.
-  
-  .. py:attribute:: velX
+  .. py:attribute:: gnss1VelX
     :type: float
   
-  GNSS velocity in ECEF-frame x-axis.
-  
-  .. py:attribute:: velY
+  .. py:attribute:: gnss1VelY
     :type: float
   
-  GNSS velocity in ECEF-frame y-axis.
-  
-  .. py:attribute:: velZ
+  .. py:attribute:: gnss1VelZ
     :type: float
   
-  GNSS velocity in ECEF-frame z-axis.
-  
-  .. py:attribute:: posUncertaintyX
+  .. py:attribute:: gnss1PosUncertaintyX
     :type: float
   
-  GNSS position uncertainty ECEF X.
-  
-  .. py:attribute:: posUncertaintyY
+  .. py:attribute:: gnss1PosUncertaintyY
     :type: float
   
-  GNSS position uncertainty ECEF Y.
-  
-  .. py:attribute:: posUncertaintyZ
+  .. py:attribute:: gnss1PosUncertaintyZ
     :type: float
-  
-  GNSS position uncertainty ECEF Z.
   
   .. py:attribute:: gnss1VelUncertainty
     :type: float
   
-  GNSS velocity uncertainty (scalar).
-  
   .. py:attribute:: gnss1TimeUncertainty
     :type: float
-  
-  GNSS time uncertainty.
   
   .. py:class:: Gnss1Fix
   
@@ -741,7 +677,7 @@ GnssSolEcef
 GnssSystemConfig
 ****************
 
-.. py:class:: vnpy.Registers.GNSS.GnssSystemConfig
+.. py:class:: vectornav.Registers.GNSS.GnssSystemConfig
 
   Configuration register, ID 99
   
@@ -901,7 +837,7 @@ GnssSystemConfig
 GnssSyncConfig
 **************
 
-.. py:class:: vnpy.Registers.GNSS.GnssSyncConfig
+.. py:class:: vectornav.Registers.GNSS.GnssSyncConfig
 
   Configuration register, ID 100
   
@@ -948,7 +884,7 @@ GnssSyncConfig
 Gnss2SolLla
 ***********
 
-.. py:class:: vnpy.Registers.GNSS.Gnss2SolLla
+.. py:class:: vectornav.Registers.GNSS.Gnss2SolLla
 
   Measurement register, ID 103
   
@@ -975,47 +911,47 @@ Gnss2SolLla
   
   Number of satellites tracked by GNSS receiver.
   
-  .. py:attribute:: lat
+  .. py:attribute:: gnss2Lat
     :type: double
   
   GNSS geodetic latitude.
   
-  .. py:attribute:: lon
+  .. py:attribute:: gnss2Lon
     :type: double
   
   GNSS longitude.
   
-  .. py:attribute:: alt
+  .. py:attribute:: gnss2Alt
     :type: double
   
   GNSS altitude above WGS84 ellipsoid.
   
-  .. py:attribute:: velN
+  .. py:attribute:: gnss2VelN
     :type: float
   
   GNSS velocity in North direction.
   
-  .. py:attribute:: velE
+  .. py:attribute:: gnss2VelE
     :type: float
   
   GNSS velocity in East direction.
   
-  .. py:attribute:: velD
+  .. py:attribute:: gnss2VelD
     :type: float
   
   GNSS velocity in Down direction.
   
-  .. py:attribute:: posUncertaintyN
+  .. py:attribute:: gnss2PosUncertaintyN
     :type: float
   
   GNSS position uncertainty, North direction.
   
-  .. py:attribute:: posUncertaintyE
+  .. py:attribute:: gnss2PosUncertaintyE
     :type: float
   
   GNSS position uncertainty, East direction.
   
-  .. py:attribute:: posUncertaintyD
+  .. py:attribute:: gnss2PosUncertaintyD
     :type: float
   
   GNSS position uncertainty, Down direction.
@@ -1045,7 +981,7 @@ Gnss2SolLla
 Gnss2SolEcef
 ************
 
-.. py:class:: vnpy.Registers.GNSS.Gnss2SolEcef
+.. py:class:: vectornav.Registers.GNSS.Gnss2SolEcef
 
   Measurement register, ID 104
   
@@ -1072,47 +1008,47 @@ Gnss2SolEcef
   
   Number of satellites tracked by GNSS receiver.
   
-  .. py:attribute:: posX
+  .. py:attribute:: gnss2PosX
     :type: double
   
   GNSS position in ECEF-frame x-axis.
   
-  .. py:attribute:: posY
+  .. py:attribute:: gnss2PosY
     :type: double
   
   GNSS position in ECEF-frame y-axis.
   
-  .. py:attribute:: posZ
+  .. py:attribute:: gnss2PosZ
     :type: double
   
   GNSS position in ECEF-frame z-axis.
   
-  .. py:attribute:: velX
+  .. py:attribute:: gnss2VelX
     :type: float
   
   GNSS velocity in ECEF-frame x-axis.
   
-  .. py:attribute:: velY
+  .. py:attribute:: gnss2VelY
     :type: float
   
   GNSS velocity in ECEF-frame y-axis.
   
-  .. py:attribute:: velZ
+  .. py:attribute:: gnss2VelZ
     :type: float
   
   GNSS velocity in ECEF-frame z-axis.
   
-  .. py:attribute:: posUncertaintyX
+  .. py:attribute:: gnss2PosUncertaintyX
     :type: float
   
   GNSS position uncertainty ECEF X.
   
-  .. py:attribute:: posUncertaintyY
+  .. py:attribute:: gnss2PosUncertaintyY
     :type: float
   
   GNSS position uncertainty ECEF Y.
   
-  .. py:attribute:: posUncertaintyZ
+  .. py:attribute:: gnss2PosUncertaintyZ
     :type: float
   
   GNSS position uncertainty ECEF Z.
@@ -1142,7 +1078,7 @@ Gnss2SolEcef
 ExtGnssOffset
 *************
 
-.. py:class:: vnpy.Registers.GNSS.ExtGnssOffset
+.. py:class:: vectornav.Registers.GNSS.ExtGnssOffset
 
   Configuration register, ID 157
   
@@ -1164,7 +1100,7 @@ GNSSCompass
 GnssCompassSignalHealthStatus
 *****************************
 
-.. py:class:: vnpy.Registers.GNSSCompass.GnssCompassSignalHealthStatus
+.. py:class:: vectornav.Registers.GNSSCompass.GnssCompassSignalHealthStatus
 
   Measurement register, ID 86
   
@@ -1216,7 +1152,7 @@ GnssCompassSignalHealthStatus
 GnssCompassBaseline
 *******************
 
-.. py:class:: vnpy.Registers.GNSSCompass.GnssCompassBaseline
+.. py:class:: vectornav.Registers.GNSSCompass.GnssCompassBaseline
 
   Configuration register, ID 93
   
@@ -1244,7 +1180,7 @@ GnssCompassBaseline
 GnssCompassEstBaseline
 **********************
 
-.. py:class:: vnpy.Registers.GNSSCompass.GnssCompassEstBaseline
+.. py:class:: vectornav.Registers.GNSSCompass.GnssCompassEstBaseline
 
   Measurement register, ID 97
   
@@ -1301,7 +1237,7 @@ GnssCompassEstBaseline
 GnssCompassStartupStatus
 ************************
 
-.. py:class:: vnpy.Registers.GNSSCompass.GnssCompassStartupStatus
+.. py:class:: vectornav.Registers.GNSSCompass.GnssCompassStartupStatus
 
   Measurement register, ID 98
   
@@ -1326,7 +1262,7 @@ HardSoftIronEstimator
 RealTimeHsiControl
 ******************
 
-.. py:class:: vnpy.Registers.HardSoftIronEstimator.RealTimeHsiControl
+.. py:class:: vectornav.Registers.HardSoftIronEstimator.RealTimeHsiControl
 
   Configuration register, ID 44
   
@@ -1356,7 +1292,7 @@ RealTimeHsiControl
 EstMagCal
 *********
 
-.. py:class:: vnpy.Registers.HardSoftIronEstimator.EstMagCal
+.. py:class:: vectornav.Registers.HardSoftIronEstimator.EstMagCal
 
   Measurement register, ID 47
   
@@ -1431,7 +1367,7 @@ Heave
 HeaveOutputs
 ************
 
-.. py:class:: vnpy.Registers.Heave.HeaveOutputs
+.. py:class:: vectornav.Registers.Heave.HeaveOutputs
 
   Measurement register, ID 115
   
@@ -1458,7 +1394,7 @@ HeaveOutputs
 HeaveBasicConfig
 ****************
 
-.. py:class:: vnpy.Registers.Heave.HeaveBasicConfig
+.. py:class:: vectornav.Registers.Heave.HeaveBasicConfig
 
   Configuration register, ID 116
   
@@ -1492,7 +1428,7 @@ IMU
 Mag
 ***
 
-.. py:class:: vnpy.Registers.IMU.Mag
+.. py:class:: vectornav.Registers.IMU.Mag
 
   Measurement register, ID 17
   
@@ -1519,7 +1455,7 @@ Mag
 Accel
 *****
 
-.. py:class:: vnpy.Registers.IMU.Accel
+.. py:class:: vectornav.Registers.IMU.Accel
 
   Measurement register, ID 18
   
@@ -1546,7 +1482,7 @@ Accel
 Gyro
 ****
 
-.. py:class:: vnpy.Registers.IMU.Gyro
+.. py:class:: vectornav.Registers.IMU.Gyro
 
   Measurement register, ID 19
   
@@ -1573,7 +1509,7 @@ Gyro
 MagAccelGyro
 ************
 
-.. py:class:: vnpy.Registers.IMU.MagAccelGyro
+.. py:class:: vectornav.Registers.IMU.MagAccelGyro
 
   Measurement register, ID 20
   
@@ -1630,7 +1566,7 @@ MagAccelGyro
 MagCal
 ******
 
-.. py:class:: vnpy.Registers.IMU.MagCal
+.. py:class:: vectornav.Registers.IMU.MagCal
 
   Configuration register, ID 23
   
@@ -1676,7 +1612,7 @@ MagCal
 AccelCal
 ********
 
-.. py:class:: vnpy.Registers.IMU.AccelCal
+.. py:class:: vectornav.Registers.IMU.AccelCal
 
   Configuration register, ID 25
   
@@ -1722,7 +1658,7 @@ AccelCal
 RefFrameRot
 ***********
 
-.. py:class:: vnpy.Registers.IMU.RefFrameRot
+.. py:class:: vectornav.Registers.IMU.RefFrameRot
 
   Configuration register, ID 26
   
@@ -1759,7 +1695,7 @@ RefFrameRot
 ImuMeas
 *******
 
-.. py:class:: vnpy.Registers.IMU.ImuMeas
+.. py:class:: vectornav.Registers.IMU.ImuMeas
 
   Measurement register, ID 54
   
@@ -1826,7 +1762,7 @@ ImuMeas
 DeltaThetaVelocity
 ******************
 
-.. py:class:: vnpy.Registers.IMU.DeltaThetaVelocity
+.. py:class:: vectornav.Registers.IMU.DeltaThetaVelocity
 
   Measurement register, ID 80
   
@@ -1873,7 +1809,7 @@ DeltaThetaVelocity
 DeltaThetaVelConfig
 *******************
 
-.. py:class:: vnpy.Registers.IMU.DeltaThetaVelConfig
+.. py:class:: vectornav.Registers.IMU.DeltaThetaVelConfig
 
   Configuration register, ID 82
   
@@ -1922,7 +1858,7 @@ DeltaThetaVelConfig
 GyroCal
 *******
 
-.. py:class:: vnpy.Registers.IMU.GyroCal
+.. py:class:: vectornav.Registers.IMU.GyroCal
 
   Configuration register, ID 84
   
@@ -1968,7 +1904,7 @@ GyroCal
 ImuFilterControl
 ****************
 
-.. py:class:: vnpy.Registers.IMU.ImuFilterControl
+.. py:class:: vectornav.Registers.IMU.ImuFilterControl
 
   Configuration register, ID 85
   
@@ -2046,7 +1982,7 @@ INS
 InsSolLla
 *********
 
-.. py:class:: vnpy.Registers.INS.InsSolLla
+.. py:class:: vectornav.Registers.INS.InsSolLla
 
   Measurement register, ID 63
   
@@ -2168,7 +2104,7 @@ InsSolLla
 InsSolEcef
 **********
 
-.. py:class:: vnpy.Registers.INS.InsSolEcef
+.. py:class:: vectornav.Registers.INS.InsSolEcef
 
   Measurement register, ID 64
   
@@ -2290,7 +2226,7 @@ InsSolEcef
 InsBasicConfig
 **************
 
-.. py:class:: vnpy.Registers.INS.InsBasicConfig
+.. py:class:: vectornav.Registers.INS.InsBasicConfig
 
   Configuration register, ID 67
   
@@ -2330,7 +2266,7 @@ InsBasicConfig
 InsStateLla
 ***********
 
-.. py:class:: vnpy.Registers.INS.InsStateLla
+.. py:class:: vectornav.Registers.INS.InsStateLla
 
   Measurement register, ID 72
   
@@ -2417,7 +2353,7 @@ InsStateLla
 InsStateEcef
 ************
 
-.. py:class:: vnpy.Registers.INS.InsStateEcef
+.. py:class:: vectornav.Registers.INS.InsStateEcef
 
   Measurement register, ID 73
   
@@ -2504,7 +2440,7 @@ InsStateEcef
 FilterStartupBias
 *****************
 
-.. py:class:: vnpy.Registers.INS.FilterStartupBias
+.. py:class:: vectornav.Registers.INS.FilterStartupBias
 
   Configuration register, ID 74
   
@@ -2535,7 +2471,7 @@ FilterStartupBias
 InsRefOffset
 ************
 
-.. py:class:: vnpy.Registers.INS.InsRefOffset
+.. py:class:: vectornav.Registers.INS.InsRefOffset
 
   Configuration register, ID 105
   
@@ -2563,7 +2499,7 @@ InsRefOffset
 InsGnssSelect
 *************
 
-.. py:class:: vnpy.Registers.INS.InsGnssSelect
+.. py:class:: vectornav.Registers.INS.InsGnssSelect
 
   Configuration register, ID 144
   
@@ -2607,7 +2543,7 @@ System
 UserTag
 *******
 
-.. py:class:: vnpy.Registers.System.UserTag
+.. py:class:: vectornav.Registers.System.UserTag
 
   Configuration register, ID 0
   
@@ -2620,7 +2556,7 @@ UserTag
 Model
 *****
 
-.. py:class:: vnpy.Registers.System.Model
+.. py:class:: vectornav.Registers.System.Model
 
   Measurement register, ID 1
   
@@ -2637,7 +2573,7 @@ Model
 HwVer
 *****
 
-.. py:class:: vnpy.Registers.System.HwVer
+.. py:class:: vectornav.Registers.System.HwVer
 
   Measurement register, ID 2
   
@@ -2659,7 +2595,7 @@ HwVer
 Serial
 ******
 
-.. py:class:: vnpy.Registers.System.Serial
+.. py:class:: vectornav.Registers.System.Serial
 
   Measurement register, ID 3
   
@@ -2676,7 +2612,7 @@ Serial
 FwVer
 *****
 
-.. py:class:: vnpy.Registers.System.FwVer
+.. py:class:: vectornav.Registers.System.FwVer
 
   Measurement register, ID 4
   
@@ -2693,18 +2629,18 @@ FwVer
 BaudRate
 ********
 
-.. py:class:: vnpy.Registers.System.BaudRate
+.. py:class:: vectornav.Registers.System.BaudRate
 
   Configuration register, ID 5
   
 
   .. py:attribute:: baudRate
-    :type: BaudRate.BaudRate
+    :type: BaudRate.BaudRates
   
   .. py:attribute:: serialPort
     :type: BaudRate.SerialPort
   
-  .. py:class:: BaudRate
+  .. py:class:: BaudRates
   
     .. py:attribute:: Baud9600
     .. py:attribute:: Baud19200
@@ -2726,7 +2662,7 @@ BaudRate
 AsyncOutputType
 ***************
 
-.. py:class:: vnpy.Registers.System.AsyncOutputType
+.. py:class:: vectornav.Registers.System.AsyncOutputType
 
   Configuration register, ID 6
   
@@ -2772,7 +2708,7 @@ AsyncOutputType
 AsyncOutputFreq
 ***************
 
-.. py:class:: vnpy.Registers.System.AsyncOutputFreq
+.. py:class:: vectornav.Registers.System.AsyncOutputFreq
 
   Configuration register, ID 7
   
@@ -2808,7 +2744,7 @@ AsyncOutputFreq
 ProtocolControl
 ***************
 
-.. py:class:: vnpy.Registers.System.ProtocolControl
+.. py:class:: vectornav.Registers.System.ProtocolControl
 
   Configuration register, ID 30
   
@@ -2894,7 +2830,7 @@ ProtocolControl
 SyncControl
 ***********
 
-.. py:class:: vnpy.Registers.System.SyncControl
+.. py:class:: vectornav.Registers.System.SyncControl
 
   Configuration register, ID 32
   
@@ -2957,7 +2893,7 @@ SyncControl
 SyncStatus
 **********
 
-.. py:class:: vnpy.Registers.System.SyncStatus
+.. py:class:: vectornav.Registers.System.SyncStatus
 
   Measurement register, ID 33
   
@@ -2984,7 +2920,7 @@ SyncStatus
 BinaryOutput
 ************
 
-.. py:class:: vnpy.Registers.System.BinaryOutput
+.. py:class:: vectornav.Registers.System.BinaryOutput
   
   Base for Binary Output Config registers, IDs 75-77
   
@@ -3296,7 +3232,7 @@ BinaryOutput
 BinaryOutput1
 *************
 
-.. py:class:: vnpy.BinaryOutput1
+.. py:class:: vectornav.BinaryOutput1
   
   Configuration register, ID 75. Derived from BinaryOutput.
   
@@ -3304,7 +3240,7 @@ BinaryOutput1
 BinaryOutput2
 *************
 
-.. py:class:: vnpy.BinaryOutput2
+.. py:class:: vectornav.BinaryOutput2
   
   Configuration register, ID 76. Derived from BinaryOutput.
   
@@ -3312,7 +3248,7 @@ BinaryOutput2
 BinaryOutput3
 *************
 
-.. py:class:: vnpy.BinaryOutput3
+.. py:class:: vectornav.BinaryOutput3
   
   Configuration register, ID 77. Derived from BinaryOutput.
   
@@ -3320,7 +3256,7 @@ BinaryOutput3
 NmeaOutput1
 ***********
 
-.. py:class:: vnpy.Registers.System.NmeaOutput1
+.. py:class:: vectornav.Registers.System.NmeaOutput1
 
   Configuration register, ID 101
   
@@ -3410,7 +3346,7 @@ NmeaOutput1
 NmeaOutput2
 ***********
 
-.. py:class:: vnpy.Registers.System.NmeaOutput2
+.. py:class:: vectornav.Registers.System.NmeaOutput2
 
   Configuration register, ID 102
   
@@ -3500,7 +3436,7 @@ NmeaOutput2
 LegacyCompatibilitySettings
 ***************************
 
-.. py:class:: vnpy.Registers.System.LegacyCompatibilitySettings
+.. py:class:: vectornav.Registers.System.LegacyCompatibilitySettings
 
   Configuration register, ID 206
   
@@ -3549,7 +3485,7 @@ VelocityAiding
 VelAidingMeas
 *************
 
-.. py:class:: vnpy.Registers.VelocityAiding.VelAidingMeas
+.. py:class:: vectornav.Registers.VelocityAiding.VelAidingMeas
 
   Configuration register, ID 50
   
@@ -3568,7 +3504,7 @@ VelAidingMeas
 VelAidingControl
 ****************
 
-.. py:class:: vnpy.Registers.VelocityAiding.VelAidingControl
+.. py:class:: vectornav.Registers.VelocityAiding.VelAidingControl
 
   Configuration register, ID 51
   
@@ -3595,7 +3531,7 @@ WorldMagGravityModel
 RefModelConfig
 **************
 
-.. py:class:: vnpy.Registers.WorldMagGravityModel.RefModelConfig
+.. py:class:: vectornav.Registers.WorldMagGravityModel.RefModelConfig
 
   Configuration register, ID 83
   

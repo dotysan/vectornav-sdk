@@ -40,7 +40,7 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Class FileExporter" href="class_v_n_1_1_file_exporter.html" />
+    <link rel="next" title="Class DebugSwitches" href="class_v_n_1_1_firmware_programmer_1_1_debug_switches.html" />
     <link rel="prev" title="Class FaPacketExtractor" href="class_v_n_1_1_fa_packet_extractor.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
@@ -53,7 +53,7 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="class_v_n_1_1_file_exporter.html" title="Class FileExporter"
+          <a href="class_v_n_1_1_firmware_programmer_1_1_debug_switches.html" title="Class DebugSwitches"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="class_v_n_1_1_fa_packet_extractor.html" title="Class FaPacketExtractor"
@@ -78,6 +78,12 @@
 <ul class="simple">
 <li><p>Defined in <a class="reference internal" href="file_include_vectornav_Implementation_FbPacketDispatcher.hpp.html#file-include-vectornav-implementation-fbpacketdispatcher-hpp"><span class="std std-ref">File FbPacketDispatcher.hpp</span></a></p></li>
 </ul>
+<section id="nested-relationships">
+<h2>Nested Relationships<a class="headerlink" href="#nested-relationships" title="Link to this heading">¶</a></h2>
+<section id="nested-types">
+<h3>Nested Types<a class="headerlink" href="#nested-types" title="Link to this heading">¶</a></h3>
+</section>
+</section>
 <section id="inheritance-relationships">
 <h2>Inheritance Relationships<a class="headerlink" href="#inheritance-relationships" title="Link to this heading">¶</a></h2>
 <section id="base-type">
@@ -111,10 +117,56 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher14dispatchPacketERK10ByteBufferK6size_t">
-<span id="_CPPv3N2VN18FbPacketDispatcher14dispatchPacketERK10ByteBufferK6size_t"></span><span id="_CPPv2N2VN18FbPacketDispatcher14dispatchPacketERK10ByteBufferK6size_t"></span><span id="VN::FbPacketDispatcher::dispatchPacket__ByteBufferCR.sC"></span><span class="target" id="class_v_n_1_1_fb_packet_dispatcher_1ab3023fdc395c1170b0058dd1c4a9b3b6"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dispatchPacket</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="class_v_n_1_1_byte_buffer.html#_CPPv4N2VN10ByteBufferE" title="VN::ByteBuffer"><span class="n"><span class="pre">ByteBuffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">byteBuffer</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">syncByteIndex</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><span class="w"> </span><span class="k"><span class="pre">override</span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher14dispatchPacketERK10ByteBufferK6size_t" title="Link to this definition">¶</a><br /></dt>
+<span id="_CPPv3N2VN18FbPacketDispatcher14dispatchPacketERK10ByteBufferK6size_t"></span><span id="_CPPv2N2VN18FbPacketDispatcher14dispatchPacketERK10ByteBufferK6size_t"></span><span id="VN::FbPacketDispatcher::dispatchPacket__ByteBufferCR.sC"></span><span class="target" id="class_v_n_1_1_fb_packet_dispatcher_1a6ea74f30add193f4c804d06c9f128148"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dispatchPacket</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="class_v_n_1_1_byte_buffer.html#_CPPv4N2VN10ByteBufferE" title="VN::ByteBuffer"><span class="n"><span class="pre">ByteBuffer</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">byteBuffer</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">syncByteIndex</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><span class="w"> </span><span class="k"><span class="pre">override</span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher14dispatchPacketERK10ByteBufferK6size_t" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher13addSubscriberEP21PacketQueue_Interface16SubscriberFilter">
+<span id="_CPPv3N2VN18FbPacketDispatcher13addSubscriberEP21PacketQueue_Interface16SubscriberFilter"></span><span id="_CPPv2N2VN18FbPacketDispatcher13addSubscriberEP21PacketQueue_Interface16SubscriberFilter"></span><span id="VN::FbPacketDispatcher::addSubscriber__PacketQueue_InterfaceP.SubscriberFilter"></span><span class="target" id="class_v_n_1_1_fb_packet_dispatcher_1ae73243b6c189a601cdbdeec31448dfc7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">addSubscriber</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="typedef__queue_definitions_8hpp_1aa988b4d83f887379cfcdbac8c8e66496.html#_CPPv4N2VN21PacketQueue_InterfaceE" title="VN::PacketQueue_Interface"><span class="n"><span class="pre">PacketQueue_Interface</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">subscriber</span></span>, <a class="reference internal" href="#_CPPv4N2VN18FbPacketDispatcher16SubscriberFilterE" title="VN::FbPacketDispatcher::SubscriberFilter"><span class="n"><span class="pre">SubscriberFilter</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">filter</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher13addSubscriberEP21PacketQueue_Interface16SubscriberFilter" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher16removeSubscriberEP21PacketQueue_Interface">
+<span id="_CPPv3N2VN18FbPacketDispatcher16removeSubscriberEP21PacketQueue_Interface"></span><span id="_CPPv2N2VN18FbPacketDispatcher16removeSubscriberEP21PacketQueue_Interface"></span><span id="VN::FbPacketDispatcher::removeSubscriber__PacketQueue_InterfaceP"></span><span class="target" id="class_v_n_1_1_fb_packet_dispatcher_1ab7c9f5d83c89b7e26c5f302b7195e73d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">removeSubscriber</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="typedef__queue_definitions_8hpp_1aa988b4d83f887379cfcdbac8c8e66496.html#_CPPv4N2VN21PacketQueue_InterfaceE" title="VN::PacketQueue_Interface"><span class="n"><span class="pre">PacketQueue_Interface</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">subscriberToRemove</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher16removeSubscriberEP21PacketQueue_Interface" title="Link to this definition">¶</a><br /></dt>
 <dd></dd></dl>
 
 </div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher16SubscriberFilterE">
+<span id="_CPPv3N2VN18FbPacketDispatcher16SubscriberFilterE"></span><span id="_CPPv2N2VN18FbPacketDispatcher16SubscriberFilterE"></span><span id="VN::FbPacketDispatcher::SubscriberFilter"></span><span class="target" id="struct_v_n_1_1_fb_packet_dispatcher_1_1_subscriber_filter"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SubscriberFilter</span></span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher16SubscriberFilterE" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEv">
+<span id="_CPPv3N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEv"></span><span id="_CPPv2N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEv"></span><span id="VN::FbPacketDispatcher::SubscriberFilter::SubscriberFilter"></span><span class="target" id="struct_v_n_1_1_fb_packet_dispatcher_1_1_subscriber_filter_1ac242d08f5851f25ddbe5194e935ca1b3"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SubscriberFilter</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEv" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEKbKb">
+<span id="_CPPv3N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEKbKb"></span><span id="_CPPv2N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEKbKb"></span><span id="VN::FbPacketDispatcher::SubscriberFilter::SubscriberFilter__bC.bC"></span><span class="target" id="struct_v_n_1_1_fb_packet_dispatcher_1_1_subscriber_filter_1a5c9e3a4749a52540e3dc88069bbaf3ec"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SubscriberFilter</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">packet</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">completedFaMessage</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter16SubscriberFilterEKbKb" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter6packetE">
+<span id="_CPPv3N2VN18FbPacketDispatcher16SubscriberFilter6packetE"></span><span id="_CPPv2N2VN18FbPacketDispatcher16SubscriberFilter6packetE"></span><span id="VN::FbPacketDispatcher::SubscriberFilter::packet__uint8_t"></span><span class="target" id="struct_v_n_1_1_fb_packet_dispatcher_1_1_subscriber_filter_1a2e9b505c1332ed6464c05fd233af49fb"></span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">packet</span></span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter6packetE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter18completedFaMessageE">
+<span id="_CPPv3N2VN18FbPacketDispatcher16SubscriberFilter18completedFaMessageE"></span><span id="_CPPv2N2VN18FbPacketDispatcher16SubscriberFilter18completedFaMessageE"></span><span id="VN::FbPacketDispatcher::SubscriberFilter::completedFaMessage__uint8_t"></span><span class="target" id="struct_v_n_1_1_fb_packet_dispatcher_1_1_subscriber_filter_1af165a2abca65e12ae7ee427b8696c5df"></span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">completedFaMessage</span></span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter18completedFaMessageE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter8__pad0__E">
+<span id="_CPPv3N2VN18FbPacketDispatcher16SubscriberFilter8__pad0__E"></span><span id="_CPPv2N2VN18FbPacketDispatcher16SubscriberFilter8__pad0__E"></span><span id="VN::FbPacketDispatcher::SubscriberFilter::__pad0____uint8_t"></span><span class="target" id="struct_v_n_1_1_fb_packet_dispatcher_1_1_subscriber_filter_1a83fe58899acd1f7c04fe90aba778f0d8"></span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">__pad0__</span></span></span><a class="headerlink" href="#_CPPv4N2VN18FbPacketDispatcher16SubscriberFilter8__pad0__E" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -163,8 +215,8 @@
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="class_v_n_1_1_file_exporter.html"
-                          title="Next page">&rarr; Class FileExporter</a></p>
+    <p class="topless"><a href="class_v_n_1_1_firmware_programmer_1_1_debug_switches.html"
+                          title="Next page">&rarr; Class DebugSwitches</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -203,7 +255,7 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="class_v_n_1_1_file_exporter.html" title="Class FileExporter"
+          <a href="class_v_n_1_1_firmware_programmer_1_1_debug_switches.html" title="Class DebugSwitches"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="class_v_n_1_1_fa_packet_extractor.html" title="Class FaPacketExtractor"

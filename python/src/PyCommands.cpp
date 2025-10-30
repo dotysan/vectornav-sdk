@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -41,7 +41,13 @@ void init_commands(py::module& m) {
       .def("isAwaitingResponse", &GenericCommand::isAwaitingResponse)
       .def("hasValidResponse", &GenericCommand::hasValidResponse)
       .def("getError", &GenericCommand::getError)
-      .def("getResponse", &GenericCommand::getResponse);
+      .def("getResponse", [](GenericCommand& cls) -> std::string {
+        return std::string(cls.getResponse().c_str());
+      })
+      .def("getCommandString", [](GenericCommand& cls) -> std::string {
+        return std::string(cls.getCommandString().c_str());
+      })
+      ;
 
   py::class_<WriteSettings, GenericCommand>(m, "WriteSettings")
       .def(py::init<>());

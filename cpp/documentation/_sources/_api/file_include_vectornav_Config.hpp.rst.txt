@@ -48,12 +48,6 @@ Included By
 
 - :ref:`file_include_vectornav_HAL_Serial_Base.hpp`
 
-- :ref:`file_include_vectornav_HAL_Serial_Mbed.hpp`
-
-- :ref:`file_include_vectornav_HAL_Serial_Wasm.hpp`
-
-- :ref:`file_include_vectornav_HAL_Serial_Windows.hpp`
-
 - :ref:`file_include_vectornav_Implementation_AsciiHeader.hpp`
 
 - :ref:`file_include_vectornav_Implementation_AsciiPacketDispatcher.hpp`
@@ -82,7 +76,11 @@ Included By
 
 - :ref:`file_include_vectornav_Interface_Sensor.hpp`
 
+- :ref:`file_include_vectornav_TemplateLibrary_DirectAccessQueue.hpp`
+
 - :ref:`file_include_vectornav_TemplateLibrary_Queue.hpp`
+
+- :ref:`file_plugins_DataExport_include_vectornav_Exporter.hpp`
 
 - :ref:`file_plugins_DataExport_include_vectornav_ExporterImr.hpp`
 
@@ -177,7 +175,7 @@ Variables
 
 - :ref:`exhale_variable__config_8hpp_1a47963a6a261682f2344596f897ef9844`
 
-- :ref:`exhale_variable__config_8hpp_1a1dbeb83688dcad3eb58d73c57e98a631`
+- :ref:`exhale_variable__config_8hpp_1a655fc3fabca3fa5c03b3e6f61a4f43dc`
 
 - :ref:`exhale_variable__config_8hpp_1aaf699fb823fe2af1915a76200817d251`
 
@@ -196,8 +194,6 @@ Variables
 - :ref:`exhale_variable__config_8hpp_1a33077f59f97168c218ff69711244a78a`
 
 - :ref:`exhale_variable__config_8hpp_1ac687e8e7bd25e45524c3f08c86375b1b`
-
-- :ref:`exhale_variable__config_8hpp_1abd997e93dae45fcbeac14b6ae7511922`
 
 - :ref:`exhale_variable__config_8hpp_1ad5df6441d89ff398d56b4c36bdb7b4e3`
 

@@ -70,7 +70,7 @@ Functions
 
 - :ref:`exhale_function__attitude_math_8hpp_1ac4d9415c84d457bcaab45185f8f9968b`
 
-- :ref:`exhale_function__attitude_math_8hpp_1aa91cc2b05bdccf6293b51269e54a20b0`
+- :ref:`exhale_function__attitude_math_8hpp_1ae0f510e4882be84665178dc8e0b26555`
 
 - :ref:`exhale_function__attitude_math_8hpp_1a47dd8291d8aeeb574163bb186539b5af`
 

@@ -78,6 +78,8 @@
 
 <span class="k">namespace</span><span class="w"> </span><span class="nn">VN</span>
 <span class="p">{</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">DataExport</span>
+<span class="p">{</span>
 
 <span class="k">enum</span><span class="w"> </span><span class="nc">CsvType</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span>
 <span class="p">{</span>
@@ -94,7 +96,7 @@
 <span class="w">    </span><span class="n">NON</span><span class="p">,</span>
 <span class="p">};</span>
 
-<span class="k">using</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">CsvType</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">VN</span><span class="o">::</span><span class="n">DataExport</span><span class="o">::</span><span class="n">CsvType</span><span class="p">;</span>
 
 <span class="k">struct</span><span class="w"> </span><span class="nc">CsvTypeInfo</span>
 <span class="p">{</span>
@@ -130,6 +132,7 @@
 
 <span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="nf">getMeasurementName</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">binaryGroup</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">binaryField</span><span class="p">);</span>
 
+<span class="p">}</span><span class="w">  </span><span class="c1">// namespace DataExport</span>
 <span class="p">}</span><span class="w">  </span><span class="c1">// namespace VN</span>
 
 <span class="cp">#endif  </span><span class="c1">// VN_EXPORTERCSVUTILS_HPP_</span>

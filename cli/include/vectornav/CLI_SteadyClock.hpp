@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,7 +24,9 @@
 #ifndef VN_CLI_STEADYCLOCK_HPP_
 #define VN_CLI_STEADYCLOCK_HPP_
 
+#pragma managed(push, off)
 #include "vectornav/HAL/Timer.hpp"
+#pragma managed(pop)
 
 namespace VNSDK
 {

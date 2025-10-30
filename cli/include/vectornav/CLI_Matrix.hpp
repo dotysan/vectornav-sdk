@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,7 +24,9 @@
 #ifndef VN_CLI_MATRIX_HPP_
 #define VN_CLI_MATRIX_HPP_
 
+#pragma managed(push, off)
 #include "vectornav/TemplateLibrary/Matrix.hpp"
+#pragma managed(pop)
 
 namespace VNSDK
 {
@@ -92,6 +94,7 @@ public:
         for (uint8_t i = 0; i < 9; i++) { stdArray[i] = other[i]; }
         return stdArray;
     }
+
     array<float>^ ToArray()
     {
         array<float>^ arr = gcnew array<float>(length);
@@ -109,6 +112,88 @@ public:
             for (uint8_t j = 0; j < num_cols; i++) { arr[i + (j * 3)] = matrix[j + (i * 3)]; }
         }
         return arr;
+    }
+
+    VN::Mat3f GetNative()
+    {
+        return VN::Mat3f(ToStdArray(*this));
+    }
+    
+};
+
+public value class Vec2f
+{
+private:
+    array<float>^ vector;
+    size_t length;
+
+public:
+
+    // Constructors
+    Vec2f(float value)
+    {
+        length = 2;
+        vector = gcnew array<float>(length);
+        for (int i = 0; i < length; i++) { vector[i] = value; }
+    }
+    Vec2f(array<float>^ values)
+    {
+        length = 2;
+        vector = gcnew array<float>(length);
+        if (values->Length != length) { throw gcnew System::ArgumentException("array must contain exactly 2 elements for a 2x1 matrix."); }
+        for (int i = 0; i < length; i++) { vector[i] = values[i]; }
+    }
+    Vec2f(const VN::Vec2f& other)
+    {
+        length = 2;
+        vector = gcnew array<float>(length);
+        for (uint8_t i = 0; i < length; i++) { vector[i] = other[i]; }
+    }
+    Vec2f(Vec2f^ other)
+    {
+        length = 2;
+        vector = gcnew array<float>(length);
+        for (uint8_t i = 0; i < length; i++) { vector[i] = other->vector[i]; }
+    }
+
+    // Accessors
+    property float default[ int ]
+    {
+        float get(int index) { return vector[index]; }
+        void set(int index, float value) { vector[index] = value; }
+    }
+
+    float get(int index) { return vector[index]; }
+    void set(int index, float value) { vector[index] = value; }
+
+    property float x
+    {
+        float get() { return vector[0]; }
+        void set(float value) { vector[0] = value; }
+    }
+    property float y
+    {
+        float get() { return vector[1]; }
+        void set(float value) { vector[1] = value; }
+    }
+    
+    // Conversions
+    static std::array<float, 2> ToStdArray(Vec2f^ other)
+    {
+        std::array<float, 2> stdArray;
+        for (uint8_t i = 0; i < 2; i++) { stdArray[i] = other[i]; }
+        return stdArray;
+    }
+    array<float>^ ToArray()
+    {
+        array<float>^ arr = gcnew array<float>(length);
+        for (uint8_t i = 0; i < length; i++) { arr[i] = vector[i]; }
+        return arr;
+    }
+
+    VN::Vec2f GetNative()
+    {
+        return VN::Vec2f(ToStdArray(*this));
     }
 };
 
@@ -186,6 +271,11 @@ public:
         for (uint8_t i = 0; i < length; i++) { arr[i] = vector[i]; }
         return arr;
     }
+
+    VN::Vec3f GetNative()
+    {
+        return VN::Vec3f(ToStdArray(*this));
+    }
 };
 
 public value class Vec4f
@@ -245,6 +335,11 @@ public:
         for (uint8_t i = 0; i < length; i++) { arr[i] = vector[i]; }
         return arr;
     }
+
+    VN::Vec4f GetNative()
+    {
+        return VN::Vec4f(ToStdArray(*this));
+    }
 };
 
 public value class Vec8f
@@ -303,6 +398,11 @@ public:
         array<float>^ arr = gcnew array<float>(length);
         for (uint8_t i = 0; i < length; i++) { arr[i] = vector[i]; }
         return arr;
+    }
+
+    VN::Matrix<8, 1, float> GetNative()
+    {
+        return VN::Matrix<8, 1, float>(ToStdArray(*this));
     }
 };
 
@@ -378,6 +478,10 @@ public:
         array<float>^ arr = gcnew array<float>(length);
         for (uint8_t i = 0; i < length; i++) { arr[i] = vector[i]; }
         return arr;
+    }
+    VN::Vec3d GetNative()
+    {
+        return VN::Vec3d(ToStdArray(*this));
     }
 };
 

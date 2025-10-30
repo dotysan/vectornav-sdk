@@ -1,6 +1,6 @@
 % The MIT License (MIT)
 % 
-% VectorNav SDK (v0.22.0)
+% VectorNav SDK (v0.99.0)
 % Copyright (c) 2024 VectorNav Technologies, LLC
 % 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,41 +21,46 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-disp('Starting Firmware Update example.')
-
-vnsdkAssembly = NET.addAssembly([pwd '\..\..\net\VnSdk_Net.dll']); % change to file path
+vnsdkAssembly = NET.addAssembly([pwd '\..\..\..\net\VnSdk_Net.dll']); % change to file path
 import VNSDK.* % Get rid of 'VNSDK' namespace qualifications
 import System.Collections.Generic.*;
 
+%{
+This firmware update example walks through the MATLAB usage of the SDK to connect to and update the firmware on a VectorNav unit.
 
-if exist('sensor','var')
-    sensor.Disconnect();  % We don't want to replace an object that already exists, and may keep the serial port locked
-else
-    sensor = Sensor();
+This example will achieve the following:
+1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+2. Create a FirmwareUpdater object
+3. Update the firmware based on the file type
+4. Disconnect from the VectorNav unit
+%}
+
+% Define the port connection parameters to be used later
+if ~exist('portName', 'var')
+    portName = 'COM1'; % Change the sensor port name to the COM port of your local machine
 end
 
-if ~exist('port_name', 'var')
-    port_name = 'COM10'; % Change the sensor port name to the COM port of your local machine
-end
-files = NET.createGeneric('System.Collections.Generic.List', {'VNSDK.FirmwareUpdater+FirmwareFile'}, 0);
+files = NET.createGeneric('System.Collections.Generic.List', {'VNSDK.FirmwareProgrammer+FirmwareUpdater+FirmwareFile'}, 0);
 if ~exist('Nav', 'var')
     Nav = fullfile(pwd, 'ReferenceModels_v3.vn100.vnx'); % Change this to your sensor
+    file = VNSDK.('FirmwareProgrammer+FirmwareUpdater+FirmwareFile')(VNSDK.('FirmwareProgrammer+FirmwareUpdater+Processor').Nav, Nav);
+    files.Add(Nav)
 else
-    file = VNSDK.('FirmwareUpdater+FirmwareFile')(VNSDK.('FirmwareUpdater+Processor').Nav, Nav);
+    file = VNSDK.('FirmwareProgrammer+FirmwareUpdater+FirmwareFile')(VNSDK.('FirmwareProgrammer+FirmwareUpdater+Processor').Nav, Nav);
     files.Add(file)
     fprintf('Loading Nav firmware from %s\n', Nav);
 end
 if ~exist('Gnss', 'var')
     Gnss = '';
 else
-    file = VNSDK.('FirmwareUpdater+FirmwareFile')(VNSDK.('FirmwareUpdater+Processor').Gnss, Gnss);
+    file = VNSDK.('FirmwareProgrammer+FirmwareUpdater+FirmwareFile')(VNSDK.('FirmwareProgrammer+FirmwareUpdater+Processor').Gnss, Gnss);
     files.Add(file);
     fprintf('Loading Gnss firmware from %s\n', Gnss);
 end
 if ~exist('Imu', 'var')
     Imu = '';
 else
-    file = VNSDK.('FirmwareUpdater+FirmwareFile')(VNSDK.('FirmwareUpdater+Processor').Imu, Imu);
+    file = VNSDK.('FirmwareProgrammer+FirmwareUpdater+FirmwareFile')(VNSDK.('FirmwareProgrammer+FirmwareUpdater+Processor').Imu, Imu);
     files.Add(file);
     fprintf('Loading Imu firmware from %s\n', Imu);
 end
@@ -71,17 +76,49 @@ if ~exist('bootloaderBaudRate', 'var')
     bootloaderBaudRate = 115200;
 end
 
-% Connect to sensor. We are not autoconnecting or verifying connectivity because we can not assume the sensor has a valid firmware
-sensor.Connect(port_name, 115200);
-fprintf('Connected to %s at %s\n', sensor.ConnectedPortName(), sensor.ConnectedBaudRate())
-
-params = VNSDK.("FirmwareUpdater+Params")(firmwareBaudRate, bootloaderBaudRate);
-firmwareUpdater = FirmwareUpdater();
-if ~isempty(vnXml)
-    firmwareUpdater.UpdateFirmware(sensor, vnXml, params);
+%% 1. Instantiate a Sensor object and use it to connect to the VectorNav unit.
+% We are not autoconnecting or verifying connectivity because we cannot assume the sensor has a valid firmware
+if exist('sensor','var')
+    sensor.Disconnect();  % We don't want to replace an object that already exists, and may keep the serial port locked
 else
-    firmwareUpdater.UpdateFirmware(sensor, files, params);
+    sensor = Sensor();
 end
 
+try
+    sensor.Connect(portName, firmwareBaudRate);
+catch latestError
+    error('Error encountered when connecting to %s.\n%s\n', portName, latestError.message);
+end
+
+% 2. Create a FirmwareUpdater object
+firmwareUpdater = VNSDK.('FirmwareProgrammer+FirmwareUpdater')();
+params = VNSDK.('FirmwareProgrammer+FirmwareUpdater+Params')(firmwareBaudRate, bootloaderBaudRate);
+% 3. Update the firmware based on the file type - There are two file types that can be used to update the firmware: VNX or VNXML
+if ~isempty(vnXml)
+    try
+        firmwareUpdater.UpdateFirmware(sensor, vnXml, params);
+    catch firmwareUpdateError
+        error('%s\nFirmware update failed.', firmwareUpdateError.message);
+    end
+else
+    try
+        firmwareUpdater.UpdateFirmware(sensor, files, params);
+    catch firmwareUpdateError
+        error('%s\nFirmware update failed.', firmwareUpdateError.message);
+    end
+end
+
+
+% Handle asynchronous errors that occurred during firmware upgrade
+while (true)
+    try
+        sensor.ThrowIfAsyncError();
+        break;
+    catch asyncError
+        fprintf('Received async error: %s\n',  asyncError.message);
+    end
+end
+
+% 4. Disconnect from the VectorNav unit
 sensor.Disconnect();
-fprintf('Firmware update example complete.\n');
+fprintf('FirmwareUpdate example complete.');

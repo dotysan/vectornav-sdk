@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,6 +24,7 @@
 #include "vectornav/Implementation/AsciiPacketDispatcher.hpp"
 
 #include "vectornav/Implementation/AsciiPacketProtocol.hpp"
+#include "vectornav/Interface/CompositeData.hpp"
 
 namespace VN
 {
@@ -34,21 +35,22 @@ PacketDispatcher::FindPacketRetVal AsciiPacketDispatcher::findPacket(const ByteB
     return {findPacketRetVal.validity, findPacketRetVal.metadata.length};
 }
 
-void AsciiPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept
+Error AsciiPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept
 {
     VN_PROFILER_TIME_CURRENT_SCOPE();
-    bool packetHasBeenConsumed = false;
+    Error error{Error::None};
     if (StringUtils::startsWith(_latestPacketMetadata.header, "VN"))
     {
         AsciiPacketProtocol::AsciiMeasurementHeader asciiHeader = AsciiPacketProtocol::getMeasHeader(_latestPacketMetadata.header);
         if (asciiHeader != AsciiPacketProtocol::AsciiMeasurementHeader::None)
         {
-            _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
-            if (AsciiPacketProtocol::asciiIsParsable(asciiHeader))
+            error = _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
+            if constexpr (Config::PacketDispatchers::compositeDataQueueCapacity > 0)
             {
-                if constexpr (Config::PacketDispatchers::compositeDataQueueCapacity > 0)
+                if (_parseToCD && AsciiPacketProtocol::asciiIsParsable(asciiHeader))
                 {
-                    packetHasBeenConsumed |= _tryPushToCompositeDataQueue(byteBuffer, syncByteIndex, _latestPacketMetadata, asciiHeader);
+                    Error latestError = _tryPushToCompositeDataQueue(byteBuffer, syncByteIndex, _latestPacketMetadata, asciiHeader);
+                    if (latestError != Error::None) { error = latestError; }
                 }
             }
         }
@@ -62,95 +64,101 @@ void AsciiPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const s
     }
     else
     {  // Data does not begin with "VN"
-        _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
+        error = _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
     }
+
+    return error;
 }
 
-bool AsciiPacketDispatcher::addSubscriber(PacketQueue_Interface* subscriber, const AsciiHeader& headerToUse, SubscriberFilterType filterType) noexcept
+Error AsciiPacketDispatcher::addSubscriber(PacketQueue_Interface* subscriber, const AsciiHeader& headerToUse, SubscriberFilterType filterType) noexcept
 {
-    if (subscriber == nullptr) { return true; }
+    if (subscriber == nullptr) { return Error::PacketQueueNull; }
     if (headerToUse.empty()) { filterType = SubscriberFilterType::StartsWith; }
-    return _subscribers.push_back(Subscriber{subscriber, headerToUse, filterType});
+    if (_subscribers.push_back(Subscriber{subscriber, headerToUse, filterType})) { return Error::MessageSubscriberCapacityReached; }
+    else { return Error::None; }
 }
 
 void AsciiPacketDispatcher::removeSubscriber(PacketQueue_Interface* subscriberToRemove) noexcept
 {
-    for (auto itr = _subscribers.begin(); itr != _subscribers.end(); ++itr)
+    for (auto itr = _subscribers.begin(); itr != _subscribers.end();)
     {
-        auto& subscriber = *itr;
-        if (subscriberToRemove == subscriber.queueToPush) { _subscribers.erase(itr); }
+        if (subscriberToRemove == itr->queueToPush) { itr = _subscribers.erase(itr); }
+        else { ++itr; }
     }
 }
 
 void AsciiPacketDispatcher::removeSubscriber(PacketQueue_Interface* subscriberToRemove, const AsciiHeader& headerToUse) noexcept
 {
-    for (auto itr = _subscribers.begin(); itr != _subscribers.end(); ++itr)
+    for (auto itr = _subscribers.begin(); itr != _subscribers.end();)
     {
-        auto& subscriber = *itr;
-        if (subscriberToRemove == subscriber.queueToPush)
-        {
-            if (headerToUse == subscriber.headerFilter)
-            {
-                _subscribers.erase(itr);
-                break;
-            }
-        }
+        if (subscriberToRemove == itr->queueToPush && headerToUse == itr->headerFilter) { itr = _subscribers.erase(itr); }
+        else { ++itr; }
     }
 }
 
-bool AsciiPacketDispatcher::_tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex,
-                                                         const AsciiPacketProtocol::Metadata& metadata,
-                                                         AsciiPacketProtocol::AsciiMeasurementHeader measEnum) noexcept
+Error AsciiPacketDispatcher::_tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex,
+                                                          const AsciiPacketProtocol::Metadata& metadata,
+                                                          AsciiPacketProtocol::AsciiMeasurementHeader measEnum) noexcept
 {
     // if (!AsciiPacketProtocol::anyDataIsEnabled(metadata.header, _enabledMeasurements)) { return false; }
     auto compositeData = AsciiPacketProtocol::parsePacket(byteBuffer, syncByteIndex, metadata, measEnum);
-    if (!compositeData.has_value()) { return false; }
+    if (!compositeData.has_value()) { return Error::ParsingFailed; }
 
     // Copy to the output queue
     auto pCompositeData = _compositeDataQueue->put();
-    if (!pCompositeData) { return false; }
+    if (!pCompositeData) { return Error::MeasurementQueueFull; }
     *pCompositeData = compositeData.value();  // Todo 477: INvestigate passing pointer into the parser, rather than returning and copying it. Will that
                                               // be more efficient than calling "reset" and assigning values?
-    return true;
+    return Error::None;
 }
 
-void AsciiPacketDispatcher::_invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata) noexcept
+Error AsciiPacketDispatcher::_invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex,
+                                                const AsciiPacketProtocol::Metadata& metadata) noexcept
 {
+    Error error{Error::None};
     for (auto& subscriber : _subscribers)
     {
         if (StringUtils::startsWith(metadata.header, subscriber.headerFilter))
         {
             if (subscriber.filterType == SubscriberFilterType::StartsWith)
             {
-                [[maybe_unused]] const bool failed = _tryPushToSubscriber(byteBuffer, syncByteIndex, metadata, subscriber);
+                const Error latestError = _tryPushToSubscriber(byteBuffer, syncByteIndex, metadata, subscriber);
+                if (latestError != Error::None) { error = latestError; }
             }
         }
         else
         {
             if (subscriber.filterType == SubscriberFilterType::DoesNotStartWith)
             {
-                [[maybe_unused]] const bool failed = _tryPushToSubscriber(byteBuffer, syncByteIndex, metadata, subscriber);
+                const Error latestError = _tryPushToSubscriber(byteBuffer, syncByteIndex, metadata, subscriber);
+                if (latestError != Error::None) { error = latestError; }
             }
         }
     }
+
+    return error;
 }
 
-bool AsciiPacketDispatcher::_tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata,
-                                                 Subscriber& subscriber) noexcept
+Error AsciiPacketDispatcher::_tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata,
+                                                  Subscriber& subscriber) noexcept
 {
     auto putSlot = subscriber.queueToPush->put();
     if (putSlot)
     {
-        putSlot->details.syncByte = PacketDetails::SyncByte::Ascii;
-        putSlot->details.asciiMetadata = metadata;
-        byteBuffer.peek_unchecked(putSlot->buffer, metadata.length, syncByteIndex);
+        if (putSlot->capacity >= metadata.length)
+        {
+            putSlot->details.syncByte = PacketDetails::SyncByte::Ascii;
+            putSlot->details.asciiMetadata = metadata;
+            byteBuffer.peek_unchecked(putSlot->buffer, metadata.length, syncByteIndex);
+        }
+        else
+        {
+            putSlot->details = PacketDetails();
+            return Error::PacketQueueOverrun;
+        }
     }
-    else
-    {
-        // Putting failed
-        return true;
-    }
-    return false;
+    else { return Error::PacketQueueFull; }
+    return Error::None;
 }
 
 }  // namespace VN

@@ -30,7 +30,8 @@ Program Listing for File ConfigWriter.hpp
    template <typename T>
    struct ConfigWriter
    {
-       VN::Error writeConfig(const AsciiMessage& msg) { return static_cast<T*>(this)->write(msg); }
+       Error writeConfig(const AsciiMessage& msg) { return static_cast<T*>(this)->write(msg); }
+   
        void close() { static_cast<T*>(this)->finalize(); }
    };
    
@@ -39,10 +40,10 @@ Program Listing for File ConfigWriter.hpp
    public:
        AsciiConfigWriter(const Filesystem::FilePath& path) : file(path) {}
    
-       VN::Error write(const AsciiMessage& msg)
+       Error write(const AsciiMessage& msg)
        {
-           if (file.write(msg.c_str())) { return VN::Error::FileWriteFailed; }
-           else { return VN::Error::None; }
+           if (file.write(msg.c_str())) { return Error::FileWriteFailed; }
+           else { return Error::None; }
        }
    
        void finalize()
@@ -58,17 +59,17 @@ Program Listing for File ConfigWriter.hpp
    {
    public:
        GenericConfigWriter(
-           std::function<VN::Error(const AsciiMessage& msg)> writeConfig, std::function<void()> finalizeConfig = []() {})
+           std::function<Error(const AsciiMessage& msg)> writeConfig, std::function<void()> finalizeConfig = []() {})
            : _writeConfig(writeConfig), _finalizeConfig(finalizeConfig)
        {
        }
    
-       VN::Error write(const AsciiMessage& msg) { return _writeConfig(msg); }
+       Error write(const AsciiMessage& msg) { return _writeConfig(msg); }
    
        void finalize() { _finalizeConfig(); }
    
    private:
-       std::function<VN::Error(const AsciiMessage& msg)> _writeConfig;
+       std::function<Error(const AsciiMessage& msg)> _writeConfig;
        std::function<void()> _finalizeConfig;
    };
    
@@ -77,7 +78,7 @@ Program Listing for File ConfigWriter.hpp
    public:
        XmlConfigWriter(Sensor& sensor, const Filesystem::FilePath path) : sensor(sensor), _path(path) {}
    
-       VN::Error write(const AsciiMessage& msg);
+       Error write(const AsciiMessage& msg);
    
        void finalize();
    
@@ -93,8 +94,8 @@ Program Listing for File ConfigWriter.hpp
        AsciiMessage _reg7 = "";
        AsciiMessage _reg99 = "";
    
-       VN::Error _initialize();
-       VN::Error _write(const AsciiMessage& msg, const uint16_t regId);
+       Error _initialize();
+       Error _write(const AsciiMessage& msg, const uint16_t regId);
    };
    
    }  // namespace RegisterScan

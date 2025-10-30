@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Key Functionality" href="KeyFunctionality.html" />
-    <link rel="prev" title="VectorNav CLI Migration Guide" href="MigrationGuide.html" /> 
+    <link rel="prev" title="Migration Guide" href="MigrationGuide.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -56,7 +56,7 @@
           <a href="KeyFunctionality.html" title="Key Functionality"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="MigrationGuide.html" title="VectorNav CLI Migration Guide"
+          <a href="MigrationGuide.html" title="Migration Guide"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
     <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
@@ -85,11 +85,11 @@
 <section id="installation">
 <h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h3>
 <p>To build and install the VectorNav MATLAB library, download and install MATLAB from the <a class="reference external" href="https://www.mathworks.com/help/install/ug/install-products-with-internet-connection.html">Mathworks website</a> if you have not already done so. The VnSdk_Net.dll file is distributed in the <cite>./net</cite> directory. To use the dll, you must import that file into your MATLAB instance using:</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">NET.addAssembly</span><span class="p">(</span><span class="n">VnDotNetAssemblyPath</span><span class="p">);</span>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">vnsdkAssembly</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">NET.addAssembly</span><span class="p">([</span><span class="nb">pwd</span><span class="w"> </span><span class="s">&#39;\..\..\..\net\VnSdk_Net.dll&#39;</span><span class="p">]);</span><span class="w"> </span><span class="c">% change to file path</span>
 </pre></div>
 </div>
 <p>All of the values in the assembly are nested in the <cite>VNSDK</cite> namespace. You must then import the namespace <cite>VNSDK</cite> which also strips the namespace qualifier.</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">import</span><span class="w"> </span><span class="n">VNSDK</span><span class="o">.*</span>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">import</span><span class="w"> </span><span class="n">VNSDK</span><span class="o">.*</span><span class="w"> </span><span class="c">% Get rid of &#39;VNSDK&#39; namespace qualifications</span>
 </pre></div>
 </div>
 <p>The namespace importing is scope-tied, so it must be called in each new function.</p>
@@ -100,17 +100,15 @@
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Registers use enumerations rather than raw integers. A list of available enumerations is available upon importing the library using</p>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">vnSdkAssembly</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">NET.addAssembly</span><span class="p">(</span><span class="n">VnDotNetAssemblyPath</span><span class="p">);</span>
-<span class="nb">disp</span><span class="p">(</span><span class="n">vnSdkAssembly</span><span class="p">.</span><span class="n">Enums</span><span class="p">);</span>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">disp</span><span class="p">(</span><span class="n">vnSdkAssembly</span><span class="p">.</span><span class="n">Enums</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>An enum is accessed via <cite>(‘ClassName+EnumName’)</cite> inside the correct namespace. For example, for the <cite>HeadingMode</cite> enum inside the <cite>VpeBasicControl</cite> class (defined in <a class="reference internal" href="../_api/class_v_n_s_d_k_1_1_registers_1_1_attitude_1_1_vpe_basic_control.html#_CPPv4N5VNSDK9Registers8Attitude15VpeBasicControlE" title="VNSDK::Registers::Attitude::VpeBasicControl"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">VNSDK::Registers::Attitude::VpeBasicControl</span></code></a>) can be accessed via:</p>
+<p>An enum is accessed via <cite>(‘ClassName+EnumName’)</cite> inside the correct namespace. For example, for the <cite>HeadingMode</cite> enum inside the <cite>VpeBasicControl</cite> class (defined in <a class="reference internal" href="../_api/class_v_n_s_d_k_1_1_registers_1_1_attitude_1_1_vpe_basic_control.html#_CPPv4N5VNSDK9Registers8Attitude15VpeBasicControlE" title="VNSDK::Registers::Attitude::VpeBasicControl"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">VpeBasicControl</span></code></a>) can be accessed via:</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">VNSDK</span><span class="p">.</span><span class="n">Regsiters</span><span class="p">.</span><span class="n">Attitude</span><span class="p">.(</span><span class="s">&#39;VpeBasicControl+HeadingMode&#39;</span><span class="p">).</span><span class="n">Absolute</span>
 </pre></div>
 </div>
 <p>Unfortunately, getting the enums available from an imported enum class is not intuitive in MATLAB. To make this easier, the VNSDK provides a utility to get the available enums, called <cite>getEnumNames</cite>, inside the <code class="docutils literal notranslate"><span class="pre">matlab/Examples/GettingStarted</span></code> folder. The following code block details how to extract the possible enums and list their names.</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">enumType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">vnSdkAssembly</span><span class="p">.</span><span class="n">Assemblyhandle</span><span class="p">.</span><span class="n">GetType</span><span class="p">();</span>
-
 <span class="n">allNames</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="n">Enum</span><span class="p">.</span><span class="n">GetNames</span><span class="p">(</span><span class="n">enumType</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -246,21 +244,21 @@
 <div class="sphinx-toc sphinxglobaltoc">
 <h3><a href="../Documentation.html">Table of Contents</a></h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="MigrationGuide.html">VectorNav CLI Migration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MigrationGuide.html">Migration Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#matlab">MATLAB</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#c">C#</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="KeyFunctionality.html">Key Functionality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_index.html">VNSDK API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 </ul>
 </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
     <p class="topless"><a href="MigrationGuide.html"
-                          title="Previous page">&larr; VectorNav CLI Migration Guide</a></p>
+                          title="Previous page">&larr; Migration Guide</a></p>
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
@@ -307,7 +305,7 @@
           <a href="KeyFunctionality.html" title="Key Functionality"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="MigrationGuide.html" title="VectorNav CLI Migration Guide"
+          <a href="MigrationGuide.html" title="Migration Guide"
              >previous</a> &nbsp; &nbsp;</li>
     <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -75,11 +75,11 @@ public:
     virtual Error getData() noexcept = 0;
 
     /// @brief Sends the passed message over the serial port.
-    /// @param message The message to send over the port.
+    /// @param buffer Buffer containing the message to be sent over the port.
+    /// @param len Number of bytes to write from the buffer
     virtual Error send(const char* buffer, const size_t len) noexcept = 0;
 
 protected:
-    static const size_t _numBytesToReadPerGetData = Config::Serial::numBytesToReadPerGetData;
     bool _isOpen = false;
     ByteBuffer& _byteBuffer;
     PortName _portName;

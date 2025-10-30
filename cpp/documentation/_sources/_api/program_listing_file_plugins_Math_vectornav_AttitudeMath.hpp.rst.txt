@@ -131,7 +131,9 @@ Program Listing for File AttitudeMath.hpp
                break;
        }
    
-       return normalizeQuat(q).value();  // valid DCM guarantees valid quaternion
+       auto out = normalizeQuat(q);
+       VN_ASSERT(out.has_value());  // valid DCM guarantees valid quaternion
+       return out.value();
    }
    
    inline Quat multiplyQuat(const Quat& q0, const Quat& q1) noexcept
@@ -146,12 +148,12 @@ Program Listing for File AttitudeMath.hpp
        };
    }
    
-   inline Quat inverseQuat(const Quat& q) noexcept { return Quat{{q.vector * -1.0f}, q.scalar}; }
+   inline Quat inverseQuat(const Quat& quat) noexcept { return Quat{{quat.vector * -1.0f}, quat.scalar}; }
    
    inline Quat propagateQuat(Quat q0, Vec3f dTheta) noexcept
    {
        const float normdT = norm(dTheta);
-       const float phi = 0.5 * normdT;
+       const float phi = 0.5f * normdT;
        const float cosPhi = std::cos(phi);
    
        Vec3f psi = dTheta;

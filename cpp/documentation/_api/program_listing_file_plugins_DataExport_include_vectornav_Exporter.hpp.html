@@ -72,8 +72,7 @@
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;atomic&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdio&gt;</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/HAL/Thread.hpp&quot;</span>
-
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/Config.hpp&quot;</span>
 <span class="cp">#if THREADING_ENABLE</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;vectornav/HAL/Thread.hpp&quot;</span>
 <span class="cp">#endif</span>
@@ -81,18 +80,25 @@
 
 <span class="k">namespace</span><span class="w"> </span><span class="nn">VN</span>
 <span class="p">{</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">DataExport</span>
+<span class="p">{</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Exporter</span>
 <span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">PACKET_QUEUE_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="p">;</span>
+
 <span class="k">public</span><span class="o">:</span>
-<span class="w">    </span><span class="n">Exporter</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">packetCapacity</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_queue</span><span class="p">{</span><span class="n">packetCapacity</span><span class="p">}</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">PacketQueueMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PacketQueue</span><span class="o">&lt;</span><span class="n">PACKET_QUEUE_SIZE</span><span class="o">&gt;::</span><span class="n">PutMode</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">Exporter</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">packetCapacity</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">PacketQueueMode</span><span class="o">&amp;</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_queue</span><span class="p">{</span><span class="n">mode</span><span class="p">,</span><span class="w"> </span><span class="n">packetCapacity</span><span class="p">}</span><span class="w"> </span><span class="p">{}</span>
 
 <span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Exporter</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
 
 <span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">exportToFile</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="cp">#if THREADING_ENABLE</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">start</span><span class="p">()</span>
+<span class="w">    </span><span class="n">Errored</span><span class="w"> </span><span class="nf">start</span><span class="p">()</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">_thread</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">nullptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">_logging</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 <span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
@@ -112,7 +118,7 @@
 <span class="w">    </span><span class="n">PacketQueue_Interface</span><span class="o">*</span><span class="w"> </span><span class="nf">getQueuePtr</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="n">_queue</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
 <span class="k">protected</span><span class="o">:</span>
-<span class="w">    </span><span class="n">PacketQueue</span><span class="o">&lt;</span><span class="mi">1000</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_queue</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PacketQueue</span><span class="o">&lt;</span><span class="n">PACKET_QUEUE_SIZE</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_queue</span><span class="p">;</span>
 <span class="cp">#if THREADING_ENABLE</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_logging</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Thread</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_thread</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">;</span>
@@ -130,6 +136,7 @@
 <span class="cp">#endif</span>
 <span class="p">};</span>
 
+<span class="p">}</span><span class="w">  </span><span class="c1">// namespace DataExport</span>
 <span class="p">}</span><span class="w">  </span><span class="c1">// namespace VN</span>
 
 <span class="cp">#endif  </span><span class="c1">// VN_EXPORTER_HPP_</span>

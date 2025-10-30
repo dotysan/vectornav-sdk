@@ -6,6 +6,15 @@ Struct Metadata
 - Defined in :ref:`file_include_vectornav_Implementation_AsciiPacketProtocol.hpp`
 
 
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public VN::PacketMetadata< AsciiHeader >`` (:ref:`exhale_struct_struct_v_n_1_1_packet_metadata`)
+
+
 Struct Documentation
 --------------------
 

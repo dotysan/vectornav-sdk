@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -92,7 +92,7 @@ PacketDispatcher::FindPacketRetVal::Validity _calculteExpectedPayloadSize(const 
 {
     uint8_t headerSize = header.outputGroups.size() + header.outputTypes.size() * 2;
     uint8_t groupByteNumber = 0;
-    uint8_t typeWordIndex = -1;  // Initialize below zero becase we preincrement
+    uint8_t typeWordIndex = -1;  // Initialize below zero because we preincrement
     expectedPayloadSize = 0;
     // Loop through both the normal and extension group byte
     for (const auto groupByte : header.outputGroups)
@@ -108,7 +108,7 @@ PacketDispatcher::FindPacketRetVal::Validity _calculteExpectedPayloadSize(const 
                 uint16_t typeWord;
                 do {
                     // This shouldn't need to be checked, because we are assuming we are getting a valid header.
-                    typeWord = header.outputTypes.at(++typeWordIndex);
+                    typeWord = header.outputTypes[++typeWordIndex];
 
                     // Loop through each bit of the type word, besides extension bit
                     for (auto typeBitOffset = 0; typeBitOffset < 15; ++typeBitOffset)
@@ -129,13 +129,13 @@ PacketDispatcher::FindPacketRetVal::Validity _calculteExpectedPayloadSize(const 
                             case (Validity::Incomplete):
                             {
                                 if (expectedPayloadSize > Config::PacketFinders::faPacketMaxLength) { return Validity::Invalid; }
-                                return measurementTypeSizeRetVal;
+                                else { return measurementTypeSizeRetVal; }
                             }
                             case (Validity::Valid):
                                 // Do nothing
                                 break;
                             default:
-                                VN_ABORT();
+                                return measurementTypeSizeRetVal;
                         }
                     }
                     ++typeWordNumber;
@@ -230,7 +230,7 @@ FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteI
         }
         default:
         {
-            VN_ABORT();
+            return {headerValidity, Metadata{BinaryHeader{}, 7, time_point{}}};
         }
     }
     uint8_t headerSize = header.outputGroups.size() + header.outputTypes.size() * 2;
@@ -252,7 +252,7 @@ FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteI
 
             break;
         default:
-            VN_ABORT();
+            return {calcExpectedPayloadSizeValidity, Metadata{BinaryHeader{}, requiredPacketLength, time_point{}}};
     }
 
     // We now know the whole size of the expected payload. Check to make sure we have enough bytes one last time.

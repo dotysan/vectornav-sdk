@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Register Scan" href="RegisterScan.html" />
-    <link rel="prev" title="Firmware Update" href="FirmwareUpdate.html" /> 
+    <link rel="prev" title="Logger" href="Logger.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -56,7 +56,7 @@
           <a href="RegisterScan.html" title="Register Scan"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="FirmwareUpdate.html" title="Firmware Update"
+          <a href="Logger.html" title="Logger"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
     <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
@@ -73,21 +73,27 @@
           <div class="body" role="main">
             
   <section id="math">
-<h1>Math<a class="headerlink" href="#math" title="Link to this heading">¶</a></h1>
-<p>The Math plugin includes several functions, universal constants, and operator overloads that are available to the user to be used within their code base.</p>
+<span id="cppmathpage"></span><h1>Math<a class="headerlink" href="#math" title="Link to this heading">¶</a></h1>
+<p>The Math plugin includes several classes, functions, and universal constants that are available to the user for various mathematical tasks.</p>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>This plugin is contained in a single <a class="reference internal" href="../_api/namespace_VN__Math.html#namespace-vn-math"><span class="std std-ref">Math</span></a> namespace but split into multiple files based on the type of mathematical task performed:</p>
 <ul class="simple">
-<li><p>Temperature and angle conversions are located in the <span class="xref std std-ref">namespace_VN__Conversions</span>.</p></li>
-<li><p>Conversions that are related to attitude are located in the <span class="xref std std-ref">namespace_VN__AttConversions</span>. This includes conversions related between the DCM, quaternions, and Ypr. This is also where quaternion propagation and vector math can be found.</p></li>
-<li><p>Any calculations related to position and velocity can be found in the <span class="xref std std-ref">namespace_VN__PosVelConversions</span>. This includes course and speed over ground calculations and the conversions between Earth-centered Earth-fixed (ECEF) and latitude, longitude, altitude (LLA) coordinates.</p></li>
-<li><p>All math related to linear algebra can be found in the <span class="xref std std-ref">namespace_VN__LinAlg</span>. Some helpful functions located here are the inverse, transpose, dot product, and cross product.</p></li>
-<li><p>Matrix operator overloads along with the identity and null functions can be found in the <a class="reference internal" href="../_api/struct_v_n_1_1_matrix.html#_CPPv4I_8uint16_t_8uint16_t0EN2VN6MatrixE" title="VN::Matrix"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">VN::Matrix</span></code></a>.</p></li>
+<li><p>Temperature and angle conversions are located in the <a class="reference internal" href="../_api/file_plugins_Math_vectornav_Conversions.hpp.html#file-plugins-math-vectornav-conversions-hpp"><span class="std std-ref">Conversions</span></a> file.</p></li>
+<li><p>Conversions that are related to attitude are located in the <a class="reference internal" href="../_api/file_plugins_Math_vectornav_AttitudeMath.hpp.html#file-plugins-math-vectornav-attitudemath-hpp"><span class="std std-ref">AttitudeMath</span></a> file. This includes transformations between the different attitude representations, such as the direction cosine matrix (DCM), quaternion, and yaw-pitch-roll angles. Additionally, quaternion propagation and methods for calculating attitude from inertial sensor data can be found in this file.</p></li>
+<li><p>Any calculations related to position and velocity can be found in the <a class="reference internal" href="../_api/file_plugins_Math_vectornav_PosVelMath.hpp.html#file-plugins-math-vectornav-posvelmath-hpp"><span class="std std-ref">PosVelMath</span></a> file. This includes course and speed over ground calculations and the conversions between Earth-centered, Earth-fixed (ECEF) and latitude, longitude, altitude (LLA) coordinates.</p></li>
+<li><p>All math related to linear algebra can be found in the <a class="reference internal" href="../_api/file_plugins_Math_vectornav_LinearAlgebra.hpp.html#file-plugins-math-vectornav-linearalgebra-hpp"><span class="std std-ref">LinearAlgebra</span></a> file. Some helpful functions located here include the inverse, transpose, dot product, and cross product methods.</p></li>
+<li><p>Linear least squares solvers and utilities are located in the <a class="reference internal" href="../_api/file_plugins_Math_vectornav_LinearLeastSquares.hpp.html#file-plugins-math-vectornav-linearleastsquares-hpp"><span class="std std-ref">LinearLeastSquares</span></a> file. This includes the <a class="reference internal" href="../_api/class_v_n_1_1_math_1_1_linear_least_squares.html#_CPPv4N2VN4Math18LinearLeastSquaresE" title="VN::Math::LinearLeastSquares"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LinearLeastSquares</span></code></a> class for solving systems, along with result containers and error handling.</p></li>
+<li><p>Mathematical routines related to eigen decomposition can be found in the <a class="reference internal" href="../_api/file_plugins_Math_vectornav_EigenDecomposition.hpp.html#file-plugins-math-vectornav-eigendecomposition-hpp"><span class="std std-ref">EigenDecomposition</span></a> file. This includes the <a class="reference internal" href="../_api/class_v_n_1_1_math_1_1_eigen_decomposition.html#_CPPv4N2VN4Math18EigenDecompositionE" title="VN::Math::EigenDecomposition"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">EigenDecomposition</span></code></a> class for operations like extracting eigenvalues and eigenvectors, which is used in linear system solvers and other numerical routines.</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While not part of the Math plugin, matrix operator overloads along with the identity and null functions are provided in  <a class="reference internal" href="../_api/struct_v_n_1_1_matrix.html#_CPPv4I_8uint16_t_8uint16_t0EN2VN6MatrixE" title="VN::Matrix"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>.</p>
+</div>
 </section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
-<p>ADD WORDS HERE</p>
+<p><a class="reference internal" href="../_api/namespace_VN__Math.html#namespace-vn-math"><span class="std std-ref">Math</span></a></p>
 </section>
 </section>
 
@@ -119,20 +125,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/NonOsUsage.html">Non-Os Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/api_index.html">VNSDK API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Plugins</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="DataExport.html">Data Export</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FirmwareUpdate.html">Firmware Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Calibration.html">Calibration (<em>BETA</em>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DataExport.html">Data Export (<em>BETA</em>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FirmwareProgrammer.html">Firmware Programmer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logger.html">Logger</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Math</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RegisterScan.html">Register Scan</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Ros2.html">ROS2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="SimpleLogger.html">Simple Logger</a></li>
 </ul>
 </li>
 </ul>
 </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
-    <p class="topless"><a href="FirmwareUpdate.html"
-                          title="Previous page">&larr; Firmware Update</a></p>
+    <p class="topless"><a href="Logger.html"
+                          title="Previous page">&larr; Logger</a></p>
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
@@ -179,7 +186,7 @@
           <a href="RegisterScan.html" title="Register Scan"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="FirmwareUpdate.html" title="Firmware Update"
+          <a href="Logger.html" title="Logger"
              >previous</a> &nbsp; &nbsp;</li>
     <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 

@@ -73,7 +73,7 @@
 
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;filesystem&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
-<span class="cp">#define VN_CURRENT_DEBUG_LEVEL 0</span>
+<span class="cp">#define VN_DEBUG_LEVEL 0</span>
 <span class="cp">#define VN_USING_LIGHTWEIGHT_DEBUG false</span>
 
 <span class="cp">#ifndef VN_PROFILING_ENABLE</span>
@@ -98,26 +98,32 @@
 <span class="cp">#define VN_ASSERT(assert_expression)                                     \</span>
 <span class="cp">    if (!(assert_expression))                                            \</span>
 <span class="cp">    {                                                                    \</span>
-<span class="cp">        std::cout &lt;&lt; &quot;(&quot; &lt;&lt; __FILENAME__ &lt;&lt; &quot;:&quot; &lt;&lt; __LINE__ &lt;&lt; &quot;) &quot;      \</span>
+<span class="cp">        std::cerr &lt;&lt; &quot;(&quot; &lt;&lt; __FILENAME__ &lt;&lt; &quot;:&quot; &lt;&lt; __LINE__ &lt;&lt; &quot;) &quot;      \</span>
 <span class="cp">                  &lt;&lt; &quot;Assertion failed: &quot; &lt;&lt; #assert_expression &lt;&lt; &quot;\n&quot;; \</span>
 <span class="cp">        abort();                                                         \</span>
 <span class="cp">    }</span>
 
 <span class="cp">#define VN_ABORT()                                              \</span>
-<span class="cp">    std::cout &lt;&lt; &quot;(&quot; &lt;&lt; __FILENAME__ &lt;&lt; &quot;:&quot; &lt;&lt; __LINE__ &lt;&lt; &quot;) &quot; \</span>
+<span class="cp">    std::cerr &lt;&lt; &quot;(&quot; &lt;&lt; __FILENAME__ &lt;&lt; &quot;:&quot; &lt;&lt; __LINE__ &lt;&lt; &quot;) &quot; \</span>
 <span class="cp">              &lt;&lt; &quot;Abort called.&quot;                                \</span>
 <span class="cp">              &lt;&lt; &quot;\n&quot;;                                          \</span>
 <span class="cp">    abort();</span>
 
-<span class="cp">#define FORCE_DEBUG(debug_expression) std::cout &lt;&lt; &quot;(&quot; &lt;&lt; __FILENAME__ &lt;&lt; &quot;:&quot; &lt;&lt; __LINE__ &lt;&lt; &quot;) &quot; &lt;&lt; (debug_expression) &lt;&lt; &quot;\n&quot;;</span>
+<span class="cp">#define FORCE_DEBUG(debug_expression) std::clog &lt;&lt; &quot;(&quot; &lt;&lt; __FILENAME__ &lt;&lt; &quot;:&quot; &lt;&lt; __LINE__ &lt;&lt; &quot;) &quot; &lt;&lt; (debug_expression) &lt;&lt; std::endl;</span>
 
-<span class="cp">#if (VN_CURRENT_DEBUG_LEVEL &gt;= 1)</span>
+<span class="cp">#if (VN_DEBUG_LEVEL &gt;= 0)</span>
+<span class="cp">#define VN_DEBUG_0(debug_expression) std::clog &lt;&lt; debug_expression</span>
+<span class="cp">#else</span>
+<span class="cp">#define VN_DEBUG_0(debug_expression)</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#if (VN_DEBUG_LEVEL &gt;= 1)</span>
 <span class="cp">#define VN_DEBUG_1(debug_expression) FORCE_DEBUG(debug_expression)</span>
 <span class="cp">#else</span>
 <span class="cp">#define VN_DEBUG_1(debug_expression)</span>
 <span class="cp">#endif</span>
 
-<span class="cp">#if (VN_CURRENT_DEBUG_LEVEL &gt;= 2)</span>
+<span class="cp">#if (VN_DEBUG_LEVEL &gt;= 2)</span>
 <span class="cp">#define VN_DEBUG_2(debug_expression) FORCE_DEBUG(debug_expression)</span>
 <span class="cp">#else</span>
 <span class="cp">#define VN_DEBUG_2(debug_expression)</span>

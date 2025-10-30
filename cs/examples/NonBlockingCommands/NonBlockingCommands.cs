@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,12 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 using System;
 using VNSDK;
 
 
-namespace Examples
+namespace NonBlockingCommands
 {
     class Program
     {
@@ -37,65 +36,102 @@ namespace Examples
             with different types of commands.
 
             This example will achieve the following:
-            
-            1. Connect to the sensor
-            2. Configure the ADOR and ADOF to YPR at 100Hz
-            3. Send generic command (known magnetic disturbance)
-            4. Wait and check response
+            1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            2. Configure the asynchronous ASCII output to YPR at 100 Hz
+            3. Send generic command (Known Magnetic Disturbance command)
+            4. Wait and check response from the unit
             5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds:
                 5.1. Check if a valid response has been received from the velocity aiding command
                 5.2. Print response and send new command
-            6. Disconnect from the sensor
+            6. Disconnect from the VectorNav unit
             */
 
-            // [1] Instantiate Sensor and Establish Connection
-            String port = "COM6"; // Default port COM33 or as passed by user.
+            // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            String portName = "COM1";  // Change the sensor port name to the COM port of your local machine
             if (args.Length > 0)
             {
-                port = args[0];
+                portName = args[0];
             }
             Sensor sensor = new Sensor();
-            sensor.AutoConnect(port);
-            Console.WriteLine($"\nConnected to {port} at {sensor.ConnectedBaudRate()}\n");
+            try { sensor.AutoConnect(portName); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when connecting to {portName}.");
+                return 1;
+            }
+            Console.WriteLine($"\nConnected to {portName} at {sensor.ConnectedBaudRate()}");
 
-            // [2] Configure ADOR (Asynchronous Data Output Register) and ADOF (Asynchronous Data Output Frequency)
+            VNSDK.Registers.System.Model modelRegister = new VNSDK.Registers.System.Model();
+            try { sensor.ReadRegister(modelRegister); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when reading register 1 (Model).");
+                return 1;
+            }
+            Console.WriteLine($"Sensor Model Number: {modelRegister.model}");
+
+            // 2. Configure the asynchronous ASCII output to YPR at 100Hz
             VNSDK.Registers.System.AsyncOutputType asyncDataOutputType = new VNSDK.Registers.System.AsyncOutputType();
-            asyncDataOutputType.ador = VNSDK.Registers.System.AsyncOutputType.Ador.YPR; // Configure for Yaw, Pitch, Roll data.
+            asyncDataOutputType.ador = VNSDK.Registers.System.AsyncOutputType.Ador.YPR;  // Configure for Yaw, Pitch, Roll data.
             asyncDataOutputType.serialPort = VNSDK.Registers.System.AsyncOutputType.SerialPort.Serial1;
-            sensor.WriteRegister(asyncDataOutputType);
-            Console.WriteLine("ADOR configured");
+            try { sensor.WriteRegister(asyncDataOutputType); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when writing register 6 (AsyncOutputType).");
+                return 1;
+            }
+            Console.WriteLine("ADOR configured.");
 
-            VNSDK.Registers.System.AsyncOutputFreq asyncDataOutputFreq = new VNSDK.Registers.System.AsyncOutputFreq();
-            asyncDataOutputFreq.adof = VNSDK.Registers.System.AsyncOutputFreq.Adof.Rate100Hz; // Set output rate to 100Hz
-            asyncDataOutputFreq.serialPort = VNSDK.Registers.System.AsyncOutputFreq.SerialPort.Serial1;
-            sensor.WriteRegister(asyncDataOutputFreq);
-            Console.WriteLine("ADOF configured");
+            VNSDK.Registers.System.AsyncOutputFreq asyncDataOutputFrequency = new VNSDK.Registers.System.AsyncOutputFreq();
+            asyncDataOutputFrequency.adof = VNSDK.Registers.System.AsyncOutputFreq.Adof.Rate100Hz;  // Set output rate to 100Hz
+            asyncDataOutputFrequency.serialPort = VNSDK.Registers.System.AsyncOutputFreq.SerialPort.Serial1;
+            try { sensor.WriteRegister(asyncDataOutputFrequency); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when writing register 7 (AsyncOutputFreq).");
+                return 1;
+            }
+            Console.WriteLine("ADOF configured\n");
 
-            // [3] Send Known Magnetic Disturbanc Command
-            VNSDK.GenericCommand kmd = new VNSDK.KnownMagneticDisturbance(VNSDK.KnownMagneticDisturbance.State.Present);
-            sensor.SendCommand(ref kmd, Sensor.SendCommandBlockMode.None); // Non-blocking
+            // 3. Send generic command (Known Magnetic Disturbance command)
+            GenericCommand kmd = new KnownMagneticDisturbance(KnownMagneticDisturbance.State.Present);
+            try { sensor.SendCommand(ref kmd, Sensor.SendCommandBlockMode.None); } // Non-blocking
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} received while sending the Known Magnetic Disturbance Command..");
+                return 1;
+            }
 
-            // [4] Wait and Check Response
+            // 4. Wait and check response from the unit
             System.Threading.Thread.Sleep(250);
+
             // We could check kmd.awaitingResponse() but it will be removed from the command queue (setting kmd.awaitingResponse to false) after commandRemovalTimeoutLength
             // (default 200ms), if any command has been sent or received since.
             if (kmd.HasValidResponse())
             {
-                Console.WriteLine($"\nKMD Response: {kmd.GetResponse()}");
+                Console.WriteLine($"KMD Response: {kmd.GetResponse()}");
                 int? error_maybe = kmd.GetError();
                 if (error_maybe.HasValue)
                 {
-                    Console.WriteLine($"\nError: {error_maybe.Value}");
+                    Console.WriteLine($"\tError: {error_maybe.Value}");
                     return error_maybe.Value;
                 }
             }
-            else { Console.WriteLine("\nError: KMD did not receive a valid response"); }
+            else { Console.WriteLine("Error: KMD did not receive a valid response"); }
 
+            // 5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds
 
-            // [5] Enter Loop for 5 Seconds to Process Commands and Measurements
             // Initialize velocity aiding register, command, counters, flags, and timers
             VNSDK.Registers.VelocityAiding.VelAidingMeas velAidRegister = new VNSDK.Registers.VelocityAiding.VelAidingMeas();
+            velAidRegister.velocityX = 0;
+            velAidRegister.velocityY = 0;
+            velAidRegister.velocityZ = 0;
             VNSDK.GenericCommand velAidWRGCommand = velAidRegister.ToWriteCommand();
+            if (velAidWRGCommand == null)
+            {
+                Console.WriteLine($"Error: Failed to create velocity aiding command.");
+                return 1;
+            }
 
             int asciiCount = 0;
             int velAidSentCount = 0;
@@ -109,7 +145,6 @@ namespace Examples
 
             while (timer.Elapsed < timeout)
             {
-                // Handle ASCII YPR Measurement
                 Nullable<CompositeData> compositeData = sensor.GetNextMeasurement();
                 if (compositeData.HasValue && compositeData.Value.MatchesMessage("VNYPR"))
                 {
@@ -118,7 +153,7 @@ namespace Examples
                     asciiCount++;
                 }
 
-                // [5.1] Check for Valid Response
+                // 5.1. Check if a valid response has been received from the velocity aiding command
                 if (!validResponseReceived && !velAidWRGCommand.IsAwaitingResponse())
                 {
                     int? error_maybe = velAidWRGCommand.GetError();
@@ -134,28 +169,45 @@ namespace Examples
                     }
                 }
 
-                // [5.2] Send command and check response at 2Hz
+                // 5.2. Print response and send new command
                 if (resendTimer.Elapsed > resendTimeout)
                 {
                     if (!validResponseReceived && velAidSentCount > 0) { Console.WriteLine($"\nError: Response Timeout\n"); }
 
+                    velAidRegister = new VNSDK.Registers.VelocityAiding.VelAidingMeas();
                     velAidRegister.velocityX = (float)(random.NextDouble()); // random to simulate different velocities
                     velAidRegister.velocityY = (float)(random.NextDouble());
                     velAidRegister.velocityZ = (float)(random.NextDouble());
-                    velAidWRGCommand = velAidRegister.ToWriteCommand(); // The Command object was instantiated before the loop.
-                    sensor.SendCommand(ref velAidWRGCommand, Sensor.SendCommandBlockMode.None); // Non-blocking
+                    velAidWRGCommand = velAidRegister.ToWriteCommand(); // The GenericCommand object was instantiated before the loop.
+                    if (velAidWRGCommand == null)
+                    {
+                        Console.WriteLine($"Error: Expected a valid instance of GenericCommand^, but received null");
+                        return 1;
+                    }
+                    try { sensor.SendCommand(ref velAidWRGCommand, Sensor.SendCommandBlockMode.None); } // Non-blocking
+                    catch (Exception latestError)
+                    {
+                        Console.WriteLine($"Error: {latestError} encountered when writing to register");
+                    }
 
                     validResponseReceived = false;
                     velAidSentCount++;
                     resendTimer.Restart(); // Restart send timer
                 }
+
+                // Handle asynchronous errors
+                try { sensor.ThrowIfAsyncError(); }
+                catch (Exception asyncError)
+                {
+                    Console.WriteLine($"Received async error: {asyncError.Message}");
+                }
             }
 
             Console.WriteLine($"\nTotal ASCII YPR Packets Received: {asciiCount}");
-            Console.WriteLine($"\nTotal VelAid Commands Sent: {velAidSentCount}");
+            Console.WriteLine($"Total VelAid Commands Sent: {velAidSentCount}");
             Console.WriteLine($"\nNonBlockingCommands example complete");
 
-            // [6] Disconnect Sensor
+            // 6. Disconnect from the VectorNav unit
             sensor.Disconnect();
             return 0;
         }

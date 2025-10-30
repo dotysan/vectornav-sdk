@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,6 +38,8 @@
 
 namespace VN
 {
+namespace DataExport
+{
 
 class ExporterCsv : public Exporter
 {
@@ -60,8 +62,8 @@ public:
         OutputFile file;
     };
 
-    ExporterCsv(const Filesystem::FilePath& outputDir, bool enableSystemTimeStamps = false)
-        : Exporter(EXPORTER_PACKET_CAPACITY), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
+    ExporterCsv(const Filesystem::FilePath& outputDir, PacketQueueMode mode = PacketQueueMode::Force, bool enableSystemTimeStamps = false)
+        : Exporter(EXPORTER_PACKET_CAPACITY, mode), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
     {
         if (!_filePath.empty() && _filePath.back() != std::filesystem::path::preferred_separator)
         {
@@ -176,6 +178,7 @@ public:
             }
             csv.write("\n");
         }
+        flushAllFiles();
     }
 
 private:
@@ -327,6 +330,12 @@ private:
         return _dynamicCsvInfo.back().file;
     }
 
+    void flushAllFiles()
+    {
+        for (auto& csvInfo : _csvInfo) { csvInfo.file.flush(); }
+        for (auto& dynamicCsvInfo : _dynamicCsvInfo) { dynamicCsvInfo.file.flush(); }
+    }
+
 private:
     Filesystem::FilePath _filePath;
     const bool _enableSystemTimeStamps = false;
@@ -336,6 +345,7 @@ private:
     Vector<DynamicCsvInfo, MAX_NUM_FILES> _dynamicCsvInfo;  // One entry per file created, which is per unique message type
 };
 
+}  // namespace DataExport
 }  // namespace VN
 
 #endif  // VN_EXPORTERCSV_HPP_

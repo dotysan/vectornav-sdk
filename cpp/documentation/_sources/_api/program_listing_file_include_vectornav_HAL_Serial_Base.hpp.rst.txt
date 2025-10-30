@@ -52,7 +52,6 @@ Program Listing for File Serial_Base.hpp
        virtual Error send(const char* buffer, const size_t len) noexcept = 0;
    
    protected:
-       static const size_t _numBytesToReadPerGetData = Config::Serial::numBytesToReadPerGetData;
        bool _isOpen = false;
        ByteBuffer& _byteBuffer;
        PortName _portName;

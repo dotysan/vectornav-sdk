@@ -13,7 +13,9 @@ Program Listing for File CLI_SteadyClock.hpp
    #ifndef VN_CLI_STEADYCLOCK_HPP_
    #define VN_CLI_STEADYCLOCK_HPP_
    
+   #pragma managed(push, off)
    #include "vectornav/HAL/Timer.hpp"
+   #pragma managed(pop)
    
    namespace VNSDK
    {

@@ -21,9 +21,10 @@ Inheritance Relationships
 Derived Types
 *************
 
-- ``public VN::DirectAccessQueue< 1000 >`` (:ref:`exhale_class_class_v_n_1_1_direct_access_queue`)
+- ``public VN::DirectAccessQueue< PACKET_QUEUE_SIZE >`` (:ref:`exhale_class_class_v_n_1_1_direct_access_queue`)
 - ``public VN::DirectAccessQueue< CompositeData, Config::PacketDispatchers::compositeDataQueueCapacity >`` (:ref:`exhale_class_class_v_n_1_1_direct_access_queue`)
 - ``public VN::DirectAccessQueue< ItemType, Capacity >`` (:ref:`exhale_class_class_v_n_1_1_direct_access_queue`)
+- ``public VN::DynamicPacketQueue`` (:ref:`exhale_class_class_v_n_1_1_dynamic_packet_queue`)
 
 
 Class Documentation

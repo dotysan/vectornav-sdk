@@ -22,7 +22,6 @@ Files
 - :ref:`file_plugins_DataExport_include_vectornav_ExporterCsvUtils.hpp`
 - :ref:`file_plugins_DataExport_include_vectornav_ExporterImr.hpp`
 - :ref:`file_plugins_DataExport_include_vectornav_ExporterRinex.hpp`
-- :ref:`file_plugins_DataExport_include_vectornav_FileExporter.hpp`
-- :ref:`file_plugins_DataExport_include_vectornav_SkippedByteExporter.hpp`
+- :ref:`file_plugins_DataExport_include_vectornav_ExporterSkippedByte.hpp`
 
 

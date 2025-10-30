@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # 
-# VectorNav SDK (v0.22.0)
+# VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,30 +21,82 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import sys, os
+import os
+import sys
+import time
 
-from vectornav.Plugins import FileExporter
+import vectornav
+from vectornav import Sensor
+from vectornav.Plugins import DataExport
 
 def main(argv):
+    """
+    This data export example walks through the Python usage of the SDK to export a binary file to a CSV or ASCII file.
+
+    This example will achieve the following:
+    1. Create a FileExporter object
+    2. Add exporters for CSV, ASCII, and skipped bytes
+    3. Process file
+    4. Print parsing stats
+    """
+
+    # Parse command line arguments
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     filePath = argv[0] if argv else os.path.join(parent_dir, "data_export_from_file.bin")
-    outputPath = argv[1] if len(argv)==2 else parent_dir
+    outputPath = argv[1] if len(argv) == 2 else parent_dir
 
     print(f"Exporting {filePath}")
     print(f"Outputting to {outputPath}\n")
 
-    fileExporter = FileExporter()
-    fileExporter.addCsvExporter(outputPath, False)
-    fileExporter.addAsciiExporter(outputPath)
-    fileExporter.addSkippedByteExporter(outputPath)
+    # 1. Create a Sensor object for file processing
+    pushToCompositeData = Sensor.MeasQueueMode.Off
+    sensor = Sensor(pushToCompositeData)
 
-    if (fileExporter.processFile(filePath)):
-        print("Error: File processing failed.")
-        return
+    # 2. Add exporters for CSV, ASCII, and skipped bytes and subscribe to sensor messages
+    asciiExporter = DataExport.ExporterAscii(outputPath, DataExport.PacketQueueMode.Retry)
+    sensor.subscribeToMessage(
+        asciiExporter.getQueuePtr(), "VN", Sensor.AsciiSubscriberFilterType.StartsWith
+    )
     
-    print(fileExporter.getParsingStats())
+    csvExporter = DataExport.ExporterCsv(outputPath, DataExport.PacketQueueMode.Retry)
+    sensor.subscribeToMessage(
+        csvExporter.getQueuePtr(),
+        Sensor.BinaryOutputMeasurements(),
+        Sensor.FaSubscriberFilterType.AnyMatch
+    )
+    sensor.subscribeToMessage(
+        csvExporter.getQueuePtr(), "VN", Sensor.AsciiSubscriberFilterType.StartsWith
+    )
 
-    print("ExportFromFile example complete")
+    skippedByteExporter = DataExport.ExporterSkippedByte(outputPath, DataExport.PacketQueueMode.Retry)
+    sensor.subscribeToMessage(skippedByteExporter.getQueuePtr(), Sensor.SyncByte.none)
+    
+    # 3. Kick off exporter threads
+    asciiExporter.start()
+    csvExporter.start()
+    skippedByteExporter.start()
 
-if __name__ == '__main__':
-    main(sys.argv[1:])    
+    # 4. Connect to file, monitoring AsyncError queue for FileReadFailed error to indicate end of file reached
+    sensor.connect(filePath)
+    while True:
+        time.sleep(0.001)
+
+        # Handle asynchronous errors
+        try:
+            sensor.throwIfAsyncError()
+        except vectornav.FileReadFailed:
+            break
+        except Exception as asyncError:
+            print(f"Received async error: {asyncError}")
+    
+    sensor.disconnect()
+    
+    # 5. Stop exporters
+    asciiExporter.stop()
+    csvExporter.stop()
+    skippedByteExporter.stop()
+    
+    print("DataExportFromFile example complete.")
+    
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -37,13 +37,13 @@ Program Listing for File Conversions.hpp
    inline double deg2rad(double angleInDegs) noexcept { return angleInDegs * static_cast<double>(M_PI) / 180.0; }
    
    template <uint16_t n, uint16_t m, typename T>
-   inline Matrix<n, m, T> rad2deg(Matrix<n, m, T> vec) noexcept
+   inline constexpr Matrix<n, m, T> rad2deg(Matrix<n, m, T> vec) noexcept
    {
        return vec * (static_cast<T>(180.0) / static_cast<T>(M_PI));
    }
    
    template <uint16_t n, uint16_t m, typename T>
-   inline Matrix<n, m, T> deg2rad(Matrix<n, m, T> vec) noexcept
+   inline constexpr Matrix<n, m, T> deg2rad(Matrix<n, m, T> vec) noexcept
    {
        return vec * (static_cast<T>(M_PI) / static_cast<T>(180.0));
    }

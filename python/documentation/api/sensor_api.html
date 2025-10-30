@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Class Sensor &#8212; VectorNav 0.22.0 documentation</title>
+    <title>Class Sensor &#8212; VectorNav SDK 0.22.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=36acb9b5" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=4c969af8" />
@@ -55,7 +55,7 @@
         <li class="right" >
           <a href="index.html" title="VNSDK API"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav 0.22.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">VNSDK API</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Class Sensor</a></li> 
@@ -76,37 +76,42 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="vectornav.Sensor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vectornav.</span></span><span class="sig-name descname"><span class="pre">Sensor</span></span><a class="headerlink" href="#vectornav.Sensor" title="Link to this definition">¶</a></dt>
-<dd><p>This is the top-level class used by the SDK. In nominal operation, the user will instantiate a sensor object and interact directly with it.</p>
-</dd></dl>
-
+<dd><blockquote>
+<div><p>This is the top-level class used by the SDK. In nominal operation, the user will instantiate a sensor object and interact directly with it.</p>
+</div></blockquote>
 <section id="serial-connectivity-methods">
 <h3>Serial Connectivity Methods<a class="headerlink" href="#serial-connectivity-methods" title="Link to this heading">¶</a></h3>
-<blockquote>
-<div><dl class="py method">
-<dt class="sig sig-object py" id="connect">
-<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PortName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baudRate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vectornav.Sensor.BaudRate" title="vectornav.Sensor.BaudRate"><span class="pre">Sensor.BaudRate</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#connect" title="Link to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="vectornav.Sensor.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PortName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baudRate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vectornav.Sensor.BaudRate" title="vectornav.Sensor.BaudRate"><span class="pre">Sensor.BaudRate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitorAsyncErrors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.connect" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>VnError</strong> – If the COM port is not accessible.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monitorAsyncErrors</strong> – If true, exceptions from the asynchronous error monitoring thread will be thrown.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>VnError</strong> – If the COM port is not accessible.</p>
 </dd>
 </dl>
 <p>Opens the serial port at the specified baud rate and starts the Listening Thread. This does not verify any connectivity, and as such only validates that the serial port is available for opening.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="autoConnect">
-<span class="sig-name descname"><span class="pre">autoConnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PortName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#autoConnect" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.autoConnect">
+<span class="sig-name descname"><span class="pre">autoConnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PortName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitorAsyncErrors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.autoConnect" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>VnError</strong> – If the COM port is not accessible or if the unit does not reply to connection verification.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>monitorAsyncErrors</strong> – If true, exceptions from the asynchronous error monitoring thread will be thrown.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>VnError</strong> – If the COM port is not accessible or if the unit does not reply to connection verification.</p>
 </dd>
 </dl>
 <p>Opens the serial port and starts the Listening Thread, scanning all possible baud rates until the unit is verified to be connected. This performs a verifySensorConnectivity at each possible baud rate.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="verifySensorConnectivity">
-<span class="sig-name descname"><span class="pre">verifySensorConnectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#verifySensorConnectivity" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.verifySensorConnectivity">
+<span class="sig-name descname"><span class="pre">verifySensorConnectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#vectornav.Sensor.verifySensorConnectivity" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns connectivityVerified<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Whether a valid response was received from the unit.</p>
@@ -116,8 +121,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="connectedPortName">
-<span class="sig-name descname"><span class="pre">connectedPortName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">vectornav.PortName</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#connectedPortName" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.connectedPortName">
+<span class="sig-name descname"><span class="pre">connectedPortName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">vectornav.PortName</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vectornav.Sensor.connectedPortName" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns portName<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Name of the connected port.</p>
@@ -127,8 +132,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="connectedBaudRate">
-<span class="sig-name descname"><span class="pre">connectedBaudRate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#vectornav.Sensor.BaudRate" title="vectornav.Sensor.BaudRate"><span class="pre">Sensor.BaudRate</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#connectedBaudRate" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.connectedBaudRate">
+<span class="sig-name descname"><span class="pre">connectedBaudRate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#vectornav.Sensor.BaudRate" title="vectornav.Sensor.BaudRate"><span class="pre">Sensor.BaudRate</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vectornav.Sensor.connectedBaudRate" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns baudRate<span class="colon">:</span></dt>
 <dd class="field-odd"><p>BaudRate of the connected port.</p>
@@ -138,19 +143,31 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="changeBaudRate">
-<span class="sig-name descname"><span class="pre">changeBaudRate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newBaudRate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vectornav.Sensor.BaudRate" title="vectornav.Sensor.BaudRate"><span class="pre">Sensor.BaudRate</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#changeBaudRate" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.changeBaudRate">
+<span class="sig-name descname"><span class="pre">changeBaudRate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newBaudRate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vectornav.Sensor.BaudRate" title="vectornav.Sensor.BaudRate"><span class="pre">Sensor.BaudRate</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.changeBaudRate" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>VnError</strong> – If passed a baud rate the system doesn’t support or if the unit did not reply to baud rate change command.</p>
+<dd class="field-odd"><p><strong>VnError</strong> – If passed an unsupported baud rate, if the command queue is full, if reading the current serial port configuration fails, or if the unit did not reply to the change baud rate command</p>
 </dd>
 </dl>
 <p>Sends a Write Register for the new baud rate to the unit and reopens to the serial port under the new baud rate. Will retry on failure.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="changeHostBaudRate">
-<span class="sig-name descname"><span class="pre">changeHostBaudRate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#changeHostBaudRate" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">changeBaudRate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newBaudRate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vectornav.Sensor.BaudRate" title="vectornav.Sensor.BaudRate"><span class="pre">Sensor.BaudRate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialPort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="registers.html#vectornav.Registers.System.BaudRate.SerialPort" title="vectornav.Registers.System.BaudRate.SerialPort"><span class="pre">Registers.System.BaudRate.SerialPort</span></a></span></em><span class="sig-paren">)</span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>VnError</strong> – If passed an unsupported baud rate, if the command queue is full, if reading current serial port configuration fails, or if the unit did not reply to the baud rate change command</p>
+</dd>
+</dl>
+<p>Changes the baud rate on a specified serial port of the sensor. If the targeted port is the currently active one, it also
+updates the host’s baud rate to match.  Will retry on failure</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vectornav.Sensor.changeHostBaudRate">
+<span class="sig-name descname"><span class="pre">changeHostBaudRate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.changeHostBaudRate" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If the host rejected the change baud rate request.</p>
@@ -160,14 +177,14 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="disconnect">
-<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#disconnect" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.disconnect">
+<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.disconnect" title="Link to this definition">¶</a></dt>
 <dd><p>Disconnects from the unit and closes the Listening Thread.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="vectornav.Sensor.BaudRate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vectornav.Sensor.</span></span><span class="sig-name descname"><span class="pre">BaudRate</span></span><a class="headerlink" href="#vectornav.Sensor.BaudRate" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BaudRate</span></span><a class="headerlink" href="#vectornav.Sensor.BaudRate" title="Link to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="vectornav.Sensor.BaudRate.Baud9600">
 <span class="sig-name descname"><span class="pre">Baud9600</span></span><a class="headerlink" href="#vectornav.Sensor.BaudRate.Baud9600" title="Link to this definition">¶</a></dt>
@@ -215,20 +232,18 @@
 
 </dd></dl>
 
-</div></blockquote>
 </section>
 <section id="measurement-accessor-methods">
 <h3>Measurement Accessor Methods<a class="headerlink" href="#measurement-accessor-methods" title="Link to this heading">¶</a></h3>
-<blockquote>
-<div><dl class="py method">
-<dt class="sig sig-object py" id="hasMeasurement">
-<span class="sig-name descname"><span class="pre">hasMeasurement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#hasMeasurement" title="Link to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="vectornav.Sensor.hasMeasurement">
+<span class="sig-name descname"><span class="pre">hasMeasurement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#vectornav.Sensor.hasMeasurement" title="Link to this definition">¶</a></dt>
 <dd><p>Checks to see if there is a new measurement available on the MeasurementQueue.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="getNextMeasurement">
-<span class="sig-name descname"><span class="pre">getNextMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">vectornav.CompositeData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="registers.html#vnpy.Registers.GNSS.GnssBasicConfig.PpsSource.None" title="vnpy.Registers.GNSS.GnssBasicConfig.PpsSource.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#getNextMeasurement" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.getNextMeasurement">
+<span class="sig-name descname"><span class="pre">getNextMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="composite_data_api.html#vectornav.CompositeData" title="vectornav.CompositeData"><span class="pre">vectornav.CompositeData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vectornav.Sensor.getNextMeasurement" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>block</strong> – If true, wait a maximum of getMeasurementTimeoutLength for a new measurement.</p>
@@ -238,8 +253,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="getMostRecentMeasurement">
-<span class="sig-name descname"><span class="pre">getMostRecentMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">vectornav.CompositeData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="registers.html#vnpy.Registers.GNSS.GnssBasicConfig.PpsSource.None" title="vnpy.Registers.GNSS.GnssBasicConfig.PpsSource.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#getMostRecentMeasurement" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.getMostRecentMeasurement">
+<span class="sig-name descname"><span class="pre">getMostRecentMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="composite_data_api.html#vectornav.CompositeData" title="vectornav.CompositeData"><span class="pre">vectornav.CompositeData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#vectornav.Sensor.getMostRecentMeasurement" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>block</strong> – If true, wait a maximum of getMeasurementTimeoutLength for a new measurement.</p>
@@ -248,14 +263,12 @@
 <p>Gets the back (most recent) of the MeasurementQueue, popping every measurement in the queue.</p>
 </dd></dl>
 
-</div></blockquote>
 </section>
 <section id="command-sending-methods">
 <h3>Command Sending Methods<a class="headerlink" href="#command-sending-methods" title="Link to this heading">¶</a></h3>
-<blockquote>
-<div><dl class="py method">
-<dt class="sig sig-object py" id="readRegister">
-<span class="sig-name descname"><span class="pre">readRegister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registerToRead</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.Registers.Register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retryOnFailure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#readRegister" title="Link to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="vectornav.Sensor.readRegister">
+<span class="sig-name descname"><span class="pre">readRegister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registerToRead</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.Registers.Register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retryOnFailure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.readRegister" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, the received response is a synchronous VnErr, or the received response can not be parsed into the Register object.</p>
@@ -265,8 +278,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="writeRegister">
-<span class="sig-name descname"><span class="pre">writeRegister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registerToWrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.Registers.ConfigurationRegister</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retryOnFailure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#writeRegister" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.writeRegister">
+<span class="sig-name descname"><span class="pre">writeRegister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registerToWrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.Registers.ConfigurationRegister</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retryOnFailure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.writeRegister" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, the received response is a synchronous VnErr, or the received response can not be parsed into the Register object.</p>
@@ -276,8 +289,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="writeSettings">
-<span class="sig-name descname"><span class="pre">writeSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#writeSettings" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.writeSettings">
+<span class="sig-name descname"><span class="pre">writeSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.writeSettings" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -287,8 +300,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#reset" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.reset" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -298,8 +311,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="restoreFactorySettings">
-<span class="sig-name descname"><span class="pre">restoreFactorySettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#restoreFactorySettings" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.restoreFactorySettings">
+<span class="sig-name descname"><span class="pre">restoreFactorySettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.restoreFactorySettings" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -309,8 +322,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="knownMagneticDisturbance">
-<span class="sig-name descname"><span class="pre">knownMagneticDisturbance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.KnownMagneticDisturbance.State</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#knownMagneticDisturbance" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.knownMagneticDisturbance">
+<span class="sig-name descname"><span class="pre">knownMagneticDisturbance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.KnownMagneticDisturbance.State</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.knownMagneticDisturbance" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -320,8 +333,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="knownAccelerationDisturbance">
-<span class="sig-name descname"><span class="pre">knownAccelerationDisturbance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.KnownAccelerationDisturbance.State</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#knownAccelerationDisturbance" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.knownAccelerationDisturbance">
+<span class="sig-name descname"><span class="pre">knownAccelerationDisturbance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.KnownAccelerationDisturbance.State</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.knownAccelerationDisturbance" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -331,8 +344,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="setInitialHeading">
-<span class="sig-name descname"><span class="pre">setInitialHeading</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">const</span> <span class="pre">float</span> <span class="pre">heading:</span> <span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#setInitialHeading" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.setInitialHeading">
+<span class="sig-name descname"><span class="pre">setInitialHeading</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">const</span> <span class="pre">float</span> <span class="pre">heading:</span> <span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.setInitialHeading" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -364,8 +377,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="asyncOutputEnable">
-<span class="sig-name descname"><span class="pre">asyncOutputEnable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.AsyncOutputEnable.State</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asyncOutputEnable" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.asyncOutputEnable">
+<span class="sig-name descname"><span class="pre">asyncOutputEnable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.AsyncOutputEnable.State</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.asyncOutputEnable" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -375,8 +388,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="setFilterBias">
-<span class="sig-name descname"><span class="pre">setFilterBias</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#setFilterBias" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.setFilterBias">
+<span class="sig-name descname"><span class="pre">setFilterBias</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.setFilterBias" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -386,8 +399,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="setBootloader">
-<span class="sig-name descname"><span class="pre">setBootloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">processorId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.SetBootLoader.Processor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#setBootloader" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.setBootloader">
+<span class="sig-name descname"><span class="pre">setBootloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">processorId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.SetBootLoader.Processor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.setBootloader" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -397,8 +410,8 @@
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="SendCommandBlockMode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SendCommandBlockMode</span></span><a class="headerlink" href="#SendCommandBlockMode" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.SendCommandBlockMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SendCommandBlockMode</span></span><a class="headerlink" href="#vectornav.Sensor.SendCommandBlockMode" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -406,28 +419,28 @@
 </dl>
 <p>Block mode for sendCommand.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="SendCommandBlockMode.None">
-<span class="sig-name descname"><span class="pre">None</span></span><a class="headerlink" href="#SendCommandBlockMode.None" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.SendCommandBlockMode.None">
+<span class="sig-name descname"><span class="pre">None</span></span><a class="headerlink" href="#vectornav.Sensor.SendCommandBlockMode.None" title="Link to this definition">¶</a></dt>
 <dd><p>Do not wait for a response from the unit before returning.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="SendCommandBlockMode.Block">
-<span class="sig-name descname"><span class="pre">Block</span></span><a class="headerlink" href="#SendCommandBlockMode.Block" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.SendCommandBlockMode.Block">
+<span class="sig-name descname"><span class="pre">Block</span></span><a class="headerlink" href="#vectornav.Sensor.SendCommandBlockMode.Block" title="Link to this definition">¶</a></dt>
 <dd><p>Block upon a response from the unit until the specific timeout; will return ResponseTimeout if timeout is hit.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="SendCommandBlockMode.BlockWithRetry">
-<span class="sig-name descname"><span class="pre">BlockWithRetry</span></span><a class="headerlink" href="#SendCommandBlockMode.BlockWithRetry" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.SendCommandBlockMode.BlockWithRetry">
+<span class="sig-name descname"><span class="pre">BlockWithRetry</span></span><a class="headerlink" href="#vectornav.Sensor.SendCommandBlockMode.BlockWithRetry" title="Link to this definition">¶</a></dt>
 <dd><p>Block upon a response from the unit until the specific timeout; retry sending the command and blocking commandSendRetriesAllowed times before returning ResponseTimeout.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="sendCommand">
-<span class="sig-name descname"><span class="pre">sendCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commandToSend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.Command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waitMode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SendCommandBlockMode" title="SendCommandBlockMode"><span class="pre">SendCommandBlockMode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">waitLength</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sendCommand" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.sendCommand">
+<span class="sig-name descname"><span class="pre">sendCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commandToSend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.Command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waitMode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#vectornav.Sensor.SendCommandBlockMode" title="vectornav.Sensor.SendCommandBlockMode"><span class="pre">SendCommandBlockMode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">waitLength</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.sendCommand" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -437,8 +450,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="serialSend">
-<span class="sig-name descname"><span class="pre">serialSend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msgToSend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AsciiMessage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#serialSend" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.serialSend">
+<span class="sig-name descname"><span class="pre">serialSend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msgToSend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AsciiMessage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.serialSend" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>VnError</strong> – If serial fails to send, no response is received, or the received response is a synchronous VnErr.</p>
@@ -447,32 +460,30 @@
 <p>Sends an arbitary message to the unit without any message modification or response validation. Not recommended for use.</p>
 </dd></dl>
 
-</div></blockquote>
 </section>
 <section id="additional-logging-methods">
 <h3>Additional Logging Methods<a class="headerlink" href="#additional-logging-methods" title="Link to this heading">¶</a></h3>
-<blockquote>
-<div><dl class="py method">
-<dt class="sig sig-object py" id="registerSkippedByteBuffer">
-<span class="sig-name descname"><span class="pre">registerSkippedByteBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skippedByteBuffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.ByteBuffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#registerSkippedByteBuffer" title="Link to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="vectornav.Sensor.registerSkippedByteBuffer">
+<span class="sig-name descname"><span class="pre">registerSkippedByteBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skippedByteBuffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.ByteBuffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.registerSkippedByteBuffer" title="Link to this definition">¶</a></dt>
 <dd><p>Registers a ByteBuffer to be populated (write only) with every byte that is not parsable using any known protocol.  Only one can be registered at a time.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deregisterSkippedByteBuffer">
-<span class="sig-name descname"><span class="pre">deregisterSkippedByteBuffer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deregisterSkippedByteBuffer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.deregisterSkippedByteBuffer">
+<span class="sig-name descname"><span class="pre">deregisterSkippedByteBuffer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.deregisterSkippedByteBuffer" title="Link to this definition">¶</a></dt>
 <dd><p>Deregisters the ByteBuffer previously registered to be populated with skipped bytes, if applicable. If not, it has no effect.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="registerReceivedByteBuffer">
-<span class="sig-name descname"><span class="pre">registerReceivedByteBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">receivedByteBuffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.ByteBuffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#registerReceivedByteBuffer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.registerReceivedByteBuffer">
+<span class="sig-name descname"><span class="pre">registerReceivedByteBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">receivedByteBuffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">vectornav.ByteBuffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.registerReceivedByteBuffer" title="Link to this definition">¶</a></dt>
 <dd><p>Registers a ByteBuffer to be populated (write only) with every byte received by the serial port. Only one can be registered at a time.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deregisterReceivedByteBuffer">
-<span class="sig-name descname"><span class="pre">deregisterReceivedByteBuffer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deregisterReceivedByteBuffer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="vectornav.Sensor.deregisterReceivedByteBuffer">
+<span class="sig-name descname"><span class="pre">deregisterReceivedByteBuffer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.deregisterReceivedByteBuffer" title="Link to this definition">¶</a></dt>
 <dd><p>Deregisters the ByteBuffer previously registered to be populated with received bytes, if applicable. If not, it has no effect.</p>
 </dd></dl>
 
@@ -494,19 +505,18 @@
 <dd><p>Unsubscribes the passed queue from all messages matching the passed filter.</p>
 </dd></dl>
 
-</div></blockquote>
 </section>
 <section id="error-handling-methods">
 <h3>Error Handling Methods<a class="headerlink" href="#error-handling-methods" title="Link to this heading">¶</a></h3>
-<blockquote>
-<div><dl class="py method">
-<dt class="sig sig-object py" id="getAsynchronousError">
-<span class="sig-name descname"><span class="pre">getAsynchronousError</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncError</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="registers.html#vnpy.Registers.GNSS.GnssBasicConfig.PpsSource.None" title="vnpy.Registers.GNSS.GnssBasicConfig.PpsSource.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#getAsynchronousError" title="Link to this definition">¶</a></dt>
-<dd><p>Gets the next asynchronous error in the queue.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="vectornav.Sensor.throwIfAsyncError">
+<span class="sig-name descname"><span class="pre">throwIfAsyncError</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Sensor.throwIfAsyncError" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the queue of asynchronous errors and raises the next one, if any.</p>
 </dd></dl>
 
-</div></blockquote>
 </section>
+</dd></dl>
+
 </section>
 </section>
 
@@ -595,7 +605,7 @@
         <li class="right" >
           <a href="index.html" title="VNSDK API"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav 0.22.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="index.html" >VNSDK API</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Class Sensor</a></li> 

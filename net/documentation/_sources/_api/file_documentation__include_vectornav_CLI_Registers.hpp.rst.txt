@@ -32,13 +32,7 @@ Includes
 
 - ``CLI_GenericCommand.hpp`` (:ref:`file_documentation__include_vectornav_CLI_GenericCommand.hpp`)
 
-- ``Windows.h``
-
-- ``conio.h``
-
 - ``msclr/marshal.h``
-
-- ``string``
 
 - ``vectornav/Interface/Registers.hpp``
 
@@ -109,6 +103,8 @@ Classes
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_attitude_1_1_ypr_linear_inertial_accel_angular_rates`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_attitude_1_1_ypr_mag_accel_angular_rates`
+
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_config_register`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_g_n_s_s_1_1_ext_gnss_offset`
 
@@ -194,7 +190,7 @@ Classes
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_i_n_s_1_1_ins_state_lla`
 
-- :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_register`
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_meas_register`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_system_1_1_async_output_freq`
 
@@ -249,6 +245,13 @@ Classes
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_velocity_aiding_1_1_vel_aiding_meas`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_world_mag_gravity_model_1_1_ref_model_config`
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function__c_l_i___registers_8hpp_1a32650efaccbc4792ce29b533791ba3a9`
 
 
 Defines

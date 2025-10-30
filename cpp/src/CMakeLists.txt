@@ -40,3 +40,5 @@ endif()
 
 target_include_directories(VnSensor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_include_directories(oVnSensor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+target_include_directories(VnSensor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../plugins)
+target_include_directories(oVnSensor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../plugins)

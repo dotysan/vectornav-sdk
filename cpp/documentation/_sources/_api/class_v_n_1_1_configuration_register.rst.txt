@@ -25,6 +25,8 @@ Derived Types
 - ``public VN::Registers::GNSS::ExtGnssOffset`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_ext_gnss_offset`)
 - ``public VN::Registers::GNSS::GnssAOffset`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_a_offset`)
 - ``public VN::Registers::GNSS::GnssBasicConfig`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_basic_config`)
+- ``public VN::Registers::GNSS::GnssSolEcef`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_sol_ecef`)
+- ``public VN::Registers::GNSS::GnssSolLla`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_sol_lla`)
 - ``public VN::Registers::GNSS::GnssSyncConfig`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_sync_config`)
 - ``public VN::Registers::GNSS::GnssSystemConfig`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_system_config`)
 - ``public VN::Registers::GNSSCompass::GnssCompassBaseline`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_compass_1_1_gnss_compass_baseline`)

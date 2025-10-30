@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,66 +35,67 @@ std::string usage = "[port]\n";
 
 int main(int argc, char* argv[])
 {
-    // This getting started example will walk you throgh the C++ usage of the SDK to connect to and interact with a VectorNav sensor.
+    /*
+    This getting started example walks through the C++ usage of the SDK to connect to and interact with a VectorNav unit.
 
-    // This example will achieve the following:
-    // 1. Connect to the sensor
-    // 2. Poll and print the model number using a read register command
-    // 3. Poll and print the current yaw, pitch, and roll using a read register command
-    // 4. Configure the ADOR and ADOF to YPR at 2Hz
-    // 5. Configure the first binary output to output timeStartup, accel, and angRate, all from common group, with a 200 rate divisor
-    // 6. Enter a loop for 5 seconds where it:
-    //    Determines which measurement it received (VNYPR or the necessary binary header)
-    //    Prints out the relevant measurement from the CompositeData struct
-    // 7. Disconnect from sensor
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Poll and print the model number using a read register command
+    3. Poll and print the current yaw, pitch, and roll using a read register command
+    4. Configure the asynchronous ASCII output to YPR at 2 Hz
+    5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group, at a 2 Hz output rate (1 Hz if VN-300)
+    through both serial ports.
+    6. Enter a loop for 5 seconds where it:
+       Determines which measurement it received (VNYPR or the necessary binary header)
+       Prints out the relevant measurement from the CompositeData struct
+    7. Disconnect from the VectorNav unit
+    */
 
     // Define the port connection parameters to be used later
-    const std::string portName = (argc > 1) ? argv[1] : "COM33";  // Change the sensor port name to the COM port of your local machine
+    const std::string portName = (argc > 1) ? argv[1] : "COM1";  // Change the sensor port name to the COM port of your local machine
 
-    // [1] Instantiate a sensor object we'll use to connect to and interact with the unit
+    // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
     Sensor sensor;
     Error latestError = sensor.autoConnect(portName);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
+        std::cerr << latestError << " encountered when connecting to " + portName << std::endl;
         return static_cast<int>(latestError);
     }
     std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
 
-    // [2] Read and print the sensor model number
+    // 2. Poll and print the model number using a read register command
     // Create an empty register object of the necessary type, where the data member will be populated when the sensor responds to our "read register" request
     Registers::System::Model modelRegister;
-
     latestError = sensor.readRegister(&modelRegister);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when reading register " << std::to_string(modelRegister.id()) << " (" << modelRegister.name()
-                  << ")" << std::endl;
+        std::cerr << latestError << " encountered when reading register " << std::to_string(modelRegister.id()) << " (" << modelRegister.name() << ")"
+                  << std::endl;
         return static_cast<int>(latestError);
     }
     std::string modelNumber = modelRegister.model;
     std::cout << "Sensor Model Number: " << modelNumber << std::endl;
 
-    // [3] Read and print the current YPR
+    // 3. Poll and print the current yaw, pitch, and roll using a read register command
     Registers::Attitude::YawPitchRoll yprRegister;
     latestError = sensor.readRegister(&yprRegister);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when reading register " << std::to_string(yprRegister.id()) << " (" << yprRegister.name() << ")"
-                  << std::endl;
+        std::cerr << latestError << " encountered when reading register " << std::to_string(yprRegister.id()) << " (" << yprRegister.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     }
-    std::cout << "Current Reading:  Yaw - " << yprRegister.yaw << " , Pitch - " << yprRegister.pitch << " , Roll - " << yprRegister.roll << std::endl;
+    std::cout << "Current Reading:\n\tYaw: " << yprRegister.yaw << " , Pitch: " << yprRegister.pitch << " , Roll: " << yprRegister.roll << std::endl;
 
-    // [4] Configure the asynchronous ASCII output to YPR at 2Hz
+    // 4. Configure the asynchronous ASCII output to YPR at 2 Hz
     Registers::System::AsyncOutputType asyncDataOutputType;
     asyncDataOutputType.ador = Registers::System::AsyncOutputType::Ador::YPR;
     asyncDataOutputType.serialPort = Registers::System::AsyncOutputType::SerialPort::Serial1;
     latestError = sensor.writeRegister(&asyncDataOutputType);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputType.id()) << " ("
-                  << asyncDataOutputType.name() << ")" << std::endl;
+        std::cerr << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputType.id()) << " (" << asyncDataOutputType.name()
+                  << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     else { std::cout << "ADOR configured\n"; }
@@ -105,17 +106,19 @@ int main(int argc, char* argv[])
     latestError = sensor.writeRegister(&asyncDataOutputFrequency);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputFrequency.id()) << " ("
+        std::cerr << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputFrequency.id()) << " ("
                   << asyncDataOutputFrequency.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     else { std::cout << "ADOF configured\n"; }
 
-    // [5] Configure the binary output to 2 Hz (1Hz if VN-300) through both serial ports, with specified outputs
+    // 5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group, at a 2 Hz output rate (1 Hz if VN-300)
+    // through both serial ports.
     Registers::System::BinaryOutput1 binaryOutput1Register;
+    binaryOutput1Register.asyncMode.emplace();
+    binaryOutput1Register.asyncMode->serial1 = true;
+    binaryOutput1Register.asyncMode->serial2 = true;
     binaryOutput1Register.rateDivisor = 400;
-    binaryOutput1Register.asyncMode.serial1 = true;
-    binaryOutput1Register.asyncMode.serial2 = true;
     binaryOutput1Register.common.timeStartup = true;
     binaryOutput1Register.common.accel = true;
     binaryOutput1Register.common.angularRate = true;
@@ -124,13 +127,15 @@ int main(int argc, char* argv[])
     latestError = sensor.writeRegister(&binaryOutput1Register);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when configuring register " << std::to_string(binaryOutput1Register.id()) << " ("
+        std::cerr << latestError << " encountered when configuring register " << std::to_string(binaryOutput1Register.id()) << " ("
                   << binaryOutput1Register.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     else { std::cout << "Binary output 1 message configured.\n"; }
 
-    // [6] Listen to measurements from the sensor and print recognized packets
+    // 6. Enter a loop for 5 seconds where it:
+    //     Determines which message it received (VNYPR or the binary output)
+    //     Prints out the relevant measurement from the CompositeData struct
     Timer timer{5s};
     timer.start();
     while (!timer.hasTimedOut())
@@ -143,7 +148,8 @@ int main(int argc, char* argv[])
         {
             std::cout << "Found binary 1 measurment.\n";
 
-            std::cout << "\tTime: " << compositeData->time.timeStartup.value().nanoseconds() << "\n";
+            auto timeStartup = compositeData->time.timeStartup.value().nanoseconds();
+            std::cout << "\tTime: " << timeStartup << "\n";
             Vec3f accel = compositeData->imu.accel.value();
             std::cout << "\tAccel X: " << accel[0] << "\n\tAccel Y: " << accel[1] << "\n\tAccel Z: " << accel[2] << "\n";
         }
@@ -157,7 +163,7 @@ int main(int argc, char* argv[])
         else { std::cout << "Unrecognized asynchronous message received.\n"; }
     }
 
-    // [7] Disconnect from the sensor
+    // 7. Disconnect from the VectorNav unit
     sensor.disconnect();
     std::cout << "Sensor disconnected.\n";
     std::cout << "GettingStarted example complete." << std::endl;

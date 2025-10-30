@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,7 +26,6 @@
 
 #include "vectornav/Config.hpp"
 #include "vectornav/ExporterCsv.hpp"
-// #include "FileExportFaDispatcher.hpp"
 #include "vectornav/Implementation/AsciiPacketDispatcher.hpp"
 #include "vectornav/Implementation/FaPacketDispatcher.hpp"
 #include "vectornav/Implementation/FaPacketProtocol.hpp"
@@ -36,41 +35,58 @@
 using namespace VN;
 namespace fs = std::filesystem;
 
-Sensor sensor;
-
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-    const std::string portName = (argc > 1) ? argv[1] : "COM18";
+    /*
+    This data export example walks through the C++ usage of the SDK to export data from a VectorNav unit to a CSV file.
+
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Create an ExportCsv object
+    3. Add a subscriber to all binary and ASCII packets
+    4. Log data from the VectorNav unit
+    5. Disconnect from the VectorNav unit
+    */
+
+    // Parse command line arguments
+    const std::string portName = (argc > 1) ? argv[1] : "COM1";
     const std::string outputDirectory = (argc > 2) ? argv[2] : (fs::path(__FILE__).parent_path()).string();
 
-    auto latestError = sensor.autoConnect(portName);
+    // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    Sensor sensor;
+    Error latestError = sensor.autoConnect(portName);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when connecting to " << sensor.connectedPortName().value() << ".\t" << std::endl;
+        std::cerr << latestError << " : encountered when connecting to " << sensor.connectedPortName().value() << std::endl;
         return static_cast<int>(latestError);
     }
     std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
 
-    ExporterCsv csvExporter(outputDirectory);
+    // 2. Create an ExportCsv object
+    DataExport::ExporterCsv csvExporter(outputDirectory);
 
-    // Add a subscriber to all VN FA and ASCII packets
+    // 3. Add a subscriber to all binary and ASCII packets
     latestError = sensor.subscribeToMessage(csvExporter.getQueuePtr(), Sensor::BinaryOutputMeasurements{}, Sensor::FaSubscriberFilterType::AnyMatch);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when subscribing." << std::endl;
+        std::cerr << latestError << " : encountered when subscribing." << std::endl;
         return static_cast<int>(latestError);
     }
     latestError = sensor.subscribeToMessage(csvExporter.getQueuePtr(), "VN", Sensor::AsciiSubscriberFilterType::StartsWith);
     if (latestError != Error::None)
     {
-        std::cout << "Error " << latestError << " encountered when subscribing." << std::endl;
+        std::cerr << latestError << " : encountered when subscribing." << std::endl;
         return static_cast<int>(latestError);
     }
 
+    // 4. Log data from the VectorNav unit
     csvExporter.start();
     std::cout << "Logging to " << outputDirectory << std::endl;
 
     std::this_thread::sleep_for(5s);
     csvExporter.stop();
-    std::cout << "ExportFromSensor example complete." << std::endl;
+
+    // 5. Disconnect from the VectorNav unit
+    sensor.disconnect();
+    std::cout << "DataExportFromSensor example complete." << std::endl;
 }

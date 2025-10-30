@@ -73,6 +73,8 @@
 <li><p><a class="reference internal" href="#includes" id="id2">Includes</a></p></li>
 <li><p><a class="reference internal" href="#namespaces" id="id3">Namespaces</a></p></li>
 <li><p><a class="reference internal" href="#classes" id="id4">Classes</a></p></li>
+<li><p><a class="reference internal" href="#enums" id="id5">Enums</a></p></li>
+<li><p><a class="reference internal" href="#functions" id="id6">Functions</a></p></li>
 </ul>
 </nav>
 <section id="definition-documentation-include-vectornav-cli-sensor-hpp">
@@ -87,13 +89,16 @@
 <h2>Includes<a class="headerlink" href="#includes" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_ByteBuffer.hpp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_Commands.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_CompositeData.hpp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_Exceptions.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_GenericCommand.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_Plugins.hpp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_QueueDefinitions.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_Registers.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/CLI_SteadyClock.hpp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vectornav/Interface/BridgeSensor.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/Interface/Sensor.hpp</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">vectornav/TemplateLibrary/ByteBuffer.hpp</span></code></p></li>
 </ul>
 </section>
 <section id="namespaces">
@@ -106,8 +111,30 @@
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="struct_v_n_s_d_k_1_1_async_error.html#exhale-struct-struct-v-n-s-d-k-1-1-async-error"><span class="std std-ref">Struct AsyncError</span></a></p></li>
+<li><p><a class="reference internal" href="class_v_n_s_d_k_1_1_binary_output_measurements.html#exhale-class-class-v-n-s-d-k-1-1-binary-output-measurements"><span class="std std-ref">Class BinaryOutputMeasurements</span></a></p></li>
 <li><p><a class="reference internal" href="class_v_n_s_d_k_1_1_sensor.html#exhale-class-class-v-n-s-d-k-1-1-sensor"><span class="std std-ref">Class Sensor</span></a></p></li>
-<li><p><a class="reference internal" href="class_v_n_s_d_k_1_1_vn_exception.html#exhale-class-class-v-n-s-d-k-1-1-vn-exception"><span class="std std-ref">Class VnException</span></a></p></li>
+</ul>
+</section>
+<section id="enums">
+<h2>Enums<a class="headerlink" href="#enums" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="enum__c_l_i___sensor_8hpp_1a31e647fd1769b5c5ecaaf710f0f61c05.html#exhale-enum-c-l-i-sensor-8hpp-1a31e647fd1769b5c5ecaaf710f0f61c05"><span class="std std-ref">Enum AsciiSubscriberFilterType</span></a></p></li>
+<li><p><a class="reference internal" href="enum__c_l_i___sensor_8hpp_1adfcb3dfaa2e5f4e59aee361bf8a1a0ad.html#exhale-enum-c-l-i-sensor-8hpp-1adfcb3dfaa2e5f4e59aee361bf8a1a0ad"><span class="std std-ref">Enum FaSubscriberFilterType</span></a></p></li>
+<li><p><a class="reference internal" href="enum__c_l_i___sensor_8hpp_1ad4ac7c50a2f6009399ce864499208ff6.html#exhale-enum-c-l-i-sensor-8hpp-1ad4ac7c50a2f6009399ce864499208ff6"><span class="std std-ref">Enum MeasQueueMode</span></a></p></li>
+<li><p><a class="reference internal" href="enum__c_l_i___sensor_8hpp_1a6b259e2e9f7af800e870315cb7575cf9.html#exhale-enum-c-l-i-sensor-8hpp-1a6b259e2e9f7af800e870315cb7575cf9"><span class="std std-ref">Enum SyncByte</span></a></p></li>
+</ul>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1a6c647d8cce4aa257a38f2463e02041d1.html#exhale-function-c-l-i-sensor-8hpp-1a6c647d8cce4aa257a38f2463e02041d1"><span class="std std-ref">Function VNSDK::ToManagedInstance(VN::BridgeSensor::AsciiSubscriberFilterType)</span></a></p></li>
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1ada3b4a6bbc797d7afa58df62bda24a84.html#exhale-function-c-l-i-sensor-8hpp-1ada3b4a6bbc797d7afa58df62bda24a84"><span class="std std-ref">Function VNSDK::ToManagedInstance(VN::BridgeSensor::FaSubscriberFilterType)</span></a></p></li>
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1aa926b91905014b9d135f3be33ad0aa5d.html#exhale-function-c-l-i-sensor-8hpp-1aa926b91905014b9d135f3be33ad0aa5d"><span class="std std-ref">Function VNSDK::ToManagedInstance(VN::BridgeSensor::MeasQueueMode)</span></a></p></li>
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1af6a10e007a085efb775d265a2d4bc773.html#exhale-function-c-l-i-sensor-8hpp-1af6a10e007a085efb775d265a2d4bc773"><span class="std std-ref">Function VNSDK::ToManagedInstance(VN::BridgeSensor::SyncByte)</span></a></p></li>
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1a26d1a56e23b2d6f4cfc0dddf9935b1b9.html#exhale-function-c-l-i-sensor-8hpp-1a26d1a56e23b2d6f4cfc0dddf9935b1b9"><span class="std std-ref">Function VNSDK::ToNativeInstance(SyncByte)</span></a></p></li>
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1aadb63f5ca988db5bb1e7f3f1c8856cd2.html#exhale-function-c-l-i-sensor-8hpp-1aadb63f5ca988db5bb1e7f3f1c8856cd2"><span class="std std-ref">Function VNSDK::ToNativeInstance(AsciiSubscriberFilterType)</span></a></p></li>
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1acdb39e1fa1e8ebfb2e8fc7607422586f.html#exhale-function-c-l-i-sensor-8hpp-1acdb39e1fa1e8ebfb2e8fc7607422586f"><span class="std std-ref">Function VNSDK::ToNativeInstance(FaSubscriberFilterType)</span></a></p></li>
+<li><p><a class="reference internal" href="function__c_l_i___sensor_8hpp_1a9570546e0dfb3726b046c11491fffcc2.html#exhale-function-c-l-i-sensor-8hpp-1a9570546e0dfb3726b046c11491fffcc2"><span class="std std-ref">Function VNSDK::ToNativeInstance(MeasQueueMode)</span></a></p></li>
 </ul>
 </section>
 </section>
@@ -132,11 +159,11 @@
 <div class="sphinx-toc sphinxglobaltoc">
 <h3><a href="../Documentation.html">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../pages/MigrationGuide.html">VectorNav CLI Migration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/MigrationGuide.html">Migration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/KeyFunctionality.html">Key Functionality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pages/api_index.html">VNSDK API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a></li>
 </ul>
 </div>
   <div role="note" aria-label="source link">

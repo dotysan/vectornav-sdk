@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,13 @@ namespace VN
 using time_point = std::chrono::steady_clock::time_point;
 inline time_point now() { return std::chrono::steady_clock::now(); }
 
+inline std::ostream& operator<<(std::ostream& os, const time_point& tp) noexcept
+{
+    auto duration = tp.time_since_epoch();
+    os << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() << " ms";
+    return os;
+}
+
 class Timer : Timer_Base
 {
 public:
@@ -56,7 +63,7 @@ public:
         return (Clock::now() - _timeStarted) >= _timerLength;
     }
 
-    Nanoseconds timeElapsed() const noexcept
+    Nanoseconds timeElapsed() const noexcept override final
     {
         // Used only for profiling
         if (!_hasStarted) { return 0ns; }

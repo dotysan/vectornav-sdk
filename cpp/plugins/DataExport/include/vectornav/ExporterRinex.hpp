@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -43,6 +43,9 @@ namespace VN
 {
 static_assert((GNSS_GROUP_ENABLE & GNSS_GNSS1RAWMEAS_BIT) | (GNSS2_GROUP_ENABLE & GNSS2_GNSS2RAWMEAS_BIT), "GNSS raw meas is not enabled");
 
+namespace DataExport
+{
+
 class ExporterRinex : public Exporter
 {
 private:
@@ -50,8 +53,8 @@ private:
     static constexpr uint16_t STRING_BUFFER_CAPACITY = 1024;
 
 public:
-    ExporterRinex(const Filesystem::FilePath& fileName, const uint32_t gnssGroup)
-        : Exporter(EXPORTER_PACKET_CAPACITY), _fileName(fileName), _gnssGroup(gnssGroup)
+    ExporterRinex(const Filesystem::FilePath& fileName, const uint32_t gnssGroup, PacketQueueMode mode = PacketQueueMode::Force)
+        : Exporter(EXPORTER_PACKET_CAPACITY, mode), _fileName(fileName), _gnssGroup(gnssGroup)
     {
         switch (gnssGroup)
         {
@@ -147,7 +150,7 @@ public:
 
             if (!p->details.faMetadata.header.contains(_gnssGroup, static_cast<uint32_t>(GNSS_GNSS1RAWMEAS_BIT))) { continue; }
 
-            ByteBuffer byteBuffer(p->buffer, p->size, p->size);
+            ByteBuffer byteBuffer(p->buffer, p->capacity, p->capacity);
 
             const auto cdOpt = FaPacketProtocol::parsePacket(byteBuffer, 0, p->details.faMetadata, Config::PacketDispatchers::cdEnabledMeasTypes);
             if (!cdOpt) continue;
@@ -280,6 +283,7 @@ private:
     std::array<std::array<uint8_t, chanCode.size()>, sysId.size()> _trackedSatelliteInfo{};
 };
 
+}  // namespace DataExport
 }  // namespace VN
 
 #endif  // VN_EXPORTERRINEX_HPP_

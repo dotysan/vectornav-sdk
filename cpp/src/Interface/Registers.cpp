@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -65,8 +65,6 @@ bool YawPitchRoll::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const YawPitchRoll& lhs, const YawPitchRoll& rhs) { return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll)); }
-
 bool Quaternion::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -101,11 +99,6 @@ bool Quaternion::fromString(const AsciiMessage& response)
     quatS = quatS_tmp.value();
 
     return false;  // no errors occurred
-}
-
-bool operator==(const Quaternion& lhs, const Quaternion& rhs)
-{
-    return ((lhs.quatX == rhs.quatX) && (lhs.quatY == rhs.quatY) && (lhs.quatZ == rhs.quatZ) && (lhs.quatS == rhs.quatS));
 }
 
 bool QuatMagAccelRate::fromString(const AsciiMessage& response)
@@ -198,13 +191,6 @@ bool QuatMagAccelRate::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const QuatMagAccelRate& lhs, const QuatMagAccelRate& rhs)
-{
-    return ((lhs.quatX == rhs.quatX) && (lhs.quatY == rhs.quatY) && (lhs.quatZ == rhs.quatZ) && (lhs.quatS == rhs.quatS) && (lhs.magX == rhs.magX) &&
-            (lhs.magY == rhs.magY) && (lhs.magZ == rhs.magZ) && (lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) &&
-            (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
-}
-
 bool MagGravRefVec::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -256,14 +242,15 @@ bool MagGravRefVec::fromString(const AsciiMessage& response)
 AsciiMessage MagGravRefVec::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f", magRefN, magRefE, magRefD, gravRefN, gravRefE, gravRefD);
-    return result;
-}
 
-bool operator==(const MagGravRefVec& lhs, const MagGravRefVec& rhs)
-{
-    return ((lhs.magRefN == rhs.magRefN) && (lhs.magRefE == rhs.magRefE) && (lhs.magRefD == rhs.magRefD) && (lhs.gravRefN == rhs.gravRefN) &&
-            (lhs.gravRefE == rhs.gravRefE) && (lhs.gravRefD == rhs.gravRefD));
+    // verify that all fields have a value set
+    if (magRefN.has_value() && magRefE.has_value() && magRefD.has_value() && gravRefN.has_value() && gravRefE.has_value() && gravRefD.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f", magRefN.value(), magRefE.value(), magRefD.value(), gravRefN.value(),
+                      gravRefE.value(), gravRefD.value());
+    }
+
+    return result;
 }
 
 bool YprMagAccelAngularRates::fromString(const AsciiMessage& response)
@@ -350,13 +337,6 @@ bool YprMagAccelAngularRates::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const YprMagAccelAngularRates& lhs, const YprMagAccelAngularRates& rhs)
-{
-    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.magX == rhs.magX) && (lhs.magY == rhs.magY) &&
-            (lhs.magZ == rhs.magZ) && (lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) &&
-            (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
-}
-
 bool VpeBasicControl::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -396,14 +376,15 @@ bool VpeBasicControl::fromString(const AsciiMessage& response)
 AsciiMessage VpeBasicControl::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u", resv, static_cast<uint8_t>(headingMode), static_cast<uint8_t>(filteringMode),
-                  static_cast<uint8_t>(tuningMode));
-    return result;
-}
 
-bool operator==(const VpeBasicControl& lhs, const VpeBasicControl& rhs)
-{
-    return ((lhs.resv == rhs.resv) && (lhs.headingMode == rhs.headingMode) && (lhs.filteringMode == rhs.filteringMode) && (lhs.tuningMode == rhs.tuningMode));
+    // verify that all fields have a value set
+    if (resv.has_value() && headingMode.has_value() && filteringMode.has_value() && tuningMode.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u", resv.value(), static_cast<uint8_t>(headingMode.value()),
+                      static_cast<uint8_t>(filteringMode.value()), static_cast<uint8_t>(tuningMode.value()));
+    }
+
+    return result;
 }
 
 bool VpeMagBasicTuning::fromString(const AsciiMessage& response)
@@ -475,17 +456,17 @@ bool VpeMagBasicTuning::fromString(const AsciiMessage& response)
 AsciiMessage VpeMagBasicTuning::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f", baseTuningX, baseTuningY, baseTuningZ, adaptiveTuningX, adaptiveTuningY,
-                  adaptiveTuningZ, adaptiveFilteringX, adaptiveFilteringY, adaptiveFilteringZ);
-    return result;
-}
 
-bool operator==(const VpeMagBasicTuning& lhs, const VpeMagBasicTuning& rhs)
-{
-    return ((lhs.baseTuningX == rhs.baseTuningX) && (lhs.baseTuningY == rhs.baseTuningY) && (lhs.baseTuningZ == rhs.baseTuningZ) &&
-            (lhs.adaptiveTuningX == rhs.adaptiveTuningX) && (lhs.adaptiveTuningY == rhs.adaptiveTuningY) && (lhs.adaptiveTuningZ == rhs.adaptiveTuningZ) &&
-            (lhs.adaptiveFilteringX == rhs.adaptiveFilteringX) && (lhs.adaptiveFilteringY == rhs.adaptiveFilteringY) &&
-            (lhs.adaptiveFilteringZ == rhs.adaptiveFilteringZ));
+    // verify that all fields have a value set
+    if (baseTuningX.has_value() && baseTuningY.has_value() && baseTuningZ.has_value() && adaptiveTuningX.has_value() && adaptiveTuningY.has_value() &&
+        adaptiveTuningZ.has_value() && adaptiveFilteringX.has_value() && adaptiveFilteringY.has_value() && adaptiveFilteringZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f", baseTuningX.value(), baseTuningY.value(), baseTuningZ.value(),
+                      adaptiveTuningX.value(), adaptiveTuningY.value(), adaptiveTuningZ.value(), adaptiveFilteringX.value(), adaptiveFilteringY.value(),
+                      adaptiveFilteringZ.value());
+    }
+
+    return result;
 }
 
 bool VpeAccelBasicTuning::fromString(const AsciiMessage& response)
@@ -557,17 +538,17 @@ bool VpeAccelBasicTuning::fromString(const AsciiMessage& response)
 AsciiMessage VpeAccelBasicTuning::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f", baseTuningX, baseTuningY, baseTuningZ, adaptiveTuningX, adaptiveTuningY,
-                  adaptiveTuningZ, adaptiveFilteringX, adaptiveFilteringY, adaptiveFilteringZ);
-    return result;
-}
 
-bool operator==(const VpeAccelBasicTuning& lhs, const VpeAccelBasicTuning& rhs)
-{
-    return ((lhs.baseTuningX == rhs.baseTuningX) && (lhs.baseTuningY == rhs.baseTuningY) && (lhs.baseTuningZ == rhs.baseTuningZ) &&
-            (lhs.adaptiveTuningX == rhs.adaptiveTuningX) && (lhs.adaptiveTuningY == rhs.adaptiveTuningY) && (lhs.adaptiveTuningZ == rhs.adaptiveTuningZ) &&
-            (lhs.adaptiveFilteringX == rhs.adaptiveFilteringX) && (lhs.adaptiveFilteringY == rhs.adaptiveFilteringY) &&
-            (lhs.adaptiveFilteringZ == rhs.adaptiveFilteringZ));
+    // verify that all fields have a value set
+    if (baseTuningX.has_value() && baseTuningY.has_value() && baseTuningZ.has_value() && adaptiveTuningX.has_value() && adaptiveTuningY.has_value() &&
+        adaptiveTuningZ.has_value() && adaptiveFilteringX.has_value() && adaptiveFilteringY.has_value() && adaptiveFilteringZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f", baseTuningX.value(), baseTuningY.value(), baseTuningZ.value(),
+                      adaptiveTuningX.value(), adaptiveTuningY.value(), adaptiveTuningZ.value(), adaptiveFilteringX.value(), adaptiveFilteringY.value(),
+                      adaptiveFilteringZ.value());
+    }
+
+    return result;
 }
 
 bool YprLinearBodyAccelAngularRates::fromString(const AsciiMessage& response)
@@ -636,13 +617,6 @@ bool YprLinearBodyAccelAngularRates::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const YprLinearBodyAccelAngularRates& lhs, const YprLinearBodyAccelAngularRates& rhs)
-{
-    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.linAccelX == rhs.linAccelX) &&
-            (lhs.linAccelY == rhs.linAccelY) && (lhs.linAccelZ == rhs.linAccelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) &&
-            (lhs.gyroZ == rhs.gyroZ));
-}
-
 bool YprLinearInertialAccelAngularRates::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -709,13 +683,6 @@ bool YprLinearInertialAccelAngularRates::fromString(const AsciiMessage& response
     return false;  // no errors occurred
 }
 
-bool operator==(const YprLinearInertialAccelAngularRates& lhs, const YprLinearInertialAccelAngularRates& rhs)
-{
-    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.linAccelN == rhs.linAccelN) &&
-            (lhs.linAccelE == rhs.linAccelE) && (lhs.linAccelD == rhs.linAccelD) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) &&
-            (lhs.gyroZ == rhs.gyroZ));
-}
-
 }  // namespace Attitude
 
 namespace GNSS
@@ -765,15 +732,15 @@ bool GnssBasicConfig::fromString(const AsciiMessage& response)
 AsciiMessage GnssBasicConfig::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u", static_cast<uint8_t>(receiverEnable), static_cast<uint8_t>(ppsSource),
-                  static_cast<uint8_t>(rate), resv4, static_cast<uint8_t>(antPower));
-    return result;
-}
 
-bool operator==(const GnssBasicConfig& lhs, const GnssBasicConfig& rhs)
-{
-    return ((lhs.receiverEnable == rhs.receiverEnable) && (lhs.ppsSource == rhs.ppsSource) && (lhs.rate == rhs.rate) && (lhs.resv4 == rhs.resv4) &&
-            (lhs.antPower == rhs.antPower));
+    // verify that all fields have a value set
+    if (receiverEnable.has_value() && ppsSource.has_value() && rate.has_value() && resv4.has_value() && antPower.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u", static_cast<uint8_t>(receiverEnable.value()),
+                      static_cast<uint8_t>(ppsSource.value()), static_cast<uint8_t>(rate.value()), resv4.value(), static_cast<uint8_t>(antPower.value()));
+    }
+
+    return result;
 }
 
 bool GnssAOffset::fromString(const AsciiMessage& response)
@@ -809,13 +776,14 @@ bool GnssAOffset::fromString(const AsciiMessage& response)
 AsciiMessage GnssAOffset::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f", positionX, positionY, positionZ);
-    return result;
-}
 
-bool operator==(const GnssAOffset& lhs, const GnssAOffset& rhs)
-{
-    return ((lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ));
+    // verify that all fields have a value set
+    if (positionX.has_value() && positionY.has_value() && positionZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f", positionX.value(), positionY.value(), positionZ.value());
+    }
+
+    return result;
 }
 
 bool GnssSolLla::fromString(const AsciiMessage& response)
@@ -853,57 +821,57 @@ bool GnssSolLla::fromString(const AsciiMessage& response)
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto lat_tmp = StringUtils::fromString<double>(start, end);
-    if (!lat_tmp.has_value()) { return true; }
-    lat = lat_tmp.value();
+    const auto gnss1Lat_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss1Lat_tmp.has_value()) { return true; }
+    gnss1Lat = gnss1Lat_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto lon_tmp = StringUtils::fromString<double>(start, end);
-    if (!lon_tmp.has_value()) { return true; }
-    lon = lon_tmp.value();
+    const auto gnss1Lon_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss1Lon_tmp.has_value()) { return true; }
+    gnss1Lon = gnss1Lon_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto alt_tmp = StringUtils::fromString<double>(start, end);
-    if (!alt_tmp.has_value()) { return true; }
-    alt = alt_tmp.value();
+    const auto gnss1Alt_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss1Alt_tmp.has_value()) { return true; }
+    gnss1Alt = gnss1Alt_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velN_tmp = StringUtils::fromString<float>(start, end);
-    if (!velN_tmp.has_value()) { return true; }
-    velN = velN_tmp.value();
+    const auto gnss1VelN_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1VelN_tmp.has_value()) { return true; }
+    gnss1VelN = gnss1VelN_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velE_tmp = StringUtils::fromString<float>(start, end);
-    if (!velE_tmp.has_value()) { return true; }
-    velE = velE_tmp.value();
+    const auto gnss1VelE_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1VelE_tmp.has_value()) { return true; }
+    gnss1VelE = gnss1VelE_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velD_tmp = StringUtils::fromString<float>(start, end);
-    if (!velD_tmp.has_value()) { return true; }
-    velD = velD_tmp.value();
+    const auto gnss1VelD_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1VelD_tmp.has_value()) { return true; }
+    gnss1VelD = gnss1VelD_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyN_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyN_tmp.has_value()) { return true; }
-    posUncertaintyN = posUncertaintyN_tmp.value();
+    const auto gnss1PosUncertaintyN_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1PosUncertaintyN_tmp.has_value()) { return true; }
+    gnss1PosUncertaintyN = gnss1PosUncertaintyN_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyE_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyE_tmp.has_value()) { return true; }
-    posUncertaintyE = posUncertaintyE_tmp.value();
+    const auto gnss1PosUncertaintyE_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1PosUncertaintyE_tmp.has_value()) { return true; }
+    gnss1PosUncertaintyE = gnss1PosUncertaintyE_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyD_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyD_tmp.has_value()) { return true; }
-    posUncertaintyD = posUncertaintyD_tmp.value();
+    const auto gnss1PosUncertaintyD_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1PosUncertaintyD_tmp.has_value()) { return true; }
+    gnss1PosUncertaintyD = gnss1PosUncertaintyD_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
@@ -920,13 +888,15 @@ bool GnssSolLla::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const GnssSolLla& lhs, const GnssSolLla& rhs)
+AsciiMessage GnssSolLla::toString() const
 {
-    return ((lhs.gps1Tow == rhs.gps1Tow) && (lhs.gps1Week == rhs.gps1Week) && (lhs.gnss1Fix == rhs.gnss1Fix) && (lhs.gnss1NumSats == rhs.gnss1NumSats) &&
-            (lhs.lat == rhs.lat) && (lhs.lon == rhs.lon) && (lhs.alt == rhs.alt) && (lhs.velN == rhs.velN) && (lhs.velE == rhs.velE) &&
-            (lhs.velD == rhs.velD) && (lhs.posUncertaintyN == rhs.posUncertaintyN) && (lhs.posUncertaintyE == rhs.posUncertaintyE) &&
-            (lhs.posUncertaintyD == rhs.posUncertaintyD) && (lhs.gnss1VelUncertainty == rhs.gnss1VelUncertainty) &&
-            (lhs.gnss1TimeUncertainty == rhs.gnss1TimeUncertainty));
+    AsciiMessage result = "";
+
+    std::snprintf(result.begin(), result.capacity(), "%.6f,%u,%u,%u,%.8f,%.8f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%g", gps1Tow, gps1Week,
+                  static_cast<uint8_t>(gnss1Fix), gnss1NumSats, gnss1Lat, gnss1Lon, gnss1Alt, gnss1VelN, gnss1VelE, gnss1VelD, gnss1PosUncertaintyN,
+                  gnss1PosUncertaintyE, gnss1PosUncertaintyD, gnss1VelUncertainty, gnss1TimeUncertainty);
+
+    return result;
 }
 
 bool GnssSolEcef::fromString(const AsciiMessage& response)
@@ -964,57 +934,57 @@ bool GnssSolEcef::fromString(const AsciiMessage& response)
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posX_tmp = StringUtils::fromString<double>(start, end);
-    if (!posX_tmp.has_value()) { return true; }
-    posX = posX_tmp.value();
+    const auto gnss1PosX_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss1PosX_tmp.has_value()) { return true; }
+    gnss1PosX = gnss1PosX_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posY_tmp = StringUtils::fromString<double>(start, end);
-    if (!posY_tmp.has_value()) { return true; }
-    posY = posY_tmp.value();
+    const auto gnss1PosY_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss1PosY_tmp.has_value()) { return true; }
+    gnss1PosY = gnss1PosY_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posZ_tmp = StringUtils::fromString<double>(start, end);
-    if (!posZ_tmp.has_value()) { return true; }
-    posZ = posZ_tmp.value();
+    const auto gnss1PosZ_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss1PosZ_tmp.has_value()) { return true; }
+    gnss1PosZ = gnss1PosZ_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velX_tmp = StringUtils::fromString<float>(start, end);
-    if (!velX_tmp.has_value()) { return true; }
-    velX = velX_tmp.value();
+    const auto gnss1VelX_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1VelX_tmp.has_value()) { return true; }
+    gnss1VelX = gnss1VelX_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velY_tmp = StringUtils::fromString<float>(start, end);
-    if (!velY_tmp.has_value()) { return true; }
-    velY = velY_tmp.value();
+    const auto gnss1VelY_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1VelY_tmp.has_value()) { return true; }
+    gnss1VelY = gnss1VelY_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velZ_tmp = StringUtils::fromString<float>(start, end);
-    if (!velZ_tmp.has_value()) { return true; }
-    velZ = velZ_tmp.value();
+    const auto gnss1VelZ_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1VelZ_tmp.has_value()) { return true; }
+    gnss1VelZ = gnss1VelZ_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyX_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyX_tmp.has_value()) { return true; }
-    posUncertaintyX = posUncertaintyX_tmp.value();
+    const auto gnss1PosUncertaintyX_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1PosUncertaintyX_tmp.has_value()) { return true; }
+    gnss1PosUncertaintyX = gnss1PosUncertaintyX_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyY_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyY_tmp.has_value()) { return true; }
-    posUncertaintyY = posUncertaintyY_tmp.value();
+    const auto gnss1PosUncertaintyY_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1PosUncertaintyY_tmp.has_value()) { return true; }
+    gnss1PosUncertaintyY = gnss1PosUncertaintyY_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyZ_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyZ_tmp.has_value()) { return true; }
-    posUncertaintyZ = posUncertaintyZ_tmp.value();
+    const auto gnss1PosUncertaintyZ_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss1PosUncertaintyZ_tmp.has_value()) { return true; }
+    gnss1PosUncertaintyZ = gnss1PosUncertaintyZ_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
@@ -1031,13 +1001,15 @@ bool GnssSolEcef::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const GnssSolEcef& lhs, const GnssSolEcef& rhs)
+AsciiMessage GnssSolEcef::toString() const
 {
-    return ((lhs.gps1Tow == rhs.gps1Tow) && (lhs.gps1Week == rhs.gps1Week) && (lhs.gnss1Fix == rhs.gnss1Fix) && (lhs.gnss1NumSats == rhs.gnss1NumSats) &&
-            (lhs.posX == rhs.posX) && (lhs.posY == rhs.posY) && (lhs.posZ == rhs.posZ) && (lhs.velX == rhs.velX) && (lhs.velY == rhs.velY) &&
-            (lhs.velZ == rhs.velZ) && (lhs.posUncertaintyX == rhs.posUncertaintyX) && (lhs.posUncertaintyY == rhs.posUncertaintyY) &&
-            (lhs.posUncertaintyZ == rhs.posUncertaintyZ) && (lhs.gnss1VelUncertainty == rhs.gnss1VelUncertainty) &&
-            (lhs.gnss1TimeUncertainty == rhs.gnss1TimeUncertainty));
+    AsciiMessage result = "";
+
+    std::snprintf(result.begin(), result.capacity(), "%.6f,%u,%u,%u,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%g", gps1Tow, gps1Week,
+                  static_cast<uint8_t>(gnss1Fix), gnss1NumSats, gnss1PosX, gnss1PosY, gnss1PosZ, gnss1VelX, gnss1VelY, gnss1VelZ, gnss1PosUncertaintyX,
+                  gnss1PosUncertaintyY, gnss1PosUncertaintyZ, gnss1VelUncertainty, gnss1TimeUncertainty);
+
+    return result;
 }
 
 bool GnssSystemConfig::fromString(const AsciiMessage& response)
@@ -1126,25 +1098,25 @@ GenericCommand GnssSystemConfig::toReadCommand()
 AsciiMessage GnssSystemConfig::toString() const
 {
     AsciiMessage result = "";
-    if (receiverSelect == GNSS::GnssSystemConfig::ReceiverSelect::GnssAB)
+
+    // verify that all fields have a value set
+    if (systems.has_value() && minCno.has_value() && minElev.has_value() && maxSats.has_value() && sbasMode.has_value() && sbasSelect1.has_value() &&
+        sbasSelect2.has_value() && sbasSelect3.has_value())
     {
-        std::snprintf(result.begin(), result.capacity(), "%04X,%d,%d,%d,%02X,%04X,%04X,%04X", uint16_t(systems), minCno, minElev, maxSats, uint8_t(sbasMode),
-                      uint16_t(sbasSelect1), uint16_t(sbasSelect2), uint16_t(sbasSelect3));
-    }
-    else
-    {
-        std::snprintf(result.begin(), result.capacity(), "%04X,%d,%d,%d,%02X,%04X,%04X,%04X,%d", uint16_t(systems), minCno, minElev, maxSats, uint8_t(sbasMode),
-                      uint16_t(sbasSelect1), uint16_t(sbasSelect2), uint16_t(sbasSelect3), static_cast<uint8_t>(receiverSelect));
+        if (receiverSelect == GNSS::GnssSystemConfig::ReceiverSelect::GnssAB)
+        {
+            std::snprintf(result.begin(), result.capacity(), "%04X,%d,%d,%d,%02X,%04X,%04X,%04X", uint16_t(systems.value()), minCno.value(), minElev.value(),
+                          maxSats.value(), uint8_t(sbasMode.value()), uint16_t(sbasSelect1.value()), uint16_t(sbasSelect2.value()),
+                          uint16_t(sbasSelect3.value()));
+        }
+        else
+        {
+            std::snprintf(result.begin(), result.capacity(), "%04X,%d,%d,%d,%02X,%04X,%04X,%04X,%d", uint16_t(systems.value()), minCno.value(), minElev.value(),
+                          maxSats.value(), uint8_t(sbasMode.value()), uint16_t(sbasSelect1.value()), uint16_t(sbasSelect2.value()),
+                          uint16_t(sbasSelect3.value()), static_cast<uint8_t>(receiverSelect));
+        }
     }
     return result;
-}
-
-bool operator==(const GnssSystemConfig& lhs, const GnssSystemConfig& rhs)
-{
-    return ((uint16_t(lhs.systems) == uint16_t(rhs.systems)) && (lhs.minCno == rhs.minCno) && (lhs.minElev == rhs.minElev) && (lhs.maxSats == rhs.maxSats) &&
-            (uint8_t(lhs.sbasMode) == uint8_t(rhs.sbasMode)) && (uint16_t(lhs.sbasSelect1) == uint16_t(rhs.sbasSelect1)) &&
-            (uint16_t(lhs.sbasSelect2) == uint16_t(rhs.sbasSelect2)) && (uint16_t(lhs.sbasSelect3) == uint16_t(rhs.sbasSelect3)) &&
-            (lhs.receiverSelect == rhs.receiverSelect));
 }
 
 bool GnssSyncConfig::fromString(const AsciiMessage& response)
@@ -1204,15 +1176,17 @@ bool GnssSyncConfig::fromString(const AsciiMessage& response)
 AsciiMessage GnssSyncConfig::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%d", static_cast<uint8_t>(gnssSyncEnable), static_cast<uint8_t>(polarity),
-                  static_cast<uint8_t>(specType), resv, period, pulseWidth, offset);
-    return result;
-}
 
-bool operator==(const GnssSyncConfig& lhs, const GnssSyncConfig& rhs)
-{
-    return ((lhs.gnssSyncEnable == rhs.gnssSyncEnable) && (lhs.polarity == rhs.polarity) && (lhs.specType == rhs.specType) && (lhs.resv == rhs.resv) &&
-            (lhs.period == rhs.period) && (lhs.pulseWidth == rhs.pulseWidth) && (lhs.offset == rhs.offset));
+    // verify that all fields have a value set
+    if (gnssSyncEnable.has_value() && polarity.has_value() && specType.has_value() && resv.has_value() && period.has_value() && pulseWidth.has_value() &&
+        offset.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%d", static_cast<uint8_t>(gnssSyncEnable.value()),
+                      static_cast<uint8_t>(polarity.value()), static_cast<uint8_t>(specType.value()), resv.value(), period.value(), pulseWidth.value(),
+                      offset.value());
+    }
+
+    return result;
 }
 
 bool Gnss2SolLla::fromString(const AsciiMessage& response)
@@ -1250,57 +1224,57 @@ bool Gnss2SolLla::fromString(const AsciiMessage& response)
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto lat_tmp = StringUtils::fromString<double>(start, end);
-    if (!lat_tmp.has_value()) { return true; }
-    lat = lat_tmp.value();
+    const auto gnss2Lat_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss2Lat_tmp.has_value()) { return true; }
+    gnss2Lat = gnss2Lat_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto lon_tmp = StringUtils::fromString<double>(start, end);
-    if (!lon_tmp.has_value()) { return true; }
-    lon = lon_tmp.value();
+    const auto gnss2Lon_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss2Lon_tmp.has_value()) { return true; }
+    gnss2Lon = gnss2Lon_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto alt_tmp = StringUtils::fromString<double>(start, end);
-    if (!alt_tmp.has_value()) { return true; }
-    alt = alt_tmp.value();
+    const auto gnss2Alt_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss2Alt_tmp.has_value()) { return true; }
+    gnss2Alt = gnss2Alt_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velN_tmp = StringUtils::fromString<float>(start, end);
-    if (!velN_tmp.has_value()) { return true; }
-    velN = velN_tmp.value();
+    const auto gnss2VelN_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2VelN_tmp.has_value()) { return true; }
+    gnss2VelN = gnss2VelN_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velE_tmp = StringUtils::fromString<float>(start, end);
-    if (!velE_tmp.has_value()) { return true; }
-    velE = velE_tmp.value();
+    const auto gnss2VelE_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2VelE_tmp.has_value()) { return true; }
+    gnss2VelE = gnss2VelE_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velD_tmp = StringUtils::fromString<float>(start, end);
-    if (!velD_tmp.has_value()) { return true; }
-    velD = velD_tmp.value();
+    const auto gnss2VelD_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2VelD_tmp.has_value()) { return true; }
+    gnss2VelD = gnss2VelD_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyN_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyN_tmp.has_value()) { return true; }
-    posUncertaintyN = posUncertaintyN_tmp.value();
+    const auto gnss2PosUncertaintyN_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2PosUncertaintyN_tmp.has_value()) { return true; }
+    gnss2PosUncertaintyN = gnss2PosUncertaintyN_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyE_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyE_tmp.has_value()) { return true; }
-    posUncertaintyE = posUncertaintyE_tmp.value();
+    const auto gnss2PosUncertaintyE_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2PosUncertaintyE_tmp.has_value()) { return true; }
+    gnss2PosUncertaintyE = gnss2PosUncertaintyE_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyD_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyD_tmp.has_value()) { return true; }
-    posUncertaintyD = posUncertaintyD_tmp.value();
+    const auto gnss2PosUncertaintyD_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2PosUncertaintyD_tmp.has_value()) { return true; }
+    gnss2PosUncertaintyD = gnss2PosUncertaintyD_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
@@ -1315,15 +1289,6 @@ bool Gnss2SolLla::fromString(const AsciiMessage& response)
     gnss2TimeUncertainty = gnss2TimeUncertainty_tmp.value();
 
     return false;  // no errors occurred
-}
-
-bool operator==(const Gnss2SolLla& lhs, const Gnss2SolLla& rhs)
-{
-    return ((lhs.gps2Tow == rhs.gps2Tow) && (lhs.gps2Week == rhs.gps2Week) && (lhs.gnss2Fix == rhs.gnss2Fix) && (lhs.gnss2NumSats == rhs.gnss2NumSats) &&
-            (lhs.lat == rhs.lat) && (lhs.lon == rhs.lon) && (lhs.alt == rhs.alt) && (lhs.velN == rhs.velN) && (lhs.velE == rhs.velE) &&
-            (lhs.velD == rhs.velD) && (lhs.posUncertaintyN == rhs.posUncertaintyN) && (lhs.posUncertaintyE == rhs.posUncertaintyE) &&
-            (lhs.posUncertaintyD == rhs.posUncertaintyD) && (lhs.gnss2VelUncertainty == rhs.gnss2VelUncertainty) &&
-            (lhs.gnss2TimeUncertainty == rhs.gnss2TimeUncertainty));
 }
 
 bool Gnss2SolEcef::fromString(const AsciiMessage& response)
@@ -1361,57 +1326,57 @@ bool Gnss2SolEcef::fromString(const AsciiMessage& response)
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posX_tmp = StringUtils::fromString<double>(start, end);
-    if (!posX_tmp.has_value()) { return true; }
-    posX = posX_tmp.value();
+    const auto gnss2PosX_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss2PosX_tmp.has_value()) { return true; }
+    gnss2PosX = gnss2PosX_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posY_tmp = StringUtils::fromString<double>(start, end);
-    if (!posY_tmp.has_value()) { return true; }
-    posY = posY_tmp.value();
+    const auto gnss2PosY_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss2PosY_tmp.has_value()) { return true; }
+    gnss2PosY = gnss2PosY_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posZ_tmp = StringUtils::fromString<double>(start, end);
-    if (!posZ_tmp.has_value()) { return true; }
-    posZ = posZ_tmp.value();
+    const auto gnss2PosZ_tmp = StringUtils::fromString<double>(start, end);
+    if (!gnss2PosZ_tmp.has_value()) { return true; }
+    gnss2PosZ = gnss2PosZ_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velX_tmp = StringUtils::fromString<float>(start, end);
-    if (!velX_tmp.has_value()) { return true; }
-    velX = velX_tmp.value();
+    const auto gnss2VelX_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2VelX_tmp.has_value()) { return true; }
+    gnss2VelX = gnss2VelX_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velY_tmp = StringUtils::fromString<float>(start, end);
-    if (!velY_tmp.has_value()) { return true; }
-    velY = velY_tmp.value();
+    const auto gnss2VelY_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2VelY_tmp.has_value()) { return true; }
+    gnss2VelY = gnss2VelY_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto velZ_tmp = StringUtils::fromString<float>(start, end);
-    if (!velZ_tmp.has_value()) { return true; }
-    velZ = velZ_tmp.value();
+    const auto gnss2VelZ_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2VelZ_tmp.has_value()) { return true; }
+    gnss2VelZ = gnss2VelZ_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyX_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyX_tmp.has_value()) { return true; }
-    posUncertaintyX = posUncertaintyX_tmp.value();
+    const auto gnss2PosUncertaintyX_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2PosUncertaintyX_tmp.has_value()) { return true; }
+    gnss2PosUncertaintyX = gnss2PosUncertaintyX_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyY_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyY_tmp.has_value()) { return true; }
-    posUncertaintyY = posUncertaintyY_tmp.value();
+    const auto gnss2PosUncertaintyY_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2PosUncertaintyY_tmp.has_value()) { return true; }
+    gnss2PosUncertaintyY = gnss2PosUncertaintyY_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
-    const auto posUncertaintyZ_tmp = StringUtils::fromString<float>(start, end);
-    if (!posUncertaintyZ_tmp.has_value()) { return true; }
-    posUncertaintyZ = posUncertaintyZ_tmp.value();
+    const auto gnss2PosUncertaintyZ_tmp = StringUtils::fromString<float>(start, end);
+    if (!gnss2PosUncertaintyZ_tmp.has_value()) { return true; }
+    gnss2PosUncertaintyZ = gnss2PosUncertaintyZ_tmp.value();
 
     start = tokens[index++] + 1;
     end = tokens[index];
@@ -1426,15 +1391,6 @@ bool Gnss2SolEcef::fromString(const AsciiMessage& response)
     gnss2TimeUncertainty = gnss2TimeUncertainty_tmp.value();
 
     return false;  // no errors occurred
-}
-
-bool operator==(const Gnss2SolEcef& lhs, const Gnss2SolEcef& rhs)
-{
-    return ((lhs.gps2Tow == rhs.gps2Tow) && (lhs.gps2Week == rhs.gps2Week) && (lhs.gnss2Fix == rhs.gnss2Fix) && (lhs.gnss2NumSats == rhs.gnss2NumSats) &&
-            (lhs.posX == rhs.posX) && (lhs.posY == rhs.posY) && (lhs.posZ == rhs.posZ) && (lhs.velX == rhs.velX) && (lhs.velY == rhs.velY) &&
-            (lhs.velZ == rhs.velZ) && (lhs.posUncertaintyX == rhs.posUncertaintyX) && (lhs.posUncertaintyY == rhs.posUncertaintyY) &&
-            (lhs.posUncertaintyZ == rhs.posUncertaintyZ) && (lhs.gnss2VelUncertainty == rhs.gnss2VelUncertainty) &&
-            (lhs.gnss2TimeUncertainty == rhs.gnss2TimeUncertainty));
 }
 
 bool ExtGnssOffset::fromString(const AsciiMessage& response)
@@ -1470,13 +1426,14 @@ bool ExtGnssOffset::fromString(const AsciiMessage& response)
 AsciiMessage ExtGnssOffset::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f", positionX, positionY, positionZ);
-    return result;
-}
 
-bool operator==(const ExtGnssOffset& lhs, const ExtGnssOffset& rhs)
-{
-    return ((lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ));
+    // verify that all fields have a value set
+    if (positionX.has_value() && positionY.has_value() && positionZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f", positionX.value(), positionY.value(), positionZ.value());
+    }
+
+    return result;
 }
 
 }  // namespace GNSS
@@ -1543,13 +1500,6 @@ bool GnssCompassSignalHealthStatus::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const GnssCompassSignalHealthStatus& lhs, const GnssCompassSignalHealthStatus& rhs)
-{
-    return ((lhs.numSatsPvtA == rhs.numSatsPvtA) && (lhs.numSatsRtkA == rhs.numSatsRtkA) && (lhs.highestCn0A == rhs.highestCn0A) &&
-            (lhs.numSatsPvtB == rhs.numSatsPvtB) && (lhs.numSatsRtkB == rhs.numSatsRtkB) && (lhs.highestCn0B == rhs.highestCn0B) &&
-            (lhs.numComSatsPvt == rhs.numComSatsPvt) && (lhs.numComSatsRtk == rhs.numComSatsRtk));
-}
-
 bool GnssCompassBaseline::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -1601,14 +1551,16 @@ bool GnssCompassBaseline::fromString(const AsciiMessage& response)
 AsciiMessage GnssCompassBaseline::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f", positionX, positionY, positionZ, uncertaintyX, uncertaintyY, uncertaintyZ);
-    return result;
-}
 
-bool operator==(const GnssCompassBaseline& lhs, const GnssCompassBaseline& rhs)
-{
-    return ((lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ) &&
-            (lhs.uncertaintyX == rhs.uncertaintyX) && (lhs.uncertaintyY == rhs.uncertaintyY) && (lhs.uncertaintyZ == rhs.uncertaintyZ));
+    // verify that all fields have a value set
+    if (positionX.has_value() && positionY.has_value() && positionZ.has_value() && uncertaintyX.has_value() && uncertaintyY.has_value() &&
+        uncertaintyZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f", positionX.value(), positionY.value(), positionZ.value(), uncertaintyX.value(),
+                      uncertaintyY.value(), uncertaintyZ.value());
+    }
+
+    return result;
 }
 
 bool GnssCompassEstBaseline::fromString(const AsciiMessage& response)
@@ -1677,13 +1629,6 @@ bool GnssCompassEstBaseline::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const GnssCompassEstBaseline& lhs, const GnssCompassEstBaseline& rhs)
-{
-    return ((lhs.estBaselineComplete == rhs.estBaselineComplete) && (lhs.resv == rhs.resv) && (lhs.numMeas == rhs.numMeas) &&
-            (lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ) &&
-            (lhs.uncertaintyX == rhs.uncertaintyX) && (lhs.uncertaintyY == rhs.uncertaintyY) && (lhs.uncertaintyZ == rhs.uncertaintyZ));
-}
-
 bool GnssCompassStartupStatus::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -1706,11 +1651,6 @@ bool GnssCompassStartupStatus::fromString(const AsciiMessage& response)
     currentHeading = currentHeading_tmp.value();
 
     return false;  // no errors occurred
-}
-
-bool operator==(const GnssCompassStartupStatus& lhs, const GnssCompassStartupStatus& rhs)
-{
-    return ((lhs.percentComplete == rhs.percentComplete) && (lhs.currentHeading == rhs.currentHeading));
 }
 
 }  // namespace GNSSCompass
@@ -1750,13 +1690,15 @@ bool RealTimeHsiControl::fromString(const AsciiMessage& response)
 AsciiMessage RealTimeHsiControl::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u", static_cast<uint8_t>(mode), static_cast<uint8_t>(applyCompensation), convergeRate);
-    return result;
-}
 
-bool operator==(const RealTimeHsiControl& lhs, const RealTimeHsiControl& rhs)
-{
-    return ((lhs.mode == rhs.mode) && (lhs.applyCompensation == rhs.applyCompensation) && (lhs.convergeRate == rhs.convergeRate));
+    // verify that all fields have a value set
+    if (mode.has_value() && applyCompensation.has_value() && convergeRate.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u", static_cast<uint8_t>(mode.value()), static_cast<uint8_t>(applyCompensation.value()),
+                      convergeRate.value());
+    }
+
+    return result;
 }
 
 bool EstMagCal::fromString(const AsciiMessage& response)
@@ -1843,13 +1785,6 @@ bool EstMagCal::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const EstMagCal& lhs, const EstMagCal& rhs)
-{
-    return ((lhs.magGain00 == rhs.magGain00) && (lhs.magGain01 == rhs.magGain01) && (lhs.magGain02 == rhs.magGain02) && (lhs.magGain10 == rhs.magGain10) &&
-            (lhs.magGain11 == rhs.magGain11) && (lhs.magGain12 == rhs.magGain12) && (lhs.magGain20 == rhs.magGain20) && (lhs.magGain21 == rhs.magGain21) &&
-            (lhs.magGain22 == rhs.magGain22) && (lhs.magBiasX == rhs.magBiasX) && (lhs.magBiasY == rhs.magBiasY) && (lhs.magBiasZ == rhs.magBiasZ));
-}
-
 }  // namespace HardSoftIronEstimator
 
 namespace Heave
@@ -1882,11 +1817,6 @@ bool HeaveOutputs::fromString(const AsciiMessage& response)
     delayedHeave = delayedHeave_tmp.value();
 
     return false;  // no errors occurred
-}
-
-bool operator==(const HeaveOutputs& lhs, const HeaveOutputs& rhs)
-{
-    return ((lhs.heave == rhs.heave) && (lhs.heaveRate == rhs.heaveRate) && (lhs.delayedHeave == rhs.delayedHeave));
 }
 
 bool HeaveBasicConfig::fromString(const AsciiMessage& response)
@@ -1946,17 +1876,16 @@ bool HeaveBasicConfig::fromString(const AsciiMessage& response)
 AsciiMessage HeaveBasicConfig::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f", initialWavePeriod, initialWaveAmplitude, maxWavePeriod, minWaveAmplitude,
-                  delayedHeaveCutoffFreq, heaveCutoffFreq, heaveRateCutoffFreq);
-    return result;
-}
 
-bool operator==(const HeaveBasicConfig& lhs, const HeaveBasicConfig& rhs)
-{
-    return ((lhs.initialWavePeriod == rhs.initialWavePeriod) && (lhs.initialWaveAmplitude == rhs.initialWaveAmplitude) &&
-            (lhs.maxWavePeriod == rhs.maxWavePeriod) && (lhs.minWaveAmplitude == rhs.minWaveAmplitude) &&
-            (lhs.delayedHeaveCutoffFreq == rhs.delayedHeaveCutoffFreq) && (lhs.heaveCutoffFreq == rhs.heaveCutoffFreq) &&
-            (lhs.heaveRateCutoffFreq == rhs.heaveRateCutoffFreq));
+    // verify that all fields have a value set
+    if (initialWavePeriod.has_value() && initialWaveAmplitude.has_value() && maxWavePeriod.has_value() && minWaveAmplitude.has_value() &&
+        delayedHeaveCutoffFreq.has_value() && heaveCutoffFreq.has_value() && heaveRateCutoffFreq.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f", initialWavePeriod.value(), initialWaveAmplitude.value(), maxWavePeriod.value(),
+                      minWaveAmplitude.value(), delayedHeaveCutoffFreq.value(), heaveCutoffFreq.value(), heaveRateCutoffFreq.value());
+    }
+
+    return result;
 }
 
 }  // namespace Heave
@@ -1993,8 +1922,6 @@ bool Mag::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const Mag& lhs, const Mag& rhs) { return ((lhs.magX == rhs.magX) && (lhs.magY == rhs.magY) && (lhs.magZ == rhs.magZ)); }
-
 bool Accel::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -2025,8 +1952,6 @@ bool Accel::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const Accel& lhs, const Accel& rhs) { return ((lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ)); }
-
 bool Gyro::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -2056,8 +1981,6 @@ bool Gyro::fromString(const AsciiMessage& response)
 
     return false;  // no errors occurred
 }
-
-bool operator==(const Gyro& lhs, const Gyro& rhs) { return ((lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ)); }
 
 bool MagAccelGyro::fromString(const AsciiMessage& response)
 {
@@ -2123,12 +2046,6 @@ bool MagAccelGyro::fromString(const AsciiMessage& response)
     gyroZ = gyroZ_tmp.value();
 
     return false;  // no errors occurred
-}
-
-bool operator==(const MagAccelGyro& lhs, const MagAccelGyro& rhs)
-{
-    return ((lhs.magX == rhs.magX) && (lhs.magY == rhs.magY) && (lhs.magZ == rhs.magZ) && (lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) &&
-            (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
 }
 
 bool MagCal::fromString(const AsciiMessage& response)
@@ -2218,16 +2135,17 @@ bool MagCal::fromString(const AsciiMessage& response)
 AsciiMessage MagCal::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", magGain00, magGain01, magGain02, magGain10, magGain11, magGain12,
-                  magGain20, magGain21, magGain22, magBiasX, magBiasY, magBiasZ);
-    return result;
-}
 
-bool operator==(const MagCal& lhs, const MagCal& rhs)
-{
-    return ((lhs.magGain00 == rhs.magGain00) && (lhs.magGain01 == rhs.magGain01) && (lhs.magGain02 == rhs.magGain02) && (lhs.magGain10 == rhs.magGain10) &&
-            (lhs.magGain11 == rhs.magGain11) && (lhs.magGain12 == rhs.magGain12) && (lhs.magGain20 == rhs.magGain20) && (lhs.magGain21 == rhs.magGain21) &&
-            (lhs.magGain22 == rhs.magGain22) && (lhs.magBiasX == rhs.magBiasX) && (lhs.magBiasY == rhs.magBiasY) && (lhs.magBiasZ == rhs.magBiasZ));
+    // verify that all fields have a value set
+    if (magGain00.has_value() && magGain01.has_value() && magGain02.has_value() && magGain10.has_value() && magGain11.has_value() && magGain12.has_value() &&
+        magGain20.has_value() && magGain21.has_value() && magGain22.has_value() && magBiasX.has_value() && magBiasY.has_value() && magBiasZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", magGain00.value(), magGain01.value(), magGain02.value(),
+                      magGain10.value(), magGain11.value(), magGain12.value(), magGain20.value(), magGain21.value(), magGain22.value(), magBiasX.value(),
+                      magBiasY.value(), magBiasZ.value());
+    }
+
+    return result;
 }
 
 bool AccelCal::fromString(const AsciiMessage& response)
@@ -2317,17 +2235,18 @@ bool AccelCal::fromString(const AsciiMessage& response)
 AsciiMessage AccelCal::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", accelGain00, accelGain01, accelGain02, accelGain10, accelGain11,
-                  accelGain12, accelGain20, accelGain21, accelGain22, accelBiasX, accelBiasY, accelBiasZ);
-    return result;
-}
 
-bool operator==(const AccelCal& lhs, const AccelCal& rhs)
-{
-    return ((lhs.accelGain00 == rhs.accelGain00) && (lhs.accelGain01 == rhs.accelGain01) && (lhs.accelGain02 == rhs.accelGain02) &&
-            (lhs.accelGain10 == rhs.accelGain10) && (lhs.accelGain11 == rhs.accelGain11) && (lhs.accelGain12 == rhs.accelGain12) &&
-            (lhs.accelGain20 == rhs.accelGain20) && (lhs.accelGain21 == rhs.accelGain21) && (lhs.accelGain22 == rhs.accelGain22) &&
-            (lhs.accelBiasX == rhs.accelBiasX) && (lhs.accelBiasY == rhs.accelBiasY) && (lhs.accelBiasZ == rhs.accelBiasZ));
+    // verify that all fields have a value set
+    if (accelGain00.has_value() && accelGain01.has_value() && accelGain02.has_value() && accelGain10.has_value() && accelGain11.has_value() &&
+        accelGain12.has_value() && accelGain20.has_value() && accelGain21.has_value() && accelGain22.has_value() && accelBiasX.has_value() &&
+        accelBiasY.has_value() && accelBiasZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", accelGain00.value(), accelGain01.value(), accelGain02.value(),
+                      accelGain10.value(), accelGain11.value(), accelGain12.value(), accelGain20.value(), accelGain21.value(), accelGain22.value(),
+                      accelBiasX.value(), accelBiasY.value(), accelBiasZ.value());
+    }
+
+    return result;
 }
 
 bool RefFrameRot::fromString(const AsciiMessage& response)
@@ -2399,14 +2318,16 @@ bool RefFrameRot::fromString(const AsciiMessage& response)
 AsciiMessage RefFrameRot::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f", rfr00, rfr01, rfr02, rfr10, rfr11, rfr12, rfr20, rfr21, rfr22);
-    return result;
-}
 
-bool operator==(const RefFrameRot& lhs, const RefFrameRot& rhs)
-{
-    return ((lhs.rfr00 == rhs.rfr00) && (lhs.rfr01 == rhs.rfr01) && (lhs.rfr02 == rhs.rfr02) && (lhs.rfr10 == rhs.rfr10) && (lhs.rfr11 == rhs.rfr11) &&
-            (lhs.rfr12 == rhs.rfr12) && (lhs.rfr20 == rhs.rfr20) && (lhs.rfr21 == rhs.rfr21) && (lhs.rfr22 == rhs.rfr22));
+    // verify that all fields have a value set
+    if (rfr00.has_value() && rfr01.has_value() && rfr02.has_value() && rfr10.has_value() && rfr11.has_value() && rfr12.has_value() && rfr20.has_value() &&
+        rfr21.has_value() && rfr22.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f", rfr00.value(), rfr01.value(), rfr02.value(), rfr10.value(),
+                      rfr11.value(), rfr12.value(), rfr20.value(), rfr21.value(), rfr22.value());
+    }
+
+    return result;
 }
 
 bool ImuMeas::fromString(const AsciiMessage& response)
@@ -2487,14 +2408,6 @@ bool ImuMeas::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const ImuMeas& lhs, const ImuMeas& rhs)
-{
-    return ((lhs.uncompMagX == rhs.uncompMagX) && (lhs.uncompMagY == rhs.uncompMagY) && (lhs.uncompMagZ == rhs.uncompMagZ) &&
-            (lhs.uncompAccX == rhs.uncompAccX) && (lhs.uncompAccY == rhs.uncompAccY) && (lhs.uncompAccZ == rhs.uncompAccZ) &&
-            (lhs.uncompGyroX == rhs.uncompGyroX) && (lhs.uncompGyroY == rhs.uncompGyroY) && (lhs.uncompGyroZ == rhs.uncompGyroZ) &&
-            (lhs.temperature == rhs.temperature) && (lhs.pressure == rhs.pressure));
-}
-
 bool DeltaThetaVelocity::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -2549,12 +2462,6 @@ bool DeltaThetaVelocity::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const DeltaThetaVelocity& lhs, const DeltaThetaVelocity& rhs)
-{
-    return ((lhs.deltaTime == rhs.deltaTime) && (lhs.deltaThetaX == rhs.deltaThetaX) && (lhs.deltaThetaY == rhs.deltaThetaY) &&
-            (lhs.deltaThetaZ == rhs.deltaThetaZ) && (lhs.deltaVelX == rhs.deltaVelX) && (lhs.deltaVelY == rhs.deltaVelY) && (lhs.deltaVelZ == rhs.deltaVelZ));
-}
-
 bool DeltaThetaVelConfig::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -2600,15 +2507,16 @@ bool DeltaThetaVelConfig::fromString(const AsciiMessage& response)
 AsciiMessage DeltaThetaVelConfig::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u", static_cast<uint8_t>(integrationFrame), static_cast<uint8_t>(gyroCompensation),
-                  static_cast<uint8_t>(accelCompensation), static_cast<uint8_t>(earthRateCompensation), resv);
-    return result;
-}
 
-bool operator==(const DeltaThetaVelConfig& lhs, const DeltaThetaVelConfig& rhs)
-{
-    return ((lhs.integrationFrame == rhs.integrationFrame) && (lhs.gyroCompensation == rhs.gyroCompensation) &&
-            (lhs.accelCompensation == rhs.accelCompensation) && (lhs.earthRateCompensation == rhs.earthRateCompensation) && (lhs.resv == rhs.resv));
+    // verify that all fields have a value set
+    if (integrationFrame.has_value() && gyroCompensation.has_value() && accelCompensation.has_value() && earthRateCompensation.has_value() && resv.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u", static_cast<uint8_t>(integrationFrame.value()),
+                      static_cast<uint8_t>(gyroCompensation.value()), static_cast<uint8_t>(accelCompensation.value()),
+                      static_cast<uint8_t>(earthRateCompensation.value()), resv.value());
+    }
+
+    return result;
 }
 
 bool GyroCal::fromString(const AsciiMessage& response)
@@ -2698,17 +2606,18 @@ bool GyroCal::fromString(const AsciiMessage& response)
 AsciiMessage GyroCal::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", gyroGain00, gyroGain01, gyroGain02, gyroGain10, gyroGain11,
-                  gyroGain12, gyroGain20, gyroGain21, gyroGain22, gyroBiasX, gyroBiasY, gyroBiasZ);
-    return result;
-}
 
-bool operator==(const GyroCal& lhs, const GyroCal& rhs)
-{
-    return ((lhs.gyroGain00 == rhs.gyroGain00) && (lhs.gyroGain01 == rhs.gyroGain01) && (lhs.gyroGain02 == rhs.gyroGain02) &&
-            (lhs.gyroGain10 == rhs.gyroGain10) && (lhs.gyroGain11 == rhs.gyroGain11) && (lhs.gyroGain12 == rhs.gyroGain12) &&
-            (lhs.gyroGain20 == rhs.gyroGain20) && (lhs.gyroGain21 == rhs.gyroGain21) && (lhs.gyroGain22 == rhs.gyroGain22) &&
-            (lhs.gyroBiasX == rhs.gyroBiasX) && (lhs.gyroBiasY == rhs.gyroBiasY) && (lhs.gyroBiasZ == rhs.gyroBiasZ));
+    // verify that all fields have a value set
+    if (gyroGain00.has_value() && gyroGain01.has_value() && gyroGain02.has_value() && gyroGain10.has_value() && gyroGain11.has_value() &&
+        gyroGain12.has_value() && gyroGain20.has_value() && gyroGain21.has_value() && gyroGain22.has_value() && gyroBiasX.has_value() &&
+        gyroBiasY.has_value() && gyroBiasZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", gyroGain00.value(), gyroGain01.value(), gyroGain02.value(),
+                      gyroGain10.value(), gyroGain11.value(), gyroGain12.value(), gyroGain20.value(), gyroGain21.value(), gyroGain22.value(), gyroBiasX.value(),
+                      gyroBiasY.value(), gyroBiasZ.value());
+    }
+
+    return result;
 }
 
 bool ImuFilterControl::fromString(const AsciiMessage& response)
@@ -2786,18 +2695,17 @@ bool ImuFilterControl::fromString(const AsciiMessage& response)
 AsciiMessage ImuFilterControl::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u", magWindowSize, accelWindowSize, gyroWindowSize, tempWindowSize,
-                  presWindowSize, uint8_t(magFilterMode), uint8_t(accelFilterMode), uint8_t(gyroFilterMode), uint8_t(tempFilterMode), uint8_t(presFilterMode));
-    return result;
-}
 
-bool operator==(const ImuFilterControl& lhs, const ImuFilterControl& rhs)
-{
-    return ((lhs.magWindowSize == rhs.magWindowSize) && (lhs.accelWindowSize == rhs.accelWindowSize) && (lhs.gyroWindowSize == rhs.gyroWindowSize) &&
-            (lhs.tempWindowSize == rhs.tempWindowSize) && (lhs.presWindowSize == rhs.presWindowSize) &&
-            (uint8_t(lhs.magFilterMode) == uint8_t(rhs.magFilterMode)) && (uint8_t(lhs.accelFilterMode) == uint8_t(rhs.accelFilterMode)) &&
-            (uint8_t(lhs.gyroFilterMode) == uint8_t(rhs.gyroFilterMode)) && (uint8_t(lhs.tempFilterMode) == uint8_t(rhs.tempFilterMode)) &&
-            (uint8_t(lhs.presFilterMode) == uint8_t(rhs.presFilterMode)));
+    // verify that all fields have a value set
+    if (magWindowSize.has_value() && accelWindowSize.has_value() && gyroWindowSize.has_value() && tempWindowSize.has_value() && presWindowSize.has_value() &&
+        magFilterMode.has_value() && accelFilterMode.has_value() && gyroFilterMode.has_value() && tempFilterMode.has_value() && presFilterMode.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u", magWindowSize.value(), accelWindowSize.value(),
+                      gyroWindowSize.value(), tempWindowSize.value(), presWindowSize.value(), uint8_t(magFilterMode.value()), uint8_t(accelFilterMode.value()),
+                      uint8_t(gyroFilterMode.value()), uint8_t(tempFilterMode.value()), uint8_t(presFilterMode.value()));
+    }
+
+    return result;
 }
 
 }  // namespace IMU
@@ -2906,14 +2814,6 @@ bool InsSolLla::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const InsSolLla& lhs, const InsSolLla& rhs)
-{
-    return ((lhs.timeGpsTow == rhs.timeGpsTow) && (lhs.timeGpsWeek == rhs.timeGpsWeek) && (uint16_t(lhs.insStatus) == uint16_t(rhs.insStatus)) &&
-            (lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posLat == rhs.posLat) && (lhs.posLon == rhs.posLon) &&
-            (lhs.posAlt == rhs.posAlt) && (lhs.velN == rhs.velN) && (lhs.velE == rhs.velE) && (lhs.velD == rhs.velD) &&
-            (lhs.attUncertainty == rhs.attUncertainty) && (lhs.posUncertainty == rhs.posUncertainty) && (lhs.velUncertainty == rhs.velUncertainty));
-}
-
 bool InsSolEcef::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -3016,14 +2916,6 @@ bool InsSolEcef::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const InsSolEcef& lhs, const InsSolEcef& rhs)
-{
-    return ((lhs.timeGpsTow == rhs.timeGpsTow) && (lhs.timeGpsWeek == rhs.timeGpsWeek) && (uint16_t(lhs.insStatus) == uint16_t(rhs.insStatus)) &&
-            (lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posEx == rhs.posEx) && (lhs.posEy == rhs.posEy) &&
-            (lhs.posEz == rhs.posEz) && (lhs.velEx == rhs.velEx) && (lhs.velEy == rhs.velEy) && (lhs.velEz == rhs.velEz) &&
-            (lhs.attUncertainty == rhs.attUncertainty) && (lhs.posUncertainty == rhs.posUncertainty) && (lhs.velUncertainty == rhs.velUncertainty));
-}
-
 bool InsBasicConfig::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -3063,14 +2955,15 @@ bool InsBasicConfig::fromString(const AsciiMessage& response)
 AsciiMessage InsBasicConfig::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u", static_cast<uint8_t>(scenario), static_cast<uint8_t>(ahrsAiding),
-                  static_cast<uint8_t>(estBaseline), resv);
-    return result;
-}
 
-bool operator==(const InsBasicConfig& lhs, const InsBasicConfig& rhs)
-{
-    return ((lhs.scenario == rhs.scenario) && (lhs.ahrsAiding == rhs.ahrsAiding) && (lhs.estBaseline == rhs.estBaseline) && (lhs.resv == rhs.resv));
+    // verify that all fields have a value set
+    if (scenario.has_value() && ahrsAiding.has_value() && estBaseline.has_value() && resv.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u", static_cast<uint8_t>(scenario.value()), static_cast<uint8_t>(ahrsAiding.value()),
+                      static_cast<uint8_t>(estBaseline.value()), resv.value());
+    }
+
+    return result;
 }
 
 bool InsStateLla::fromString(const AsciiMessage& response)
@@ -3175,13 +3068,6 @@ bool InsStateLla::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const InsStateLla& lhs, const InsStateLla& rhs)
-{
-    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posLat == rhs.posLat) && (lhs.posLon == rhs.posLon) &&
-            (lhs.posAlt == rhs.posAlt) && (lhs.velN == rhs.velN) && (lhs.velE == rhs.velE) && (lhs.velD == rhs.velD) && (lhs.accelX == rhs.accelX) &&
-            (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
-}
-
 bool InsStateEcef::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -3284,13 +3170,6 @@ bool InsStateEcef::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const InsStateEcef& lhs, const InsStateEcef& rhs)
-{
-    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posEx == rhs.posEx) && (lhs.posEy == rhs.posEy) &&
-            (lhs.posEz == rhs.posEz) && (lhs.velEx == rhs.velEx) && (lhs.velEy == rhs.velEy) && (lhs.velEz == rhs.velEz) && (lhs.accelX == rhs.accelX) &&
-            (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
-}
-
 bool FilterStartupBias::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -3348,14 +3227,16 @@ bool FilterStartupBias::fromString(const AsciiMessage& response)
 AsciiMessage FilterStartupBias::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f", gyroBiasX, gyroBiasY, gyroBiasZ, accelBiasX, accelBiasY, accelBiasZ, presBias);
-    return result;
-}
 
-bool operator==(const FilterStartupBias& lhs, const FilterStartupBias& rhs)
-{
-    return ((lhs.gyroBiasX == rhs.gyroBiasX) && (lhs.gyroBiasY == rhs.gyroBiasY) && (lhs.gyroBiasZ == rhs.gyroBiasZ) && (lhs.accelBiasX == rhs.accelBiasX) &&
-            (lhs.accelBiasY == rhs.accelBiasY) && (lhs.accelBiasZ == rhs.accelBiasZ) && (lhs.presBias == rhs.presBias));
+    // verify that all fields have a value set
+    if (gyroBiasX.has_value() && gyroBiasY.has_value() && gyroBiasZ.has_value() && accelBiasX.has_value() && accelBiasY.has_value() && accelBiasZ.has_value() &&
+        presBias.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f,%f", gyroBiasX.value(), gyroBiasY.value(), gyroBiasZ.value(), accelBiasX.value(),
+                      accelBiasY.value(), accelBiasZ.value(), presBias.value());
+    }
+
+    return result;
 }
 
 bool InsRefOffset::fromString(const AsciiMessage& response)
@@ -3409,14 +3290,16 @@ bool InsRefOffset::fromString(const AsciiMessage& response)
 AsciiMessage InsRefOffset::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f", refOffsetX, refOffsetY, refOffsetZ, refUncertX, refUncertY, refUncertZ);
-    return result;
-}
 
-bool operator==(const InsRefOffset& lhs, const InsRefOffset& rhs)
-{
-    return ((lhs.refOffsetX == rhs.refOffsetX) && (lhs.refOffsetY == rhs.refOffsetY) && (lhs.refOffsetZ == rhs.refOffsetZ) &&
-            (lhs.refUncertX == rhs.refUncertX) && (lhs.refUncertY == rhs.refUncertY) && (lhs.refUncertZ == rhs.refUncertZ));
+    // verify that all fields have a value set
+    if (refOffsetX.has_value() && refOffsetY.has_value() && refOffsetZ.has_value() && refUncertX.has_value() && refUncertY.has_value() &&
+        refUncertZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f,%f,%f,%f", refOffsetX.value(), refOffsetY.value(), refOffsetZ.value(), refUncertX.value(),
+                      refUncertY.value(), refUncertZ.value());
+    }
+
+    return result;
 }
 
 bool InsGnssSelect::fromString(const AsciiMessage& response)
@@ -3470,15 +3353,16 @@ bool InsGnssSelect::fromString(const AsciiMessage& response)
 AsciiMessage InsGnssSelect::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u", static_cast<uint8_t>(activeReceiverSelect), usedForNavTime, hysteresisTime,
-                  static_cast<uint8_t>(useGnssCompass), resv1, resv2);
-    return result;
-}
 
-bool operator==(const InsGnssSelect& lhs, const InsGnssSelect& rhs)
-{
-    return ((lhs.activeReceiverSelect == rhs.activeReceiverSelect) && (lhs.usedForNavTime == rhs.usedForNavTime) &&
-            (lhs.hysteresisTime == rhs.hysteresisTime) && (lhs.useGnssCompass == rhs.useGnssCompass) && (lhs.resv1 == rhs.resv1) && (lhs.resv2 == rhs.resv2));
+    // verify that all fields have a value set
+    if (activeReceiverSelect.has_value() && usedForNavTime.has_value() && hysteresisTime.has_value() && useGnssCompass.has_value() && resv1.has_value() &&
+        resv2.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u", static_cast<uint8_t>(activeReceiverSelect.value()), usedForNavTime.value(),
+                      hysteresisTime.value(), static_cast<uint8_t>(useGnssCompass.value()), resv1.value(), resv2.value());
+    }
+
+    return result;
 }
 
 }  // namespace INS
@@ -3504,11 +3388,11 @@ bool UserTag::fromString(const AsciiMessage& response)
 AsciiMessage UserTag::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%s", tag.c_str());
+
+    // verify that all fields have a value set
+    if (tag.has_value()) { std::snprintf(result.begin(), result.capacity(), "%s", tag.value().c_str()); }
     return result;
 }
-
-bool operator==(const UserTag& lhs, const UserTag& rhs) { return ((lhs.tag == rhs.tag)); }
 
 bool Model::fromString(const AsciiMessage& response)
 {
@@ -3525,8 +3409,6 @@ bool Model::fromString(const AsciiMessage& response)
 
     return false;  // no errors occurred
 }
-
-bool operator==(const Model& lhs, const Model& rhs) { return ((lhs.model == rhs.model)); }
 
 bool HwVer::fromString(const AsciiMessage& response)
 {
@@ -3560,8 +3442,6 @@ bool HwVer::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const HwVer& lhs, const HwVer& rhs) { return ((lhs.hwVer == rhs.hwVer) && (lhs.hwMinVer == rhs.hwMinVer)); }
-
 bool Serial::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -3580,8 +3460,6 @@ bool Serial::fromString(const AsciiMessage& response)
     return false;  // no errors occurred
 }
 
-bool operator==(const Serial& lhs, const Serial& rhs) { return ((lhs.serialNum == rhs.serialNum)); }
-
 bool FwVer::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -3597,8 +3475,6 @@ bool FwVer::fromString(const AsciiMessage& response)
 
     return false;  // no errors occurred
 }
-
-bool operator==(const FwVer& lhs, const FwVer& rhs) { return ((lhs.fwVer == rhs.fwVer)); }
 
 bool BaudRate::fromString(const AsciiMessage& response)
 {
@@ -3635,11 +3511,13 @@ bool BaudRate::fromString(const AsciiMessage& response)
 AsciiMessage BaudRate::toString() const
 {
     AsciiMessage result = "";
-    if (static_cast<uint8_t>(serialPort) == 0) { std::snprintf(result.begin(), result.capacity(), "%d", static_cast<uint32_t>(baudRate)); }
-    else
+
+    // verify that all fields have a value set
+    if (baudRate.has_value())
     {
-        if (serialPort == SerialPort::Poll) { std::snprintf(result.begin(), result.capacity(), "%u,?", static_cast<uint32_t>(baudRate)); }
-        else { std::snprintf(result.begin(), result.capacity(), "%u,%u", static_cast<uint32_t>(baudRate), static_cast<uint8_t>(serialPort)); }
+        if (serialPort == SerialPort::Poll) { std::snprintf(result.begin(), result.capacity(), "%u,?", static_cast<uint32_t>(baudRate.value())); }
+        else if (serialPort == SerialPort::ActiveSerial) { std::snprintf(result.begin(), result.capacity(), "%u", static_cast<uint32_t>(baudRate.value())); }
+        else { std::snprintf(result.begin(), result.capacity(), "%u,%u", static_cast<uint32_t>(baudRate.value()), static_cast<uint8_t>(serialPort)); }
     }
     return result;
 }
@@ -3653,8 +3531,6 @@ GenericCommand BaudRate::toReadCommand()
     GenericCommand readCommand(commandString, 6);
     return readCommand;
 }
-
-bool operator==(const BaudRate& lhs, const BaudRate& rhs) { return ((lhs.baudRate == rhs.baudRate) && (lhs.serialPort == rhs.serialPort)); }
 
 bool AsyncOutputType::fromString(const AsciiMessage& response)
 {
@@ -3691,11 +3567,13 @@ bool AsyncOutputType::fromString(const AsciiMessage& response)
 AsciiMessage AsyncOutputType::toString() const
 {
     AsciiMessage result = "";
-    if (static_cast<uint8_t>(serialPort) == 0) { std::snprintf(result.begin(), result.capacity(), "%d", static_cast<uint32_t>(ador)); }
-    else
+
+    // verify that all fields have a value set
+    if (ador.has_value())
     {
-        if (serialPort == SerialPort::Poll) { std::snprintf(result.begin(), result.capacity(), "%u,?", static_cast<uint32_t>(ador)); }
-        else { std::snprintf(result.begin(), result.capacity(), "%u,%u", static_cast<uint32_t>(ador), static_cast<uint8_t>(serialPort)); }
+        if (serialPort == SerialPort::Poll) { std::snprintf(result.begin(), result.capacity(), "%u,?", static_cast<uint32_t>(ador.value())); }
+        else if (serialPort == SerialPort::ActiveSerial) { std::snprintf(result.begin(), result.capacity(), "%u", static_cast<uint32_t>(ador.value())); }
+        else { std::snprintf(result.begin(), result.capacity(), "%u,%u", static_cast<uint32_t>(ador.value()), static_cast<uint8_t>(serialPort)); }
     }
     return result;
 }
@@ -3709,8 +3587,6 @@ GenericCommand AsyncOutputType::toReadCommand()
     GenericCommand readCommand(commandString, 6);
     return readCommand;
 }
-
-bool operator==(const AsyncOutputType& lhs, const AsyncOutputType& rhs) { return ((lhs.ador == rhs.ador) && (lhs.serialPort == rhs.serialPort)); }
 
 bool AsyncOutputFreq::fromString(const AsciiMessage& response)
 {
@@ -3747,11 +3623,13 @@ bool AsyncOutputFreq::fromString(const AsciiMessage& response)
 AsciiMessage AsyncOutputFreq::toString() const
 {
     AsciiMessage result = "";
-    if (static_cast<uint8_t>(serialPort) == 0) { std::snprintf(result.begin(), result.capacity(), "%d", static_cast<uint32_t>(adof)); }
-    else
+
+    // verify that all fields have a value set
+    if (adof.has_value())
     {
-        if (serialPort == SerialPort::Poll) { std::snprintf(result.begin(), result.capacity(), "%u,?", static_cast<uint32_t>(adof)); }
-        else { std::snprintf(result.begin(), result.capacity(), "%u,%u", static_cast<uint32_t>(adof), static_cast<uint8_t>(serialPort)); }
+        if (serialPort == SerialPort::Poll) { std::snprintf(result.begin(), result.capacity(), "%u,?", static_cast<uint32_t>(adof.value())); }
+        else if (serialPort == SerialPort::ActiveSerial) { std::snprintf(result.begin(), result.capacity(), "%u", static_cast<uint32_t>(adof.value())); }
+        else { std::snprintf(result.begin(), result.capacity(), "%u,%u", static_cast<uint32_t>(adof.value()), static_cast<uint8_t>(serialPort)); }
     }
     return result;
 }
@@ -3765,8 +3643,6 @@ GenericCommand AsyncOutputFreq::toReadCommand()
     GenericCommand readCommand(commandString, 6);
     return readCommand;
 }
-
-bool operator==(const AsyncOutputFreq& lhs, const AsyncOutputFreq& rhs) { return ((lhs.adof == rhs.adof) && (lhs.serialPort == rhs.serialPort)); }
 
 bool ProtocolControl::fromString(const AsciiMessage& response)
 {
@@ -3825,17 +3701,18 @@ bool ProtocolControl::fromString(const AsciiMessage& response)
 AsciiMessage ProtocolControl::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%u", static_cast<uint8_t>(asciiAppendCount), static_cast<uint8_t>(asciiAppendStatus),
-                  static_cast<uint8_t>(spiAppendCount), static_cast<uint8_t>(spiAppendStatus), static_cast<uint8_t>(asciiChecksum),
-                  static_cast<uint8_t>(spiChecksum), static_cast<uint8_t>(errorMode));
-    return result;
-}
 
-bool operator==(const ProtocolControl& lhs, const ProtocolControl& rhs)
-{
-    return ((lhs.asciiAppendCount == rhs.asciiAppendCount) && (lhs.asciiAppendStatus == rhs.asciiAppendStatus) && (lhs.spiAppendCount == rhs.spiAppendCount) &&
-            (lhs.spiAppendStatus == rhs.spiAppendStatus) && (lhs.asciiChecksum == rhs.asciiChecksum) && (lhs.spiChecksum == rhs.spiChecksum) &&
-            (lhs.errorMode == rhs.errorMode));
+    // verify that all fields have a value set
+    if (asciiAppendCount.has_value() && asciiAppendStatus.has_value() && spiAppendCount.has_value() && spiAppendStatus.has_value() &&
+        asciiChecksum.has_value() && spiChecksum.has_value() && errorMode.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%u", static_cast<uint8_t>(asciiAppendCount.value()),
+                      static_cast<uint8_t>(asciiAppendStatus.value()), static_cast<uint8_t>(spiAppendCount.value()),
+                      static_cast<uint8_t>(spiAppendStatus.value()), static_cast<uint8_t>(asciiChecksum.value()), static_cast<uint8_t>(spiChecksum.value()),
+                      static_cast<uint8_t>(errorMode.value()));
+    }
+
+    return result;
 }
 
 bool SyncControl::fromString(const AsciiMessage& response)
@@ -3907,17 +3784,17 @@ bool SyncControl::fromString(const AsciiMessage& response)
 AsciiMessage SyncControl::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%u,%u,%u", static_cast<uint8_t>(syncInMode), static_cast<uint8_t>(syncInEdge),
-                  syncInSkipFactor, resv1, static_cast<uint8_t>(syncOutMode), static_cast<uint8_t>(syncOutPolarity), syncOutSkipFactor, syncOutPulseWidth,
-                  resv2);
-    return result;
-}
 
-bool operator==(const SyncControl& lhs, const SyncControl& rhs)
-{
-    return ((lhs.syncInMode == rhs.syncInMode) && (lhs.syncInEdge == rhs.syncInEdge) && (lhs.syncInSkipFactor == rhs.syncInSkipFactor) &&
-            (lhs.resv1 == rhs.resv1) && (lhs.syncOutMode == rhs.syncOutMode) && (lhs.syncOutPolarity == rhs.syncOutPolarity) &&
-            (lhs.syncOutSkipFactor == rhs.syncOutSkipFactor) && (lhs.syncOutPulseWidth == rhs.syncOutPulseWidth) && (lhs.resv2 == rhs.resv2));
+    // verify that all fields have a value set
+    if (syncInMode.has_value() && syncInEdge.has_value() && syncInSkipFactor.has_value() && resv1.has_value() && syncOutMode.has_value() &&
+        syncOutPolarity.has_value() && syncOutSkipFactor.has_value() && syncOutPulseWidth.has_value() && resv2.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%u,%u,%u,%u", static_cast<uint8_t>(syncInMode.value()),
+                      static_cast<uint8_t>(syncInEdge.value()), syncInSkipFactor.value(), resv1.value(), static_cast<uint8_t>(syncOutMode.value()),
+                      static_cast<uint8_t>(syncOutPolarity.value()), syncOutSkipFactor.value(), syncOutPulseWidth.value(), resv2.value());
+    }
+
+    return result;
 }
 
 bool SyncStatus::fromString(const AsciiMessage& response)
@@ -3948,11 +3825,6 @@ bool SyncStatus::fromString(const AsciiMessage& response)
     syncOutCount = syncOutCount_tmp.value();
 
     return false;  // no errors occurred
-}
-
-bool operator==(const SyncStatus& lhs, const SyncStatus& rhs)
-{
-    return ((lhs.syncInCount == rhs.syncInCount) && (lhs.syncInTime == rhs.syncInTime) && (lhs.syncOutCount == rhs.syncOutCount));
 }
 
 bool BinaryOutput::fromString(const AsciiMessage& response)
@@ -4149,8 +4021,11 @@ AsciiMessage BinaryOutput::toString() const
 {
     AsciiMessage result = "";
     BinaryHeader binaryHeader = toBinaryHeader();
-    std::snprintf(result.end(), result.numAvailable(), "%1X,%d%s", uint16_t(asyncMode), rateDivisor,
-                  binaryHeaderToString<AsciiMessage::capacity()>(binaryHeader).c_str());
+    if (asyncMode.has_value() && rateDivisor.has_value())
+    {
+        std::snprintf(result.end(), result.numAvailable(), "%1X,%d%s", uint16_t(asyncMode.value()), rateDivisor.value(),
+                      binaryHeaderToString<AsciiMessage::capacity()>(binaryHeader).c_str());
+    }
     return result;
 }
 
@@ -4254,6 +4129,8 @@ BinaryHeader BinaryOutputMeasurements::toBinaryHeader() const noexcept
     return result;
 }
 
+Vector<uint8_t, binaryHeaderMaxLength> BinaryOutputMeasurements::toHeaderBytes() const noexcept { return this->toBinaryHeader().toHeaderBytes(); }
+
 bool NmeaOutput1::fromString(const AsciiMessage& response)
 {
     const auto tokens = findIndexOfFieldSeparators(response);
@@ -4299,15 +4176,15 @@ bool NmeaOutput1::fromString(const AsciiMessage& response)
 AsciiMessage NmeaOutput1::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%X", static_cast<uint8_t>(port), static_cast<uint8_t>(rate), static_cast<uint8_t>(mode),
-                  static_cast<uint8_t>(gnssSelect), uint32_t(msgSelection));
-    return result;
-}
 
-bool operator==(const NmeaOutput1& lhs, const NmeaOutput1& rhs)
-{
-    return ((lhs.port == rhs.port) && (lhs.rate == rhs.rate) && (lhs.mode == rhs.mode) && (lhs.gnssSelect == rhs.gnssSelect) &&
-            (uint32_t(lhs.msgSelection) == uint32_t(rhs.msgSelection)));
+    // verify that all fields have a value set
+    if (port.has_value() && rate.has_value() && mode.has_value() && gnssSelect.has_value() && msgSelection.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%X", static_cast<uint8_t>(port.value()), static_cast<uint8_t>(rate.value()),
+                      static_cast<uint8_t>(mode.value()), static_cast<uint8_t>(gnssSelect.value()), uint32_t(msgSelection.value()));
+    }
+
+    return result;
 }
 
 bool NmeaOutput2::fromString(const AsciiMessage& response)
@@ -4355,15 +4232,15 @@ bool NmeaOutput2::fromString(const AsciiMessage& response)
 AsciiMessage NmeaOutput2::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%X", static_cast<uint8_t>(port), static_cast<uint8_t>(rate), static_cast<uint8_t>(mode),
-                  static_cast<uint8_t>(gnssSelect), uint32_t(msgSelection));
-    return result;
-}
 
-bool operator==(const NmeaOutput2& lhs, const NmeaOutput2& rhs)
-{
-    return ((lhs.port == rhs.port) && (lhs.rate == rhs.rate) && (lhs.mode == rhs.mode) && (lhs.gnssSelect == rhs.gnssSelect) &&
-            (uint32_t(lhs.msgSelection) == uint32_t(rhs.msgSelection)));
+    // verify that all fields have a value set
+    if (port.has_value() && rate.has_value() && mode.has_value() && gnssSelect.has_value() && msgSelection.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%X", static_cast<uint8_t>(port.value()), static_cast<uint8_t>(rate.value()),
+                      static_cast<uint8_t>(mode.value()), static_cast<uint8_t>(gnssSelect.value()), uint32_t(msgSelection.value()));
+    }
+
+    return result;
 }
 
 bool LegacyCompatibilitySettings::fromString(const AsciiMessage& response)
@@ -4405,15 +4282,15 @@ bool LegacyCompatibilitySettings::fromString(const AsciiMessage& response)
 AsciiMessage LegacyCompatibilitySettings::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u", static_cast<uint8_t>(insLegacy), uint8_t(gnssLegacy), static_cast<uint8_t>(imuLegacy),
-                  static_cast<uint8_t>(hwLegacy));
-    return result;
-}
 
-bool operator==(const LegacyCompatibilitySettings& lhs, const LegacyCompatibilitySettings& rhs)
-{
-    return ((lhs.insLegacy == rhs.insLegacy) && (uint8_t(lhs.gnssLegacy) == uint8_t(rhs.gnssLegacy)) && (lhs.imuLegacy == rhs.imuLegacy) &&
-            (lhs.hwLegacy == rhs.hwLegacy));
+    // verify that all fields have a value set
+    if (insLegacy.has_value() && gnssLegacy.has_value() && imuLegacy.has_value() && hwLegacy.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u", static_cast<uint8_t>(insLegacy.value()), uint8_t(gnssLegacy.value()),
+                      static_cast<uint8_t>(imuLegacy.value()), static_cast<uint8_t>(hwLegacy.value()));
+    }
+
+    return result;
 }
 
 }  // namespace System
@@ -4453,13 +4330,14 @@ bool VelAidingMeas::fromString(const AsciiMessage& response)
 AsciiMessage VelAidingMeas::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%f,%f,%f", velocityX, velocityY, velocityZ);
-    return result;
-}
 
-bool operator==(const VelAidingMeas& lhs, const VelAidingMeas& rhs)
-{
-    return ((lhs.velocityX == rhs.velocityX) && (lhs.velocityY == rhs.velocityY) && (lhs.velocityZ == rhs.velocityZ));
+    // verify that all fields have a value set
+    if (velocityX.has_value() && velocityY.has_value() && velocityZ.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%f,%f,%f", velocityX.value(), velocityY.value(), velocityZ.value());
+    }
+
+    return result;
 }
 
 bool VelAidingControl::fromString(const AsciiMessage& response)
@@ -4495,13 +4373,14 @@ bool VelAidingControl::fromString(const AsciiMessage& response)
 AsciiMessage VelAidingControl::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%f,%f", static_cast<uint8_t>(velAidEnable), velUncertTuning, resv);
-    return result;
-}
 
-bool operator==(const VelAidingControl& lhs, const VelAidingControl& rhs)
-{
-    return ((lhs.velAidEnable == rhs.velAidEnable) && (lhs.velUncertTuning == rhs.velUncertTuning) && (lhs.resv == rhs.resv));
+    // verify that all fields have a value set
+    if (velAidEnable.has_value() && velUncertTuning.has_value() && resv.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%f,%f", static_cast<uint8_t>(velAidEnable.value()), velUncertTuning.value(), resv.value());
+    }
+
+    return result;
 }
 
 }  // namespace VelocityAiding
@@ -4577,16 +4456,17 @@ bool RefModelConfig::fromString(const AsciiMessage& response)
 AsciiMessage RefModelConfig::toString() const
 {
     AsciiMessage result = "";
-    std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%f,%f,%f,%f", static_cast<uint8_t>(enableMagModel),
-                  static_cast<uint8_t>(enableGravityModel), resv1, resv2, recalcThreshold, year, latitude, longitude, altitude);
-    return result;
-}
 
-bool operator==(const RefModelConfig& lhs, const RefModelConfig& rhs)
-{
-    return ((lhs.enableMagModel == rhs.enableMagModel) && (lhs.enableGravityModel == rhs.enableGravityModel) && (lhs.resv1 == rhs.resv1) &&
-            (lhs.resv2 == rhs.resv2) && (lhs.recalcThreshold == rhs.recalcThreshold) && (lhs.year == rhs.year) && (lhs.latitude == rhs.latitude) &&
-            (lhs.longitude == rhs.longitude) && (lhs.altitude == rhs.altitude));
+    // verify that all fields have a value set
+    if (enableMagModel.has_value() && enableGravityModel.has_value() && resv1.has_value() && resv2.has_value() && recalcThreshold.has_value() &&
+        year.has_value() && latitude.has_value() && longitude.has_value() && altitude.has_value())
+    {
+        std::snprintf(result.begin(), result.capacity(), "%u,%u,%u,%u,%u,%f,%f,%f,%f", static_cast<uint8_t>(enableMagModel.value()),
+                      static_cast<uint8_t>(enableGravityModel.value()), resv1.value(), resv2.value(), recalcThreshold.value(), year.value(), latitude.value(),
+                      longitude.value(), altitude.value());
+    }
+
+    return result;
 }
 
 }  // namespace WorldMagGravityModel

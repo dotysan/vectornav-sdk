@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -92,16 +92,16 @@ public:
     char& at(uint16_t index) noexcept
     {
         VN_ASSERT(index <= length());
-        return str.at(index);
+        return str[index];
     }
 
     char at(uint16_t index) const noexcept
     {
         VN_ASSERT(index <= length());
-        return str.at(index);
+        return str[index];
     }
 
-    bool push_back(const char charToPush) noexcept
+    Errored push_back(const char charToPush) noexcept
     {
         if (length() >= Capacity) { return true; }
         str[length()] = charToPush;
@@ -124,7 +124,7 @@ public:
     const char* end() const noexcept { return &str[length()]; }
     char* end() noexcept { return &str[length()]; }
 
-    uint16_t length() const noexcept { return strnlen(str.data(), Capacity); }
+    uint16_t length() const noexcept { return static_cast<uint16_t>(strnlen(str.data(), Capacity)); }
 
     bool empty() const noexcept { return (str[0] == '\0'); }
 
@@ -200,6 +200,7 @@ private:
     std::array<char, Capacity + 1> str = {0};
 };
 
+/** \cond */
 // ###################
 // Operators
 // ###################
@@ -318,6 +319,7 @@ bool operator==(const String<Capacity>& lhs, const std::string& rhs) noexcept
 {
     return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
+/** \endcond */
 
 namespace StringUtils
 {
@@ -466,6 +468,7 @@ Vector<String<Capacity>, stringSplitMaximumSize> split(const char* strIn, const 
 }  // namespace StringUtils
 }  // namespace VN
 
+/** \cond */
 template <uint16_t Capacity>
 struct std::hash<VN::String<Capacity>>
 {
@@ -476,5 +479,5 @@ struct std::hash<VN::String<Capacity>>
         return hash;
     }
 };
-
+/** \endcond */
 #endif  // VN_STRING_HPP_

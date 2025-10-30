@@ -16,6 +16,7 @@ Directory Interface
 Files
 -----
 
+- :ref:`file_include_vectornav_Interface_BridgeSensor.hpp`
 - :ref:`file_include_vectornav_Interface_Commands.hpp`
 - :ref:`file_include_vectornav_Interface_CompositeData.hpp`
 - :ref:`file_include_vectornav_Interface_Errors.hpp`

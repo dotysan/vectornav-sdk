@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,113 +32,131 @@ PacketDispatcher::FindPacketRetVal FaPacketDispatcher::findPacket(const ByteBuff
     return {findPacketRetVal.validity, findPacketRetVal.metadata.length};
 }
 
-void FaPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept
+Error FaPacketDispatcher::dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept
 {
     VN_PROFILER_TIME_CURRENT_SCOPE();
-    bool packetConsumed = false;
-    _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
+    Error error = _invokeSubscribers(byteBuffer, syncByteIndex, _latestPacketMetadata);
     if constexpr (Config::PacketDispatchers::compositeDataQueueCapacity > 0)
     {
-        packetConsumed |= _tryPushToCompositeDataQueue(byteBuffer, syncByteIndex, _latestPacketMetadata);
+        std::optional<EnabledMeasurements> measFound = _latestPacketMetadata.header.toMeasurementHeader();
+        if (_parseToCD && measFound.has_value() && anyDataIsEnabled(measFound.value(), _enabledMeasurements))
+        {
+            Error latestError = _tryPushToCompositeDataQueue(byteBuffer, syncByteIndex, _latestPacketMetadata);
+            if (latestError != Error::None) { error = latestError; }
+        }
     }
+
+    return error;
 }
 
-bool FaPacketDispatcher::addSubscriber(PacketQueue_Interface* subscriber, EnabledMeasurements headerToUse, SubscriberFilterType filterType) noexcept
+Error FaPacketDispatcher::addSubscriber(PacketQueue_Interface* subscriber, EnabledMeasurements headerToUse, SubscriberFilterType filterType) noexcept
 {
+    if (subscriber == nullptr) { return Error::PacketQueueNull; }
     if (headerToUse == EnabledMeasurements{0})
     {
         // If they pass no header filter, we should match on any message
         for (auto& group : headerToUse) { group = std::numeric_limits<uint32_t>::max(); }
         filterType = SubscriberFilterType::AnyMatch;
     }
-    return _subscribers.push_back(Subscriber{subscriber, headerToUse, filterType});
+    if (_subscribers.push_back(Subscriber{subscriber, headerToUse, filterType})) { return Error::MessageSubscriberCapacityReached; }
+    else { return Error::None; }
 }
 
 void FaPacketDispatcher::removeSubscriber(PacketQueue_Interface* subscriberToRemove) noexcept
 {
-    for (auto itr = _subscribers.rbegin(); itr != _subscribers.rend(); ++itr)
+    for (auto itr = _subscribers.begin(); itr != _subscribers.end();)
     {
         auto& subscriber = *itr;
-        if (subscriberToRemove == subscriber.queueToPush) { _subscribers.erase(itr.base()); }
+        if (subscriberToRemove == subscriber.queueToPush) { itr = _subscribers.erase(itr); }
+        else { ++itr; }
     }
 }
 
 void FaPacketDispatcher::removeSubscriber(PacketQueue_Interface* subscriberToRemove, const EnabledMeasurements& headerToUse) noexcept
 {
-    for (auto itr = _subscribers.rbegin(); itr != _subscribers.rend(); ++itr)
+    for (auto itr = _subscribers.begin(); itr != _subscribers.end();)
     {
         auto& subscriber = *itr;
-        if (subscriberToRemove == subscriber.queueToPush)
-        {
-            if (headerToUse == subscriber.headerFilter) { _subscribers.erase(itr.base()); }
-        }
+        if (subscriberToRemove == subscriber.queueToPush && headerToUse == subscriber.headerFilter) { itr = _subscribers.erase(itr); }
+        else { ++itr; }
     }
 }
 
-bool FaPacketDispatcher::_tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex,
-                                                      const FaPacketProtocol::Metadata& packetDetails) noexcept
+Error FaPacketDispatcher::_tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex,
+                                                       const FaPacketProtocol::Metadata& packetDetails) noexcept
 {
     VN_PROFILER_TIME_CURRENT_SCOPE();
-    if (!anyDataIsEnabled(packetDetails.header.toMeasurementHeader(), _enabledMeasurements)) { return false; }
+    // TODO: Currently we fail to parse if no data is enabled. This is expected but will be fixed in the future
     auto compositeData = FaPacketProtocol::parsePacket(byteBuffer, syncByteIndex, packetDetails, _enabledMeasurements);
-    if (!compositeData.has_value()) { return false; }
+    if (!compositeData.has_value()) { return Error::ParsingFailed; }
 
     // Copy to the output queue
     auto pCompositeData = _compositeDataQueue->put();
-    if (!pCompositeData) { return false; }
+    if (!pCompositeData) { return Error::MeasurementQueueFull; }
     *pCompositeData = compositeData.value();  // Todo 477: INvestigate passing pointer into the parser, rather than returning and copying it. Will that
                                               // be more efficient than calling "reset" and assigning values?
-    return true;
+    return Error::None;
 }
 
-void FaPacketDispatcher::_invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails) noexcept
+Error FaPacketDispatcher::_invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails) noexcept
 {
+    Error error{Error::None};
     VN_PROFILER_TIME_CURRENT_SCOPE();
+    const auto packetHeader = packetDetails.header.toMeasurementHeader();
+    if (!packetHeader.has_value()) { return Error::ParsingFailed; }
     for (auto& subscriber : _subscribers)
     {
         const auto filterHeader = subscriber.headerFilter;
-        const auto packetHeader = packetDetails.header.toMeasurementHeader();
         bool pushToSub;
         switch (subscriber.filterType)
         {
             case (SubscriberFilterType::AnyMatch):
             {
-                pushToSub = anyDataIsEnabled(filterHeader, packetHeader);
+                pushToSub = anyDataIsEnabled(filterHeader, packetHeader.value());
                 break;
             }
             case (SubscriberFilterType::ExactMatch):
             {
-                pushToSub = filterHeader == packetHeader;
+                pushToSub = filterHeader == packetHeader.value();
                 break;
             }
             case (SubscriberFilterType::NotExactMatch):
             {
-                pushToSub = filterHeader != packetHeader;
+                pushToSub = filterHeader != packetHeader.value();
                 break;
             }
             default:
-                VN_ABORT();
+                pushToSub = false;
         }
-        if (pushToSub) { [[maybe_unused]] const bool failed = _tryPushToSubscriber(byteBuffer, syncByteIndex, packetDetails, subscriber); }
+        if (pushToSub)
+        {
+            const Error latestError = _tryPushToSubscriber(byteBuffer, syncByteIndex, packetDetails, subscriber);
+            if (latestError != Error::None) { error = latestError; }
+        }
     }
+    return error;
 }
 
-bool FaPacketDispatcher::_tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails,
-                                              Subscriber& subscriber) noexcept
+Error FaPacketDispatcher::_tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& metadata,
+                                               Subscriber& subscriber) noexcept
 {
     auto putSlot = subscriber.queueToPush->put();
     if (putSlot)
     {
-        putSlot->details.syncByte = PacketDetails::SyncByte::FA;
-        putSlot->details.faMetadata = packetDetails;
-        byteBuffer.peek_unchecked(putSlot->buffer, packetDetails.length, syncByteIndex);
+        if (putSlot->capacity >= metadata.length)
+        {
+            putSlot->details.syncByte = PacketDetails::SyncByte::FA;
+            putSlot->details.faMetadata = metadata;
+            byteBuffer.peek_unchecked(putSlot->buffer, metadata.length, syncByteIndex);
+        }
+        else
+        {
+            putSlot->details = PacketDetails();
+            return Error::PacketQueueOverrun;
+        }
     }
-    else
-    {
-        // Putting failed
-        return true;
-    }
-    return false;
+    else { return Error::PacketQueueFull; }
+    return Error::None;
 }
 
 }  // namespace VN

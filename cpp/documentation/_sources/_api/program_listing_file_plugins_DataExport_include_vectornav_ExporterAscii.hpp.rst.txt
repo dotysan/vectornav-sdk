@@ -21,6 +21,8 @@ Program Listing for File ExporterAscii.hpp
    
    namespace VN
    {
+   namespace DataExport
+   {
    
    class ExporterAscii : public Exporter
    {
@@ -35,10 +37,10 @@ Program Listing for File ExporterAscii.hpp
            OutputFile file;
        };
    
-       ExporterAscii(const Filesystem::FilePath& outputDir, bool enableSystemTimeStamps = false)
-           : Exporter(EXPORTER_PACKET_CAPACITY), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
+       ExporterAscii(const Filesystem::FilePath& outputDir, PacketQueueMode mode = PacketQueueMode::Force, bool enableSystemTimeStamps = false)
+           : Exporter(EXPORTER_PACKET_CAPACITY, mode), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
        {
-           if (!_filePath.empty() && _filePath.to_string().back() != std::filesystem::path::preferred_separator)
+           if (!_filePath.empty() && _filePath.back() != std::filesystem::path::preferred_separator)
            {
                _filePath = _filePath + std::filesystem::path::preferred_separator;
            }
@@ -71,9 +73,15 @@ Program Listing for File ExporterAscii.hpp
    
                ascii.write(reinterpret_cast<const char*>(p->buffer), p->details.asciiMetadata.length);
            }
+           flushAllFiles();
        }
    
    private:
+       void flushAllFiles()
+       {
+           for (auto& asciiInfo : _asciiInfo) { asciiInfo.file.flush(); }
+       }
+   
        Filesystem::FilePath _filePath;
        const bool _enableSystemTimeStamps = false;
    
@@ -96,6 +104,7 @@ Program Listing for File ExporterAscii.hpp
        }
    };
    
+   }  // namespace DataExport
    }  // namespace VN
    
    #endif  // VN_EXPORTERASCII_HPP_

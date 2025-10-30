@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -147,28 +147,25 @@ AsciiMeasurementHeader getMeasHeader(AsciiHeader headerChars)
     return AsciiMeasurementHeader::None;
 }
 
-EnabledMeasurements asciiHeaderToMeasHeader(const AsciiMeasurementHeader header) noexcept
+std::optional<EnabledMeasurements> asciiHeaderToMeasHeader(const AsciiMeasurementHeader header) noexcept
 {
     EnabledMeasurements presentMeasurements = {};
-    auto asciiMeasurementIndices = _getAsciiMeasurementIndices(header).value();
+    if (!asciiIsParsable(header)) { return std::nullopt; }
+    auto asciiMeasurementIndices = (*_getAsciiMeasurementIndices(header));
     for (const auto& currentMeasField : asciiMeasurementIndices)
     {
-        VN_ASSERT((presentMeasurements.size() > static_cast<uint8_t>(currentMeasField.measGroupIndex - 1)));  // Subtructing 1 because of Common group offset
-        presentMeasurements.at(currentMeasField.measGroupIndex - 1) |= 1 << currentMeasField.measTypeIndex;   // Subtructing 1 because of Common group offset
+        uint8_t ind = static_cast<uint8_t>(currentMeasField.measGroupIndex - 1);  // Subtracting 1 because of Common group offset
+        if (ind >= presentMeasurements.size()) { return std::nullopt; }
+        presentMeasurements[ind] |= 1 << currentMeasField.measTypeIndex;
     }
     return presentMeasurements;
 };
 
 bool allDataIsEnabled(const AsciiMeasurementHeader header, const EnabledMeasurements& measurementsToCheck) noexcept
 {
-    bool isEnabled;
-    if (!asciiIsParsable(header)) { isEnabled = false; }
-    else
-    {
-        const EnabledMeasurements measHeader = asciiHeaderToMeasHeader(header);
-        isEnabled = VN::allDataIsEnabled(measHeader, measurementsToCheck);
-    }
-    return (isEnabled);
+    const std::optional<EnabledMeasurements> measHeader = asciiHeaderToMeasHeader(header);
+    if (!measHeader.has_value()) { return false; }
+    else { return VN::allDataIsEnabled(measHeader.value(), measurementsToCheck); }
 }
 
 bool asciiIsMeasurement(const AsciiMeasurementHeader header) noexcept { return _getAsciiMeasurementIndices(header).has_value(); }
@@ -180,14 +177,9 @@ bool asciiIsParsable(const AsciiPacketProtocol::AsciiMeasurementHeader header) n
 
 bool anyDataIsEnabled(const AsciiMeasurementHeader header, const EnabledMeasurements& measurementsToCheck) noexcept
 {
-    bool isEnabled;
-    if (!AsciiPacketProtocol::asciiIsParsable(header)) { isEnabled = false; }
-    else
-    {
-        const EnabledMeasurements measHeader = asciiHeaderToMeasHeader(header);
-        isEnabled = VN::anyDataIsEnabled(measHeader, measurementsToCheck);
-    }
-    return (isEnabled);
+    const std::optional<EnabledMeasurements> measHeader = asciiHeaderToMeasHeader(header);
+    if (!measHeader.has_value()) { return false; }
+    else { return VN::anyDataIsEnabled(measHeader.value(), measurementsToCheck); }
 }
 
 FindPacketReturn findPacket(const ByteBuffer& byteBuffer) noexcept
@@ -251,7 +243,7 @@ FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteI
             if (fromSyncByteIndex > Config::PacketFinders::asciiHeaderMaxLength) { return {PacketDispatcher::FindPacketRetVal::Validity::Invalid, Metadata{}}; }
             details.header.push_back(tmpByte);
         }
-        _calculateCheckSum(&checksum8, tmpByte);
+        _calculateChecksum(&checksum8, tmpByte);
         _calculateCRC(&crc16, tmpByte);
     }
 
@@ -319,9 +311,10 @@ std::optional<CompositeData> parsePacket(const ByteBuffer& buffer, const size_t 
     CompositeData compositeData{metadata.header};
     AsciiPacketExtractor extractor(buffer, metadata, syncByteIndex);
 
-    auto asciiParsingData = _getAsciiMeasurementIndices(measEnum).value();
+    auto asciiParsingData = _getAsciiMeasurementIndices(measEnum);
+    if (!asciiParsingData.has_value()) { return std::nullopt; }
 
-    for (const auto& measIndex : asciiParsingData)
+    for (const auto& measIndex : asciiParsingData.value())
     {
         if (compositeData.copyFromBuffer(extractor, measIndex.measGroupIndex, measIndex.measTypeIndex)) { return std::nullopt; }
     }
@@ -331,13 +324,13 @@ std::optional<CompositeData> parsePacket(const ByteBuffer& buffer, const size_t 
     {
         auto appendParam = extractor.nextAsciiParameter();
         if (!appendParam.has_value()) { break; }
-        if (appendParam.value().at(0) == 'S')
+        if (appendParam.value()[0] == 'S')
         {
             compositeData.asciiAppendStatus = StringUtils::fromStringHex<uint16_t>(appendParam.value().begin() + 1, appendParam.value().end());
             if (!compositeData.asciiAppendStatus.has_value()) { return std::nullopt; }
             extractor.discard(1);
         }
-        else if (appendParam.value().at(0) == 'T')
+        else if (appendParam.value()[0] == 'T')
         {
             compositeData.asciiAppendCount = StringUtils::fromString<uint32_t>(appendParam.value().begin() + 1, appendParam.value().end());
             if (!compositeData.asciiAppendCount.has_value()) { return std::nullopt; }

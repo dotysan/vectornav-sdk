@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,7 +34,7 @@ namespace VN
 namespace RegisterScan
 {
 
-VN::Error augmentMessage(AsciiMessage& msgOut, const AsciiMessage& msg)
+Error augmentMessage(AsciiMessage& msgOut, const AsciiMessage& msg)
 {
     const auto first_comma = msg.find(',');
     const auto second_comma = msg.find(',', first_comma + 1);
@@ -44,25 +44,25 @@ VN::Error augmentMessage(AsciiMessage& msgOut, const AsciiMessage& msg)
     if (msgOut.empty())
     {
         msgOut = msgParams;
-        return VN::Error::None;
+        return Error::None;
     }
 
     msgOut.push_back(';');
     for (uint16_t i{0}; i != msgParams.length(); ++i) { msgOut.push_back(msgParams[i]); }
 
-    return VN::Error::None;
+    return Error::None;
 }
 
-VN::Error XmlConfigWriter::write(const AsciiMessage& msg)
+Error XmlConfigWriter::write(const AsciiMessage& msg)
 {
-    VN::Error error{VN::Error::None};
+    Error error{Error::None};
     if (!_initialized)
     {
         error = _initialize();
-        if (error != VN::Error::None) { return error; }
+        if (error != Error::None) { return error; }
     }
 
-    std::cout << msg.c_str() << '\n';
+    VN_DEBUG_0(msg.c_str() << std::endl);
     // start appending where needed
     const auto first_comma = msg.find(',');
     const auto second_comma = msg.find(',', first_comma + 1);
@@ -71,7 +71,7 @@ VN::Error XmlConfigWriter::write(const AsciiMessage& msg)
     const auto regId = StringUtils::fromString<uint8_t>(&msg[first_comma + 1], &msg[second_comma]);
     if (!regId.has_value())
     {
-        error = VN::Error::FileWriteFailed;
+        error = Error::FileWriteFailed;
         return error;
     }
 
@@ -103,9 +103,9 @@ VN::Error XmlConfigWriter::write(const AsciiMessage& msg)
     return error;
 }
 
-VN::Error XmlConfigWriter::_initialize()
+Error XmlConfigWriter::_initialize()
 {
-    VN::Error error{VN::Error::None};
+    Error error{Error::None};
     auto decl = _doc.prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
@@ -118,13 +118,13 @@ VN::Error XmlConfigWriter::_initialize()
     Registers::System::HwVer hwVerReg;
 
     error = sensor.readRegister(&modelReg);
-    if (error != VN::Error::None) { return error; }
+    if (error != Error::None) { return error; }
     error = sensor.readRegister(&serNumReg);
-    if (error != VN::Error::None) { return error; }
+    if (error != Error::None) { return error; }
     error = sensor.readRegister(&fwVerReg);
-    if (error != VN::Error::None) { return error; }
+    if (error != Error::None) { return error; }
     error = sensor.readRegister(&hwVerReg);
-    if (error != VN::Error::None) { return error; }
+    if (error != Error::None) { return error; }
 
     _root = _doc.append_child("VectorNav_Sensor");
     _root.append_child("Model").text().set(modelReg.model.c_str());
@@ -152,7 +152,7 @@ void XmlConfigWriter::finalize()
     _doc.save_file(_path.c_str());
 }
 
-VN::Error XmlConfigWriter::_write(const AsciiMessage& msg, const uint16_t regId)
+Error XmlConfigWriter::_write(const AsciiMessage& msg, const uint16_t regId)
 {
     // check if we have a name
     auto child = _root.append_child("Register");
@@ -166,7 +166,7 @@ VN::Error XmlConfigWriter::_write(const AsciiMessage& msg, const uint16_t regId)
     std::snprintf(buffer, sizeof(buffer), "%.*s", static_cast<int>(msg.length()), msg.data());
     child.append_child("Values").text().set(buffer);
 
-    return VN::Error::None;
+    return Error::None;
 }
 
 }  // namespace RegisterScan

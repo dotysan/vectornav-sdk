@@ -48,6 +48,8 @@ Included By
 
 - :ref:`file_plugins_Math_vectornav_LinearLeastSquares.hpp`
 
+- :ref:`file_plugins_Math_vectornav_SampleStats.hpp`
+
 
 
 
@@ -88,11 +90,11 @@ Functions
 
 - :ref:`exhale_function__linear_algebra_8hpp_1a77a6599361b4c458a35b0da95ce21cde`
 
-- :ref:`exhale_function__linear_algebra_8hpp_1a32b276c7010f041fc284e2fa25b06196`
+- :ref:`exhale_function__linear_algebra_8hpp_1a6c8c48b16cc27eb05c7803f7076be29a`
 
 - :ref:`exhale_function__linear_algebra_8hpp_1a9a44ff62da9edc7a325064a47e34109f`
 
-- :ref:`exhale_function__linear_algebra_8hpp_1a3c7bdae233dcc8ca4bb56a4b1117d476`
+- :ref:`exhale_function__linear_algebra_8hpp_1a5ec78d57ceddbf6d252b7945ad526bd0`
 
 - :ref:`exhale_function__linear_algebra_8hpp_1abddc19108eccc9e32326da922bd3de71`
 

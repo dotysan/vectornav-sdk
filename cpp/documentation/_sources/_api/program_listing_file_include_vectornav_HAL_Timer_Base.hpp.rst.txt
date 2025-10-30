@@ -25,6 +25,7 @@ Program Listing for File Timer_Base.hpp
        virtual void setTimerLength(Microseconds timerLength) noexcept = 0;
        virtual void start() noexcept = 0;
        virtual bool hasTimedOut() const noexcept = 0;
+       virtual Nanoseconds timeElapsed() const noexcept = 0;
    };
    
    }  // namespace VN

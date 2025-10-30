@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,6 +34,11 @@ namespace VN
 namespace Math
 {
 
+/**
+ * @brief Normalizes the quaternion to unit length and enforces a positive scalar component.
+ * @param quat Original quaternion.
+ * @return Normalized quaternion. Returns nullopt if norm of original quaternion below epsilon.
+ */
 inline std::optional<Quat> normalizeQuat(const Quat& quat) noexcept
 {
     float normQ = norm(*reinterpret_cast<const Vec4f*>(&quat));
@@ -43,6 +48,11 @@ inline std::optional<Quat> normalizeQuat(const Quat& quat) noexcept
     return std::make_optional<Quat>(Quat{quat.vector * scale, quat.scalar * scale});
 }
 
+/**
+ * @brief Converts yaw-pitch-roll to quaternion.
+ * @param ypr Yaw-pitch-roll in degrees.
+ * @return Equivalent quaternion.
+ */
 inline Quat ypr2quat(const Ypr& ypr) noexcept
 {
     Ypr yprR = deg2rad(ypr);
@@ -57,6 +67,11 @@ inline Quat ypr2quat(const Ypr& ypr) noexcept
     return Quat({c1 * c2 * s3 - s1 * s2 * c3, c1 * s2 * c3 + s1 * c2 * s3, s1 * c2 * c3 - c1 * s2 * s3}, c1 * c2 * c3 + s1 * s2 * s3);
 }
 
+/**
+ * @brief Converts yaw-pitch-roll to direction cosine matrix.
+ * @param ypr Yaw-pitch-roll in degrees.
+ * @return Equivalent DCM.
+ */
 inline Mat3f ypr2dcm(const Ypr& ypr) noexcept
 {
     Ypr yprR = deg2rad(ypr);
@@ -76,6 +91,11 @@ inline Mat3f ypr2dcm(const Ypr& ypr) noexcept
     // clang-format on
 }
 
+/**
+ * @brief Converts quaternion to direction cosine matrix.
+ * @param quat Quaternion.
+ * @return Equivalent DCM.
+ */
 inline Mat3f quat2dcm(const Quat& quat) noexcept
 {
     float q1 = quat.vector[0];
@@ -91,6 +111,11 @@ inline Mat3f quat2dcm(const Quat& quat) noexcept
     // clang-format on
 }
 
+/**
+ * @brief Converts direction cosine matrix to yaw-pitch-roll. If pitch=+/-90deg, sets roll to zero.
+ * @param dcm Direction cosine matrix.
+ * @return Equivalent yaw-pitch-roll in degrees.
+ */
 inline Ypr dcm2ypr(const Mat3f& dcm) noexcept
 {
     Ypr ypr;
@@ -111,8 +136,18 @@ inline Ypr dcm2ypr(const Mat3f& dcm) noexcept
     return ypr;
 }
 
+/**
+ * @brief Converts quaternion to yaw-pitch-roll.
+ * @param quat Quaternion.
+ * @return Equivalent yaw-pitch-roll in degrees.
+ */
 inline Ypr quat2ypr(const Quat& quat) noexcept { return dcm2ypr(quat2dcm(quat)); }
 
+/**
+ * @brief Converts direction cosine matrix to quaternion.
+ * @param dcm Direction cosine matrix.
+ * @return Equivalent quaternion.
+ */
 inline Quat dcm2quat(const Mat3f& dcm) noexcept
 {
     float tr = dcm(0, 0) + dcm(1, 1) + dcm(2, 2);
@@ -142,9 +177,17 @@ inline Quat dcm2quat(const Mat3f& dcm) noexcept
             break;
     }
 
-    return normalizeQuat(q).value();  // valid DCM guarantees valid quaternion
+    auto out = normalizeQuat(q);
+    VN_ASSERT(out.has_value());  // valid DCM guarantees valid quaternion
+    return out.value();
 }
 
+/**
+ * @brief Combines two quaternions as sequential rotations into a composite rotation quaternion.
+ * @param q0 First rotation quaternion.
+ * @param q1 Second rotation quaternion.
+ * @return Combined quaternion.
+ */
 inline Quat multiplyQuat(const Quat& q0, const Quat& q1) noexcept
 {
     return Quat{
@@ -157,12 +200,23 @@ inline Quat multiplyQuat(const Quat& q0, const Quat& q1) noexcept
     };
 }
 
-inline Quat inverseQuat(const Quat& q) noexcept { return Quat{{q.vector * -1.0f}, q.scalar}; }
+/**
+ * @brief Reverses the rotation of the quaternion.
+ * @param quat Quaternion.
+ * @return Inverted quaternion.
+ */
+inline Quat inverseQuat(const Quat& quat) noexcept { return Quat{{quat.vector * -1.0f}, quat.scalar}; }
 
+/**
+ * @brief Calculates the propagated quaternion given an initial orientation and a delta-theta.
+ * @param q0 Quaternion representing initial orientation.
+ * @param dTheta Delta-theta (eg. coning integral) in radians.
+ * @return Propagated quaternion.
+ */
 inline Quat propagateQuat(Quat q0, Vec3f dTheta) noexcept
 {
     const float normdT = norm(dTheta);
-    const float phi = 0.5 * normdT;
+    const float phi = 0.5f * normdT;
     const float cosPhi = std::cos(phi);
 
     Vec3f psi = dTheta;
@@ -184,6 +238,13 @@ inline Quat propagateQuat(Quat q0, Vec3f dTheta) noexcept
     return normalizeQuat(q).value();  // method cannot produce invalid quaternion
 }
 
+/**
+ * @brief Calculates a tilt-corrected yaw (heading) given magnetic measurements, pitch & roll and (optional) magnetic declination.
+ * @param magBody Magnetometer measurements in body-frame.
+ * @param pitchAndRoll Pitch and roll when magnetometer measurement was taken (deg).
+ * @param declination Magnetic declination to correct from magnetic north to true north (deg). Defaults to 0.
+ * @return Yaw (heading) in degrees.
+ */
 inline float mag2yaw(const Vec3f& magBody, const Vec2f& pitchAndRoll, const float& declination = 0) noexcept
 {
     float pitch = deg2rad(pitchAndRoll[0]);
@@ -194,6 +255,11 @@ inline float mag2yaw(const Vec3f& magBody, const Vec2f& pitchAndRoll, const floa
     return yaw;
 }
 
+/**
+ * @brief Calculates pitch and roll given an accelerometer measurement. Assumes accelerometer is measuring only gravity (static).
+ * @param accelBody Accelerometer measurements in body-frame.
+ * @return Pitch and roll in degrees. Returns nullopt if norm of accelerometer below epsilon.
+ */
 inline std::optional<Vec2f> accel2pitchroll(const Vec3f& accelBody) noexcept
 {
     float normacc = norm(accelBody);
@@ -204,6 +270,14 @@ inline std::optional<Vec2f> accel2pitchroll(const Vec3f& accelBody) noexcept
     return std::make_optional<Vec2f>(rad2deg(Vec2f{pitch, roll}));
 }
 
+/**
+ * @brief Calculates yaw-pitch-roll given a magnetometer and accelerometer measurement, and optional magnetic declination. Assumes accelerometer is measuring
+ * only gravity (static).
+ * @param accelBody Accelerometer measurements in body-frame.
+ * @param magBody Magnetometer measurements in body-frame.
+ * @param declination Magnetic declination to correct from magnetic north to true north (deg). Defaults to 0.
+ * @return Yaw-pitch-roll in degrees. Returns nullopt if norm of accelerometer below epsilon.
+ */
 inline std::optional<Ypr> imu2ypr(const Vec3f& magBody, const Vec3f& accelBody, const float& declination = 0) noexcept
 {
     std::optional<Vec2f> pitchAndRoll = accel2pitchroll(accelBody);
@@ -212,20 +286,40 @@ inline std::optional<Ypr> imu2ypr(const Vec3f& magBody, const Vec3f& accelBody, 
     return Ypr(yaw, (*pitchAndRoll)(0), (*pitchAndRoll)(1));
 }
 
+/**
+ * @brief Converts classical Rodrigues parameters to quaternion.
+ * @param crp Classical Rodrigues parameters.
+ * @return Equivalent quaternion.
+ */
 inline Quat crp2quat(const Vec3f& crp) noexcept
 {
     float qs = 1.0f / sqrtf(1.0f + dot(crp, crp));
     return {Vec3f{crp(0) * qs, crp(1) * qs, crp(2) * qs}, qs};
 }
 
+/**
+ * @brief Converts quaternion to classical Rodrigues parameters.
+ * @param quat Quaternion.
+ * @return Equivalent classical Rodrigues parameters. Returns nullopt if scalar component of quaternion is less than epsilon.
+ */
 inline std::optional<Vec3f> quat2crp(const Quat& quat) noexcept
 {
     if (abs(quat.scalar) > std::numeric_limits<float>::epsilon()) { return std::make_optional(Vec3f{quat.vector / quat.scalar}); }
     else { return std::nullopt; }
 }
 
+/**
+ * @brief Converts classical Rodrigues parameters to direction cosine matrix.
+ * @param crp Classical Rodrigues parameters.
+ * @return Equivalent direction cosine matrix.
+ */
 inline Mat3f crp2dcm(const Vec3f& crp) noexcept { return quat2dcm(crp2quat(crp)); }
 
+/**
+ * @brief Converts direction cosine matrix to classical Rodrigues parameters.
+ * @param dcm Direction cosine matrix.
+ * @return Equivalent classical Rodrigues parameters. Returns nullopt if scalar component of equivalent quaternion is less than epsilon.
+ */
 inline std::optional<Vec3f> dcm2crp(const Mat3f& dcm) noexcept { return quat2crp(dcm2quat(dcm)); }
 
 }  // namespace Math

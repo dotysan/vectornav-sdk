@@ -22,6 +22,8 @@ Program Listing for File ExporterCsvUtils.hpp
    
    namespace VN
    {
+   namespace DataExport
+   {
    
    enum CsvType : uint8_t
    {
@@ -38,7 +40,7 @@ Program Listing for File ExporterCsvUtils.hpp
        NON,
    };
    
-   using VN::CsvType;
+   using VN::DataExport::CsvType;
    
    struct CsvTypeInfo
    {
@@ -74,6 +76,7 @@ Program Listing for File ExporterCsvUtils.hpp
    
    const char* getMeasurementName(const size_t binaryGroup, const size_t binaryField);
    
+   }  // namespace DataExport
    }  // namespace VN
    
    #endif  // VN_EXPORTERCSVUTILS_HPP_

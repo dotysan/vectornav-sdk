@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,28 +36,55 @@ namespace VN
 namespace Math
 {
 
+/**
+ * @brief Class for solving Linear Least Squares problems.
+ * This class provides an implementation of the Linear Least Squares (LLS) method.
+ * It solves the equation `Ax = b` using the normal equation `HTH * x = HTy * b`,
+ * where `H` is a matrix and `b` is a vector, by performing eigen decomposition
+ */
 class LinearLeastSquares
 {
 public:
+    /**
+     * @brief Enum for error codes related to Linear Least Squares.
+     */
     enum class LlsError
     {
-        None = 0,
-        InsufficientData = 9,
-        FailedEigenDecomposition = 11,
+        None = 0,                      ///< No error occurred.
+        InsufficientData = 9,          ///< Not enough data was provided.
+        FailedEigenDecomposition = 11  ///< Eigen decomposition failed.
     };
+
+    /**
+     * @brief Structure holding the solution of a Linear Least Squares problem.
+     * @tparam n The size of the matrix (n x n) and vectors (n x 1).
+     * @tparam T The type of elements in the matrix and vector.
+     */
     template <uint16_t n, typename T>
     struct LeastSquaresSolution
     {
-        Matrix<n, 1, T> solution;
-        Matrix<n, n, T> eigenVectors;
-        Matrix<n, 1, T> eigenValuesReal;
-        Matrix<n, 1, T> eigenValuesImag;
-        T FOM;
-        LlsError error;  // Replace with error struct
+        Matrix<n, 1, T> solution;         ///< Solution vector `x` for the system `Ax = b`.
+        Matrix<n, n, T> eigenVectors;     ///< Matrix of eigenvectors from the decomposition.
+        Matrix<n, 1, T> eigenValuesReal;  ///< Real parts of the eigenvalues.
+        Matrix<n, 1, T> eigenValuesImag;  ///< Imaginary parts of the eigenvalues.
+        T FOM;                            ///< Figure of merit.
+        LlsError error;                   ///< Error code indicating the status of the solution.
     };
 
+    /**
+     * @brief Default constructor.
+     */
     LinearLeastSquares() = default;
 
+    /**
+     * @brief Solves the Linear Least Squares problem using eigen decomposition.
+     * @tparam n The size of the matrix (n x n) and vector (n x 1).
+     * @tparam T The type of elements in the matrix and vector.
+     * @param HTH The matrix `HTH`.
+     * @param HTy The matrix `HTy`.
+     * @param condition_threshold The threshold below which the smallest eigenvalue will be treated as problematic.
+     * @return A structure containing the solution and additional information.
+     */
     template <uint16_t n, typename T>
     LeastSquaresSolution<n, T> solve(Matrix<n, n, T>& HTH, Matrix<n, 1, T>& HTy, T condition_threshold) noexcept
     {
@@ -95,6 +122,15 @@ public:
     }
 };
 
+/**
+ * @brief Solves the Linear Least Squares problem using LU decomposition.
+ * @tparam m The number of rows in the matrix and size of vector.
+ * @tparam n The number of columns in the matrix.
+ * @tparam T The the type of elements in the matrix and vector.
+ * @param A The matrix `A` in the equation `Ax = y`.
+ * @param y The vector `y` in the equation `Ax = y`.
+ * @return The solution vector `x`.
+ */
 template <uint16_t m, uint16_t n, typename T>
 Matrix<n, 1, T> solveLinearLeastSquares(Matrix<m, n, T> A, const Matrix<m, 1, T>& y) noexcept
 {

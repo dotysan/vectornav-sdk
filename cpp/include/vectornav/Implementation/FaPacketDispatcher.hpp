@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,14 +38,16 @@ namespace VN
 class FaPacketDispatcher : public PacketDispatcher
 {
 public:
-    FaPacketDispatcher(MeasurementQueue* measurementQueue, EnabledMeasurements enabledMeasurements)
-        : PacketDispatcher({0xFA}), _compositeDataQueue(measurementQueue), _enabledMeasurements(enabledMeasurements)
+    FaPacketDispatcher(MeasurementQueue* measurementQueue, EnabledMeasurements enabledMeasurements, bool parseToCD = true)
+        : PacketDispatcher({0xFA}), _compositeDataQueue(measurementQueue), _enabledMeasurements(enabledMeasurements), _parseToCD{parseToCD}
     {
     }
 
     PacketDispatcher::FindPacketRetVal findPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
 
-    void dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
+    FaPacketProtocol::Metadata getLatestPacketMetadata() const noexcept { return _latestPacketMetadata; }
+
+    Error dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
 
     enum class SubscriberFilterType
     {
@@ -54,7 +56,7 @@ public:
         NotExactMatch
     };
 
-    bool addSubscriber(PacketQueue_Interface* subscriber, EnabledMeasurements headerToUse, SubscriberFilterType filterType) noexcept;
+    Error addSubscriber(PacketQueue_Interface* subscriber, EnabledMeasurements headerToUse, SubscriberFilterType filterType) noexcept;
 
     void removeSubscriber(PacketQueue_Interface* subscriberToRemove) noexcept;
     void removeSubscriber(PacketQueue_Interface* subscriberToRemove, const EnabledMeasurements& headerToUse) noexcept;
@@ -74,11 +76,12 @@ protected:
     MeasurementQueue* _compositeDataQueue;
     EnabledMeasurements _enabledMeasurements;
     FaPacketProtocol::Metadata _latestPacketMetadata;
+    bool _parseToCD;
 
-    bool _tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails) noexcept;
-    void _invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails) noexcept;
-    bool _tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails,
-                              Subscriber& subscriber) noexcept;
+    Error _tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails) noexcept;
+    Error _invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& packetDetails) noexcept;
+    Error _tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const FaPacketProtocol::Metadata& metadata,
+                               Subscriber& subscriber) noexcept;
 };
 
 }  // namespace VN

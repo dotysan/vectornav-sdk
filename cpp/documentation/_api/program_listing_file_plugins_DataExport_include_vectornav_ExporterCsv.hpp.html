@@ -83,6 +83,8 @@
 
 <span class="k">namespace</span><span class="w"> </span><span class="nn">VN</span>
 <span class="p">{</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">DataExport</span>
+<span class="p">{</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ExporterCsv</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Exporter</span>
 <span class="p">{</span>
@@ -105,8 +107,8 @@
 <span class="w">        </span><span class="n">OutputFile</span><span class="w"> </span><span class="n">file</span><span class="p">;</span>
 <span class="w">    </span><span class="p">};</span>
 
-<span class="w">    </span><span class="n">ExporterCsv</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Filesystem</span><span class="o">::</span><span class="n">FilePath</span><span class="o">&amp;</span><span class="w"> </span><span class="n">outputDir</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">enableSystemTimeStamps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span>
-<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">Exporter</span><span class="p">(</span><span class="n">EXPORTER_PACKET_CAPACITY</span><span class="p">),</span><span class="w"> </span><span class="n">_filePath</span><span class="p">(</span><span class="n">outputDir</span><span class="p">),</span><span class="w"> </span><span class="n">_enableSystemTimeStamps</span><span class="p">(</span><span class="n">enableSystemTimeStamps</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ExporterCsv</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Filesystem</span><span class="o">::</span><span class="n">FilePath</span><span class="o">&amp;</span><span class="w"> </span><span class="n">outputDir</span><span class="p">,</span><span class="w"> </span><span class="n">PacketQueueMode</span><span class="w"> </span><span class="n">mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PacketQueueMode</span><span class="o">::</span><span class="n">Force</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">enableSystemTimeStamps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">Exporter</span><span class="p">(</span><span class="n">EXPORTER_PACKET_CAPACITY</span><span class="p">,</span><span class="w"> </span><span class="n">mode</span><span class="p">),</span><span class="w"> </span><span class="n">_filePath</span><span class="p">(</span><span class="n">outputDir</span><span class="p">),</span><span class="w"> </span><span class="n">_enableSystemTimeStamps</span><span class="p">(</span><span class="n">enableSystemTimeStamps</span><span class="p">)</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">_filePath</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">_filePath</span><span class="p">.</span><span class="n">back</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">filesystem</span><span class="o">::</span><span class="n">path</span><span class="o">::</span><span class="n">preferred_separator</span><span class="p">)</span>
 <span class="w">        </span><span class="p">{</span>
@@ -221,6 +223,7 @@
 <span class="w">            </span><span class="p">}</span>
 <span class="w">            </span><span class="n">csv</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
 <span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">flushAllFiles</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="k">private</span><span class="o">:</span>
@@ -372,6 +375,12 @@
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">_dynamicCsvInfo</span><span class="p">.</span><span class="n">back</span><span class="p">().</span><span class="n">file</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">flushAllFiles</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">csvInfo</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_csvInfo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">csvInfo</span><span class="p">.</span><span class="n">file</span><span class="p">.</span><span class="n">flush</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dynamicCsvInfo</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">_dynamicCsvInfo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">dynamicCsvInfo</span><span class="p">.</span><span class="n">file</span><span class="p">.</span><span class="n">flush</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
 <span class="k">private</span><span class="o">:</span>
 <span class="w">    </span><span class="n">Filesystem</span><span class="o">::</span><span class="n">FilePath</span><span class="w"> </span><span class="n">_filePath</span><span class="p">;</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">_enableSystemTimeStamps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
@@ -381,6 +390,7 @@
 <span class="w">    </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DynamicCsvInfo</span><span class="p">,</span><span class="w"> </span><span class="n">MAX_NUM_FILES</span><span class="o">&gt;</span><span class="w"> </span><span class="n">_dynamicCsvInfo</span><span class="p">;</span><span class="w">  </span><span class="c1">// One entry per file created, which is per unique message type</span>
 <span class="p">};</span>
 
+<span class="p">}</span><span class="w">  </span><span class="c1">// namespace DataExport</span>
 <span class="p">}</span><span class="w">  </span><span class="c1">// namespace VN</span>
 
 <span class="cp">#endif  </span><span class="c1">// VN_EXPORTERCSV_HPP_</span>

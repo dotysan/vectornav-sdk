@@ -32,12 +32,6 @@ Included By
 -----------
 
 
-- :ref:`file_include_vectornav_HAL_Mutex_CLI.hpp`
-
-- :ref:`file_include_vectornav_HAL_Mutex_Disabled.hpp`
-
-- :ref:`file_include_vectornav_HAL_Mutex_Mbed.hpp`
-
 - :ref:`file_include_vectornav_HAL_Mutex_PC.hpp`
 
 

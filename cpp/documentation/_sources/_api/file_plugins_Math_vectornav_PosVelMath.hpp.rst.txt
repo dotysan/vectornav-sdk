@@ -56,17 +56,17 @@ Functions
 ---------
 
 
-- :ref:`exhale_function__pos_vel_math_8hpp_1a39e7157ebded42c11c87842e684df379`
-
 - :ref:`exhale_function__pos_vel_math_8hpp_1aaa1925e5de13f93f435ea6f172de34db`
+
+- :ref:`exhale_function__pos_vel_math_8hpp_1a39e7157ebded42c11c87842e684df379`
 
 - :ref:`exhale_function__pos_vel_math_8hpp_1a3dba5839be7d6612b3fe7eb4eb513c08`
 
 - :ref:`exhale_function__pos_vel_math_8hpp_1a626372a49def308682e9bb04ec316610`
 
-- :ref:`exhale_function__pos_vel_math_8hpp_1a184f285cf31460d53323ad1aa6bbefe7`
-
 - :ref:`exhale_function__pos_vel_math_8hpp_1a821bfc2c77addef981388cccab2d3920`
+
+- :ref:`exhale_function__pos_vel_math_8hpp_1a184f285cf31460d53323ad1aa6bbefe7`
 
 
 Variables

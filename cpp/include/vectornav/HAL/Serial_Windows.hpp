@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -61,15 +61,14 @@ private:
     // Port access
     // ***********
     HANDLE _serialPortHandle = NULL;
-    bool _reconfigurePort();
+    Errored _reconfigurePort();
 
     // Mutex _mutex;
 
     // ***************
     // Port read/write
     // ***************
-    bool _flush();
-    std::array<uint8_t, _numBytesToReadPerGetData> _inputBuffer{};
+    Errored _flush();
 };
 
 // ######################
@@ -93,11 +92,12 @@ inline Error Serial::open(const PortName& portName, const uint32_t baudRate) noe
         switch (create_file_err)
         {
             case ERROR_FILE_NOT_FOUND:
+            case ERROR_PATH_NOT_FOUND:
                 return Error::InvalidPortName;
             case ERROR_ACCESS_DENIED:
                 return Error::AccessDenied;
             default:
-                VN_DEBUG_1("Error getting the serial port state." + std::to_string(create_file_err));
+                VN_DEBUG_1("Error getting the serial port state: " + std::to_string(create_file_err));
                 return Error::UnexpectedSerialError;
         }
     }
@@ -136,15 +136,23 @@ inline Error Serial::getData() noexcept
     DWORD errors;
     ClearCommError(_serialPortHandle, &errors, &stats);
 
-    if (stats.cbInQue == 0) { return Error::None; }
-
-    if (!ReadFile(_serialPortHandle, _inputBuffer.data(), std::min(stats.cbInQue, static_cast<DWORD>(_inputBuffer.size())), &bytes_read, NULL))
+    auto bytesRemaining = stats.cbInQue;
+    size_t linearBytes = _byteBuffer.numLinearBytesToPut();
+    while (bytesRemaining > 0 && linearBytes > 0)
     {
-        VN_DEBUG_1("Error while reading from the serial port: " + std::to_string(GetLastError()));
-        return Error::SerialReadFailed;
+        if (!ReadFile(_serialPortHandle, const_cast<uint8_t*>(_byteBuffer.tail()), std::min(bytesRemaining, static_cast<DWORD>(linearBytes)), &bytes_read,
+                      NULL))
+        {
+            VN_DEBUG_1("Error while reading from the serial port: " + std::to_string(GetLastError()));
+            return Error::SerialReadFailed;
+        }
+        _byteBuffer.put(static_cast<size_t>(bytes_read));
+        linearBytes = _byteBuffer.numLinearBytesToPut();
+        bytesRemaining -= bytes_read;
     }
 
-    if (_byteBuffer.put(_inputBuffer.data(), static_cast<size_t>(bytes_read))) { return Error::PrimaryBufferFull; }
+    if (bytesRemaining > 0) { return Error::PrimaryBufferFull; }
+
     return Error::None;
 }
 
@@ -160,9 +168,9 @@ inline Error Serial::send(const char* buffer, const size_t len) noexcept
     return Error::None;
 }
 
-inline bool Serial::_flush() { return !PurgeComm(_serialPortHandle, PURGE_TXCLEAR | PURGE_RXCLEAR); }
+inline Errored Serial::_flush() { return !PurgeComm(_serialPortHandle, PURGE_TXCLEAR | PURGE_RXCLEAR); }
 
-inline bool Serial::_reconfigurePort()
+inline Errored Serial::_reconfigurePort()
 {
     DCB dcbSerialParams{};
 

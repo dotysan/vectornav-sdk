@@ -9,12 +9,9 @@ Class Serial_Base
 Inheritance Relationships
 -------------------------
 
-Derived Types
-*************
+Derived Type
+************
 
-- ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
-- ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
-- ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
 - ``public VN::Serial`` (:ref:`exhale_class_class_v_n_1_1_serial`)
 
 

@@ -86,10 +86,3 @@ Classes
 
 - :ref:`exhale_struct_struct_v_n_s_d_k_1_1_ypr`
 
-
-Variables
----------
-
-
-- :ref:`exhale_variable__c_l_i___measurement_datatypes_8hpp_1a487742b55b6d1e4a33cb90ce2ac0e05a`
-

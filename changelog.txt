@@ -1,3 +1,123 @@
+0.99.0
+- Global  : Switched SkippedByte subscription from a ByteBuffer to a PacketQueue
+             - Removed registerSkippedByteBuffer and deregisterSkippedByteBuffer methods from Sensor
+             - Overloaded subscribeToMessage to allow passing only a SyncByte to subscribe to messages 
+               (including SyncByte::None for SkippedBytes)
+             - Created a new defaultMetadata option for PacketDetails for constructing SkippedByte packets
+             - Updated DataExport plugin to use new ExporterSkippedByte class based on queue
+ - Global  : Made ConfigurationRegister fields std::optional, requiring all to be set to write to register
+             - toWriteCommand() method to returns optional/nullable to allow for failure to generate string
+             - C++ bitfields must be first instantiated with emplace() before setting the bitfields
+ - Global  : Renamed Sensor::asynchronousErrorQueueSize and Sensor::getAsynchronousError to
+             asyncErrorQueueSize and getNextAsyncError for consistency
+ - Global  : Added ability for Sensor to 'connect' to a file instead of a com port for file processing
+             - Introduced a new MeasQueueMode to Sensor constructor to allow the CompositeData measurement
+               queue to be disabled or set to Force/Try/Retry push modes (default to Force, backwards 
+               compatible)
+             - Updated ByteBuffer for improved thread-safety and added new methods to allow inputting to 
+               ByteBuffer from a file.  Renamed numLinearBytes() to numLinearBytesToPeek().
+             - Updated DirectAccessQueue for Force/Try/Retry put modes
+             - Updated DirectAccessQueue to only erase a single entry when Force putting instead of 
+               erasing all
+             - Changed InputFile.read() to return number of bytes read instead of Errored
+ - Global  : New Error::AlreadyConnected returned if connect() or autoconnect() called when sensor already
+             connected to either file or com port (previously succeeded at second connection)
+ - Global  : Added ability to Subscribe to raw FbPackets (formerly SplitPackets)
+ - Cpp     : Added vectornav sublayer for Logger plugin
+ - Cpp     : Implemented packet length check when pushing to a PacketQueue to fix buffer overflow bug.  If a 
+             packet exceeds PacketQueue message capacity, then a Packet of SyncByte::None and length=0 put on
+             queue, and Error::PacketQueueOverrun sent to asyncErrorQueue.
+ - Cpp     : Sensor function subscribeToMessage() for ASCII and FA packets now requires a filter argument 
+             (instead of optional).  Can use new overload requiring only SyncByte to achieve same result.
+ - Cpp     : Moved receivedByteBuffer loads from PacketSynchronizer to Sensor.  Eliminated 
+             skippedReceivedByteBufferMaxPutLength parameter and associated temporary buffer.
+ - Cpp     : Updated Windows and Linux Serial drivers to eliminate buffer overflow bug.  Removed intermediate
+             buffers from each, eliminating numBytesToReadPerGetData parameter in Config.hpp.
+ - Cpp     : Added maxPacketLength parameter to Config.hpp as a sanity check in PacketSynchronizer across all 
+             packet types  
+ - Cpp     : Added Sensor mutex for subscribing or unsubscribing from messages
+ - Cpp     : Introduced VN_DEBUG_0 to replace cout/cerr in plugins. Messages can be disabled by setting
+             VN_DEBUG_LEVEL to -1 in Debug.hpp
+ - Cpp     : Removed most VN_ABORT() and several VN_ASSERT(), returning error codes instead
+ - Cpp     : Scrubbed code of references to STL that could throw exceptions or dynamically allocate
+ - Cpp     : BinaryHeader::toMeasurementHeader now returns std::optional to allow for failure
+ - Cpp     : Removed custom Error definition in CommandProcessor
+ - Cpp     : Introduced Errored alias for bool return type for clarity
+ - Cpp     : Introduced ErrorAll type that combines standard Error with errors defined by enabled plugins
+ - Cpp     : Changed addSubscriber methods to return Error instead of bool
+ - Cpp     : Renamed GenericCommand::matchResponse to isMatchingResponse for consistency
+ - Cpp     : Changed FaPacketProtocol Metadata member 'length' from size_t to uint16_t
+ - Cpp     : Updated FbPacket handling, including renaming from SplitPacket and adding subscribers
+ - Cpp     : Renamed Packet member 'size' to 'capacity'
+ - Cpp     : Fixed bug in removeSubscriber methods
+ - Cpp     : Updated restoreFactorySettings command to return immediately if an async packet is received
+ - Cpp     : Renamed CalculateCheckSum and CalculateCRC to calculateChecksum and calculateCRC for
+             consistency
+ - Cpp     : Added plugin namespaces
+ - Cpp     : Added AsyncError throwing to the Packet Dispatchers
+ - Cpp     : In Windows' serial driver, add invalid path to count as an InvalidPortName rather than
+             unexpected
+ - Cpp     : Move register's operator== definition to header
+ - Cpp     : Alias Register::*::InsStatus from InsStatus directly
+ - Cpp     : Add bitfield equality and inequality operators
+ - Cpp     : Add padding bits to the end of Register bitfields to ensure packing uniformity
+ - Cpp     : Add BinaryHeader::toHeaderBytes to convert to a vector of bytes, for comparison with an
+             unparsed packet
+ - Cpp     : Add BinaryOutputMeasurements::toHeaderBytes
+ - Cpp     : Added a PacketMetadata template struct to PacketDispatcher.hpp as a base for all protocols
+ - Python  : Renamed getNextAsyncError to throwIfAsyncError which now throws instead of returning error
+ - Python  : Updated RegisterScan plugin to raise exceptions when errors are returned
+ - Python  : Updated all examples to use try-except on library calls that can raise exceptions
+ - Python  : Wrap toHeaderBytes into BinaryOutputMeasurements::toHeaderBytes
+ - Python  : Define bitfields to be directly in their parent class, rather than the parent module 
+             (ex. Registers.System.BinaryOutput.AsyncMode)
+ - Python  : Move bitfield members to BinaryOutputMeasurements, deriving BinaryOutput from this, to match cpp
+ - Python  : Bugfix causing unusability of Sensor::subscribeToMessage as FA
+ - Python  : Add wrapping to Sensor::unsubscribeFromMessage SyncByte overload
+ - Python  : Add wrapping to Sensor::clearAsyncErrorQueue and Sensor::asyncErrorQueueSize
+ - Python  : Add wrapping to Sensor::sendCommand timeoutThreshold overload
+ - Python  : Added support for additional members of ByteBuffer and GenericCommand classes
+ - Python  : Added support for Packet and PacketDetails classes
+ - Python  : Added support for CRC & checksum calculation
+ - Python  : Added initial support for FbPackets
+ - Python  : Added plugin submodules
+ - Python  : Refactored vectornav.cpp by adding PyByteBuffer.cpp, PyErrors.cpp, PyPackets.cpp, PySensor.cpp,
+             PyUtils.cpp, PyVnTypes.cpp
+ - Python  : Added Registers' category submodules
+ - Python  : Added thread to monitor and throw an exception if an AsyncError is received
+             - Enabled through monitorAsyncErrors boolean during connect() or autoConnect() calls
+             - monitorAsyncErrors defaults to false if unused
+ - Python  : Added optional parameter to changeBaudRate function so the serialPort can be specified
+ - Python  : Updated methods for throwing exceptions based on error codes, modified methods to ensure 
+             exceptions were thrown on error, and updated examples for proper exception handling
+ - Python  : Added unique errors which each have a catchable exception
+ - Cli     : Renamed GetAsynchronousError to ThrowIfAsyncError which now throws instead of returning error
+ - Cli     : Wrapped SubscribeToMessage and UnsubscribeFromMessage into Sensor
+ - Cli     : Added thread to monitor and throw an exception if an AsyncError is received
+             - Enabled through MonitorAsyncErrors boolean during Connect() or AutoConnect() calls
+             - MonitorAsyncErrors defaults to false if unused
+ - Cli     : Added overloads in Sensor to use defined enums instead of uintX_t arguments
+ - Cli     : Added optional parameter to changeBaudRate function so the serialPort can be specified
+ - Cli     : Added constructor to ByteBuffer to enable construction from existing native ByteBuffer
+ - Cli     : Cleaned up header includes to prevent issues between managed and unmanaged code
+ - Cli     : Updated methods for throwing exceptions based on error codes, modified methods to ensure 
+             exceptions were thrown on error, and updated examples for proper exception handling
+ - Cli     : Wrapped Vec2f class in Matrix
+ - Cli     : Separated Registers into ConfigRegister and MeasRegister classes
+ - Plugin  : Calibration; renamed CalError to ErrorCal for consistency
+ - Plugin  : Logger; SimpleLogger changed to Logger
+ - Plugin  : FirmwareProgrammer; FirmwareUpdate changed to FirmwareProgrammer
+ - Plugin  : FirmwareProgrammer; renamed Bootloader::Error to ErrorBL for consistency
+ - Plugin  : FirmwareProgrammer; Recovery from failed firmware update changed to support non-nav processors
+ - Plugin  : Math; wrapped Math plugin in CLI & Python
+ - Plugin  : Regscan; CLI wrapping implemented to use LoadConfiguration, SaveConfiguration and 
+             SaveNonDefaultConfiguration in C# and Matlab
+ - Plugin  : Calibration; refactored calibration plugin in C++ and CLI
+ - Plugin  : Math; added SampleStats class to C++ for calculating running standard deviation & mean of 
+             sample data
+ - Plugin  : DataExport; removed FileExport class and refactored to use new Sensor file connect methods
+ - Plugin  : Calibration; updated from-file examples to use new Sensor file connect methods
+
 0.22.0
  - Global  : Increased maximum ASCII and command message sizes in Config.hpp
  - Global  : Enforced camelCase on register field names (eg. gnss1AltMSL->gnss1AltMsl or posEX->posEx)
@@ -24,13 +144,13 @@
  - Matlab  : Added Data Export examples
  - C#      : Added NonBlockingCommands example
  - Plugin  : Math; Refactored cpp plugin. Split up and renamed files. Moved all functions to Math namespace 
-			 (eliminated namespaces for LinAlg, Conversions, AttConversions and PosVelConversions)
+			       (eliminated namespaces for LinAlg, Conversions, AttConversions and PosVelConversions)
  - Plugin  : Math; Renamed functions for consistency and added several new functions needed for Calibration.
  - Plugin  : DataExport; Updated names for column headings on CSV export
  - Plugin  : FirmwareUpdate; Fix printing of error codes received
  - Plugin  : FirmwareUpdate; Allow resending of lines after a comm error has occurred
- - Plugin  : FirmwareUpdate; When recovering firmware version, fix current attempt to reload a firmware already successfully loaded, 
-			 causing a reported failure
+ - Plugin  : FirmwareUpdate; When recovering firmware version, fix current attempt to reload a firmware
+             already successfully loaded, causing a reported failure
  - Plugin  : FirmwareUpdate; Fix usage of vnxml on VN-300
  - Plugin  : Calibration; Removed deprecated RfrAndBiasCalculator from Calibration plugin.  All languages.
  - Plugin  : RegScan; Bug fixes to handle responses from all registers

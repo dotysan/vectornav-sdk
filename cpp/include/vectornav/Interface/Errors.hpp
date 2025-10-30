@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,14 +26,32 @@
 
 #include <stdint.h>
 
+#include <variant>
+
 #include "vectornav/Config.hpp"
 #include "vectornav/HAL/Timer.hpp"
 #include "vectornav/TemplateLibrary/String.hpp"
 
-#define DEBUG_MESSAGE_ENABLE true
+#if __has_include("FirmwareProgrammer/include/vectornav/FirmwareProgrammerErrors.hpp")
+#include "FirmwareProgrammer/include/vectornav/FirmwareProgrammerErrors.hpp"
+#define _VN_ERROR_BL , FirmwareProgrammer::ErrorBL
+#else
+#define _VN_ERROR_BL
+#endif
+
+#if __has_include("Calibration/include/vectornav/CalError.hpp")
+#include "Calibration/include/vectornav/CalError.hpp"
+#define _VN_ERROR_CAL , Calibration::ErrorCal
+#else
+#define _VN_ERROR_CAL
+#endif
+
+#define _VN_ERROR_LIST Error _VN_ERROR_BL _VN_ERROR_CAL
 
 namespace VN
 {
+
+using Errored = bool;
 
 enum class Error : uint16_t
 {
@@ -64,6 +82,9 @@ enum class Error : uint16_t
     PrimaryBufferFull = 601,
     MessageSubscriberCapacityReached = 603,
     ReceivedInvalidResponse = 604,
+    InvalidAccessPrimaryBuffer = 606,
+    BufferFull = 607,
+    AlreadyConnected = 608,
 
     // SerialErrors
     InvalidPortName = 700,
@@ -75,16 +96,21 @@ enum class Error : uint16_t
     UnexpectedSerialError = 799,
 
     // PacketSyncErrors
-    SkippedByteBufferFull = 800,
     ReceivedByteBufferFull = 801,
+    ParsingFailed = 802,
+    PacketQueueFull = 803,
+    PacketQueueOverrun = 804,
+    PacketQueueNull = 805,
 
     // FileErrors
-    FileReadFailed = 905,
-    FileWriteFailed = 906,
+    FileDoesNotExist = 901,
+    FileOpenFailed = 902,
+    FileReadFailed = 903,
+    FileWriteFailed = 904,
 
 };
 
-inline static const char* errorCodeToString(Error error)
+inline static const char* errorCodeToString(Error error) noexcept
 {
     switch (error)
     {
@@ -146,26 +172,103 @@ inline static const char* errorCodeToString(Error error)
             return "SerialWriteFailed";
         case Error::MessageSubscriberCapacityReached:
             return "MessageSubscriberCapacityReached";
-        case Error::SkippedByteBufferFull:
-            return "SkippedByteBufferFull";
         case Error::ReceivedByteBufferFull:
             return "ReceivedByteBufferFull";
+        case Error::ParsingFailed:
+            return "ParsingFailed";
+        case Error::PacketQueueFull:
+            return "PacketQueueFull";
+        case Error::PacketQueueOverrun:
+            return "PacketQueueOverrun";
+        case Error::PacketQueueNull:
+            return "PacketQueueNull";
+        case Error::FileDoesNotExist:
+            return "FileDoesNotExist";
+        case Error::FileOpenFailed:
+            return "FileOpenFailed";
         case Error::FileReadFailed:
             return "FileReadFailed";
         case Error::FileWriteFailed:
             return "FileWriteFailed";
+        case Error::BufferFull:
+            return "BufferFull";
+        case Error::AlreadyConnected:
+            return "AlreadyConnected";
+        case Error::InvalidAccessPrimaryBuffer:
+            return "InvalidAccessPrimaryBuffer";
         default:
             return "Unknown error code.";
     }
 }
 
-inline std::ostream& operator<<(std::ostream& outStream, const Error& error) noexcept
+template <typename T, typename... Ts>
+constexpr bool is_same_any = ((std::is_same_v<T, Ts>) || ...);
+
+template <typename T, std::enable_if_t<is_same_any<T, _VN_ERROR_LIST>, bool> = true>
+inline std::ostream& operator<<(std::ostream& outStream, const T& error) noexcept
 {
-#if DEBUG_MESSAGE_ENABLE
-    outStream << static_cast<uint16_t>(error) << ": " << errorCodeToString(error);
-#else
-    outStream << static_cast<uint16_t>(error);
-#endif
+    outStream << "Error " << static_cast<uint16_t>(error) << ": " << errorCodeToString(error);
+    return outStream;
+}
+
+struct ErrorAll
+{
+    ErrorAll() : ErrorAll(Error::None) {}
+
+    static constexpr Error None = Error::None;  // enables use of ErrorAll::None
+
+    template <typename T, std::enable_if_t<is_same_any<T, _VN_ERROR_LIST>, bool> = true>
+    ErrorAll(T error)
+    {
+        _e = error;
+        if (static_cast<uint16_t>(error) == 0) { _isNone = true; }
+        else { _isNone = false; }
+    }
+
+    bool operator==(const ErrorAll& other) const { return _e == other._e; }
+    bool operator!=(const ErrorAll& other) const { return _e != other._e; }
+
+    template <typename T, std::enable_if_t<is_same_any<T, _VN_ERROR_LIST>, bool> = true>
+    ErrorAll& operator=(const T& error)
+    {
+        this->_e = error;
+        if (static_cast<uint16_t>(error) == 0) { this->_isNone = true; }
+        else { this->_isNone = false; }
+        return *this;
+    }
+
+    template <typename T, std::enable_if_t<is_same_any<T, _VN_ERROR_LIST>, bool> = true>
+    bool operator==(const T& error) const
+    {
+        if (static_cast<uint16_t>(error) == 0 && _isNone) { return true; }
+        else if (auto* err = std::get_if<T>(&_e)) { return *err == error; }
+        else { return false; }
+    }
+
+    template <typename T, std::enable_if_t<is_same_any<T, _VN_ERROR_LIST>, bool> = true>
+    bool operator!=(const T& error) const
+    {
+        return !(*this == error);
+    }
+
+private:
+    std::variant<_VN_ERROR_LIST> _e;
+    bool _isNone = false;
+    friend std::ostream& operator<<(std::ostream& outStream, const ErrorAll& error) noexcept;
+    friend const char* errorCodeToString(ErrorAll error) noexcept;
+};
+#undef _VN_ERROR_BL
+#undef _VN_ERROR_CAL
+#undef _VN_ERROR_LIST
+
+inline const char* errorCodeToString(ErrorAll error) noexcept
+{
+    return std::visit([](auto&& arg) -> const char* { return errorCodeToString(arg); }, error._e);
+}
+
+inline std::ostream& operator<<(std::ostream& outStream, const ErrorAll& error) noexcept
+{
+    std::visit([&outStream](auto&& arg) { outStream << arg; }, error._e);
     return outStream;
 }
 
@@ -213,15 +316,17 @@ struct AsyncError
     time_point timestamp;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const AsyncError& asyncError) noexcept
+{
+    os << asyncError.message << " (" << asyncError.error << ")" << "at " << asyncError.timestamp;
+    return os;
+}
+
 using VnErr_Synchronous =
     EnumCheck<Error, Error::SerialBufferOverflow, Error::InvalidChecksum, Error::InvalidCommand, Error::NotEnoughParameters, Error::TooManyParameters,
               Error::InvalidParameter, Error::InvalidRegister, Error::UnauthorizedAccess, Error::InsufficientBaudRate>;
 
 using VnErr_Asynchronous = EnumCheck<Error, Error::HardFault, Error::WatchdogReset, Error::OutputBufferOverflow, Error::ErrorBufferOverflow>;
-
-inline bool SensorException_Is_Asynchronous(Error error) { return VnErr_Asynchronous::is_value(error); }
-
-inline bool SensorException_Is_Synchronous(Error error) { return VnErr_Synchronous::is_value(error); }
 
 }  // namespace VN
 

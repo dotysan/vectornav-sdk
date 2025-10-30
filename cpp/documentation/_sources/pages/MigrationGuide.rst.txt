@@ -3,6 +3,10 @@ Migration Guide
 
 .. _migrationGuide:
 
+This C++ migration guide highlights the changes between VectorNav's Programming Library and VectorNav's Software Development Kit (SDK) for C++ applications. 
+This guide is not a how-to guide but rather a document of new features and changes between the two software packages to ensure a smooth transition for users migrating from the Programming Library to the SDK.
+As discussed throughout this document, the fundamental way to interface with the sensor is the same across the two software packages but many features have been updated, and the performance has improved significantly in the SDK. 
+
 Notable Changes and Features
 ============================
 
@@ -33,21 +37,17 @@ The VNSDK by default spawns a second thread for serial port monitoring, packet f
 
 Migrating from the VectorNav Programming Library to the VNSDK
 =============================================================
-In the VectorNav Programming Library, a ``VnSensor`` object is created with each read or write register command as a method of that object.
-In the VNSDK, a ``Sensor`` object is still created for interaction, but now only two methods, `readRegister` and `writeRegister`, exist for register interaction.
-Each register is now its own class that will be populated when a `readRegister` or `writeRegister` request is sent.
-The examples below will show differences between frequently used commands.
+This migration guide provides the basic communication differences between the VNSDK and the Programming Library for C++.
 
 Naming Conventions
 ^^^^^^^^^^^^^^^^^^
-* Method, member, and variable names are written in **camelCase**
-    For example, a composite data variable accessing the accel value will be written as compositeData.imu.accel
-* Types, enumeration values, namespaces, and classes are written in **PascalCase**
-    For example, a register enum for the serial port will be written as SerialPort
+- **Methods**, **member names**, and **variable names** are written in **camelCase**. For example, a composite data variable accessing the accel value will be written as ``compositeData.imu.accel``
+
+- **Types**, **enumeration values**, **namespaces**, and **classes** are written in **PascalCase**. For example, a register enum for the serial port will be written as ``SerialPort``
 
 Error Handling
 ^^^^^^^^^^^^^^
-Before explaining how to read and write registers, the user should know the differences in handling errors between the two softwares.
+Before explaining how to read and write registers, the user should know the differences in handling errors between the two software packages.
 In the VectorNav Programming Library, if an error occurred---such as an ``InsufficientBaudRate`` error---the program would throw an exception and crash if unhandled.
 The VNSDK does not have exceptions but instead will return an error code.
 
@@ -58,10 +58,12 @@ If trying to configure the unit to output a larger data message than the baud ra
 > what():  received sensor error InsufficientBaudRate
 ```
 
-Using the VNSDK, the error code handling appears as
+Using the VNSDK, the error handling appears as
 
 .. code-block:: cpp
-    :emphasize-lines: 10-16
+    :emphasize-lines: 10-17
+
+    // VNSDK
 
     // Creating register object
     Registers::System::AsyncOutputFreq asyncDataOutputFrequency;
@@ -73,7 +75,7 @@ Using the VNSDK, the error code handling appears as
 
     // Handling the error output
     if (latestError != Error::None) {
-        std::cout << "Error" << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputFrequency.id()) << " ("
+        std::cerr << latestError << " encountered when configuring register " << std::to_string(asyncDataOutputFrequency.id()) << " ("
                   << asyncDataOutputFrequency.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     } else {
@@ -83,41 +85,46 @@ Using the VNSDK, the error code handling appears as
 which would output
 
 ```
-> Error12: InsufficientBaudRate encountered when configuring register (AsyncOutputFreq)
+> Error 12: InsufficientBaudRate encountered when configuring register 7 (AsyncOutputFreq)
 ```
 
-All errors that can be raised are defined in :enum:`VN::Error`.
+All errors that can be raised are defined in :enum:`~VN::Error`.
 
 Connecting to the Unit
 ^^^^^^^^^^^^^^^^^^^^^^
 For both software packages, the serial port name is strictly necessary to connect to the unit.
-For the VectorNav Programming Library, the baud rate must also be known.
-With the VNSDK, there is an option to specify the baud rate using the ``connect`` method, but now there is an ``autoConnect`` method that will scan the specified port for the unit's baud rate.
+In the VectorNav Programming Library, the baud rate must also be known.
+With the VNSDK, there is an option to specify the baud rate using the :func:`~VN::Sensor::connect` method, but a new :func:`~VN::Sensor::autoConnect` method is also available that will scan the specified port for the unit's baud rate.
 
-To communicate with the unit, a sensor object has to be created before a connection can be established.
+To communicate with the unit, a sensor object must be created before a connection can be established.
 In the VectorNav Programming Library this is done by
 
 .. code-block:: cpp
-    :emphasize-lines: 2
 
-    VnSensor vs;
-    vs.connect(SensorPort, SensorBaudRate);
+    // VN Programming Library
+    VnSensor sensor;
+    sensor.connect(SensorPort, SensorBaudRate);
 
-While in the VNSDK, the sensor is connected using the `autoConnect` method below:
+While in the VNSDK, the sensor is connected using the :func:`~VN::Sensor::autoConnect` method below:
 
 .. code-block:: cpp
-    :emphasize-lines: 2
 
+    // VNSDK
     Sensor sensor;
     Error latestError = sensor.autoConnect(portName);
     if (latestError != Error::None) {
-        std::cout << "Error " << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
+        std::cerr << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
         return static_cast<int>(latestError);
     }
     std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
 
-Registers
-^^^^^^^^^
+Accessing Registers
+^^^^^^^^^^^^^^^^^^^
+
+In the VectorNav Programming Library, a ``VnSensor`` object is created with each read or write register command as a method of that object.
+In the VNSDK, a :class:`~VN::Sensor` object is still created for interaction, but now only two methods, :func:`~VN::Sensor::readRegister` and :func:`~VN::Sensor::writeRegister`, exist for register interaction.
+Each register is now its own class that will be populated when a :func:`~VN::Sensor::readRegister` or :func:`~VN::Sensor::writeRegister` request is sent.
+The examples below will show differences between frequently used commands.
 
 Bitfields
 ---------
@@ -135,34 +142,18 @@ Using the Programming Library, the user would create a VnSensor object and call 
 For example, the following code reads the *Yaw, Pitch, Roll* register (Register 8) using the Programming Library.
 
 .. code-block:: cpp
-    :emphasize-lines: 8
 
-    // Create sensor object
-    VnSensor vs;
-
-    // Connect to the unit
-	vs.connect(SensorPort, SensorBaudRate);
+    // VN Programming Library
 
     // Read from the YPR register
-    vec3f ypr = vs.readYawPitchRoll();
-	cout << "Current YPR: " << ypr << endl;
+    vec3f ypr = sensor.readYawPitchRoll();
+    cout << "Current YPR: " << ypr << endl;
 
-In the VNSDK, the user creates the Sensor object and passes a pointer to a Register object they would like to read to the ``readRegister`` method.
-This looks like
+In the VNSDK, the user creates the :class:`~VN::Sensor` object and a :class:`~VN::Register` object for the register they would like to read. This :class:`~VN::Register` object is then passed to the :func:`~VN::Sensor::readRegister` method.
 
 .. code-block:: cpp
-    :emphasize-lines: 16
 
-    // Create sensor object
-    Sensor sensor;
-
-    // Connect to the unit
-    Error latestError = sensor.autoConnect(portName);
-    if (latestError != Error::None) {
-        std::cout << "Error " << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
-        return static_cast<int>(latestError);
-    }
-    std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
+    // VNSDK
 
     // Create register object
     Registers::Attitude::YawPitchRoll yprRegister;
@@ -170,7 +161,7 @@ This looks like
     // Read from the YPR register
     latestError = sensor.readRegister(&yprRegister);
     if (latestError != Error::None) {
-        std::cout << "Error" << latestError << " encountered when reading register " << yprRegister.id() << " (" << yprRegister.name() << ")" << std::endl;
+        std::cerr << latestError << " encountered when reading register " << yprRegister.id() << " (" << yprRegister.name() << ")" << std::endl;
         return static_cast<int>(latestError);
     }
     std::cout << "Current Reading:  Yaw - " << yprRegister.yaw << " , Pitch - " << yprRegister.pitch << " , Roll - " << yprRegister.roll << std::endl;
@@ -183,29 +174,16 @@ To configure the VectorNav Programming Library to output the *VNYPR* message, cr
 
 .. code-block:: cpp
     
-    // Create Sensor object
-    VnSensor vs;
-
-    // Connect to the unit
-	vs.connect(SensorPort, SensorBaudRate);
+    // VN Programming Library
 
     // Output the YPR async data message
-    vs.writeAsyncDataOutputType(VNYPR);
+    sensor.writeAsyncDataOutputType(VNYPR);
 
-In the VNSDK, a Register object has to be created and passed to the ``writeRegister`` method, much like reading a register.
+In the VNSDK, a :class:`~VN::Register` object has to be created and passed to the :func:`~VN::Sensor::writeRegister` method, much like reading a register.
 
 .. code-block:: cpp
 
-    // Create sensor object
-    Sensor sensor;
-
-    // Connect to the unit
-    Error latestError = sensor.autoConnect(portName);
-    if (latestError != Error::None) {
-        std::cout << "Error " << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
-        return static_cast<int>(latestError);
-    }
-    std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
+    // VNSDK
 
     // Create register object
     Registers::System::AsyncOutputType asyncDataOutputType;
@@ -216,98 +194,114 @@ In the VNSDK, a Register object has to be created and passed to the ``writeRegis
 
     // Write to the AsyncDataOutputType register
     latestError = sensor.writeRegister(&asyncDataOutputType);
-    if (latestError != Error::None) {
-        std::cout << "Error" << latestError << " encountered when configuring register " << asyncDataOutputType.id() << " (" << asyncDataOutputType.name()
-                  << ")" << std::endl;
-        return static_cast<int>(latestError);
-    } else {
-        std::cout << "ADOR configured\n";
-    }
 
 Extracting Asynchronous Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the Programming Library, two methods exist to extract asynchronous measurements: using callbacks to parse and consume a raw packet and using a ``CompositeData`` object with the ``EzAsyncData`` class. Because the VNSDK is tightly integrated with its ``CompositeData`` class, this section outlines how to migrate between ``CompositeData`` classes.
+In the Programming Library, two methods exist to extract asynchronous measurements: using callbacks to parse and consume a raw packet and using a ``CompositeData`` object with the ``EzAsyncData`` class. Because the VNSDK is tightly integrated with its :class:`~VN::CompositeData` class, this section outlines how to migrate between ``CompositeData`` classes.
 
-The ``CompositeData`` Class
+The :class:`~VN::CompositeData` Class
 ---------------------------
 
 Both the Programming Library and VNSDK provide a ``CompositeData`` class that are reasonably similar to each other. In both codebases, each ``CompositeData`` object allocates memory for every possible measurement output from the unit, optionally containing a subset of those measurements.
 The Programming Library's ``CompositeData`` class maintains public data members, getters, setters, and present booleans.
-The VNSDK's ``CompositeData`` only contains public data members, instead opting to report which variables are present using a `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_. In this way, the Programming Library's ``CompositeData`` class feels more like a true class, whereas the VNSDK feels more like a data structure.
+The VNSDK's :class:`~VN::CompositeData` only contains public data members, instead opting to report which variables are present using a `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_. In this way, the Programming Library's ``CompositeData`` class feels more like a true class, whereas the VNSDK feels more like a data structure.
 
-The first distinction is in organization; the Programming Library's ``CompositeData`` contains each measurement type accessor by getter methods at the top level, whereas the VNSDK's ``CompositeData`` contains each measurement type directly accessible, organized in their respective binary groups, as defined by the Interface Control Document (ICD).
-
-For example, to access the ypr field in the Programming Library's ``CompositeData`` object would be accessed by ``cd.yawPitchRoll()``, whereas using the SDK's ``CompositeData`` object would be ``cd.attitude.ypr``.
+The first distinction is in organization; the Programming Library's ``CompositeData`` contains each measurement type accessor by getter methods at the top level, whereas the VNSDK's :class:`~VN::CompositeData` contains each measurement type directly accessible, organized in their respective binary groups, as defined by the Interface Control Document (ICD). For example, to access the ypr field in the Programming Library's ``CompositeData`` object would be accessed by ``cd.yawPitchRoll()``, whereas using the VNSDK's :class:`~VN::CompositeData` object would be ``cd.attitude.ypr``.
 
 The second distinction is in the reporting of updated or nonupdated measurement types; the Programming Library's ``CompositeData`` provides ``has`` methods which return a bool of whether the requested measurement type is present.
-The VNSDK's ``CompositeData`` object natively holds each measurement type inside a `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_, eliminating the need for a separate method to check if it is present.
+The VNSDK's :class:`~VN::CompositeData` object natively holds each measurement type inside a `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_, eliminating the need for a separate method to check if it is present. For example, the presence of that same ypr measurement in the Programming Library would be validated by ``cd.hasYawPitchRoll()``, whereas in the VNSDK would be validated by ``cd.attitude.ypr.has_value()`` (or any other mechanism made available by `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_)
 
-For example, the presence of that same ypr measurement in the Programming Library would be validated by `cd.hasYawPitchRoll()`, whereas in the VNSDK would be validated by `cd.attitude.ypr.has_value()` (or any other mechanism made available by `std::optional <https://en.cppreference.com/w/cpp/utility/optional>`_)
+There also are some minor measurement type name changes (i.e. Programming Library's ``yawPitchRoll`` to VNSDK's ``ypr``), where the VNSDK's :class:`~VN::CompositeData` naming will always match the latest ICD.
 
-There also are some minor measurement type name changes (i.e. Programming Library's ``yawPitchRoll`` to VNSDK's ``ypr``), where the VNSDK's ``CompositeData`` naming will always match the latest ICD.
-
-``CompositeData`` Accessor Methods
+:class:`~VN::CompositeData` Accessor Methods
 ----------------------------------
 
 The Programming Library's ``VnSensor`` class does not natively handle ``CompositeData`` classes, so a separate class---`EzAsyncData`---has to handle parsing and reporting the objects.
-In contrast, the VNSDK's ``Sensor`` class natively parses to ``CompositeData`` objects and reports them to the user. Both ``EzAsyncData`` and ``Sensor`` produce exactly one ``CompositeData`` object per measurement message received from the unit.
+In contrast, the VNSDK's :class:`~VN::Sensor` class natively parses to :class:`~VN::CompositeData` objects and reports them to the user. Both ``EzAsyncData`` and :class:`~VN::Sensor` produce exactly one ``CompositeData`` object per measurement message received from the unit.
 
-The ``EzAsyncData`` class provides two methods to retrieve data: ``EzAsyncData::currentData`` and ``EzAsyncData::getNextData``; the ``Sensor`` class provides ``Sensor::getNextMeasurement`` and ``Sensor::getMostRecentMeasurement``.
-The ``EzAsyncData`` class maintains only the latest measurement received, whereas the VNSDK maintains a queue of ``CompositeData`` objects. As such, there are some minor differences between the two codebases to note when accessing ``CompositeData`` objects.
+The ``EzAsyncData`` class provides two methods to retrieve data: ``EzAsyncData::currentData`` and ``EzAsyncData::getNextData``; the :class:`~VN::Sensor` class provides :func:`~VN::Sensor::getNextMeasurement` and :func:`~VN::Sensor::getMostRecentMeasurement`.
+The ``EzAsyncData`` class maintains only the latest measurement received, whereas the VNSDK maintains a queue of :class:`~VN::CompositeData` objects. As such, there are some minor differences between the two codebases to note when accessing ``CompositeData`` objects.
 
-In most cases---where the polling rate for the latest measurement data exceeds the unit's measurement output rate---a call to ``EzAsyncData::currentData`` is similar in use to non-blocking calls of both ``Sensor::getNextMeasurement`` and ``Sensor::getMostRecentMeasurement``.
-In these cases, ``EzAsyncData::currentData`` will repeatedly output a ``CompositeData`` object parsed from the most recent measurement packet, whereas the ``Sensor`` methods will output that ``CompositeData`` object only once. 
-When the polling rate exceeds the output rate, ``EzAsyncData::nextData`` is nearly identical to a blocking call of both ``Sensor::getNextMeasurement`` and ``Sensor::getMostRecentMeasurement``, but should probably be replaced with a blocking call to ``Sensor::getMostRecentMeasurement``.
+In most cases---where the polling rate for the latest measurement data exceeds the unit's measurement output rate---a call to ``EzAsyncData::currentData`` is similar in use to non-blocking calls of both :func:`~VN::Sensor::getNextMeasurement` and :func:`~VN::Sensor::getMostRecentMeasurement`.
+In these cases, ``EzAsyncData::currentData`` will repeatedly output a ``CompositeData`` object parsed from the most recent measurement packet, whereas the :class:`~VN::Sensor` methods will output that :class:`~VN::CompositeData` object only once. 
+When the polling rate exceeds the output rate, ``EzAsyncData::nextData`` is nearly identical to a blocking call of both :func:`~VN::Sensor::getNextMeasurement` and :func:`~VN::Sensor::getMostRecentMeasurement`, but should probably be replaced with a blocking call to :func:`~VN::Sensor::getMostRecentMeasurement`.
 
-When the user's measurement polling rate subceeds the unit's measurement output rate, the presence of a ``CompositeData`` queue in the ``Sensor`` class is more apparent. In this case, ``EzAsyncData::currentData`` is identical to a non-blocking call of ``Sensor::getMostRecentMeasurement``.
-While there is no direct analogue to ``EzAsyncData::nextData``, it is most similar to a blocking call of ``Sensor::getMostRecentMeasurement``, with the exception that ``Sensor::getMostRecentMeasurement`` returns immediately if a measurement is present in the queue upon invocation---
+When the user's measurement polling rate is less than the unit's measurement output rate, the presence of a ``CompositeData`` queue in the :class:`~VN::Sensor` class is more apparent. In this case, ``EzAsyncData::currentData`` is identical to a non-blocking call of :func:`~VN::Sensor::getMostRecentMeasurement`.
+While there is no direct analogue to ``EzAsyncData::nextData``, it is most similar to a blocking call of :func:`~VN::Sensor::getMostRecentMeasurement`, with the exception that :func:`~VN::Sensor::getMostRecentMeasurement` returns immediately if a measurement is present in the queue upon invocation---
 ``EzAsyncData::nextData`` necessarily blocks upon receipt of a measurement subsequent to the invocation.
-In this case, ``EzAsyncData`` drops ``CompositeData`` objects parsed between polls, whereas ``Sensor`` maintains all ``CompositeData`` objects parsed (until the queue capacity is reached).
-Consequently, the user can successively read all the measurement packets since their last poll using ``Sensor::getNextMeasurement`` to prevent data loss.
+In this case, ``EzAsyncData`` drops ``CompositeData`` objects parsed between polls, whereas :class:`~VN::Sensor` maintains all :class:`~VN::CompositeData` objects parsed (until the queue capacity is reached).
+Consequently, the user can successively read all the measurement packets since their last poll using :func:`~VN::Sensor::getNextMeasurement` to prevent data loss.
 
-The syntax to retrieve a ``CompositeData`` object is slightly different between the two codebases. Both ``EzAsyncData`` methods return a ``CompositeData`` object by value, whereas both ``Sensor`` methods return a custom ``OwningPtr`` class to the ``CompositeData`` object of interest.
-As such, the ``EzAsyncData`` methods are guaranteed to return an object, whereas the ``Sensor`` methods may return a null pointer if no object currently exists in the queue (if called non-blocking) or the timeout has been exceeded (if called blocking).
-As such, using ``EzAsyncData::currentData`` the user has to compare their stored value against the most recent value to determine if it has updated; using either ``Sensor`` method, each get call is guaranteed to return an unretrieved, unique set of measurement, but each call must check whether the pointer returned is null.
+The syntax to retrieve a ``CompositeData`` object is slightly different between the two codebases. The ``EzAsyncData`` methods always return a ``CompositeData`` object, 
+whereas the :class:`~VN::Sensor` methods return a :class:`~VN::Sensor::CompositeDataQueueReturn` that may be null if no measurement is available. The :class:`~VN::Sensor::CompositeDataQueueReturn` wraps the :class:`~VN::CompositeData` object.
+The ``EzAsyncData`` methods are guaranteed to return an object, whereas the :class:`~VN::Sensor` methods may return a null pointer if no object currently exists in the queue (if called non-blocking) or the timeout has been exceeded (if called blocking).
+As such, using ``EzAsyncData::currentData`` the user has to compare their stored value against the most recent value to determine if it has updated; using either :class:`~VN::Sensor` method, each get call is guaranteed to return an unretrieved, unique set of measurement, but each call must check whether the pointer returned is null.
+For example, in the VectorNav Programming Library we can access ``CompositeData`` fields as
+
+.. code-block:: cpp
+
+    CompositeData cd = ez->currentData();
+    if (!cd.hasYawPitchRoll())
+        cout << "YPR Unavailable." << endl;
+    else
+        cout << "Current YPR: " << cd.yawPitchRoll() << endl;
+
+whereas in the VNSDK they are accessed as
+
+.. code-block:: cpp
+
+    // VNSDK
+
+    Sensor::CompositeDataQueueReturn compositeData = sensor.getNextMeasurement();
+    if (!compositeData) 
+    {
+        continue;
+    }
+    else if (compositeData->matchesMessage("VNYPR"))
+    {
+        Ypr ypr = compositeData->attitude.ypr.value();
+        std::cout << "\tYaw: " << ypr.yaw << "\n\tPitch: " << ypr.pitch << "\n\tRoll: " << ypr.roll << std::endl;
+    }
 
 Plugin List
 ===========
 
-Enhanced Firmware Update
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Firmware Programmer
+^^^^^^^^^^^^^^^^^^^
 While this plugin is available in the Programming Library, it has been updated with the issuance of the VNSDK.
-The new Firmware Update plugin has the ability to accept both *VNX* and *VNXML* files, contains significant stability improvements, and has more flexible and simple syntax.
+The new Firmware Programmer plugin has the ability to accept both *VNX* and *VNXML* files, contains significant stability improvements, and has more flexible and simple syntax.
 This plugin allows the users to update their unit's firmware without having to connect it to VectorNav's GUI, Control Center, or creating their own embedded updater.
 All firmware updates must be performed over the main port, UART-1, and communication must be established before an update can occur.
-More information on this plugin can be found in the :ref:`plugins/FirmwareUpdate` section.
+More information on this plugin can be found on the :ref:`cppFirmwareProgrammerPage` page.
 
 Register Scan
 ^^^^^^^^^^^^^
 The Register Scan plugin is a newly added plugin unique to the VNSDK.
 This plugin is capable of producing an XML or text file containing the non-default registers on the unit, or uploading an XML or text file of register values to the unit. It is similar to and interoperable with the "Save Config" and "Load Config" buttons on Control Center.
-Additional information can be found on the :ref:`RegisterScanPage` page.
+Additional information can be found on the :ref:`cppRegisterScanPage` page.
 
-Simple Logger
-^^^^^^^^^^^^^
-The Simple Logger plugin allows users to easily log all bytes received from the unit to a binary file without the need to parse the packets.
+Logger
+^^^^^^
+The Logger plugin allows users to easily log all bytes received from the unit to a binary file without the need to parse the packets.
 The Programming Library did not have any native capability to do this, and was most often accomplished by custom code utilizing the `RawDataReceivedHandler`.
-More information on this plugin can be found in the :ref:`plugins/SimpleLogger` section.
+More information on this plugin can be found on the :ref:`cppLoggerPage` page.
 
 Data Export
 ^^^^^^^^^^^
 The Data Export plugin can export data into formats such as a *CSV*, *TXT*, or *RINEX* file.
 The plugin can handle data from either previously logged binary files or data directly from a VectorNav unit.
 Additionally, it can handle outputting to multiple different formats at once.
-More information on this plugin can be found in the :ref:`plugins/DataExport` section.
+More information on this plugin can be found on the :ref:`cppDataExportPage` page.
 
 ROS2
 ^^^^
 The new ROS2 plugin allows the user to integrate a VectorNav unit in a system running ROS2.
 The plugin will configure the connected unit according to an included yaml file upon startup and subsequently publish each received measurement under custom topics.
 There is a message for each group in the Binary output messages and each group can be subscribed to individually.
-More information on this plugin can be found in the :ref:`plugins/Ros2` section.
+More information on this plugin can be found on the :ref:`cppRosPage` page.
 
 Math
 ^^^^
 The Math plugin expands upon the Programming Library's previous vector and matrix math by also including data conversions and expanded linear algebra functions.
-More information on this plugin can be found in the :ref:`plugins/Math` section.
+More information on this plugin can be found on the :ref:`cppMathPage` page.

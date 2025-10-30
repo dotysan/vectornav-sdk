@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Function VN::Math::quat2crp" href="function__attitude_math_8hpp_1a9e70263073c529bc09079cab66c90dfc.html" />
-    <link rel="prev" title="Template Function VN::Math::outer(const Matrix&lt;m, 1, T&gt;&amp;, const Matrix&lt;m, 1, T&gt;&amp;)" href="function__linear_algebra_8hpp_1a3c7bdae233dcc8ca4bb56a4b1117d476.html" /> 
+    <link rel="prev" title="Template Function VN::Math::outer(const Matrix&lt;m, 1, T&gt;&amp;, const Matrix&lt;m, 1, T&gt;&amp;)" href="function__linear_algebra_8hpp_1a5ec78d57ceddbf6d252b7945ad526bd0.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -56,7 +56,7 @@
           <a href="function__attitude_math_8hpp_1a9e70263073c529bc09079cab66c90dfc.html" title="Function VN::Math::quat2crp"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="function__linear_algebra_8hpp_1a3c7bdae233dcc8ca4bb56a4b1117d476.html" title="Template Function VN::Math::outer(const Matrix&lt;m, 1, T&gt;&amp;, const Matrix&lt;m, 1, T&gt;&amp;)"
+          <a href="function__linear_algebra_8hpp_1a5ec78d57ceddbf6d252b7945ad526bd0.html" title="Template Function VN::Math::outer(const Matrix&lt;m, 1, T&gt;&amp;, const Matrix&lt;m, 1, T&gt;&amp;)"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
     <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
@@ -83,7 +83,19 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN4Math13propagateQuatE4Quat5Vec3f">
 <span id="_CPPv3N2VN4Math13propagateQuatE4Quat5Vec3f"></span><span id="_CPPv2N2VN4Math13propagateQuatE4Quat5Vec3f"></span><span id="VN::Math::propagateQuat__Quat.Vec3f"></span><span class="target" id="_attitude_math_8hpp_1a8bf263eef0181ee82ffffe9413c0b577"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="struct_v_n_1_1_quat.html#_CPPv4N2VN4QuatE" title="VN::Quat"><span class="n"><span class="pre">Quat</span></span></a><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Math</span></span><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">propagateQuat</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="struct_v_n_1_1_quat.html#_CPPv4N2VN4QuatE" title="VN::Quat"><span class="n"><span class="pre">Quat</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">q0</span></span>, <a class="reference internal" href="typedef__matrix_8hpp_1adf2ea782d6429f0b4c647e9f857bcabd.html#_CPPv4N2VN5Vec3fE" title="VN::Vec3f"><span class="n"><span class="pre">Vec3f</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dTheta</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N2VN4Math13propagateQuatE4Quat5Vec3f" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Calculates the propagated quaternion given an initial orientation and a delta-theta. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q0</strong> – Quaternion representing initial orientation. </p></li>
+<li><p><strong>dTheta</strong> – Delta-theta (eg. coning integral) in radians. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Propagated quaternion. </p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 </section>
@@ -126,7 +138,7 @@
 </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
-    <p class="topless"><a href="function__linear_algebra_8hpp_1a3c7bdae233dcc8ca4bb56a4b1117d476.html"
+    <p class="topless"><a href="function__linear_algebra_8hpp_1a5ec78d57ceddbf6d252b7945ad526bd0.html"
                           title="Previous page">&larr; Template Function VN::Math::outer(const Matrix&lt;m, 1, T&gt;&amp;, const Matrix&lt;m, 1, T&gt;&amp;)</a></p>
   </div>
   <div class="sphinxnext">
@@ -174,7 +186,7 @@
           <a href="function__attitude_math_8hpp_1a9e70263073c529bc09079cab66c90dfc.html" title="Function VN::Math::quat2crp"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="function__linear_algebra_8hpp_1a3c7bdae233dcc8ca4bb56a4b1117d476.html" title="Template Function VN::Math::outer(const Matrix&lt;m, 1, T&gt;&amp;, const Matrix&lt;m, 1, T&gt;&amp;)"
+          <a href="function__linear_algebra_8hpp_1a5ec78d57ceddbf6d252b7945ad526bd0.html" title="Template Function VN::Math::outer(const Matrix&lt;m, 1, T&gt;&amp;, const Matrix&lt;m, 1, T&gt;&amp;)"
              >previous</a> &nbsp; &nbsp;</li>
     <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 

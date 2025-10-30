@@ -34,6 +34,8 @@ Includes
 
 - ``vectornav/Config.hpp``
 
+- ``vectornav/Interface/Errors.hpp``
+
 - ``vectornav/TemplateLibrary/ByteBuffer.hpp``
 
 - ``vectornav/TemplateLibrary/Vector.hpp``
@@ -56,6 +58,8 @@ Included By
 
 - :ref:`file_include_vectornav_Implementation_FbPacketProtocol.hpp`
 
+- :ref:`file_include_vectornav_Implementation_Packet.hpp`
+
 - :ref:`file_include_vectornav_Implementation_PacketSynchronizer.hpp`
 
 
@@ -72,6 +76,8 @@ Classes
 -------
 
 
+
+- :ref:`exhale_struct_struct_v_n_1_1_packet_metadata`
 
 - :ref:`exhale_class_class_v_n_1_1_packet_dispatcher`
 

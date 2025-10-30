@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,6 +25,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using VNSDK;
+using DataExport = VNSDK.DataExport;
 
 namespace DataExportFromSensor
 {
@@ -32,42 +33,77 @@ namespace DataExportFromSensor
     {
         static int Main(string[] args)
         {
-            String port = "COM33";
+            /* This data export example walks through the C# usage of the SDK to export data from a VectorNav unit to a CSV file.
+
+            This example will achieve the following:
+            1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            2. Create an ExportCsv object
+            3. Add a subscriber to all binary and ASCII packets
+            4. Log data from the VectorNav unit
+            5. Disconnect from the VectorNav unit
+            */
+
+            // Parse command line arguments
+            String portName = "COM1";
             String outputDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
             if (args.Length > 0)
             {
-                port = args[0];
+                portName = args[0];
             }
-
             if (args.Length > 1)
             {
                 outputDirectory = args[1];
             }
 
+
+            // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
             Sensor sensor = new Sensor();
-            sensor.AutoConnect(port);
+            try { sensor.AutoConnect(portName); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when connecting to {portName}.");
+                return 1;
+            }
+            Console.WriteLine($"Connected to {portName} at {sensor.ConnectedBaudRate()}");
 
-            Console.WriteLine($"Connected to {port} at {sensor.ConnectedBaudRate()}");
+            // 2. Create an ExportCsv object
+            DataExport.ExporterCsv csvExporter = new DataExport.ExporterCsv(outputDirectory);
 
-            ExporterCsv csvExporter = new ExporterCsv(outputDirectory);
+            // 3. Add a subscriber to all binary and ASCII packets
+            try { sensor.RegisterDataExporter(csvExporter); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered  when subscribing.");
+                return 1;
+            }
 
-            // Subscribe to messages
-            sensor.RegisterDataExporter(csvExporter);
-
+            // 4. Log data from the VectorNav unit
             if (csvExporter.Start())
             {
                 Console.WriteLine("Error: Failed to start logging to CSV file.");
                 return 1;
             }
-
             Console.WriteLine($"Logging to {outputDirectory}");
-            System.Threading.Thread.Sleep(5000);
+
+            DateTime endTime = DateTime.Now.AddSeconds(5);
+            while (DateTime.Now < endTime)
+            {
+                System.Threading.Thread.Sleep(1);
+
+                // Handle asynchronous errors
+                try { sensor.ThrowIfAsyncError(); }
+                catch (Exception asyncError)
+                {
+                    Console.WriteLine($"Received async error: {asyncError.Message}");
+                }
+            }
 
             csvExporter.Stop();
 
+            // 5. Disconnect from the VectorNav unit
             sensor.Disconnect();
-            Console.WriteLine($"ExportFromSensor example complete.");
+            Console.WriteLine($"DataExportFromSensor example complete.");
             return 0;
         }
     }

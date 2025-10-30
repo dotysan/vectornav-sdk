@@ -1,6 +1,6 @@
 % The MIT License (MIT)
 % 
-% VectorNav SDK (v0.22.0)
+% VectorNav SDK (v0.99.0)
 % Copyright (c) 2024 VectorNav Technologies, LLC
 % 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,21 +21,23 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-% DataExporterFromSensor.m
-
-disp('Starting ExportFromSensor example.');
-
 vnsdkAssembly = NET.addAssembly([pwd '\..\..\..\..\net\VnSdk_Net.dll']); % change to file path
-import VNSDK.*
+import VNSDK.* % Get rid of 'VNSDK' namespace qualifications
 
-if exist('sensor','var')
-    sensor.Disconnect();
-else
-    sensor = Sensor();
-end
+%{
+This data export example walks through the MATLAB usage of the SDK to export data from a VectorNav unit to a CSV file.
 
-if ~exist('port_name', 'var')
-    port_name = 'COM14';
+This example will achieve the following:
+1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+2. Create an ExportCsv object
+3. Add a subscriber to all binary and ASCII packets
+4. Log data from the VectorNav unit
+5. Disconnect from the VectorNav unit
+%}
+
+
+if ~exist('portName', 'var')
+    portName = 'COM1';
 end
 
 if ~exist('path', 'var')
@@ -44,29 +46,50 @@ else
     outputDirectory = fileparts(path);
 end
 
-sensor.AutoConnect(port_name);
-
-if ~sensor.VerifySensorConnectivity()
-    disp('Error: Failed to connect to sensor.');
-    return;
+% 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+if exist('sensor','var')
+    sensor.Disconnect();
+else
+    sensor = Sensor();
+end
+try
+    sensor.AutoConnect(portName);
+catch latestError
+    error('Error encountered when connecting to %s.\n%s\n', portName, latestError.message);
 end
 fprintf('Connected to %s at %s\n', sensor.ConnectedPortName(), sensor.ConnectedBaudRate())
 
-csvExporter = ExporterCsv(outputDirectory);
+%% 2. Create an ExportCsv object
+csvExporter = DataExport.ExporterCsv(outputDirectory);
 
-sensor.RegisterDataExporter(csvExporter);
-
-if csvExporter.Start()
-    disp('Error: Failed to start logging to CSV file.');
-    return;
+%% 3. Add a subscriber to all binary and ASCII packets
+try
+    sensor.RegisterDataExporter(csvExporter);
+catch latestError
+    error('Error encountered when subscribing.\n%s\n', latestError.message);
 end
 
+%% 4. Log data from the VectorNav unit
+if csvExporter.Start()
+    error('Error: Failed to start logging to CSV file.');
+end
 fprintf('Logging to %s\n', outputDirectory);
-pause(5);
+
+secondsToRun = 5;
+tic;
+while toc < secondsToRun
+    pause(0.001);
+
+    % Handle async errors
+    try
+        sensor.ThrowIfAsyncError();
+    catch asyncError
+        fprintf('Received async error: %s\n',  asyncError.message);
+    end
+end
 
 csvExporter.Stop();
 
+%% 5. Disconnect from the VectorNav unit
 sensor.Disconnect();
-disp('ExportFromSensor example complete.');
-
-
+disp('DataExportFromSensor example complete.');

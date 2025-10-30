@@ -92,12 +92,7 @@
 
 <span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">RegisterCommandReturn</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Error</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="n">None</span><span class="p">,</span>
-<span class="w">            </span><span class="n">CommandQueueFull</span><span class="p">,</span>
-<span class="w">            </span><span class="n">CommandResent</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="n">error</span><span class="p">;</span>
+<span class="w">        </span><span class="n">Error</span><span class="w"> </span><span class="n">error</span><span class="p">;</span>
 <span class="w">        </span><span class="n">AsciiMessage</span><span class="w"> </span><span class="n">message</span><span class="p">;</span>
 <span class="w">    </span><span class="p">};</span>
 
@@ -112,7 +107,7 @@
 <span class="w">    </span><span class="n">RegisterCommandReturn</span><span class="w"> </span><span class="n">registerCommand</span><span class="p">(</span><span class="n">GenericCommand</span><span class="o">*</span><span class="w"> </span><span class="n">pCommand</span><span class="p">,</span>
 <span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">Microseconds</span><span class="w"> </span><span class="n">timeoutThreshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Config</span><span class="o">::</span><span class="n">CommandProcessor</span><span class="o">::</span><span class="n">commandRemovalTimeoutLength</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">matchResponse</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">AsciiMessage</span><span class="o">&amp;</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">AsciiPacketProtocol</span><span class="o">::</span><span class="n">Metadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Errored</span><span class="w"> </span><span class="nf">matchResponse</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">AsciiMessage</span><span class="o">&amp;</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">AsciiPacketProtocol</span><span class="o">::</span><span class="n">Metadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="nf">queueSize</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="nf">queueCapacity</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">popCommandFromQueueBack</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>

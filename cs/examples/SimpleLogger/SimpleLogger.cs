@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,62 +24,86 @@
 using System;
 using VNSDK;
 
-class Program
+namespace SimpleLogger
 {
-    static int Main(string[] args)
+    class Program
     {
-        // Pass in port name and path as positional arguments, or edit them here
-        string port = (args.Length > 0) ? args[0] : "COM18";
-        string path = (args.Length > 1) ? args[1] : System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log.bin");
-
-        Sensor sensor = new Sensor();
-        sensor.AutoConnect(port);
-
-        Console.WriteLine($"Connected to {port} at {sensor.ConnectedBaudRate()}");
-
-        VNSDK.Registers.System.Model modelReg = new VNSDK.Registers.System.Model();
-        sensor.ReadRegister(modelReg);
-        Console.WriteLine($"Sensor Model Number: {modelReg.model}");
-
-        ByteBuffer bufferToLog = new ByteBuffer(1024 * 3);
-        SimpleLogger logger = new SimpleLogger(bufferToLog, path);
-
-        // Register the logger's input buffer to receive all bytes from the sensor
-        sensor.RegisterReceivedByteBuffer(bufferToLog);
-
-        // Create the log file and start logging to it
-        if (logger.Start())
+        static int Main(string[] args)
         {
-            Console.WriteLine("Error: Failed to write to file.");
-            return 1;
-        }
+            /*
+            This simple logger example walks through the C# usage of the SDK to log data from a VectorNav unit.
 
-        Console.WriteLine($"Logging to {path}");
+            This example will achieve the following:
+            1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            2. Set up resources needed for data logging
+            3. Register the logger's input buffer to receive all bytes from the unit
+            4. Log data from the VectorNav unit
+                4.1. Check for any asynchronous errors
+            5. Disconnect from the VectorNav unit
+            */
 
-        Nullable<AsyncError> asyncError = null;
+            // Pass in port name and path as positional arguments, or edit them here
+            String portName = (args.Length > 0) ? args[0] : "COM1";
+            String filePath = (args.Length > 1) ? args[1] : System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log.bin");
 
-        DateTime endTime = DateTime.Now.AddSeconds(5); // Run for 5 seconds
-
-        while (DateTime.Now < endTime)
-        {
-            System.Threading.Thread.Sleep(1);
-            // Check to make sure we didn't get any async errors. Any buffer overruns means we have dropped data.
-            asyncError = sensor.GetAsynchronousError();
-            if (asyncError.HasValue)
+            // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+            Sensor sensor = new Sensor();
+            try { sensor.AutoConnect(portName); }
+            catch (Exception latestError)
             {
-                Console.WriteLine($"Received async error: {asyncError.Value.Error}");
+                Console.WriteLine($"Error: {latestError.Message} encountered when connecting to {portName}.");
+                return 1;
             }
+            Console.WriteLine($"\nConnected to {portName} at {sensor.ConnectedBaudRate()}");
+
+            VNSDK.Registers.System.Model modelRegister = new VNSDK.Registers.System.Model();
+            try { sensor.ReadRegister(modelRegister); }
+            catch (Exception latestError)
+            {
+                Console.WriteLine($"Error: {latestError.Message} encountered when reading register 1 (Model).");
+                return 1;
+            }
+            Console.WriteLine($"Sensor Model Number: {modelRegister.model}");
+
+            // 2. Set up resources needed for data logging
+            ByteBuffer bufferToLog = new ByteBuffer(1024 * 3);
+            Logger.SimpleLogger logger = new Logger.SimpleLogger(bufferToLog, filePath);
+
+            // 3. Register the logger's input buffer to receive all bytes from the unit
+            sensor.RegisterReceivedByteBuffer(bufferToLog);
+
+            // 4. Log data from the VectorNav unit
+            if (logger.Start())
+            {
+                Console.WriteLine("Error: Failed to write to file.");
+                return 1;
+            }
+
+            Console.WriteLine($"Logging to {filePath}");
+
+            DateTime endTime = DateTime.Now.AddSeconds(5);
+            while (DateTime.Now < endTime)
+            {
+                System.Threading.Thread.Sleep(1);
+
+                // 4.1. Check for any asynchronous errors - Any buffer overruns means data has been dropped.
+                try { sensor.ThrowIfAsyncError(); }
+                catch (Exception asyncError)
+                {
+                    Console.WriteLine($"Received async error: {asyncError.Message}");
+                }
+            }
+
+            logger.Stop();
+            sensor.DeregisterReceivedByteBuffer();
+
+            Console.WriteLine($"Logged {logger.NumBytesLogged()} bytes.");
+
+            // 5. Disconnect from the VectorNav unit
+            sensor.Disconnect();
+            Console.WriteLine($"SimpleLogger example complete.");
+
+            return 0;
         }
-
-        logger.Stop();
-
-        sensor.DeregisterReceivedByteBuffer();
-        sensor.Disconnect();
-
-        Console.WriteLine($"Logged {logger.NumBytesLogged()} bytes.");
-
-        Console.WriteLine($"SimpleLogger example complete.");
-
-        return 0;
     }
 }

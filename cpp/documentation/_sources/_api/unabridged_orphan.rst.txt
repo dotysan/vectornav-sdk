@@ -61,17 +61,27 @@ Directories
 .. toctree::
    :maxdepth: 5
 
-   dir_plugins_FirmwareUpdate.rst
+   dir_plugins_FirmwareProgrammer.rst
 
 .. toctree::
    :maxdepth: 5
 
-   dir_plugins_FirmwareUpdate_include.rst
+   dir_plugins_FirmwareProgrammer_include.rst
 
 .. toctree::
    :maxdepth: 5
 
-   dir_plugins_FirmwareUpdate_include_vectornav.rst
+   dir_plugins_FirmwareProgrammer_include_vectornav.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir_plugins_Logger.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   dir_plugins_Logger_vectornav.rst
 
 .. toctree::
    :maxdepth: 5
@@ -97,16 +107,6 @@ Directories
    :maxdepth: 5
 
    dir_plugins_RegisterScan_include_vectornav.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   dir_plugins_RegisterScan_src.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   dir_plugins_SimpleLogger.rst
 
 Files
 *****
@@ -145,7 +145,12 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_FirmwareUpdate_include_vectornav_Bootloader.hpp.rst
+   file_plugins_FirmwareProgrammer_include_vectornav_Bootloader.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_Interface_BridgeSensor.hpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -175,17 +180,7 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_RegisterScan_src_ConfigReader.cpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
    file_plugins_RegisterScan_include_vectornav_ConfigReader.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_plugins_RegisterScan_src_ConfigWriter.cpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -216,6 +211,11 @@ Files
    :maxdepth: 5
 
    file_include_vectornav_HAL_Duration.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file_include_vectornav_Implementation_DynamicPacketQueue.hpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -260,6 +260,11 @@ Files
 .. toctree::
    :maxdepth: 5
 
+   file_plugins_DataExport_include_vectornav_ExporterSkippedByte.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
    file_include_vectornav_Implementation_FaPacketDispatcher.hpp.rst
 
 .. toctree::
@@ -295,17 +300,12 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_include_vectornav_HAL_File_Wasm.hpp.rst
+   file_plugins_FirmwareProgrammer_include_vectornav_FirmwareProgrammerErrors.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_DataExport_include_vectornav_FileExporter.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_plugins_FirmwareUpdate_include_vectornav_FirmwareUpdater.hpp.rst
+   file_plugins_FirmwareProgrammer_include_vectornav_FirmwareUpdater.hpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -341,21 +341,6 @@ Files
    :maxdepth: 5
 
    file_include_vectornav_HAL_Mutex_Base.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_include_vectornav_HAL_Mutex_CLI.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_include_vectornav_HAL_Mutex_Disabled.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_include_vectornav_HAL_Mutex_Mbed.hpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -400,12 +385,12 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_RegisterScan_src_RegisterScan.cpp.rst
+   file_plugins_RegisterScan_include_vectornav_RegisterScan.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_RegisterScan_include_vectornav_RegisterScan.hpp.rst
+   file_plugins_Math_vectornav_SampleStats.hpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -430,27 +415,7 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_include_vectornav_HAL_Serial_Mbed.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_include_vectornav_HAL_Serial_Wasm.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_include_vectornav_HAL_Serial_Windows.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_plugins_SimpleLogger_SimpleLogger.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file_plugins_DataExport_include_vectornav_SkippedByteExporter.hpp.rst
+   file_plugins_Logger_vectornav_SimpleLogger.hpp.rst
 
 .. toctree::
    :maxdepth: 5
@@ -470,11 +435,6 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_include_vectornav_HAL_Thread_Mbed.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
    file_include_vectornav_HAL_Thread_PC.hpp.rst
 
 .. toctree::
@@ -490,11 +450,6 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_include_vectornav_HAL_Timer_Mbed.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
    file_include_vectornav_HAL_Timer_PC.hpp.rst
 
 .. toctree::
@@ -505,4 +460,4 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_plugins_FirmwareUpdate_include_vectornav_VnXml.hpp.rst
+   file_plugins_FirmwareProgrammer_include_vectornav_VnXml.hpp.rst

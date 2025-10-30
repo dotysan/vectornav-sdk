@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +23,7 @@
 
 #include "vectornav/Implementation/FbPacketProtocol.hpp"
 
+#include "vectornav/Implementation/CoreUtils.hpp"
 namespace VN
 {
 namespace FbPacketProtocol
@@ -41,6 +42,7 @@ bool _isValidBinaryCrc(const ByteBuffer& buffer, const size_t syncByteIndex, con
 FbPacketProtocol::FindPacketReturn findPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept
 {
     Metadata metadata;
+    metadata.timestamp = now();
     const uint16_t headerSize = 5;
     uint16_t currentFromHeadIndex = syncByteIndex;
 
@@ -49,7 +51,9 @@ FbPacketProtocol::FindPacketReturn findPacket(const ByteBuffer& byteBuffer, cons
     if (syncByte != 0xFB) { return FindPacketReturn{Validity::Invalid, Metadata{}}; }  // It was a mistake to come here.
 
     // Verify this is a message type that we support; the only supported message type is 0
-    metadata.header.messageType = byteBuffer.peek_unchecked(++currentFromHeadIndex);
+    auto msgType_opt = byteBuffer.peek(++currentFromHeadIndex);  // Peeking checked because we haven't verified length let
+    if (!msgType_opt) { return FindPacketReturn{Validity::Incomplete, Metadata{}}; }
+    metadata.header.messageType = *msgType_opt;
     if (metadata.header.messageType != 0) { return FindPacketReturn{Validity::Invalid, Metadata{}}; }
 
     const size_t numPacketBytesInBuffer = byteBuffer.size() - syncByteIndex;

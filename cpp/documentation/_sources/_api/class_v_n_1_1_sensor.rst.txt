@@ -6,6 +6,15 @@ Class Sensor
 - Defined in :ref:`file_include_vectornav_Interface_Sensor.hpp`
 
 
+Inheritance Relationships
+-------------------------
+
+Derived Type
+************
+
+- ``public VN::BridgeSensor`` (:ref:`exhale_class_class_v_n_1_1_bridge_sensor`)
+
+
 Class Documentation
 -------------------
 

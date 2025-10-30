@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,8 @@
 
 namespace VN
 {
-
+namespace DataExport
+{
 std::array<std::array<CsvTypeInfo, 19>, 13> dataTypes{{
     {CsvTypeInfo{U64, 1},
      {U64, 1},
@@ -831,11 +832,11 @@ const char* getMeasurementString(const AsciiPacketProtocol::AsciiMeasurementHead
         case AsciiPacketProtocol::AsciiMeasurementHeader::IMU:
             return "UncompMagX,UncompMagY,UncompMagZ,UncompAccX,UncompAccY,UncompAccZ,UncompGyroX,UncompGyroY,UncompGyroZ,Temperature,Pressure";
         case AsciiPacketProtocol::AsciiMeasurementHeader::GPS:
-            return "Gps1Tow,Gps1Week,Gnss1Fix,Gnss1NumSats,gnss1Lat,gnss1Lon,gnss1Alt,gnss1VelN,gnss1VelE,gnss1VelD,gnss1PosUncertaintyN,gnss1PosUncertaintyE,"
-                   "gnss1PosUncertaintyD,Gnss1VelUncertainty,Gnss1TimeUncertainty";
+            return "Gps1Tow,Gps1Week,Gnss1Fix,Gnss1NumSats,Gnss1Lat,Gnss1Lon,Gnss1Alt,Gnss1VelN,Gnss1VelE,Gnss1VelD,Gnss1PosUncertaintyN,Gnss1PosUncertaintyE,"
+                   "Gnss1PosUncertaintyD,Gnss1VelUncertainty,Gnss1TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::GPE:
-            return "Gps1Tow,Gps1Week,Gnss1Fix,Gnss1NumSats,gnss1PosX,gnss1PosY,gnss1PosZ,gnss1VelX,gnss1VelY,gnss1VelZ,gnss1PosUncertaintyX,"
-                   "gnss1PosUncertaintyY,gnss1PosUncertaintyZ,Gnss1VelUncertainty,Gnss1TimeUncertainty";
+            return "Gps1Tow,Gps1Week,Gnss1Fix,Gnss1NumSats,Gnss1PosX,Gnss1PosY,Gnss1PosZ,Gnss1VelX,Gnss1VelY,Gnss1VelZ,Gnss1PosUncertaintyX,"
+                   "Gnss1PosUncertaintyY,Gnss1PosUncertaintyZ,Gnss1VelUncertainty,Gnss1TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::INS:
             return "TimeGpsTow,TimeGpsWeek,InsStatus,Yaw,Pitch,Roll,PosLat,PosLon,PosAlt,VelN,VelE,VelD,AttUncertainty,PosUncertainty,VelUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::INE:
@@ -847,11 +848,11 @@ const char* getMeasurementString(const AsciiPacketProtocol::AsciiMeasurementHead
         case AsciiPacketProtocol::AsciiMeasurementHeader::DTV:
             return "DeltaTime,DeltaThetaX,DeltaThetaY,DeltaThetaZ,DeltaVelX,DeltaVelY,DeltaVelZ";
         case AsciiPacketProtocol::AsciiMeasurementHeader::G2S:
-            return "Gps2Tow,Gps2Week,Gnss2Fix,Gnss2NumSats,gnss2Lat,gnss2Lon,gnss2Alt,gnss2VelN,gnss2VelE,gnss2VelD,gnss2PosUncertaintyN,gnss2PosUncertaintyE,"
-                   "gnss2PosUncertaintyD,Gnss2VelUncertainty,Gnss2TimeUncertainty";
+            return "Gps2Tow,Gps2Week,Gnss2Fix,Gnss2NumSats,Gnss2Lat,Gnss2Lon,Gnss2Alt,Gnss2VelN,Gnss2VelE,Gnss2VelD,Gnss2PosUncertaintyN,Gnss2PosUncertaintyE,"
+                   "Gnss2PosUncertaintyD,Gnss2VelUncertainty,Gnss2TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::G2E:
-            return "Gps2Tow,Gps2Week,Gnss2Fix,Gnss2NumSats,gnss2PosX,gnss2PosY,gnss2PosZ,gnss2VelX,gnss2VelY,gnss2VelZ,gnss2PosUncertaintyX,"
-                   "gnss2PosUncertaintyY,gnss2PosUncertaintyZ,Gnss2VelUncertainty,Gnss2TimeUncertainty";
+            return "Gps2Tow,Gps2Week,Gnss2Fix,Gnss2NumSats,Gnss2PosX,Gnss2PosY,Gnss2PosZ,Gnss2VelX,Gnss2VelY,Gnss2VelZ,Gnss2PosUncertaintyX,"
+                   "Gnss2PosUncertaintyY,Gnss2PosUncertaintyZ,Gnss2VelUncertainty,Gnss2TimeUncertainty";
         case AsciiPacketProtocol::AsciiMeasurementHeader::HVE:
             return "Heave,HeaveRate,DelayedHeave";
         case AsciiPacketProtocol::AsciiMeasurementHeader::YBA:
@@ -863,4 +864,5 @@ const char* getMeasurementString(const AsciiPacketProtocol::AsciiMeasurementHead
     }
 }
 
+}  // namespace DataExport
 }  // namespace VN

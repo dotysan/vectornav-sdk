@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +23,8 @@
 
 #ifndef VN_ASCIIPACKETPROTOCOL_HPP_
 #define VN_ASCIIPACKETPROTOCOL_HPP_
+
+#include <cstddef>
 
 #include "vectornav/Config.hpp"
 #include "vectornav/HAL/Timer.hpp"
@@ -69,12 +71,9 @@ using DelimiterIndices = Vector<uint16_t, Config::PacketFinders::asciiMaxFieldCo
 using AsciiParameter = String<Config::PacketFinders::asciiFieldMaxLength>;
 using Validity = PacketDispatcher::FindPacketRetVal::Validity;
 
-struct Metadata
+struct Metadata : public PacketMetadata<AsciiHeader>
 {
-    AsciiHeader header;
-    uint16_t length;
     DelimiterIndices delimiterIndices;
-    time_point timestamp;
 };
 
 struct FindPacketReturn
@@ -85,7 +84,7 @@ struct FindPacketReturn
 
 AsciiMeasurementHeader getMeasHeader(AsciiHeader headerChars);
 
-EnabledMeasurements asciiHeaderToMeasHeader(const AsciiMeasurementHeader header) noexcept;
+std::optional<EnabledMeasurements> asciiHeaderToMeasHeader(const AsciiMeasurementHeader header) noexcept;
 
 FindPacketReturn findPacket(const ByteBuffer& byteBuffer) noexcept;
 
@@ -118,7 +117,7 @@ public:
     }
 
     template <class T>
-    bool extract(std::optional<T>& value) noexcept
+    Errored extract(std::optional<T>& value) noexcept
     {
         auto asciiParameter = nextAsciiParameter();
         if (!asciiParameter.has_value()) { return true; }
@@ -128,21 +127,22 @@ public:
     }
 
     template <uint16_t N, uint16_t M, typename T>
-    bool extract(std::optional<Matrix<N, M, T>>& value) noexcept;
+    Errored extract(std::optional<Matrix<N, M, T>>& value) noexcept;
 
     std::optional<AsciiPacketProtocol::AsciiParameter> nextAsciiParameter()
     {
         AsciiPacketProtocol::AsciiParameter asciiParameter;
-        if (_delIndex + 1 >= _metadata.delimiterIndices.size()) { return std::nullopt; }
+        if (static_cast<size_t>(_delIndex + 1) >= _metadata.delimiterIndices.size()) { return std::nullopt; }
         if (_buffer.peek(reinterpret_cast<uint8_t*>(asciiParameter.begin()),
-                         _metadata.delimiterIndices[_delIndex + 1] - 1 - _metadata.delimiterIndices[_delIndex], _metadata.delimiterIndices[_delIndex] + 1))
+                         static_cast<size_t>(_metadata.delimiterIndices[_delIndex + 1] - 1 - _metadata.delimiterIndices[_delIndex]),
+                         _metadata.delimiterIndices[_delIndex] + 1))
         {
             return std::nullopt;
         }
         return asciiParameter;
     }
 
-    bool extractHex(std::optional<uint16_t>& value) noexcept
+    Errored extractHex(std::optional<uint16_t>& value) noexcept
     {
         auto asciiParameter = nextAsciiParameter();
         if (!asciiParameter.has_value()) { return true; }
@@ -151,7 +151,7 @@ public:
         return !value.has_value();
     }
 
-    bool discard(const uint16_t numDiscard)
+    Errored discard(const uint8_t numDiscard)
     {
         if (_delIndex + numDiscard > _metadata.delimiterIndices.size()) { return true; }
         _delIndex += numDiscard;
@@ -164,11 +164,11 @@ public:
 private:
     const ByteBuffer _buffer;
     const AsciiPacketProtocol::Metadata& _metadata;
-    size_t _delIndex = 0;
+    uint8_t _delIndex = 0;
 };
 
 template <uint16_t N, uint16_t M, typename T>
-bool AsciiPacketExtractor::extract(std::optional<Matrix<N, M, T>>& value) noexcept
+Errored AsciiPacketExtractor::extract(std::optional<Matrix<N, M, T>>& value) noexcept
 {
     Matrix<N, M, T> mat;
     for (uint16_t i = 0; i < N * M; i++)
@@ -182,7 +182,7 @@ bool AsciiPacketExtractor::extract(std::optional<Matrix<N, M, T>>& value) noexce
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<Lla>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<Lla>& value) noexcept
 {
     std::optional<Vec3d> lla;
     if (extract(lla)) { return true; };
@@ -192,7 +192,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<Lla>& value) noexcept
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<InsStatus>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<InsStatus>& value) noexcept
 {
     auto asciiParameter = nextAsciiParameter();
     if (!asciiParameter.has_value()) { return true; }
@@ -202,7 +202,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<InsStatus>& value) noexc
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<AhrsStatus>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<AhrsStatus>& value) noexcept
 {
     auto asciiParameter = nextAsciiParameter();
     if (!asciiParameter.has_value()) { return true; }
@@ -212,7 +212,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<AhrsStatus>& value) noex
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<GnssStatus>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<GnssStatus>& value) noexcept
 {
     auto asciiParameter = nextAsciiParameter();
     if (!asciiParameter.has_value()) { return true; }
@@ -222,7 +222,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<GnssStatus>& value) noex
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<ImuStatus>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<ImuStatus>& value) noexcept
 {
     auto asciiParameter = nextAsciiParameter();
     if (!asciiParameter.has_value()) { return true; }
@@ -232,7 +232,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<ImuStatus>& value) noexc
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<TimeStatus>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<TimeStatus>& value) noexcept
 {
     auto asciiParameter = nextAsciiParameter();
     if (!asciiParameter.has_value()) { return true; }
@@ -242,7 +242,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<TimeStatus>& value) noex
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<Time>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<Time>& value) noexcept
 {
     std::optional<double> gpsTowd;
     if (extract(gpsTowd)) { return true; }
@@ -252,7 +252,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<Time>& value) noexcept
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<DeltaTheta>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<DeltaTheta>& value) noexcept
 {
     std::optional<float> deltaTime;
     std::optional<Vec3f> deltaTheta;
@@ -265,7 +265,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<DeltaTheta>& value) noex
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<Ypr>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<Ypr>& value) noexcept
 {
     std::optional<Vec3f> ypr;
     if (extract(ypr)) { return true; };
@@ -274,7 +274,7 @@ inline bool AsciiPacketExtractor::extract(std::optional<Ypr>& value) noexcept
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract(std::optional<Quat>& value) noexcept
+inline Errored AsciiPacketExtractor::extract(std::optional<Quat>& value) noexcept
 {
     std::optional<Vec3f> vector;
     std::optional<float> scalar;
@@ -285,27 +285,27 @@ inline bool AsciiPacketExtractor::extract(std::optional<Quat>& value) noexcept
 }
 
 template <>
-inline bool AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssDop>& value) noexcept
+inline Errored AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssDop>& value) noexcept
 {
     return true;
 }
 template <>
-inline bool AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssTimeInfo>& value) noexcept
+inline Errored AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssTimeInfo>& value) noexcept
 {
     return true;
 }
 template <>
-inline bool AsciiPacketExtractor::extract([[maybe_unused]] std::optional<TimeUtc>& value) noexcept
+inline Errored AsciiPacketExtractor::extract([[maybe_unused]] std::optional<TimeUtc>& value) noexcept
 {
     return true;
 }
 template <>
-inline bool AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssSatInfo>& value) noexcept
+inline Errored AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssSatInfo>& value) noexcept
 {
     return true;
 }
 template <>
-inline bool AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssRawMeas>& value) noexcept
+inline Errored AsciiPacketExtractor::extract([[maybe_unused]] std::optional<GnssRawMeas>& value) noexcept
 {
     return true;
 }

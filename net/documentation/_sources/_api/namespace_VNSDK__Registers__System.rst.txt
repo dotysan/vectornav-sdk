@@ -64,3 +64,10 @@ Classes
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_system_1_1_sync_status`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_system_1_1_user_tag`
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function__c_l_i___registers_8hpp_1a32650efaccbc4792ce29b533791ba3a9`

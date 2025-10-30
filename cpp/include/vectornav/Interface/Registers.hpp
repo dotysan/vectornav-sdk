@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -59,7 +59,12 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const YawPitchRoll& lhs, const YawPitchRoll& rhs);
+inline bool operator==(const YawPitchRoll& lhs, const YawPitchRoll& rhs)
+{
+    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll));
+}
+
+inline bool operator!=(const YawPitchRoll& lhs, const YawPitchRoll& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 9 - Quaternion </summary>
 <remarks>
@@ -83,7 +88,12 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Quaternion& lhs, const Quaternion& rhs);
+inline bool operator==(const Quaternion& lhs, const Quaternion& rhs)
+{
+    return ((lhs.quatX == rhs.quatX) && (lhs.quatY == rhs.quatY) && (lhs.quatZ == rhs.quatZ) && (lhs.quatS == rhs.quatS));
+}
+
+inline bool operator!=(const Quaternion& lhs, const Quaternion& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 15 - Quaternion & Compensated IMU </summary>
 <remarks>
@@ -116,7 +126,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const QuatMagAccelRate& lhs, const QuatMagAccelRate& rhs);
+inline bool operator==(const QuatMagAccelRate& lhs, const QuatMagAccelRate& rhs)
+{
+    return ((lhs.quatX == rhs.quatX) && (lhs.quatY == rhs.quatY) && (lhs.quatZ == rhs.quatZ) && (lhs.quatS == rhs.quatS) && (lhs.magX == rhs.magX) &&
+            (lhs.magY == rhs.magY) && (lhs.magZ == rhs.magZ) && (lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) &&
+            (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
+}
+
+inline bool operator!=(const QuatMagAccelRate& lhs, const QuatMagAccelRate& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 21 - Magnetic and Gravity Reference Vectors </summary>
 <remarks>
@@ -125,12 +142,12 @@ bool operator==(const QuatMagAccelRate& lhs, const QuatMagAccelRate& rhs);
 class MagGravRefVec : public ConfigurationRegister
 {
 public:
-    float magRefN = 0;
-    float magRefE = 0;
-    float magRefD = 0;
-    float gravRefN = 0;
-    float gravRefE = 0;
-    float gravRefD = 0;
+    std::optional<float> magRefN;
+    std::optional<float> magRefE;
+    std::optional<float> magRefD;
+    std::optional<float> gravRefN;
+    std::optional<float> gravRefE;
+    std::optional<float> gravRefD;
 
     MagGravRefVec() : ConfigurationRegister(21) {}
     static constexpr const char* name() { return "MagGravRefVec"; };
@@ -139,7 +156,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const MagGravRefVec& lhs, const MagGravRefVec& rhs);
+inline bool operator==(const MagGravRefVec& lhs, const MagGravRefVec& rhs)
+{
+    return ((lhs.magRefN == rhs.magRefN) && (lhs.magRefE == rhs.magRefE) && (lhs.magRefD == rhs.magRefD) && (lhs.gravRefN == rhs.gravRefN) &&
+            (lhs.gravRefE == rhs.gravRefE) && (lhs.gravRefD == rhs.gravRefD));
+}
+
+inline bool operator!=(const MagGravRefVec& lhs, const MagGravRefVec& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 27 - Yaw-Pitch-Roll & Compensated IMU </summary>
 <remarks>
@@ -171,7 +194,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const YprMagAccelAngularRates& lhs, const YprMagAccelAngularRates& rhs);
+inline bool operator==(const YprMagAccelAngularRates& lhs, const YprMagAccelAngularRates& rhs)
+{
+    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.magX == rhs.magX) && (lhs.magY == rhs.magY) &&
+            (lhs.magZ == rhs.magZ) && (lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) &&
+            (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
+}
+
+inline bool operator!=(const YprMagAccelAngularRates& lhs, const YprMagAccelAngularRates& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 35 - VPE Basic Control </summary>
 <remarks>
@@ -199,10 +229,10 @@ public:
         Adaptive = 1,
     };
 
-    uint8_t resv = 0;
-    HeadingMode headingMode = static_cast<HeadingMode>(0);
-    FilteringMode filteringMode = static_cast<FilteringMode>(0);
-    TuningMode tuningMode = static_cast<TuningMode>(0);
+    std::optional<uint8_t> resv;
+    std::optional<HeadingMode> headingMode;
+    std::optional<FilteringMode> filteringMode;
+    std::optional<TuningMode> tuningMode;
 
     VpeBasicControl() : ConfigurationRegister(35) {}
     static constexpr const char* name() { return "VpeBasicControl"; };
@@ -211,7 +241,12 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const VpeBasicControl& lhs, const VpeBasicControl& rhs);
+inline bool operator==(const VpeBasicControl& lhs, const VpeBasicControl& rhs)
+{
+    return ((lhs.resv == rhs.resv) && (lhs.headingMode == rhs.headingMode) && (lhs.filteringMode == rhs.filteringMode) && (lhs.tuningMode == rhs.tuningMode));
+}
+
+inline bool operator!=(const VpeBasicControl& lhs, const VpeBasicControl& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 36 - VPE Magnetometer Basic Tuning </summary>
 <remarks>
@@ -220,15 +255,15 @@ bool operator==(const VpeBasicControl& lhs, const VpeBasicControl& rhs);
 class VpeMagBasicTuning : public ConfigurationRegister
 {
 public:
-    float baseTuningX = 0;
-    float baseTuningY = 0;
-    float baseTuningZ = 0;
-    float adaptiveTuningX = 0;
-    float adaptiveTuningY = 0;
-    float adaptiveTuningZ = 0;
-    float adaptiveFilteringX = 0;
-    float adaptiveFilteringY = 0;
-    float adaptiveFilteringZ = 0;
+    std::optional<float> baseTuningX;
+    std::optional<float> baseTuningY;
+    std::optional<float> baseTuningZ;
+    std::optional<float> adaptiveTuningX;
+    std::optional<float> adaptiveTuningY;
+    std::optional<float> adaptiveTuningZ;
+    std::optional<float> adaptiveFilteringX;
+    std::optional<float> adaptiveFilteringY;
+    std::optional<float> adaptiveFilteringZ;
 
     VpeMagBasicTuning() : ConfigurationRegister(36) {}
     static constexpr const char* name() { return "VpeMagBasicTuning"; };
@@ -237,7 +272,15 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const VpeMagBasicTuning& lhs, const VpeMagBasicTuning& rhs);
+inline bool operator==(const VpeMagBasicTuning& lhs, const VpeMagBasicTuning& rhs)
+{
+    return ((lhs.baseTuningX == rhs.baseTuningX) && (lhs.baseTuningY == rhs.baseTuningY) && (lhs.baseTuningZ == rhs.baseTuningZ) &&
+            (lhs.adaptiveTuningX == rhs.adaptiveTuningX) && (lhs.adaptiveTuningY == rhs.adaptiveTuningY) && (lhs.adaptiveTuningZ == rhs.adaptiveTuningZ) &&
+            (lhs.adaptiveFilteringX == rhs.adaptiveFilteringX) && (lhs.adaptiveFilteringY == rhs.adaptiveFilteringY) &&
+            (lhs.adaptiveFilteringZ == rhs.adaptiveFilteringZ));
+}
+
+inline bool operator!=(const VpeMagBasicTuning& lhs, const VpeMagBasicTuning& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 38 - VPE Accelerometer Basic Tuning </summary>
 <remarks>
@@ -246,15 +289,15 @@ bool operator==(const VpeMagBasicTuning& lhs, const VpeMagBasicTuning& rhs);
 class VpeAccelBasicTuning : public ConfigurationRegister
 {
 public:
-    float baseTuningX = 0;
-    float baseTuningY = 0;
-    float baseTuningZ = 0;
-    float adaptiveTuningX = 0;
-    float adaptiveTuningY = 0;
-    float adaptiveTuningZ = 0;
-    float adaptiveFilteringX = 0;
-    float adaptiveFilteringY = 0;
-    float adaptiveFilteringZ = 0;
+    std::optional<float> baseTuningX;
+    std::optional<float> baseTuningY;
+    std::optional<float> baseTuningZ;
+    std::optional<float> adaptiveTuningX;
+    std::optional<float> adaptiveTuningY;
+    std::optional<float> adaptiveTuningZ;
+    std::optional<float> adaptiveFilteringX;
+    std::optional<float> adaptiveFilteringY;
+    std::optional<float> adaptiveFilteringZ;
 
     VpeAccelBasicTuning() : ConfigurationRegister(38) {}
     static constexpr const char* name() { return "VpeAccelBasicTuning"; };
@@ -263,7 +306,15 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const VpeAccelBasicTuning& lhs, const VpeAccelBasicTuning& rhs);
+inline bool operator==(const VpeAccelBasicTuning& lhs, const VpeAccelBasicTuning& rhs)
+{
+    return ((lhs.baseTuningX == rhs.baseTuningX) && (lhs.baseTuningY == rhs.baseTuningY) && (lhs.baseTuningZ == rhs.baseTuningZ) &&
+            (lhs.adaptiveTuningX == rhs.adaptiveTuningX) && (lhs.adaptiveTuningY == rhs.adaptiveTuningY) && (lhs.adaptiveTuningZ == rhs.adaptiveTuningZ) &&
+            (lhs.adaptiveFilteringX == rhs.adaptiveFilteringX) && (lhs.adaptiveFilteringY == rhs.adaptiveFilteringY) &&
+            (lhs.adaptiveFilteringZ == rhs.adaptiveFilteringZ));
+}
+
+inline bool operator!=(const VpeAccelBasicTuning& lhs, const VpeAccelBasicTuning& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 239 - Yaw-Pitch-Roll, Linear Acceleration & Gyro </summary>
 <remarks>
@@ -292,7 +343,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const YprLinearBodyAccelAngularRates& lhs, const YprLinearBodyAccelAngularRates& rhs);
+inline bool operator==(const YprLinearBodyAccelAngularRates& lhs, const YprLinearBodyAccelAngularRates& rhs)
+{
+    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.linAccelX == rhs.linAccelX) &&
+            (lhs.linAccelY == rhs.linAccelY) && (lhs.linAccelZ == rhs.linAccelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) &&
+            (lhs.gyroZ == rhs.gyroZ));
+}
+
+inline bool operator!=(const YprLinearBodyAccelAngularRates& lhs, const YprLinearBodyAccelAngularRates& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 240 - Yaw-Pitch-Roll, Inertial Linear Acceleration & Gyro </summary>
 <remarks>
@@ -321,7 +379,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const YprLinearInertialAccelAngularRates& lhs, const YprLinearInertialAccelAngularRates& rhs);
+inline bool operator==(const YprLinearInertialAccelAngularRates& lhs, const YprLinearInertialAccelAngularRates& rhs)
+{
+    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.linAccelN == rhs.linAccelN) &&
+            (lhs.linAccelE == rhs.linAccelE) && (lhs.linAccelD == rhs.linAccelD) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) &&
+            (lhs.gyroZ == rhs.gyroZ));
+}
+
+inline bool operator!=(const YprLinearInertialAccelAngularRates& lhs, const YprLinearInertialAccelAngularRates& rhs) { return !(lhs == rhs); }
 }  // namespace Attitude
 
 namespace GNSS
@@ -368,11 +433,11 @@ public:
         External = 2,
     };
 
-    ReceiverEnable receiverEnable = static_cast<ReceiverEnable>(0);
-    PpsSource ppsSource = static_cast<PpsSource>(0);
-    Rate rate = static_cast<Rate>(0);
-    uint8_t resv4 = 0;
-    AntPower antPower = static_cast<AntPower>(0);
+    std::optional<ReceiverEnable> receiverEnable;
+    std::optional<PpsSource> ppsSource;
+    std::optional<Rate> rate;
+    std::optional<uint8_t> resv4;
+    std::optional<AntPower> antPower;
 
     GnssBasicConfig() : ConfigurationRegister(55) {}
     static constexpr const char* name() { return "GnssBasicConfig"; };
@@ -381,7 +446,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const GnssBasicConfig& lhs, const GnssBasicConfig& rhs);
+inline bool operator==(const GnssBasicConfig& lhs, const GnssBasicConfig& rhs)
+{
+    return ((lhs.receiverEnable == rhs.receiverEnable) && (lhs.ppsSource == rhs.ppsSource) && (lhs.rate == rhs.rate) && (lhs.resv4 == rhs.resv4) &&
+            (lhs.antPower == rhs.antPower));
+}
+
+inline bool operator!=(const GnssBasicConfig& lhs, const GnssBasicConfig& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 57 - GNSS Internal A Antenna Offset </summary>
 <remarks>
@@ -390,9 +461,9 @@ bool operator==(const GnssBasicConfig& lhs, const GnssBasicConfig& rhs);
 class GnssAOffset : public ConfigurationRegister
 {
 public:
-    float positionX = 0;
-    float positionY = 0;
-    float positionZ = 0;
+    std::optional<float> positionX;
+    std::optional<float> positionY;
+    std::optional<float> positionZ;
 
     GnssAOffset() : ConfigurationRegister(57) {}
     static constexpr const char* name() { return "GnssAOffset"; };
@@ -401,7 +472,12 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const GnssAOffset& lhs, const GnssAOffset& rhs);
+inline bool operator==(const GnssAOffset& lhs, const GnssAOffset& rhs)
+{
+    return ((lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ));
+}
+
+inline bool operator!=(const GnssAOffset& lhs, const GnssAOffset& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 58 - GNSS Solution - LLA </summary>
 <remarks>
@@ -410,7 +486,7 @@ Primary GNSS receiver measurement with lat/lon/alt position and velocity in NED 
 
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-class GnssSolLla : public MeasurementRegister
+class GnssSolLla : public ConfigurationRegister
 {
 public:
     enum class Gnss1Fix : uint8_t
@@ -426,28 +502,37 @@ public:
 
     double gps1Tow = 0;     ///< GPS time of week.
     uint16_t gps1Week = 0;  ///< The current GPS week.
-    Gnss1Fix gnss1Fix = static_cast<Gnss1Fix>(0);
+    Gnss1Fix gnss1Fix{0};
     uint8_t gnss1NumSats = 0;        ///< Number of satellites tracked by GNSS receiver.
-    double lat = 0;                  ///< GNSS geodetic latitude.
-    double lon = 0;                  ///< GNSS longitude.
-    double alt = 0;                  ///< GNSS altitude above WGS84 ellipsoid.
-    float velN = 0;                  ///< GNSS velocity in North direction.
-    float velE = 0;                  ///< GNSS velocity in East direction.
-    float velD = 0;                  ///< GNSS velocity in Down direction.
-    float posUncertaintyN = 0;       ///< GNSS position uncertainty, North direction.
-    float posUncertaintyE = 0;       ///< GNSS position uncertainty, East direction.
-    float posUncertaintyD = 0;       ///< GNSS position uncertainty, Down direction.
+    double gnss1Lat = 0;             ///< GNSS geodetic latitude.
+    double gnss1Lon = 0;             ///< GNSS longitude.
+    double gnss1Alt = 0;             ///< GNSS altitude above WGS84 ellipsoid.
+    float gnss1VelN = 0;             ///< GNSS velocity in North direction.
+    float gnss1VelE = 0;             ///< GNSS velocity in East direction.
+    float gnss1VelD = 0;             ///< GNSS velocity in Down direction.
+    float gnss1PosUncertaintyN = 0;  ///< GNSS position uncertainty, North direction.
+    float gnss1PosUncertaintyE = 0;  ///< GNSS position uncertainty, East direction.
+    float gnss1PosUncertaintyD = 0;  ///< GNSS position uncertainty, Down direction.
     float gnss1VelUncertainty = 0;   ///< GNSS velocity uncertainty (scalar).
     float gnss1TimeUncertainty = 0;  ///< GNSS time uncertainty.
 
-    GnssSolLla() : MeasurementRegister(58) {}
+    GnssSolLla() : ConfigurationRegister(58) {}
     static constexpr const char* name() { return "GnssSolLla"; };
 
     bool fromString(const AsciiMessage& sensorResponse) override;
-    using MeasurementRegister::toString;
+    AsciiMessage toString() const override;
 };
 
-bool operator==(const GnssSolLla& lhs, const GnssSolLla& rhs);
+inline bool operator==(const GnssSolLla& lhs, const GnssSolLla& rhs)
+{
+    return ((lhs.gps1Tow == rhs.gps1Tow) && (lhs.gps1Week == rhs.gps1Week) && (lhs.gnss1Fix == rhs.gnss1Fix) && (lhs.gnss1NumSats == rhs.gnss1NumSats) &&
+            (lhs.gnss1Lat == rhs.gnss1Lat) && (lhs.gnss1Lon == rhs.gnss1Lon) && (lhs.gnss1Alt == rhs.gnss1Alt) && (lhs.gnss1VelN == rhs.gnss1VelN) &&
+            (lhs.gnss1VelE == rhs.gnss1VelE) && (lhs.gnss1VelD == rhs.gnss1VelD) && (lhs.gnss1PosUncertaintyN == rhs.gnss1PosUncertaintyN) &&
+            (lhs.gnss1PosUncertaintyE == rhs.gnss1PosUncertaintyE) && (lhs.gnss1PosUncertaintyD == rhs.gnss1PosUncertaintyD) &&
+            (lhs.gnss1VelUncertainty == rhs.gnss1VelUncertainty) && (lhs.gnss1TimeUncertainty == rhs.gnss1TimeUncertainty));
+}
+
+inline bool operator!=(const GnssSolLla& lhs, const GnssSolLla& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 59 - GNSS Solution - ECEF </summary>
 <remarks>
@@ -456,7 +541,7 @@ Primary GNSS receiver measurement in ECEF frame.
 
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-class GnssSolEcef : public MeasurementRegister
+class GnssSolEcef : public ConfigurationRegister
 {
 public:
     enum class Gnss1Fix : uint8_t
@@ -472,28 +557,37 @@ public:
 
     double gps1Tow = 0;     ///< GPS time of week.
     uint16_t gps1Week = 0;  ///< The current GPS week.
-    Gnss1Fix gnss1Fix = static_cast<Gnss1Fix>(0);
+    Gnss1Fix gnss1Fix{0};
     uint8_t gnss1NumSats = 0;        ///< Number of satellites tracked by GNSS receiver.
-    double posX = 0;                 ///< GNSS position in ECEF-frame x-axis.
-    double posY = 0;                 ///< GNSS position in ECEF-frame y-axis.
-    double posZ = 0;                 ///< GNSS position in ECEF-frame z-axis.
-    float velX = 0;                  ///< GNSS velocity in ECEF-frame x-axis.
-    float velY = 0;                  ///< GNSS velocity in ECEF-frame y-axis.
-    float velZ = 0;                  ///< GNSS velocity in ECEF-frame z-axis.
-    float posUncertaintyX = 0;       ///< GNSS position uncertainty ECEF X.
-    float posUncertaintyY = 0;       ///< GNSS position uncertainty ECEF Y.
-    float posUncertaintyZ = 0;       ///< GNSS position uncertainty ECEF Z.
+    double gnss1PosX = 0;            ///< GNSS position in ECEF-frame x-axis.
+    double gnss1PosY = 0;            ///< GNSS position in ECEF-frame y-axis.
+    double gnss1PosZ = 0;            ///< GNSS position in ECEF-frame z-axis.
+    float gnss1VelX = 0;             ///< GNSS velocity in ECEF-frame x-axis.
+    float gnss1VelY = 0;             ///< GNSS velocity in ECEF-frame y-axis.
+    float gnss1VelZ = 0;             ///< GNSS velocity in ECEF-frame z-axis.
+    float gnss1PosUncertaintyX = 0;  ///< GNSS position uncertainty ECEF X.
+    float gnss1PosUncertaintyY = 0;  ///< GNSS position uncertainty ECEF Y.
+    float gnss1PosUncertaintyZ = 0;  ///< GNSS position uncertainty ECEF Z.
     float gnss1VelUncertainty = 0;   ///< GNSS velocity uncertainty (scalar).
     float gnss1TimeUncertainty = 0;  ///< GNSS time uncertainty.
 
-    GnssSolEcef() : MeasurementRegister(59) {}
+    GnssSolEcef() : ConfigurationRegister(59) {}
     static constexpr const char* name() { return "GnssSolEcef"; };
 
     bool fromString(const AsciiMessage& sensorResponse) override;
-    using MeasurementRegister::toString;
+    AsciiMessage toString() const override;
 };
 
-bool operator==(const GnssSolEcef& lhs, const GnssSolEcef& rhs);
+inline bool operator==(const GnssSolEcef& lhs, const GnssSolEcef& rhs)
+{
+    return ((lhs.gps1Tow == rhs.gps1Tow) && (lhs.gps1Week == rhs.gps1Week) && (lhs.gnss1Fix == rhs.gnss1Fix) && (lhs.gnss1NumSats == rhs.gnss1NumSats) &&
+            (lhs.gnss1PosX == rhs.gnss1PosX) && (lhs.gnss1PosY == rhs.gnss1PosY) && (lhs.gnss1PosZ == rhs.gnss1PosZ) && (lhs.gnss1VelX == rhs.gnss1VelX) &&
+            (lhs.gnss1VelY == rhs.gnss1VelY) && (lhs.gnss1VelZ == rhs.gnss1VelZ) && (lhs.gnss1PosUncertaintyX == rhs.gnss1PosUncertaintyX) &&
+            (lhs.gnss1PosUncertaintyY == rhs.gnss1PosUncertaintyY) && (lhs.gnss1PosUncertaintyZ == rhs.gnss1PosUncertaintyZ) &&
+            (lhs.gnss1VelUncertainty == rhs.gnss1VelUncertainty) && (lhs.gnss1TimeUncertainty == rhs.gnss1TimeUncertainty));
+}
+
+inline bool operator!=(const GnssSolEcef& lhs, const GnssSolEcef& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 99 - GNSS System Configuration </summary>
 <remarks>
@@ -512,8 +606,9 @@ public:
         uint16_t imes : 1;
         uint16_t qzssL1Ca : 1;
         uint16_t qzssL1Saif : 1;
+        uint16_t : 8;  // padding
 
-        Systems() noexcept = default;
+        Systems() noexcept : Systems(0) {}
         Systems(uint16_t in) noexcept { std::memcpy(this, &in, sizeof(Systems)); }
 
         explicit operator uint16_t() const
@@ -537,8 +632,9 @@ public:
         uint8_t diffCorr : 1;
         uint8_t integrity : 1;
         uint8_t testMode : 1;
+        uint8_t : 4;  // padding
 
-        SbasMode() noexcept = default;
+        SbasMode() noexcept : SbasMode(0) {}
         SbasMode(uint8_t in) noexcept { std::memcpy(this, &in, sizeof(SbasMode)); }
 
         explicit operator uint8_t() const
@@ -574,8 +670,9 @@ public:
         uint16_t sbas133 : 1;
         uint16_t sbas134 : 1;
         uint16_t sbas135 : 1;
+        uint16_t : 0;  // padding
 
-        SbasSelect1() noexcept = default;
+        SbasSelect1() noexcept : SbasSelect1(0) {}
         SbasSelect1(uint16_t in) noexcept { std::memcpy(this, &in, sizeof(SbasSelect1)); }
 
         explicit operator uint16_t() const
@@ -611,8 +708,9 @@ public:
         uint16_t sbas149 : 1;
         uint16_t sbas150 : 1;
         uint16_t sbas151 : 1;
+        uint16_t : 0;  // padding
 
-        SbasSelect2() noexcept = default;
+        SbasSelect2() noexcept : SbasSelect2(0) {}
         SbasSelect2(uint16_t in) noexcept { std::memcpy(this, &in, sizeof(SbasSelect2)); }
 
         explicit operator uint16_t() const
@@ -639,8 +737,9 @@ public:
         uint16_t sbas156 : 1;
         uint16_t sbas157 : 1;
         uint16_t sbas158 : 1;
+        uint16_t : 9;  // padding
 
-        SbasSelect3() noexcept = default;
+        SbasSelect3() noexcept : SbasSelect3(0) {}
         SbasSelect3(uint16_t in) noexcept { std::memcpy(this, &in, sizeof(SbasSelect3)); }
 
         explicit operator uint16_t() const
@@ -665,15 +764,15 @@ public:
         GnssB = 2,
     };
 
-    Systems systems = static_cast<Systems>(0);
-    uint8_t minCno = 0;
-    uint8_t minElev = 0;
-    uint8_t maxSats = 0;
-    SbasMode sbasMode = static_cast<SbasMode>(0);
-    SbasSelect1 sbasSelect1 = static_cast<SbasSelect1>(0);
-    SbasSelect2 sbasSelect2 = static_cast<SbasSelect2>(0);
-    SbasSelect3 sbasSelect3 = static_cast<SbasSelect3>(0);
-    ReceiverSelect receiverSelect = static_cast<ReceiverSelect>(0);
+    std::optional<Systems> systems;
+    std::optional<uint8_t> minCno;
+    std::optional<uint8_t> minElev;
+    std::optional<uint8_t> maxSats;
+    std::optional<SbasMode> sbasMode;
+    std::optional<SbasSelect1> sbasSelect1;
+    std::optional<SbasSelect2> sbasSelect2;
+    std::optional<SbasSelect3> sbasSelect3;
+    ReceiverSelect receiverSelect{0};
 
     GnssSystemConfig() : ConfigurationRegister(99) {}
     static constexpr const char* name() { return "GnssSystemConfig"; };
@@ -683,7 +782,44 @@ public:
     GenericCommand toReadCommand() override;
 };
 
-bool operator==(const GnssSystemConfig& lhs, const GnssSystemConfig& rhs);
+inline bool operator==(const GnssSystemConfig::Systems& lhs, const GnssSystemConfig::Systems& rhs) noexcept
+{
+    return static_cast<uint16_t>(lhs) == static_cast<uint16_t>(rhs);
+}
+inline bool operator!=(const GnssSystemConfig::Systems& lhs, const GnssSystemConfig::Systems& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const GnssSystemConfig::SbasMode& lhs, const GnssSystemConfig::SbasMode& rhs) noexcept
+{
+    return static_cast<uint8_t>(lhs) == static_cast<uint8_t>(rhs);
+}
+inline bool operator!=(const GnssSystemConfig::SbasMode& lhs, const GnssSystemConfig::SbasMode& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const GnssSystemConfig::SbasSelect1& lhs, const GnssSystemConfig::SbasSelect1& rhs) noexcept
+{
+    return static_cast<uint16_t>(lhs) == static_cast<uint16_t>(rhs);
+}
+inline bool operator!=(const GnssSystemConfig::SbasSelect1& lhs, const GnssSystemConfig::SbasSelect1& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const GnssSystemConfig::SbasSelect2& lhs, const GnssSystemConfig::SbasSelect2& rhs) noexcept
+{
+    return static_cast<uint16_t>(lhs) == static_cast<uint16_t>(rhs);
+}
+inline bool operator!=(const GnssSystemConfig::SbasSelect2& lhs, const GnssSystemConfig::SbasSelect2& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const GnssSystemConfig::SbasSelect3& lhs, const GnssSystemConfig::SbasSelect3& rhs) noexcept
+{
+    return static_cast<uint16_t>(lhs) == static_cast<uint16_t>(rhs);
+}
+inline bool operator!=(const GnssSystemConfig::SbasSelect3& lhs, const GnssSystemConfig::SbasSelect3& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const GnssSystemConfig& lhs, const GnssSystemConfig& rhs)
+{
+    return ((lhs.systems == rhs.systems) && (lhs.minCno == rhs.minCno) && (lhs.minElev == rhs.minElev) && (lhs.maxSats == rhs.maxSats) &&
+            (lhs.sbasMode == rhs.sbasMode) && (lhs.sbasSelect1 == rhs.sbasSelect1) && (lhs.sbasSelect2 == rhs.sbasSelect2) &&
+            (lhs.sbasSelect3 == rhs.sbasSelect3) && (lhs.receiverSelect == rhs.receiverSelect));
+}
+
+inline bool operator!=(const GnssSystemConfig& lhs, const GnssSystemConfig& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 100 - GNSS Sync Configuration </summary>
 <remarks>
@@ -711,13 +847,13 @@ public:
         FreqDutyCycle = 1,
     };
 
-    GnssSyncEnable gnssSyncEnable = static_cast<GnssSyncEnable>(0);
-    Polarity polarity = static_cast<Polarity>(0);
-    SpecType specType = static_cast<SpecType>(0);
-    uint8_t resv = 0;
-    uint32_t period = 0;
-    uint32_t pulseWidth = 0;
-    int32_t offset = 0;
+    std::optional<GnssSyncEnable> gnssSyncEnable;
+    std::optional<Polarity> polarity;
+    std::optional<SpecType> specType;
+    std::optional<uint8_t> resv;
+    std::optional<uint32_t> period;
+    std::optional<uint32_t> pulseWidth;
+    std::optional<int32_t> offset;
 
     GnssSyncConfig() : ConfigurationRegister(100) {}
     static constexpr const char* name() { return "GnssSyncConfig"; };
@@ -726,7 +862,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const GnssSyncConfig& lhs, const GnssSyncConfig& rhs);
+inline bool operator==(const GnssSyncConfig& lhs, const GnssSyncConfig& rhs)
+{
+    return ((lhs.gnssSyncEnable == rhs.gnssSyncEnable) && (lhs.polarity == rhs.polarity) && (lhs.specType == rhs.specType) && (lhs.resv == rhs.resv) &&
+            (lhs.period == rhs.period) && (lhs.pulseWidth == rhs.pulseWidth) && (lhs.offset == rhs.offset));
+}
+
+inline bool operator!=(const GnssSyncConfig& lhs, const GnssSyncConfig& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 103 - GNSS 2 Solution - LLA </summary>
 <remarks>
@@ -752,17 +894,17 @@ public:
 
     double gps2Tow = 0;     ///< GPS time of week.
     uint16_t gps2Week = 0;  ///< The current GPS week.
-    Gnss2Fix gnss2Fix = static_cast<Gnss2Fix>(0);
+    Gnss2Fix gnss2Fix{0};
     uint8_t gnss2NumSats = 0;        ///< Number of satellites tracked by GNSS receiver.
-    double lat = 0;                  ///< GNSS geodetic latitude.
-    double lon = 0;                  ///< GNSS longitude.
-    double alt = 0;                  ///< GNSS altitude above WGS84 ellipsoid.
-    float velN = 0;                  ///< GNSS velocity in North direction.
-    float velE = 0;                  ///< GNSS velocity in East direction.
-    float velD = 0;                  ///< GNSS velocity in Down direction.
-    float posUncertaintyN = 0;       ///< GNSS position uncertainty, North direction.
-    float posUncertaintyE = 0;       ///< GNSS position uncertainty, East direction.
-    float posUncertaintyD = 0;       ///< GNSS position uncertainty, Down direction.
+    double gnss2Lat = 0;             ///< GNSS geodetic latitude.
+    double gnss2Lon = 0;             ///< GNSS longitude.
+    double gnss2Alt = 0;             ///< GNSS altitude above WGS84 ellipsoid.
+    float gnss2VelN = 0;             ///< GNSS velocity in North direction.
+    float gnss2VelE = 0;             ///< GNSS velocity in East direction.
+    float gnss2VelD = 0;             ///< GNSS velocity in Down direction.
+    float gnss2PosUncertaintyN = 0;  ///< GNSS position uncertainty, North direction.
+    float gnss2PosUncertaintyE = 0;  ///< GNSS position uncertainty, East direction.
+    float gnss2PosUncertaintyD = 0;  ///< GNSS position uncertainty, Down direction.
     float gnss2VelUncertainty = 0;   ///< GNSS velocity uncertainty (scalar).
     float gnss2TimeUncertainty = 0;  ///< GNSS time uncertainty.
 
@@ -773,7 +915,16 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Gnss2SolLla& lhs, const Gnss2SolLla& rhs);
+inline bool operator==(const Gnss2SolLla& lhs, const Gnss2SolLla& rhs)
+{
+    return ((lhs.gps2Tow == rhs.gps2Tow) && (lhs.gps2Week == rhs.gps2Week) && (lhs.gnss2Fix == rhs.gnss2Fix) && (lhs.gnss2NumSats == rhs.gnss2NumSats) &&
+            (lhs.gnss2Lat == rhs.gnss2Lat) && (lhs.gnss2Lon == rhs.gnss2Lon) && (lhs.gnss2Alt == rhs.gnss2Alt) && (lhs.gnss2VelN == rhs.gnss2VelN) &&
+            (lhs.gnss2VelE == rhs.gnss2VelE) && (lhs.gnss2VelD == rhs.gnss2VelD) && (lhs.gnss2PosUncertaintyN == rhs.gnss2PosUncertaintyN) &&
+            (lhs.gnss2PosUncertaintyE == rhs.gnss2PosUncertaintyE) && (lhs.gnss2PosUncertaintyD == rhs.gnss2PosUncertaintyD) &&
+            (lhs.gnss2VelUncertainty == rhs.gnss2VelUncertainty) && (lhs.gnss2TimeUncertainty == rhs.gnss2TimeUncertainty));
+}
+
+inline bool operator!=(const Gnss2SolLla& lhs, const Gnss2SolLla& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 104 - GNSS 2 Solution - ECEF </summary>
 <remarks>
@@ -799,17 +950,17 @@ public:
 
     double gps2Tow = 0;     ///< GPS time of week.
     uint16_t gps2Week = 0;  ///< The current GPS week.
-    Gnss2Fix gnss2Fix = static_cast<Gnss2Fix>(0);
+    Gnss2Fix gnss2Fix{0};
     uint8_t gnss2NumSats = 0;        ///< Number of satellites tracked by GNSS receiver.
-    double posX = 0;                 ///< GNSS position in ECEF-frame x-axis.
-    double posY = 0;                 ///< GNSS position in ECEF-frame y-axis.
-    double posZ = 0;                 ///< GNSS position in ECEF-frame z-axis.
-    float velX = 0;                  ///< GNSS velocity in ECEF-frame x-axis.
-    float velY = 0;                  ///< GNSS velocity in ECEF-frame y-axis.
-    float velZ = 0;                  ///< GNSS velocity in ECEF-frame z-axis.
-    float posUncertaintyX = 0;       ///< GNSS position uncertainty ECEF X.
-    float posUncertaintyY = 0;       ///< GNSS position uncertainty ECEF Y.
-    float posUncertaintyZ = 0;       ///< GNSS position uncertainty ECEF Z.
+    double gnss2PosX = 0;            ///< GNSS position in ECEF-frame x-axis.
+    double gnss2PosY = 0;            ///< GNSS position in ECEF-frame y-axis.
+    double gnss2PosZ = 0;            ///< GNSS position in ECEF-frame z-axis.
+    float gnss2VelX = 0;             ///< GNSS velocity in ECEF-frame x-axis.
+    float gnss2VelY = 0;             ///< GNSS velocity in ECEF-frame y-axis.
+    float gnss2VelZ = 0;             ///< GNSS velocity in ECEF-frame z-axis.
+    float gnss2PosUncertaintyX = 0;  ///< GNSS position uncertainty ECEF X.
+    float gnss2PosUncertaintyY = 0;  ///< GNSS position uncertainty ECEF Y.
+    float gnss2PosUncertaintyZ = 0;  ///< GNSS position uncertainty ECEF Z.
     float gnss2VelUncertainty = 0;   ///< GNSS velocity uncertainty (scalar).
     float gnss2TimeUncertainty = 0;  ///< GNSS time uncertainty.
 
@@ -820,7 +971,16 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Gnss2SolEcef& lhs, const Gnss2SolEcef& rhs);
+inline bool operator==(const Gnss2SolEcef& lhs, const Gnss2SolEcef& rhs)
+{
+    return ((lhs.gps2Tow == rhs.gps2Tow) && (lhs.gps2Week == rhs.gps2Week) && (lhs.gnss2Fix == rhs.gnss2Fix) && (lhs.gnss2NumSats == rhs.gnss2NumSats) &&
+            (lhs.gnss2PosX == rhs.gnss2PosX) && (lhs.gnss2PosY == rhs.gnss2PosY) && (lhs.gnss2PosZ == rhs.gnss2PosZ) && (lhs.gnss2VelX == rhs.gnss2VelX) &&
+            (lhs.gnss2VelY == rhs.gnss2VelY) && (lhs.gnss2VelZ == rhs.gnss2VelZ) && (lhs.gnss2PosUncertaintyX == rhs.gnss2PosUncertaintyX) &&
+            (lhs.gnss2PosUncertaintyY == rhs.gnss2PosUncertaintyY) && (lhs.gnss2PosUncertaintyZ == rhs.gnss2PosUncertaintyZ) &&
+            (lhs.gnss2VelUncertainty == rhs.gnss2VelUncertainty) && (lhs.gnss2TimeUncertainty == rhs.gnss2TimeUncertainty));
+}
+
+inline bool operator!=(const Gnss2SolEcef& lhs, const Gnss2SolEcef& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 157 - External GNSS Antenna Offset </summary>
 <remarks>
@@ -829,9 +989,9 @@ bool operator==(const Gnss2SolEcef& lhs, const Gnss2SolEcef& rhs);
 class ExtGnssOffset : public ConfigurationRegister
 {
 public:
-    float positionX = 0;
-    float positionY = 0;
-    float positionZ = 0;
+    std::optional<float> positionX;
+    std::optional<float> positionY;
+    std::optional<float> positionZ;
 
     ExtGnssOffset() : ConfigurationRegister(157) {}
     static constexpr const char* name() { return "ExtGnssOffset"; };
@@ -840,7 +1000,12 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const ExtGnssOffset& lhs, const ExtGnssOffset& rhs);
+inline bool operator==(const ExtGnssOffset& lhs, const ExtGnssOffset& rhs)
+{
+    return ((lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ));
+}
+
+inline bool operator!=(const ExtGnssOffset& lhs, const ExtGnssOffset& rhs) { return !(lhs == rhs); }
 }  // namespace GNSS
 
 namespace GNSSCompass
@@ -872,7 +1037,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const GnssCompassSignalHealthStatus& lhs, const GnssCompassSignalHealthStatus& rhs);
+inline bool operator==(const GnssCompassSignalHealthStatus& lhs, const GnssCompassSignalHealthStatus& rhs)
+{
+    return ((lhs.numSatsPvtA == rhs.numSatsPvtA) && (lhs.numSatsRtkA == rhs.numSatsRtkA) && (lhs.highestCn0A == rhs.highestCn0A) &&
+            (lhs.numSatsPvtB == rhs.numSatsPvtB) && (lhs.numSatsRtkB == rhs.numSatsRtkB) && (lhs.highestCn0B == rhs.highestCn0B) &&
+            (lhs.numComSatsPvt == rhs.numComSatsPvt) && (lhs.numComSatsRtk == rhs.numComSatsRtk));
+}
+
+inline bool operator!=(const GnssCompassSignalHealthStatus& lhs, const GnssCompassSignalHealthStatus& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 93 - GNSS Compass Antenna Baseline </summary>
 <remarks>
@@ -881,12 +1053,12 @@ bool operator==(const GnssCompassSignalHealthStatus& lhs, const GnssCompassSigna
 class GnssCompassBaseline : public ConfigurationRegister
 {
 public:
-    float positionX = 0;
-    float positionY = 0;
-    float positionZ = 0;
-    float uncertaintyX = 0;
-    float uncertaintyY = 0;
-    float uncertaintyZ = 0;
+    std::optional<float> positionX;
+    std::optional<float> positionY;
+    std::optional<float> positionZ;
+    std::optional<float> uncertaintyX;
+    std::optional<float> uncertaintyY;
+    std::optional<float> uncertaintyZ;
 
     GnssCompassBaseline() : ConfigurationRegister(93) {}
     static constexpr const char* name() { return "GnssCompassBaseline"; };
@@ -895,7 +1067,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const GnssCompassBaseline& lhs, const GnssCompassBaseline& rhs);
+inline bool operator==(const GnssCompassBaseline& lhs, const GnssCompassBaseline& rhs)
+{
+    return ((lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ) &&
+            (lhs.uncertaintyX == rhs.uncertaintyX) && (lhs.uncertaintyY == rhs.uncertaintyY) && (lhs.uncertaintyZ == rhs.uncertaintyZ));
+}
+
+inline bool operator!=(const GnssCompassBaseline& lhs, const GnssCompassBaseline& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 97 - GNSS Compass Estimated Baseline </summary>
 <remarks>
@@ -925,7 +1103,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const GnssCompassEstBaseline& lhs, const GnssCompassEstBaseline& rhs);
+inline bool operator==(const GnssCompassEstBaseline& lhs, const GnssCompassEstBaseline& rhs)
+{
+    return ((lhs.estBaselineComplete == rhs.estBaselineComplete) && (lhs.resv == rhs.resv) && (lhs.numMeas == rhs.numMeas) &&
+            (lhs.positionX == rhs.positionX) && (lhs.positionY == rhs.positionY) && (lhs.positionZ == rhs.positionZ) &&
+            (lhs.uncertaintyX == rhs.uncertaintyX) && (lhs.uncertaintyY == rhs.uncertaintyY) && (lhs.uncertaintyZ == rhs.uncertaintyZ));
+}
+
+inline bool operator!=(const GnssCompassEstBaseline& lhs, const GnssCompassEstBaseline& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 98 - GNSS Compass Startup Status </summary>
 <remarks>
@@ -947,7 +1132,12 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const GnssCompassStartupStatus& lhs, const GnssCompassStartupStatus& rhs);
+inline bool operator==(const GnssCompassStartupStatus& lhs, const GnssCompassStartupStatus& rhs)
+{
+    return ((lhs.percentComplete == rhs.percentComplete) && (lhs.currentHeading == rhs.currentHeading));
+}
+
+inline bool operator!=(const GnssCompassStartupStatus& lhs, const GnssCompassStartupStatus& rhs) { return !(lhs == rhs); }
 }  // namespace GNSSCompass
 
 namespace HardSoftIronEstimator
@@ -973,9 +1163,9 @@ public:
         Enable = 3,
     };
 
-    Mode mode = static_cast<Mode>(0);
-    ApplyCompensation applyCompensation = static_cast<ApplyCompensation>(0);
-    uint8_t convergeRate = 0;
+    std::optional<Mode> mode;
+    std::optional<ApplyCompensation> applyCompensation;
+    std::optional<uint8_t> convergeRate;
 
     RealTimeHsiControl() : ConfigurationRegister(44) {}
     static constexpr const char* name() { return "RealTimeHsiControl"; };
@@ -984,7 +1174,12 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const RealTimeHsiControl& lhs, const RealTimeHsiControl& rhs);
+inline bool operator==(const RealTimeHsiControl& lhs, const RealTimeHsiControl& rhs)
+{
+    return ((lhs.mode == rhs.mode) && (lhs.applyCompensation == rhs.applyCompensation) && (lhs.convergeRate == rhs.convergeRate));
+}
+
+inline bool operator!=(const RealTimeHsiControl& lhs, const RealTimeHsiControl& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 47 - Real-Time HSI Results </summary>
 <remarks>
@@ -1016,7 +1211,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const EstMagCal& lhs, const EstMagCal& rhs);
+inline bool operator==(const EstMagCal& lhs, const EstMagCal& rhs)
+{
+    return ((lhs.magGain00 == rhs.magGain00) && (lhs.magGain01 == rhs.magGain01) && (lhs.magGain02 == rhs.magGain02) && (lhs.magGain10 == rhs.magGain10) &&
+            (lhs.magGain11 == rhs.magGain11) && (lhs.magGain12 == rhs.magGain12) && (lhs.magGain20 == rhs.magGain20) && (lhs.magGain21 == rhs.magGain21) &&
+            (lhs.magGain22 == rhs.magGain22) && (lhs.magBiasX == rhs.magBiasX) && (lhs.magBiasY == rhs.magBiasY) && (lhs.magBiasZ == rhs.magBiasZ));
+}
+
+inline bool operator!=(const EstMagCal& lhs, const EstMagCal& rhs) { return !(lhs == rhs); }
 }  // namespace HardSoftIronEstimator
 
 namespace Heave
@@ -1043,7 +1245,12 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const HeaveOutputs& lhs, const HeaveOutputs& rhs);
+inline bool operator==(const HeaveOutputs& lhs, const HeaveOutputs& rhs)
+{
+    return ((lhs.heave == rhs.heave) && (lhs.heaveRate == rhs.heaveRate) && (lhs.delayedHeave == rhs.delayedHeave));
+}
+
+inline bool operator!=(const HeaveOutputs& lhs, const HeaveOutputs& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 116 - Heave Basic Configuration </summary>
 <remarks>
@@ -1052,13 +1259,13 @@ bool operator==(const HeaveOutputs& lhs, const HeaveOutputs& rhs);
 class HeaveBasicConfig : public ConfigurationRegister
 {
 public:
-    float initialWavePeriod = 0;
-    float initialWaveAmplitude = 0;
-    float maxWavePeriod = 0;
-    float minWaveAmplitude = 0;
-    float delayedHeaveCutoffFreq = 0;
-    float heaveCutoffFreq = 0;
-    float heaveRateCutoffFreq = 0;
+    std::optional<float> initialWavePeriod;
+    std::optional<float> initialWaveAmplitude;
+    std::optional<float> maxWavePeriod;
+    std::optional<float> minWaveAmplitude;
+    std::optional<float> delayedHeaveCutoffFreq;
+    std::optional<float> heaveCutoffFreq;
+    std::optional<float> heaveRateCutoffFreq;
 
     HeaveBasicConfig() : ConfigurationRegister(116) {}
     static constexpr const char* name() { return "HeaveBasicConfig"; };
@@ -1067,7 +1274,15 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const HeaveBasicConfig& lhs, const HeaveBasicConfig& rhs);
+inline bool operator==(const HeaveBasicConfig& lhs, const HeaveBasicConfig& rhs)
+{
+    return ((lhs.initialWavePeriod == rhs.initialWavePeriod) && (lhs.initialWaveAmplitude == rhs.initialWaveAmplitude) &&
+            (lhs.maxWavePeriod == rhs.maxWavePeriod) && (lhs.minWaveAmplitude == rhs.minWaveAmplitude) &&
+            (lhs.delayedHeaveCutoffFreq == rhs.delayedHeaveCutoffFreq) && (lhs.heaveCutoffFreq == rhs.heaveCutoffFreq) &&
+            (lhs.heaveRateCutoffFreq == rhs.heaveRateCutoffFreq));
+}
+
+inline bool operator!=(const HeaveBasicConfig& lhs, const HeaveBasicConfig& rhs) { return !(lhs == rhs); }
 }  // namespace Heave
 
 namespace IMU
@@ -1094,7 +1309,9 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Mag& lhs, const Mag& rhs);
+inline bool operator==(const Mag& lhs, const Mag& rhs) { return ((lhs.magX == rhs.magX) && (lhs.magY == rhs.magY) && (lhs.magZ == rhs.magZ)); }
+
+inline bool operator!=(const Mag& lhs, const Mag& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 18 - Compensated Accelerometer </summary>
 <remarks>
@@ -1117,7 +1334,9 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Accel& lhs, const Accel& rhs);
+inline bool operator==(const Accel& lhs, const Accel& rhs) { return ((lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ)); }
+
+inline bool operator!=(const Accel& lhs, const Accel& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 19 - Compensated Gyro </summary>
 <remarks>
@@ -1140,7 +1359,9 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Gyro& lhs, const Gyro& rhs);
+inline bool operator==(const Gyro& lhs, const Gyro& rhs) { return ((lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ)); }
+
+inline bool operator!=(const Gyro& lhs, const Gyro& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 20 - Compensated IMU </summary>
 <remarks>
@@ -1169,7 +1390,13 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const MagAccelGyro& lhs, const MagAccelGyro& rhs);
+inline bool operator==(const MagAccelGyro& lhs, const MagAccelGyro& rhs)
+{
+    return ((lhs.magX == rhs.magX) && (lhs.magY == rhs.magY) && (lhs.magZ == rhs.magZ) && (lhs.accelX == rhs.accelX) && (lhs.accelY == rhs.accelY) &&
+            (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
+}
+
+inline bool operator!=(const MagAccelGyro& lhs, const MagAccelGyro& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 23 - Magnetometer Calibration </summary>
 <remarks>
@@ -1178,18 +1405,18 @@ bool operator==(const MagAccelGyro& lhs, const MagAccelGyro& rhs);
 class MagCal : public ConfigurationRegister
 {
 public:
-    float magGain00 = 0;
-    float magGain01 = 0;
-    float magGain02 = 0;
-    float magGain10 = 0;
-    float magGain11 = 0;
-    float magGain12 = 0;
-    float magGain20 = 0;
-    float magGain21 = 0;
-    float magGain22 = 0;
-    float magBiasX = 0;
-    float magBiasY = 0;
-    float magBiasZ = 0;
+    std::optional<float> magGain00;
+    std::optional<float> magGain01;
+    std::optional<float> magGain02;
+    std::optional<float> magGain10;
+    std::optional<float> magGain11;
+    std::optional<float> magGain12;
+    std::optional<float> magGain20;
+    std::optional<float> magGain21;
+    std::optional<float> magGain22;
+    std::optional<float> magBiasX;
+    std::optional<float> magBiasY;
+    std::optional<float> magBiasZ;
 
     MagCal() : ConfigurationRegister(23) {}
     static constexpr const char* name() { return "MagCal"; };
@@ -1198,7 +1425,14 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const MagCal& lhs, const MagCal& rhs);
+inline bool operator==(const MagCal& lhs, const MagCal& rhs)
+{
+    return ((lhs.magGain00 == rhs.magGain00) && (lhs.magGain01 == rhs.magGain01) && (lhs.magGain02 == rhs.magGain02) && (lhs.magGain10 == rhs.magGain10) &&
+            (lhs.magGain11 == rhs.magGain11) && (lhs.magGain12 == rhs.magGain12) && (lhs.magGain20 == rhs.magGain20) && (lhs.magGain21 == rhs.magGain21) &&
+            (lhs.magGain22 == rhs.magGain22) && (lhs.magBiasX == rhs.magBiasX) && (lhs.magBiasY == rhs.magBiasY) && (lhs.magBiasZ == rhs.magBiasZ));
+}
+
+inline bool operator!=(const MagCal& lhs, const MagCal& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 25 - Accel Calibration </summary>
 <remarks>
@@ -1207,18 +1441,18 @@ bool operator==(const MagCal& lhs, const MagCal& rhs);
 class AccelCal : public ConfigurationRegister
 {
 public:
-    float accelGain00 = 0;
-    float accelGain01 = 0;
-    float accelGain02 = 0;
-    float accelGain10 = 0;
-    float accelGain11 = 0;
-    float accelGain12 = 0;
-    float accelGain20 = 0;
-    float accelGain21 = 0;
-    float accelGain22 = 0;
-    float accelBiasX = 0;
-    float accelBiasY = 0;
-    float accelBiasZ = 0;
+    std::optional<float> accelGain00;
+    std::optional<float> accelGain01;
+    std::optional<float> accelGain02;
+    std::optional<float> accelGain10;
+    std::optional<float> accelGain11;
+    std::optional<float> accelGain12;
+    std::optional<float> accelGain20;
+    std::optional<float> accelGain21;
+    std::optional<float> accelGain22;
+    std::optional<float> accelBiasX;
+    std::optional<float> accelBiasY;
+    std::optional<float> accelBiasZ;
 
     AccelCal() : ConfigurationRegister(25) {}
     static constexpr const char* name() { return "AccelCal"; };
@@ -1227,7 +1461,15 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const AccelCal& lhs, const AccelCal& rhs);
+inline bool operator==(const AccelCal& lhs, const AccelCal& rhs)
+{
+    return ((lhs.accelGain00 == rhs.accelGain00) && (lhs.accelGain01 == rhs.accelGain01) && (lhs.accelGain02 == rhs.accelGain02) &&
+            (lhs.accelGain10 == rhs.accelGain10) && (lhs.accelGain11 == rhs.accelGain11) && (lhs.accelGain12 == rhs.accelGain12) &&
+            (lhs.accelGain20 == rhs.accelGain20) && (lhs.accelGain21 == rhs.accelGain21) && (lhs.accelGain22 == rhs.accelGain22) &&
+            (lhs.accelBiasX == rhs.accelBiasX) && (lhs.accelBiasY == rhs.accelBiasY) && (lhs.accelBiasZ == rhs.accelBiasZ));
+}
+
+inline bool operator!=(const AccelCal& lhs, const AccelCal& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 26 - Reference Frame Rotation </summary>
 <remarks>
@@ -1236,15 +1478,15 @@ bool operator==(const AccelCal& lhs, const AccelCal& rhs);
 class RefFrameRot : public ConfigurationRegister
 {
 public:
-    float rfr00 = 0;
-    float rfr01 = 0;
-    float rfr02 = 0;
-    float rfr10 = 0;
-    float rfr11 = 0;
-    float rfr12 = 0;
-    float rfr20 = 0;
-    float rfr21 = 0;
-    float rfr22 = 0;
+    std::optional<float> rfr00;
+    std::optional<float> rfr01;
+    std::optional<float> rfr02;
+    std::optional<float> rfr10;
+    std::optional<float> rfr11;
+    std::optional<float> rfr12;
+    std::optional<float> rfr20;
+    std::optional<float> rfr21;
+    std::optional<float> rfr22;
 
     RefFrameRot() : ConfigurationRegister(26) {}
     static constexpr const char* name() { return "RefFrameRot"; };
@@ -1253,7 +1495,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const RefFrameRot& lhs, const RefFrameRot& rhs);
+inline bool operator==(const RefFrameRot& lhs, const RefFrameRot& rhs)
+{
+    return ((lhs.rfr00 == rhs.rfr00) && (lhs.rfr01 == rhs.rfr01) && (lhs.rfr02 == rhs.rfr02) && (lhs.rfr10 == rhs.rfr10) && (lhs.rfr11 == rhs.rfr11) &&
+            (lhs.rfr12 == rhs.rfr12) && (lhs.rfr20 == rhs.rfr20) && (lhs.rfr21 == rhs.rfr21) && (lhs.rfr22 == rhs.rfr22));
+}
+
+inline bool operator!=(const RefFrameRot& lhs, const RefFrameRot& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 54 - IMU Measurements </summary>
 <remarks>
@@ -1284,7 +1532,15 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const ImuMeas& lhs, const ImuMeas& rhs);
+inline bool operator==(const ImuMeas& lhs, const ImuMeas& rhs)
+{
+    return ((lhs.uncompMagX == rhs.uncompMagX) && (lhs.uncompMagY == rhs.uncompMagY) && (lhs.uncompMagZ == rhs.uncompMagZ) &&
+            (lhs.uncompAccX == rhs.uncompAccX) && (lhs.uncompAccY == rhs.uncompAccY) && (lhs.uncompAccZ == rhs.uncompAccZ) &&
+            (lhs.uncompGyroX == rhs.uncompGyroX) && (lhs.uncompGyroY == rhs.uncompGyroY) && (lhs.uncompGyroZ == rhs.uncompGyroZ) &&
+            (lhs.temperature == rhs.temperature) && (lhs.pressure == rhs.pressure));
+}
+
+inline bool operator!=(const ImuMeas& lhs, const ImuMeas& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 80 - Delta Theta and Delta Velocity </summary>
 <remarks>
@@ -1311,7 +1567,13 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const DeltaThetaVelocity& lhs, const DeltaThetaVelocity& rhs);
+inline bool operator==(const DeltaThetaVelocity& lhs, const DeltaThetaVelocity& rhs)
+{
+    return ((lhs.deltaTime == rhs.deltaTime) && (lhs.deltaThetaX == rhs.deltaThetaX) && (lhs.deltaThetaY == rhs.deltaThetaY) &&
+            (lhs.deltaThetaZ == rhs.deltaThetaZ) && (lhs.deltaVelX == rhs.deltaVelX) && (lhs.deltaVelY == rhs.deltaVelY) && (lhs.deltaVelZ == rhs.deltaVelZ));
+}
+
+inline bool operator!=(const DeltaThetaVelocity& lhs, const DeltaThetaVelocity& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 82 - Delta Theta and Delta Velocity Configuration </summary>
 <remarks>
@@ -1348,11 +1610,11 @@ public:
         RateAndCoriolis = 3,
     };
 
-    IntegrationFrame integrationFrame = static_cast<IntegrationFrame>(0);
-    GyroCompensation gyroCompensation = static_cast<GyroCompensation>(0);
-    AccelCompensation accelCompensation = static_cast<AccelCompensation>(0);
-    EarthRateCompensation earthRateCompensation = static_cast<EarthRateCompensation>(0);
-    uint16_t resv = 0;
+    std::optional<IntegrationFrame> integrationFrame;
+    std::optional<GyroCompensation> gyroCompensation;
+    std::optional<AccelCompensation> accelCompensation;
+    std::optional<EarthRateCompensation> earthRateCompensation;
+    std::optional<uint16_t> resv;
 
     DeltaThetaVelConfig() : ConfigurationRegister(82) {}
     static constexpr const char* name() { return "DeltaThetaVelConfig"; };
@@ -1361,7 +1623,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const DeltaThetaVelConfig& lhs, const DeltaThetaVelConfig& rhs);
+inline bool operator==(const DeltaThetaVelConfig& lhs, const DeltaThetaVelConfig& rhs)
+{
+    return ((lhs.integrationFrame == rhs.integrationFrame) && (lhs.gyroCompensation == rhs.gyroCompensation) &&
+            (lhs.accelCompensation == rhs.accelCompensation) && (lhs.earthRateCompensation == rhs.earthRateCompensation) && (lhs.resv == rhs.resv));
+}
+
+inline bool operator!=(const DeltaThetaVelConfig& lhs, const DeltaThetaVelConfig& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 84 - Gyro Calibration </summary>
 <remarks>
@@ -1370,18 +1638,18 @@ bool operator==(const DeltaThetaVelConfig& lhs, const DeltaThetaVelConfig& rhs);
 class GyroCal : public ConfigurationRegister
 {
 public:
-    float gyroGain00 = 0;
-    float gyroGain01 = 0;
-    float gyroGain02 = 0;
-    float gyroGain10 = 0;
-    float gyroGain11 = 0;
-    float gyroGain12 = 0;
-    float gyroGain20 = 0;
-    float gyroGain21 = 0;
-    float gyroGain22 = 0;
-    float gyroBiasX = 0;
-    float gyroBiasY = 0;
-    float gyroBiasZ = 0;
+    std::optional<float> gyroGain00;
+    std::optional<float> gyroGain01;
+    std::optional<float> gyroGain02;
+    std::optional<float> gyroGain10;
+    std::optional<float> gyroGain11;
+    std::optional<float> gyroGain12;
+    std::optional<float> gyroGain20;
+    std::optional<float> gyroGain21;
+    std::optional<float> gyroGain22;
+    std::optional<float> gyroBiasX;
+    std::optional<float> gyroBiasY;
+    std::optional<float> gyroBiasZ;
 
     GyroCal() : ConfigurationRegister(84) {}
     static constexpr const char* name() { return "GyroCal"; };
@@ -1390,7 +1658,15 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const GyroCal& lhs, const GyroCal& rhs);
+inline bool operator==(const GyroCal& lhs, const GyroCal& rhs)
+{
+    return ((lhs.gyroGain00 == rhs.gyroGain00) && (lhs.gyroGain01 == rhs.gyroGain01) && (lhs.gyroGain02 == rhs.gyroGain02) &&
+            (lhs.gyroGain10 == rhs.gyroGain10) && (lhs.gyroGain11 == rhs.gyroGain11) && (lhs.gyroGain12 == rhs.gyroGain12) &&
+            (lhs.gyroGain20 == rhs.gyroGain20) && (lhs.gyroGain21 == rhs.gyroGain21) && (lhs.gyroGain22 == rhs.gyroGain22) &&
+            (lhs.gyroBiasX == rhs.gyroBiasX) && (lhs.gyroBiasY == rhs.gyroBiasY) && (lhs.gyroBiasZ == rhs.gyroBiasZ));
+}
+
+inline bool operator!=(const GyroCal& lhs, const GyroCal& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 85 - IMU Filtering Configuration </summary>
 <remarks>
@@ -1403,8 +1679,9 @@ public:
     {
         uint8_t uncomp : 1;
         uint8_t comp : 1;
+        uint8_t : 6;  // padding
 
-        MagFilterMode() noexcept = default;
+        MagFilterMode() noexcept : MagFilterMode(0) {}
         MagFilterMode(uint8_t in) noexcept { std::memcpy(this, &in, sizeof(MagFilterMode)); }
 
         explicit operator uint8_t() const
@@ -1426,8 +1703,9 @@ public:
     {
         uint8_t uncomp : 1;
         uint8_t comp : 1;
+        uint8_t : 6;  // padding
 
-        AccelFilterMode() noexcept = default;
+        AccelFilterMode() noexcept : AccelFilterMode(0) {}
         AccelFilterMode(uint8_t in) noexcept { std::memcpy(this, &in, sizeof(AccelFilterMode)); }
 
         explicit operator uint8_t() const
@@ -1449,8 +1727,9 @@ public:
     {
         uint8_t uncomp : 1;
         uint8_t comp : 1;
+        uint8_t : 6;  // padding
 
-        GyroFilterMode() noexcept = default;
+        GyroFilterMode() noexcept : GyroFilterMode(0) {}
         GyroFilterMode(uint8_t in) noexcept { std::memcpy(this, &in, sizeof(GyroFilterMode)); }
 
         explicit operator uint8_t() const
@@ -1472,8 +1751,9 @@ public:
     {
         uint8_t uncomp : 1;
         uint8_t comp : 1;
+        uint8_t : 6;  // padding
 
-        TempFilterMode() noexcept = default;
+        TempFilterMode() noexcept : TempFilterMode(0) {}
         TempFilterMode(uint8_t in) noexcept { std::memcpy(this, &in, sizeof(TempFilterMode)); }
 
         explicit operator uint8_t() const
@@ -1495,8 +1775,9 @@ public:
     {
         uint8_t uncomp : 1;
         uint8_t comp : 1;
+        uint8_t : 6;  // padding
 
-        PresFilterMode() noexcept = default;
+        PresFilterMode() noexcept : PresFilterMode(0) {}
         PresFilterMode(uint8_t in) noexcept { std::memcpy(this, &in, sizeof(PresFilterMode)); }
 
         explicit operator uint8_t() const
@@ -1514,16 +1795,16 @@ public:
     };
     static_assert(sizeof(PresFilterMode) == 1);
 
-    uint16_t magWindowSize = 0;
-    uint16_t accelWindowSize = 0;
-    uint16_t gyroWindowSize = 0;
-    uint16_t tempWindowSize = 0;
-    uint16_t presWindowSize = 0;
-    MagFilterMode magFilterMode = static_cast<MagFilterMode>(0);
-    AccelFilterMode accelFilterMode = static_cast<AccelFilterMode>(0);
-    GyroFilterMode gyroFilterMode = static_cast<GyroFilterMode>(0);
-    TempFilterMode tempFilterMode = static_cast<TempFilterMode>(0);
-    PresFilterMode presFilterMode = static_cast<PresFilterMode>(0);
+    std::optional<uint16_t> magWindowSize;
+    std::optional<uint16_t> accelWindowSize;
+    std::optional<uint16_t> gyroWindowSize;
+    std::optional<uint16_t> tempWindowSize;
+    std::optional<uint16_t> presWindowSize;
+    std::optional<MagFilterMode> magFilterMode;
+    std::optional<AccelFilterMode> accelFilterMode;
+    std::optional<GyroFilterMode> gyroFilterMode;
+    std::optional<TempFilterMode> tempFilterMode;
+    std::optional<PresFilterMode> presFilterMode;
 
     ImuFilterControl() : ConfigurationRegister(85) {}
     static constexpr const char* name() { return "ImuFilterControl"; };
@@ -1532,7 +1813,45 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const ImuFilterControl& lhs, const ImuFilterControl& rhs);
+inline bool operator==(const ImuFilterControl::MagFilterMode& lhs, const ImuFilterControl::MagFilterMode& rhs) noexcept
+{
+    return static_cast<uint8_t>(lhs) == static_cast<uint8_t>(rhs);
+}
+inline bool operator!=(const ImuFilterControl::MagFilterMode& lhs, const ImuFilterControl::MagFilterMode& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const ImuFilterControl::AccelFilterMode& lhs, const ImuFilterControl::AccelFilterMode& rhs) noexcept
+{
+    return static_cast<uint8_t>(lhs) == static_cast<uint8_t>(rhs);
+}
+inline bool operator!=(const ImuFilterControl::AccelFilterMode& lhs, const ImuFilterControl::AccelFilterMode& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const ImuFilterControl::GyroFilterMode& lhs, const ImuFilterControl::GyroFilterMode& rhs) noexcept
+{
+    return static_cast<uint8_t>(lhs) == static_cast<uint8_t>(rhs);
+}
+inline bool operator!=(const ImuFilterControl::GyroFilterMode& lhs, const ImuFilterControl::GyroFilterMode& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const ImuFilterControl::TempFilterMode& lhs, const ImuFilterControl::TempFilterMode& rhs) noexcept
+{
+    return static_cast<uint8_t>(lhs) == static_cast<uint8_t>(rhs);
+}
+inline bool operator!=(const ImuFilterControl::TempFilterMode& lhs, const ImuFilterControl::TempFilterMode& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const ImuFilterControl::PresFilterMode& lhs, const ImuFilterControl::PresFilterMode& rhs) noexcept
+{
+    return static_cast<uint8_t>(lhs) == static_cast<uint8_t>(rhs);
+}
+inline bool operator!=(const ImuFilterControl::PresFilterMode& lhs, const ImuFilterControl::PresFilterMode& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const ImuFilterControl& lhs, const ImuFilterControl& rhs)
+{
+    return ((lhs.magWindowSize == rhs.magWindowSize) && (lhs.accelWindowSize == rhs.accelWindowSize) && (lhs.gyroWindowSize == rhs.gyroWindowSize) &&
+            (lhs.tempWindowSize == rhs.tempWindowSize) && (lhs.presWindowSize == rhs.presWindowSize) && (lhs.magFilterMode == rhs.magFilterMode) &&
+            (lhs.accelFilterMode == rhs.accelFilterMode) && (lhs.gyroFilterMode == rhs.gyroFilterMode) && (lhs.tempFilterMode == rhs.tempFilterMode) &&
+            (lhs.presFilterMode == rhs.presFilterMode));
+}
+
+inline bool operator!=(const ImuFilterControl& lhs, const ImuFilterControl& rhs) { return !(lhs == rhs); }
 }  // namespace IMU
 
 namespace INS
@@ -1548,6 +1867,8 @@ Estimated INS solution with lat/lon/alt position.
 class InsSolLla : public MeasurementRegister
 {
 public:
+    using InsStatus = VN::InsStatus;
+
     double timeGpsTow = 0;     ///< GPS time of week.
     uint16_t timeGpsWeek = 0;  ///< The current GPS week.
     InsStatus insStatus = 0;   ///< Ins status bitfield.
@@ -1571,7 +1892,15 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const InsSolLla& lhs, const InsSolLla& rhs);
+inline bool operator==(const InsSolLla& lhs, const InsSolLla& rhs)
+{
+    return ((lhs.timeGpsTow == rhs.timeGpsTow) && (lhs.timeGpsWeek == rhs.timeGpsWeek) && (lhs.insStatus == rhs.insStatus) && (lhs.yaw == rhs.yaw) &&
+            (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posLat == rhs.posLat) && (lhs.posLon == rhs.posLon) && (lhs.posAlt == rhs.posAlt) &&
+            (lhs.velN == rhs.velN) && (lhs.velE == rhs.velE) && (lhs.velD == rhs.velD) && (lhs.attUncertainty == rhs.attUncertainty) &&
+            (lhs.posUncertainty == rhs.posUncertainty) && (lhs.velUncertainty == rhs.velUncertainty));
+}
+
+inline bool operator!=(const InsSolLla& lhs, const InsSolLla& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 64 - INS Solution - ECEF </summary>
 <remarks>
@@ -1583,6 +1912,8 @@ Estimated INS Solution with ECEF position
 class InsSolEcef : public MeasurementRegister
 {
 public:
+    using InsStatus = VN::InsStatus;
+
     double timeGpsTow = 0;     ///< GPS time of week.
     uint16_t timeGpsWeek = 0;  ///< The current GPS week.
     InsStatus insStatus = 0;   ///< Ins status bitfield.
@@ -1606,7 +1937,15 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const InsSolEcef& lhs, const InsSolEcef& rhs);
+inline bool operator==(const InsSolEcef& lhs, const InsSolEcef& rhs)
+{
+    return ((lhs.timeGpsTow == rhs.timeGpsTow) && (lhs.timeGpsWeek == rhs.timeGpsWeek) && (lhs.insStatus == rhs.insStatus) && (lhs.yaw == rhs.yaw) &&
+            (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posEx == rhs.posEx) && (lhs.posEy == rhs.posEy) && (lhs.posEz == rhs.posEz) &&
+            (lhs.velEx == rhs.velEx) && (lhs.velEy == rhs.velEy) && (lhs.velEz == rhs.velEz) && (lhs.attUncertainty == rhs.attUncertainty) &&
+            (lhs.posUncertainty == rhs.posUncertainty) && (lhs.velUncertainty == rhs.velUncertainty));
+}
+
+inline bool operator!=(const InsSolEcef& lhs, const InsSolEcef& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 67 - INS Basic Configuration </summary>
 <remarks>
@@ -1636,10 +1975,10 @@ public:
         Enable = 1,
     };
 
-    Scenario scenario = static_cast<Scenario>(0);
-    AhrsAiding ahrsAiding = static_cast<AhrsAiding>(0);
-    EstBaseline estBaseline = static_cast<EstBaseline>(0);
-    uint8_t resv = 0;
+    std::optional<Scenario> scenario;
+    std::optional<AhrsAiding> ahrsAiding;
+    std::optional<EstBaseline> estBaseline;
+    std::optional<uint8_t> resv;
 
     InsBasicConfig() : ConfigurationRegister(67) {}
     static constexpr const char* name() { return "InsBasicConfig"; };
@@ -1648,7 +1987,12 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const InsBasicConfig& lhs, const InsBasicConfig& rhs);
+inline bool operator==(const InsBasicConfig& lhs, const InsBasicConfig& rhs)
+{
+    return ((lhs.scenario == rhs.scenario) && (lhs.ahrsAiding == rhs.ahrsAiding) && (lhs.estBaseline == rhs.estBaseline) && (lhs.resv == rhs.resv));
+}
+
+inline bool operator!=(const InsBasicConfig& lhs, const InsBasicConfig& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 72 - INS State - LLA </summary>
 <remarks>
@@ -1683,7 +2027,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const InsStateLla& lhs, const InsStateLla& rhs);
+inline bool operator==(const InsStateLla& lhs, const InsStateLla& rhs)
+{
+    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posLat == rhs.posLat) && (lhs.posLon == rhs.posLon) &&
+            (lhs.posAlt == rhs.posAlt) && (lhs.velN == rhs.velN) && (lhs.velE == rhs.velE) && (lhs.velD == rhs.velD) && (lhs.accelX == rhs.accelX) &&
+            (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
+}
+
+inline bool operator!=(const InsStateLla& lhs, const InsStateLla& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 73 - INS State - ECEF </summary>
 <remarks>
@@ -1718,7 +2069,14 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const InsStateEcef& lhs, const InsStateEcef& rhs);
+inline bool operator==(const InsStateEcef& lhs, const InsStateEcef& rhs)
+{
+    return ((lhs.yaw == rhs.yaw) && (lhs.pitch == rhs.pitch) && (lhs.roll == rhs.roll) && (lhs.posEx == rhs.posEx) && (lhs.posEy == rhs.posEy) &&
+            (lhs.posEz == rhs.posEz) && (lhs.velEx == rhs.velEx) && (lhs.velEy == rhs.velEy) && (lhs.velEz == rhs.velEz) && (lhs.accelX == rhs.accelX) &&
+            (lhs.accelY == rhs.accelY) && (lhs.accelZ == rhs.accelZ) && (lhs.gyroX == rhs.gyroX) && (lhs.gyroY == rhs.gyroY) && (lhs.gyroZ == rhs.gyroZ));
+}
+
+inline bool operator!=(const InsStateEcef& lhs, const InsStateEcef& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 74 - Filter Startup Bias </summary>
 <remarks>
@@ -1727,13 +2085,13 @@ bool operator==(const InsStateEcef& lhs, const InsStateEcef& rhs);
 class FilterStartupBias : public ConfigurationRegister
 {
 public:
-    float gyroBiasX = 0;
-    float gyroBiasY = 0;
-    float gyroBiasZ = 0;
-    float accelBiasX = 0;
-    float accelBiasY = 0;
-    float accelBiasZ = 0;
-    float presBias = 0;
+    std::optional<float> gyroBiasX;
+    std::optional<float> gyroBiasY;
+    std::optional<float> gyroBiasZ;
+    std::optional<float> accelBiasX;
+    std::optional<float> accelBiasY;
+    std::optional<float> accelBiasZ;
+    std::optional<float> presBias;
 
     FilterStartupBias() : ConfigurationRegister(74) {}
     static constexpr const char* name() { return "FilterStartupBias"; };
@@ -1742,7 +2100,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const FilterStartupBias& lhs, const FilterStartupBias& rhs);
+inline bool operator==(const FilterStartupBias& lhs, const FilterStartupBias& rhs)
+{
+    return ((lhs.gyroBiasX == rhs.gyroBiasX) && (lhs.gyroBiasY == rhs.gyroBiasY) && (lhs.gyroBiasZ == rhs.gyroBiasZ) && (lhs.accelBiasX == rhs.accelBiasX) &&
+            (lhs.accelBiasY == rhs.accelBiasY) && (lhs.accelBiasZ == rhs.accelBiasZ) && (lhs.presBias == rhs.presBias));
+}
+
+inline bool operator!=(const FilterStartupBias& lhs, const FilterStartupBias& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 105 - INS Reference Point Offset </summary>
 <remarks>
@@ -1751,12 +2115,12 @@ bool operator==(const FilterStartupBias& lhs, const FilterStartupBias& rhs);
 class InsRefOffset : public ConfigurationRegister
 {
 public:
-    float refOffsetX = 0;
-    float refOffsetY = 0;
-    float refOffsetZ = 0;
-    float refUncertX = 0;
-    float refUncertY = 0;
-    float refUncertZ = 0;
+    std::optional<float> refOffsetX;
+    std::optional<float> refOffsetY;
+    std::optional<float> refOffsetZ;
+    std::optional<float> refUncertX;
+    std::optional<float> refUncertY;
+    std::optional<float> refUncertZ;
 
     InsRefOffset() : ConfigurationRegister(105) {}
     static constexpr const char* name() { return "InsRefOffset"; };
@@ -1765,7 +2129,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const InsRefOffset& lhs, const InsRefOffset& rhs);
+inline bool operator==(const InsRefOffset& lhs, const InsRefOffset& rhs)
+{
+    return ((lhs.refOffsetX == rhs.refOffsetX) && (lhs.refOffsetY == rhs.refOffsetY) && (lhs.refOffsetZ == rhs.refOffsetZ) &&
+            (lhs.refUncertX == rhs.refUncertX) && (lhs.refUncertY == rhs.refUncertY) && (lhs.refUncertZ == rhs.refUncertZ));
+}
+
+inline bool operator!=(const InsRefOffset& lhs, const InsRefOffset& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 144 - INS GNSS Select </summary>
 <remarks>
@@ -1789,12 +2159,12 @@ public:
         On = 1,
     };
 
-    ActiveReceiverSelect activeReceiverSelect = static_cast<ActiveReceiverSelect>(0);
-    uint8_t usedForNavTime = 0;
-    uint8_t hysteresisTime = 0;
-    UseGnssCompass useGnssCompass = static_cast<UseGnssCompass>(0);
-    uint8_t resv1 = 0;
-    uint8_t resv2 = 0;
+    std::optional<ActiveReceiverSelect> activeReceiverSelect;
+    std::optional<uint8_t> usedForNavTime;
+    std::optional<uint8_t> hysteresisTime;
+    std::optional<UseGnssCompass> useGnssCompass;
+    std::optional<uint8_t> resv1;
+    std::optional<uint8_t> resv2;
 
     InsGnssSelect() : ConfigurationRegister(144) {}
     static constexpr const char* name() { return "InsGnssSelect"; };
@@ -1803,7 +2173,13 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const InsGnssSelect& lhs, const InsGnssSelect& rhs);
+inline bool operator==(const InsGnssSelect& lhs, const InsGnssSelect& rhs)
+{
+    return ((lhs.activeReceiverSelect == rhs.activeReceiverSelect) && (lhs.usedForNavTime == rhs.usedForNavTime) &&
+            (lhs.hysteresisTime == rhs.hysteresisTime) && (lhs.useGnssCompass == rhs.useGnssCompass) && (lhs.resv1 == rhs.resv1) && (lhs.resv2 == rhs.resv2));
+}
+
+inline bool operator!=(const InsGnssSelect& lhs, const InsGnssSelect& rhs) { return !(lhs == rhs); }
 }  // namespace INS
 
 namespace System
@@ -1816,8 +2192,7 @@ namespace System
 class UserTag : public ConfigurationRegister
 {
 public:
-    AsciiMessage tag = "";
-
+    std::optional<AsciiMessage> tag;
     UserTag() : ConfigurationRegister(0) {}
     static constexpr const char* name() { return "UserTag"; };
 
@@ -1825,7 +2200,9 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const UserTag& lhs, const UserTag& rhs);
+inline bool operator==(const UserTag& lhs, const UserTag& rhs) { return ((lhs.tag == rhs.tag)); }
+
+inline bool operator!=(const UserTag& lhs, const UserTag& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 1 - Model </summary>
 <remarks>
@@ -1846,7 +2223,9 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Model& lhs, const Model& rhs);
+inline bool operator==(const Model& lhs, const Model& rhs) { return ((lhs.model == rhs.model)); }
+
+inline bool operator!=(const Model& lhs, const Model& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 2 - Hardware Version </summary>
 <remarks>
@@ -1868,7 +2247,9 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const HwVer& lhs, const HwVer& rhs);
+inline bool operator==(const HwVer& lhs, const HwVer& rhs) { return ((lhs.hwVer == rhs.hwVer) && (lhs.hwMinVer == rhs.hwMinVer)); }
+
+inline bool operator!=(const HwVer& lhs, const HwVer& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 3 - Serial Number </summary>
 <remarks>
@@ -1889,7 +2270,9 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const Serial& lhs, const Serial& rhs);
+inline bool operator==(const Serial& lhs, const Serial& rhs) { return ((lhs.serialNum == rhs.serialNum)); }
+
+inline bool operator!=(const Serial& lhs, const Serial& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 4 - Firmware Version </summary>
 <remarks>
@@ -1910,7 +2293,9 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const FwVer& lhs, const FwVer& rhs);
+inline bool operator==(const FwVer& lhs, const FwVer& rhs) { return ((lhs.fwVer == rhs.fwVer)); }
+
+inline bool operator!=(const FwVer& lhs, const FwVer& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 5 - Baud Rate </summary>
 <remarks>
@@ -1940,8 +2325,8 @@ public:
         Poll = static_cast<uint8_t>('?')
     };
 
-    BaudRates baudRate = static_cast<BaudRates>(0);
-    SerialPort serialPort = static_cast<SerialPort>(0);
+    std::optional<BaudRates> baudRate;
+    SerialPort serialPort{0};
 
     BaudRate() : ConfigurationRegister(5) {}
     static constexpr const char* name() { return "BaudRate"; };
@@ -1951,7 +2336,9 @@ public:
     GenericCommand toReadCommand() override;
 };
 
-bool operator==(const BaudRate& lhs, const BaudRate& rhs);
+inline bool operator==(const BaudRate& lhs, const BaudRate& rhs) { return ((lhs.baudRate == rhs.baudRate) && (lhs.serialPort == rhs.serialPort)); }
+
+inline bool operator!=(const BaudRate& lhs, const BaudRate& rhs) { return !(lhs == rhs); }
 
 inline std::ostream& operator<<(std::ostream& outStream, const BaudRate::BaudRates& baudrate) noexcept { return outStream << static_cast<uint32_t>(baudrate); }
 /**--------------------------------------------------------------------------------------------------
@@ -1996,8 +2383,8 @@ public:
         Poll = static_cast<uint8_t>('?')
     };
 
-    Ador ador = static_cast<Ador>(0);
-    SerialPort serialPort = static_cast<SerialPort>(0);
+    std::optional<Ador> ador;
+    SerialPort serialPort{0};
 
     AsyncOutputType() : ConfigurationRegister(6) {}
     static constexpr const char* name() { return "AsyncOutputType"; };
@@ -2007,7 +2394,9 @@ public:
     GenericCommand toReadCommand() override;
 };
 
-bool operator==(const AsyncOutputType& lhs, const AsyncOutputType& rhs);
+inline bool operator==(const AsyncOutputType& lhs, const AsyncOutputType& rhs) { return ((lhs.ador == rhs.ador) && (lhs.serialPort == rhs.serialPort)); }
+
+inline bool operator!=(const AsyncOutputType& lhs, const AsyncOutputType& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 7 - Async Data Output Freq </summary>
 <remarks>
@@ -2040,8 +2429,8 @@ public:
         Poll = static_cast<uint8_t>('?')
     };
 
-    Adof adof = static_cast<Adof>(0);
-    SerialPort serialPort = static_cast<SerialPort>(0);
+    std::optional<Adof> adof;
+    SerialPort serialPort{0};
 
     AsyncOutputFreq() : ConfigurationRegister(7) {}
     static constexpr const char* name() { return "AsyncOutputFreq"; };
@@ -2051,7 +2440,9 @@ public:
     GenericCommand toReadCommand() override;
 };
 
-bool operator==(const AsyncOutputFreq& lhs, const AsyncOutputFreq& rhs);
+inline bool operator==(const AsyncOutputFreq& lhs, const AsyncOutputFreq& rhs) { return ((lhs.adof == rhs.adof) && (lhs.serialPort == rhs.serialPort)); }
+
+inline bool operator!=(const AsyncOutputFreq& lhs, const AsyncOutputFreq& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 30 - Communication Protocol Control </summary>
 <remarks>
@@ -2122,13 +2513,13 @@ public:
         AdorOff = 2,
     };
 
-    AsciiAppendCount asciiAppendCount = static_cast<AsciiAppendCount>(0);
-    AsciiAppendStatus asciiAppendStatus = static_cast<AsciiAppendStatus>(0);
-    SpiAppendCount spiAppendCount = static_cast<SpiAppendCount>(0);
-    SpiAppendStatus spiAppendStatus = static_cast<SpiAppendStatus>(0);
-    AsciiChecksum asciiChecksum = static_cast<AsciiChecksum>(0);
-    SpiChecksum spiChecksum = static_cast<SpiChecksum>(0);
-    ErrorMode errorMode = static_cast<ErrorMode>(0);
+    std::optional<AsciiAppendCount> asciiAppendCount;
+    std::optional<AsciiAppendStatus> asciiAppendStatus;
+    std::optional<SpiAppendCount> spiAppendCount;
+    std::optional<SpiAppendStatus> spiAppendStatus;
+    std::optional<AsciiChecksum> asciiChecksum;
+    std::optional<SpiChecksum> spiChecksum;
+    std::optional<ErrorMode> errorMode;
 
     ProtocolControl() : ConfigurationRegister(30) {}
     static constexpr const char* name() { return "ProtocolControl"; };
@@ -2137,7 +2528,14 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const ProtocolControl& lhs, const ProtocolControl& rhs);
+inline bool operator==(const ProtocolControl& lhs, const ProtocolControl& rhs)
+{
+    return ((lhs.asciiAppendCount == rhs.asciiAppendCount) && (lhs.asciiAppendStatus == rhs.asciiAppendStatus) && (lhs.spiAppendCount == rhs.spiAppendCount) &&
+            (lhs.spiAppendStatus == rhs.spiAppendStatus) && (lhs.asciiChecksum == rhs.asciiChecksum) && (lhs.spiChecksum == rhs.spiChecksum) &&
+            (lhs.errorMode == rhs.errorMode));
+}
+
+inline bool operator!=(const ProtocolControl& lhs, const ProtocolControl& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 32 - Synchronization Control </summary>
 <remarks>
@@ -2176,15 +2574,15 @@ public:
         PositivePulse = 1,
     };
 
-    SyncInMode syncInMode = static_cast<SyncInMode>(0);
-    SyncInEdge syncInEdge = static_cast<SyncInEdge>(0);
-    uint16_t syncInSkipFactor = 0;
-    uint32_t resv1 = 0;
-    SyncOutMode syncOutMode = static_cast<SyncOutMode>(0);
-    SyncOutPolarity syncOutPolarity = static_cast<SyncOutPolarity>(0);
-    uint16_t syncOutSkipFactor = 0;
-    uint32_t syncOutPulseWidth = 0;
-    uint32_t resv2 = 0;
+    std::optional<SyncInMode> syncInMode;
+    std::optional<SyncInEdge> syncInEdge;
+    std::optional<uint16_t> syncInSkipFactor;
+    std::optional<uint32_t> resv1;
+    std::optional<SyncOutMode> syncOutMode;
+    std::optional<SyncOutPolarity> syncOutPolarity;
+    std::optional<uint16_t> syncOutSkipFactor;
+    std::optional<uint32_t> syncOutPulseWidth;
+    std::optional<uint32_t> resv2;
 
     SyncControl() : ConfigurationRegister(32) {}
     static constexpr const char* name() { return "SyncControl"; };
@@ -2193,7 +2591,14 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const SyncControl& lhs, const SyncControl& rhs);
+inline bool operator==(const SyncControl& lhs, const SyncControl& rhs)
+{
+    return ((lhs.syncInMode == rhs.syncInMode) && (lhs.syncInEdge == rhs.syncInEdge) && (lhs.syncInSkipFactor == rhs.syncInSkipFactor) &&
+            (lhs.resv1 == rhs.resv1) && (lhs.syncOutMode == rhs.syncOutMode) && (lhs.syncOutPolarity == rhs.syncOutPolarity) &&
+            (lhs.syncOutSkipFactor == rhs.syncOutSkipFactor) && (lhs.syncOutPulseWidth == rhs.syncOutPulseWidth) && (lhs.resv2 == rhs.resv2));
+}
+
+inline bool operator!=(const SyncControl& lhs, const SyncControl& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 33 - Synchronization Status </summary>
 <remarks>
@@ -2216,7 +2621,12 @@ public:
     using MeasurementRegister::toString;
 };
 
-bool operator==(const SyncStatus& lhs, const SyncStatus& rhs);
+inline bool operator==(const SyncStatus& lhs, const SyncStatus& rhs)
+{
+    return ((lhs.syncInCount == rhs.syncInCount) && (lhs.syncInTime == rhs.syncInTime) && (lhs.syncOutCount == rhs.syncOutCount));
+}
+
+inline bool operator!=(const SyncStatus& lhs, const SyncStatus& rhs) { return !(lhs == rhs); }
 struct BinaryOutputMeasurements
 {
     struct Common
@@ -2237,7 +2647,7 @@ struct BinaryOutputMeasurements
         uint32_t syncInCnt : 1;
         uint32_t timeGpsPps : 1;
 
-        Common() noexcept = default;
+        Common() noexcept : Common(0) {}
         Common(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Common)); }
         explicit operator uint32_t() const
         {
@@ -2268,7 +2678,7 @@ struct BinaryOutputMeasurements
         uint32_t syncOutCnt : 1;
         uint32_t timeStatus : 1;
 
-        Time() noexcept = default;
+        Time() noexcept : Time(0) {}
         Time(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Time)); }
         explicit operator uint32_t() const
         {
@@ -2301,7 +2711,7 @@ struct BinaryOutputMeasurements
         uint32_t angularRate : 1;
         uint32_t sensSat : 1;
 
-        Imu() noexcept = default;
+        Imu() noexcept : Imu(0) {}
         Imu(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Imu)); }
         explicit operator uint32_t() const
         {
@@ -2341,7 +2751,7 @@ struct BinaryOutputMeasurements
         uint32_t gnss1Status : 1;
         uint32_t gnss1AltMsl : 1;
 
-        Gnss() noexcept = default;
+        Gnss() noexcept : Gnss(0) {}
         Gnss(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Gnss)); }
         explicit operator uint32_t() const
         {
@@ -2376,7 +2786,7 @@ struct BinaryOutputMeasurements
         uint32_t heave : 1;
         uint32_t attU : 1;
 
-        Attitude() noexcept = default;
+        Attitude() noexcept : Attitude(0) {}
         Attitude(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Attitude)); }
         explicit operator uint32_t() const
         {
@@ -2408,7 +2818,7 @@ struct BinaryOutputMeasurements
         uint32_t posU : 1;
         uint32_t velU : 1;
 
-        Ins() noexcept = default;
+        Ins() noexcept : Ins(0) {}
         Ins(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Ins)); }
         explicit operator uint32_t() const
         {
@@ -2448,7 +2858,7 @@ struct BinaryOutputMeasurements
         uint32_t gnss2Status : 1;
         uint32_t gnss2AltMsl : 1;
 
-        Gnss2() noexcept = default;
+        Gnss2() noexcept : Gnss2(0) {}
         Gnss2(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Gnss2)); }
         explicit operator uint32_t() const
         {
@@ -2488,7 +2898,7 @@ struct BinaryOutputMeasurements
         uint32_t gnss3Status : 1;
         uint32_t gnss3AltMsl : 1;
 
-        Gnss3() noexcept = default;
+        Gnss3() noexcept : Gnss3(0) {}
         Gnss3(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(Gnss3)); }
         explicit operator uint32_t() const
         {
@@ -2516,7 +2926,57 @@ struct BinaryOutputMeasurements
     Gnss3 gnss3{0};
 
     BinaryHeader toBinaryHeader() const noexcept;
+    Vector<uint8_t, binaryHeaderMaxLength> toHeaderBytes() const noexcept;
 };
+
+inline bool operator==(const BinaryOutputMeasurements::Common& lhs, const BinaryOutputMeasurements::Common& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Common& lhs, const BinaryOutputMeasurements::Common& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutputMeasurements::Time& lhs, const BinaryOutputMeasurements::Time& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Time& lhs, const BinaryOutputMeasurements::Time& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutputMeasurements::Imu& lhs, const BinaryOutputMeasurements::Imu& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Imu& lhs, const BinaryOutputMeasurements::Imu& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutputMeasurements::Gnss& lhs, const BinaryOutputMeasurements::Gnss& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Gnss& lhs, const BinaryOutputMeasurements::Gnss& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutputMeasurements::Attitude& lhs, const BinaryOutputMeasurements::Attitude& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Attitude& lhs, const BinaryOutputMeasurements::Attitude& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutputMeasurements::Ins& lhs, const BinaryOutputMeasurements::Ins& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Ins& lhs, const BinaryOutputMeasurements::Ins& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutputMeasurements::Gnss2& lhs, const BinaryOutputMeasurements::Gnss2& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Gnss2& lhs, const BinaryOutputMeasurements::Gnss2& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutputMeasurements::Gnss3& lhs, const BinaryOutputMeasurements::Gnss3& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const BinaryOutputMeasurements::Gnss3& lhs, const BinaryOutputMeasurements::Gnss3& rhs) noexcept { return !(lhs == rhs); }
+
 class BinaryOutput : public ConfigurationRegister, public BinaryOutputMeasurements
 {
 public:
@@ -2526,10 +2986,9 @@ public:
     {
         uint16_t serial1 : 1;
         uint16_t serial2 : 1;
-        uint16_t spi : 1;
-        uint16_t : 13;  // padding
+        uint16_t : 14;  // padding
 
-        AsyncMode() noexcept = default;
+        AsyncMode() noexcept : AsyncMode(0) {}
         AsyncMode(uint16_t in) noexcept { std::memcpy(this, &in, sizeof(AsyncMode)); }
 
         explicit operator uint16_t() const
@@ -2546,8 +3005,8 @@ public:
     };
     static_assert(sizeof(AsyncMode) == 2);
 
-    AsyncMode asyncMode{0};
-    uint16_t rateDivisor = 0;
+    std::optional<AsyncMode> asyncMode;
+    std::optional<uint16_t> rateDivisor;
 
     bool fromString(const AsciiMessage& sensorResponsePayload) override;
     AsciiMessage toString() const override;
@@ -2555,12 +3014,18 @@ public:
 protected:
     using Register::_id;
 };
-inline bool operator==(const BinaryOutput& lhs, const BinaryOutput& rhs)
+
+inline bool operator==(const BinaryOutput::AsyncMode& lhs, const BinaryOutput::AsyncMode& rhs) noexcept
 {
-    return ((uint16_t(lhs.asyncMode) == uint16_t(rhs.asyncMode)) && (lhs.rateDivisor == rhs.rateDivisor) && (uint32_t(lhs.common) == uint32_t(rhs.common)) &&
-            (uint32_t(lhs.time) == uint32_t(rhs.time)) && (uint32_t(lhs.imu) == uint32_t(rhs.imu)) && (uint32_t(lhs.gnss) == uint32_t(rhs.gnss)) &&
-            (uint32_t(lhs.attitude) == uint32_t(rhs.attitude)) && (uint32_t(lhs.ins) == uint32_t(rhs.ins)) && (uint32_t(lhs.gnss2) == uint32_t(rhs.gnss2)) &&
-            (uint32_t(lhs.gnss3) == uint32_t(rhs.gnss3)));
+    return static_cast<uint16_t>(lhs) == static_cast<uint16_t>(rhs);
+}
+inline bool operator!=(const BinaryOutput::AsyncMode& lhs, const BinaryOutput::AsyncMode& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const BinaryOutput& lhs, const BinaryOutput& rhs) noexcept
+{
+    return ((lhs.asyncMode == rhs.asyncMode) && (lhs.rateDivisor == rhs.rateDivisor) && (lhs.common == rhs.common) && (lhs.time == rhs.time) &&
+            (lhs.imu == rhs.imu) && (lhs.gnss == rhs.gnss) && (lhs.attitude == rhs.attitude) && (lhs.ins == rhs.ins) && (lhs.gnss2 == rhs.gnss2) &&
+            (lhs.gnss3 == rhs.gnss3));
 }
 
 class BinaryOutput1 : public BinaryOutput
@@ -2642,8 +3107,9 @@ public:
         uint32_t pashrIns : 1;
         uint32_t tss1Ins : 1;
         uint32_t indyn : 1;
+        uint32_t : 14;  // padding
 
-        MsgSelection() noexcept = default;
+        MsgSelection() noexcept : MsgSelection(0) {}
         MsgSelection(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(MsgSelection)); }
 
         explicit operator uint32_t() const
@@ -2661,11 +3127,11 @@ public:
     };
     static_assert(sizeof(MsgSelection) == 4);
 
-    Port port = static_cast<Port>(0);
-    Rate rate = static_cast<Rate>(0);
-    Mode mode = static_cast<Mode>(0);
-    GnssSelect gnssSelect = static_cast<GnssSelect>(0);
-    MsgSelection msgSelection = static_cast<MsgSelection>(0);
+    std::optional<Port> port;
+    std::optional<Rate> rate;
+    std::optional<Mode> mode;
+    std::optional<GnssSelect> gnssSelect;
+    std::optional<MsgSelection> msgSelection;
 
     NmeaOutput1() : ConfigurationRegister(101) {}
     static constexpr const char* name() { return "NmeaOutput1"; };
@@ -2674,7 +3140,19 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const NmeaOutput1& lhs, const NmeaOutput1& rhs);
+inline bool operator==(const NmeaOutput1::MsgSelection& lhs, const NmeaOutput1::MsgSelection& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const NmeaOutput1::MsgSelection& lhs, const NmeaOutput1::MsgSelection& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const NmeaOutput1& lhs, const NmeaOutput1& rhs)
+{
+    return ((lhs.port == rhs.port) && (lhs.rate == rhs.rate) && (lhs.mode == rhs.mode) && (lhs.gnssSelect == rhs.gnssSelect) &&
+            (lhs.msgSelection == rhs.msgSelection));
+}
+
+inline bool operator!=(const NmeaOutput1& lhs, const NmeaOutput1& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 102 - NMEA Output 2 </summary>
 <remarks>
@@ -2733,8 +3211,9 @@ public:
         uint32_t pashrIns : 1;
         uint32_t tss1Ins : 1;
         uint32_t indyn : 1;
+        uint32_t : 14;  // padding
 
-        MsgSelection() noexcept = default;
+        MsgSelection() noexcept : MsgSelection(0) {}
         MsgSelection(uint32_t in) noexcept { std::memcpy(this, &in, sizeof(MsgSelection)); }
 
         explicit operator uint32_t() const
@@ -2752,11 +3231,11 @@ public:
     };
     static_assert(sizeof(MsgSelection) == 4);
 
-    Port port = static_cast<Port>(0);
-    Rate rate = static_cast<Rate>(0);
-    Mode mode = static_cast<Mode>(0);
-    GnssSelect gnssSelect = static_cast<GnssSelect>(0);
-    MsgSelection msgSelection = static_cast<MsgSelection>(0);
+    std::optional<Port> port;
+    std::optional<Rate> rate;
+    std::optional<Mode> mode;
+    std::optional<GnssSelect> gnssSelect;
+    std::optional<MsgSelection> msgSelection;
 
     NmeaOutput2() : ConfigurationRegister(102) {}
     static constexpr const char* name() { return "NmeaOutput2"; };
@@ -2765,7 +3244,19 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const NmeaOutput2& lhs, const NmeaOutput2& rhs);
+inline bool operator==(const NmeaOutput2::MsgSelection& lhs, const NmeaOutput2::MsgSelection& rhs) noexcept
+{
+    return static_cast<uint32_t>(lhs) == static_cast<uint32_t>(rhs);
+}
+inline bool operator!=(const NmeaOutput2::MsgSelection& lhs, const NmeaOutput2::MsgSelection& rhs) noexcept { return !(lhs == rhs); }
+
+inline bool operator==(const NmeaOutput2& lhs, const NmeaOutput2& rhs)
+{
+    return ((lhs.port == rhs.port) && (lhs.rate == rhs.rate) && (lhs.mode == rhs.mode) && (lhs.gnssSelect == rhs.gnssSelect) &&
+            (lhs.msgSelection == rhs.msgSelection));
+}
+
+inline bool operator!=(const NmeaOutput2& lhs, const NmeaOutput2& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 206 - Legacy Compatibility Settings </summary>
 <remarks>
@@ -2785,8 +3276,9 @@ public:
         uint8_t legacyGnssFix : 1;
         uint8_t requireReg55Reset : 1;
         uint8_t alwaysPpsPulse : 1;
+        uint8_t : 5;  // padding
 
-        GnssLegacy() noexcept = default;
+        GnssLegacy() noexcept : GnssLegacy(0) {}
         GnssLegacy(uint8_t in) noexcept { std::memcpy(this, &in, sizeof(GnssLegacy)); }
 
         explicit operator uint8_t() const
@@ -2816,10 +3308,10 @@ public:
         Legacy = 1,
     };
 
-    InsLegacy insLegacy = static_cast<InsLegacy>(0);
-    GnssLegacy gnssLegacy = static_cast<GnssLegacy>(0);
-    ImuLegacy imuLegacy = static_cast<ImuLegacy>(0);
-    HwLegacy hwLegacy = static_cast<HwLegacy>(0);
+    std::optional<InsLegacy> insLegacy;
+    std::optional<GnssLegacy> gnssLegacy;
+    std::optional<ImuLegacy> imuLegacy;
+    std::optional<HwLegacy> hwLegacy;
 
     LegacyCompatibilitySettings() : ConfigurationRegister(206) {}
     static constexpr const char* name() { return "LegacyCompatibilitySettings"; };
@@ -2828,7 +3320,21 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const LegacyCompatibilitySettings& lhs, const LegacyCompatibilitySettings& rhs);
+inline bool operator==(const LegacyCompatibilitySettings::GnssLegacy& lhs, const LegacyCompatibilitySettings::GnssLegacy& rhs) noexcept
+{
+    return static_cast<uint8_t>(lhs) == static_cast<uint8_t>(rhs);
+}
+inline bool operator!=(const LegacyCompatibilitySettings::GnssLegacy& lhs, const LegacyCompatibilitySettings::GnssLegacy& rhs) noexcept
+{
+    return !(lhs == rhs);
+}
+
+inline bool operator==(const LegacyCompatibilitySettings& lhs, const LegacyCompatibilitySettings& rhs)
+{
+    return ((lhs.insLegacy == rhs.insLegacy) && (lhs.gnssLegacy == rhs.gnssLegacy) && (lhs.imuLegacy == rhs.imuLegacy) && (lhs.hwLegacy == rhs.hwLegacy));
+}
+
+inline bool operator!=(const LegacyCompatibilitySettings& lhs, const LegacyCompatibilitySettings& rhs) { return !(lhs == rhs); }
 }  // namespace System
 
 namespace VelocityAiding
@@ -2841,9 +3347,9 @@ namespace VelocityAiding
 class VelAidingMeas : public ConfigurationRegister
 {
 public:
-    float velocityX = 0;
-    float velocityY = 0;
-    float velocityZ = 0;
+    std::optional<float> velocityX;
+    std::optional<float> velocityY;
+    std::optional<float> velocityZ;
 
     VelAidingMeas() : ConfigurationRegister(50) {}
     static constexpr const char* name() { return "VelAidingMeas"; };
@@ -2852,7 +3358,12 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const VelAidingMeas& lhs, const VelAidingMeas& rhs);
+inline bool operator==(const VelAidingMeas& lhs, const VelAidingMeas& rhs)
+{
+    return ((lhs.velocityX == rhs.velocityX) && (lhs.velocityY == rhs.velocityY) && (lhs.velocityZ == rhs.velocityZ));
+}
+
+inline bool operator!=(const VelAidingMeas& lhs, const VelAidingMeas& rhs) { return !(lhs == rhs); }
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 51 - Velocity Aiding Control </summary>
 <remarks>
@@ -2867,9 +3378,9 @@ public:
         Enable = 1,
     };
 
-    VelAidEnable velAidEnable = static_cast<VelAidEnable>(0);
-    float velUncertTuning = 0;
-    float resv = 0;
+    std::optional<VelAidEnable> velAidEnable;
+    std::optional<float> velUncertTuning;
+    std::optional<float> resv;
 
     VelAidingControl() : ConfigurationRegister(51) {}
     static constexpr const char* name() { return "VelAidingControl"; };
@@ -2878,7 +3389,12 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const VelAidingControl& lhs, const VelAidingControl& rhs);
+inline bool operator==(const VelAidingControl& lhs, const VelAidingControl& rhs)
+{
+    return ((lhs.velAidEnable == rhs.velAidEnable) && (lhs.velUncertTuning == rhs.velUncertTuning) && (lhs.resv == rhs.resv));
+}
+
+inline bool operator!=(const VelAidingControl& lhs, const VelAidingControl& rhs) { return !(lhs == rhs); }
 }  // namespace VelocityAiding
 
 namespace WorldMagGravityModel
@@ -2903,15 +3419,15 @@ public:
         Enabled = 1,
     };
 
-    EnableMagModel enableMagModel = static_cast<EnableMagModel>(0);
-    EnableGravityModel enableGravityModel = static_cast<EnableGravityModel>(0);
-    uint8_t resv1 = 0;
-    uint8_t resv2 = 0;
-    uint32_t recalcThreshold = 0;
-    float year = 0;
-    double latitude = 0;
-    double longitude = 0;
-    double altitude = 0;
+    std::optional<EnableMagModel> enableMagModel;
+    std::optional<EnableGravityModel> enableGravityModel;
+    std::optional<uint8_t> resv1;
+    std::optional<uint8_t> resv2;
+    std::optional<uint32_t> recalcThreshold;
+    std::optional<float> year;
+    std::optional<double> latitude;
+    std::optional<double> longitude;
+    std::optional<double> altitude;
 
     RefModelConfig() : ConfigurationRegister(83) {}
     static constexpr const char* name() { return "RefModelConfig"; };
@@ -2920,7 +3436,14 @@ public:
     AsciiMessage toString() const override;
 };
 
-bool operator==(const RefModelConfig& lhs, const RefModelConfig& rhs);
+inline bool operator==(const RefModelConfig& lhs, const RefModelConfig& rhs)
+{
+    return ((lhs.enableMagModel == rhs.enableMagModel) && (lhs.enableGravityModel == rhs.enableGravityModel) && (lhs.resv1 == rhs.resv1) &&
+            (lhs.resv2 == rhs.resv2) && (lhs.recalcThreshold == rhs.recalcThreshold) && (lhs.year == rhs.year) && (lhs.latitude == rhs.latitude) &&
+            (lhs.longitude == rhs.longitude) && (lhs.altitude == rhs.altitude));
+}
+
+inline bool operator!=(const RefModelConfig& lhs, const RefModelConfig& rhs) { return !(lhs == rhs); }
 }  // namespace WorldMagGravityModel
 
 namespace ById

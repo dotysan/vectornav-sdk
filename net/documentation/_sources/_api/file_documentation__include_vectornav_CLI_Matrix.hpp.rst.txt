@@ -56,6 +56,8 @@ Classes
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_mat3f`
 
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_vec2f`
+
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_vec3d`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_vec3f`

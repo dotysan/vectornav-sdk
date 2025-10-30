@@ -36,6 +36,8 @@ Included By
 
 - :ref:`file_include_vectornav_Implementation_FaPacketProtocol.hpp`
 
+- :ref:`file_include_vectornav_Implementation_FbPacketProtocol.hpp`
+
 - :ref:`file_include_vectornav_Interface_Errors.hpp`
 
 - :ref:`file_include_vectornav_Interface_GenericCommand.hpp`

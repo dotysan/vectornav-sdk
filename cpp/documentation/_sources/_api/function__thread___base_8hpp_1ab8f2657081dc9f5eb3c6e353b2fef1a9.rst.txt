@@ -3,7 +3,7 @@
 Function VN::thisThread::sleepFor
 =================================
 
-- Defined in :ref:`file_include_vectornav_HAL_Thread_Mbed.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_Thread_PC.hpp`
 
 
 Function Documentation

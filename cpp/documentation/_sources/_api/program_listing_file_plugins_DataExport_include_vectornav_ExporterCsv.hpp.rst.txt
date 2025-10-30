@@ -27,6 +27,8 @@ Program Listing for File ExporterCsv.hpp
    
    namespace VN
    {
+   namespace DataExport
+   {
    
    class ExporterCsv : public Exporter
    {
@@ -49,8 +51,8 @@ Program Listing for File ExporterCsv.hpp
            OutputFile file;
        };
    
-       ExporterCsv(const Filesystem::FilePath& outputDir, bool enableSystemTimeStamps = false)
-           : Exporter(EXPORTER_PACKET_CAPACITY), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
+       ExporterCsv(const Filesystem::FilePath& outputDir, PacketQueueMode mode = PacketQueueMode::Force, bool enableSystemTimeStamps = false)
+           : Exporter(EXPORTER_PACKET_CAPACITY, mode), _filePath(outputDir), _enableSystemTimeStamps(enableSystemTimeStamps)
        {
            if (!_filePath.empty() && _filePath.back() != std::filesystem::path::preferred_separator)
            {
@@ -165,6 +167,7 @@ Program Listing for File ExporterCsv.hpp
                }
                csv.write("\n");
            }
+           flushAllFiles();
        }
    
    private:
@@ -316,6 +319,12 @@ Program Listing for File ExporterCsv.hpp
            return _dynamicCsvInfo.back().file;
        }
    
+       void flushAllFiles()
+       {
+           for (auto& csvInfo : _csvInfo) { csvInfo.file.flush(); }
+           for (auto& dynamicCsvInfo : _dynamicCsvInfo) { dynamicCsvInfo.file.flush(); }
+       }
+   
    private:
        Filesystem::FilePath _filePath;
        const bool _enableSystemTimeStamps = false;
@@ -325,6 +334,7 @@ Program Listing for File ExporterCsv.hpp
        Vector<DynamicCsvInfo, MAX_NUM_FILES> _dynamicCsvInfo;  // One entry per file created, which is per unique message type
    };
    
+   }  // namespace DataExport
    }  // namespace VN
    
    #endif  // VN_EXPORTERCSV_HPP_

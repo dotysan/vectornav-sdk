@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,101 +24,154 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
-#include "RegisterScan/include/vectornav/RegisterScan.hpp"
 
+#include "RegisterScan/include/vectornav/RegisterScan.hpp"
+#include "vectornav/Interface/BridgeSensor.hpp"
+
+
+#include "PyErrors.hpp"
 #include "PyTemplates.hpp"
+
 namespace py = pybind11;
 namespace VN {
   
 void init_register_scan(py::module& m) {
 
   py::module Plugins = m.def_submodule("Plugins", "Plugins Module");
+  py::module RegisterScan = Plugins.def_submodule("RegisterScan", "RegisterScan Module");
 
+  py::class_<VN::RegisterScan::ConfigWriter<VN::RegisterScan::AsciiConfigWriter>>(RegisterScan, "ConfigWriter_Ascii")
+    .def("writeConfig", &VN::RegisterScan::ConfigWriter<VN::RegisterScan::AsciiConfigWriter>::writeConfig)
+    .def("close", &VN::RegisterScan::ConfigWriter<VN::RegisterScan::AsciiConfigWriter>::close);
 
-  py::class_<RegisterScan::ConfigWriter<RegisterScan::AsciiConfigWriter>>(Plugins, "ConfigWriter_Ascii")
-    .def("writeConfig", &RegisterScan::ConfigWriter<RegisterScan::AsciiConfigWriter>::writeConfig)
-    .def("close", &RegisterScan::ConfigWriter<RegisterScan::AsciiConfigWriter>::close);
-
-  py::class_<RegisterScan::AsciiConfigWriter, RegisterScan::ConfigWriter<RegisterScan::AsciiConfigWriter>>(Plugins, "AsciiConfigWriter")
+  py::class_<VN::RegisterScan::AsciiConfigWriter, VN::RegisterScan::ConfigWriter<VN::RegisterScan::AsciiConfigWriter>>(RegisterScan, "AsciiConfigWriter")
     .def(py::init<Filesystem::FilePath&>())
-    .def("write", &RegisterScan::AsciiConfigWriter::write)
-    .def("finalize", &RegisterScan::AsciiConfigWriter::finalize);  
+    .def("write", &VN::RegisterScan::AsciiConfigWriter::write)
+    .def("finalize", &VN::RegisterScan::AsciiConfigWriter::finalize);  
 
-  py::class_<RegisterScan::ConfigWriter<RegisterScan::GenericConfigWriter>>(Plugins, "ConfigWriter_Generic")
-    .def("writeConfig", &RegisterScan::ConfigWriter<RegisterScan::GenericConfigWriter>::writeConfig)
-    .def("close", &RegisterScan::ConfigWriter<RegisterScan::GenericConfigWriter>::close);
+  py::class_<VN::RegisterScan::ConfigWriter<VN::RegisterScan::GenericConfigWriter>>(RegisterScan, "ConfigWriter_Generic")
+    .def("writeConfig", &VN::RegisterScan::ConfigWriter<VN::RegisterScan::GenericConfigWriter>::writeConfig)
+    .def("close", &VN::RegisterScan::ConfigWriter<VN::RegisterScan::GenericConfigWriter>::close);
 
-  py::class_<RegisterScan::GenericConfigWriter, RegisterScan::ConfigWriter<RegisterScan::GenericConfigWriter>>(Plugins, "GenericConfigWriter")
+  py::class_<VN::RegisterScan::GenericConfigWriter, VN::RegisterScan::ConfigWriter<VN::RegisterScan::GenericConfigWriter>>(RegisterScan, "GenericConfigWriter")
     .def(py::init<std::function<VN::Error(const AsciiMessage&)>, std::function<void()>>(), 
       py::arg("writeConfig"), py::arg("finalizeConfig") = std::function<void()>([]() {}))  
-    .def("write", &RegisterScan::GenericConfigWriter::write)  
-    .def("finalize", &RegisterScan::GenericConfigWriter::finalize); 
+    .def("write", &VN::RegisterScan::GenericConfigWriter::write)  
+    .def("finalize", &VN::RegisterScan::GenericConfigWriter::finalize); 
           
-  py::class_<RegisterScan::ConfigWriter<RegisterScan::XmlConfigWriter>>(Plugins, "ConfigWriter_Xml")
-    .def("writeConfig", &RegisterScan::ConfigWriter<RegisterScan::XmlConfigWriter>::writeConfig)
-    .def("close", &RegisterScan::ConfigWriter<RegisterScan::XmlConfigWriter>::close);
+  py::class_<VN::RegisterScan::ConfigWriter<VN::RegisterScan::XmlConfigWriter>>(RegisterScan, "ConfigWriter_Xml")
+    .def("writeConfig", &VN::RegisterScan::ConfigWriter<VN::RegisterScan::XmlConfigWriter>::writeConfig)
+    .def("close", &VN::RegisterScan::ConfigWriter<VN::RegisterScan::XmlConfigWriter>::close);
 
-  py::class_<RegisterScan::XmlConfigWriter, RegisterScan::ConfigWriter<RegisterScan::XmlConfigWriter>>(Plugins, "XmlConfigWriter")
-    .def(py::init<Sensor&, Filesystem::FilePath>())
-    .def("write", &RegisterScan::XmlConfigWriter::write)
-    .def("finalize", &RegisterScan::XmlConfigWriter::finalize);
+  py::class_<VN::RegisterScan::XmlConfigWriter, VN::RegisterScan::ConfigWriter<VN::RegisterScan::XmlConfigWriter>>(RegisterScan, "XmlConfigWriter")
+    .def(py::init<BridgeSensor&, Filesystem::FilePath>())
+    .def("write", &VN::RegisterScan::XmlConfigWriter::write)
+    .def("finalize", &VN::RegisterScan::XmlConfigWriter::finalize);
 
-  py::enum_<RegisterScan::SaveConfigurationFilter::Type>(Plugins, "SaveConfigFilterType", py::arithmetic())
-    .value("Include", RegisterScan::SaveConfigurationFilter::Type::Include)
-    .value("Exclude", RegisterScan::SaveConfigurationFilter::Type::Exclude);
+  py::enum_<VN::RegisterScan::SaveConfigurationFilter::Type>(RegisterScan, "SaveConfigFilterType", py::arithmetic())
+    .value("Include", VN::RegisterScan::SaveConfigurationFilter::Type::Include)
+    .value("Exclude", VN::RegisterScan::SaveConfigurationFilter::Type::Exclude);
 
-  py::class_<RegisterScan::SaveConfigurationFilter>(Plugins, "SaveConfigurationFilter")
+  py::class_<VN::RegisterScan::SaveConfigurationFilter>(RegisterScan, "SaveConfigurationFilter")
     .def(py::init<>())
-    .def_readwrite("type", &RegisterScan::SaveConfigurationFilter::type)
-    .def_readwrite("list", &RegisterScan::SaveConfigurationFilter::list);
+    .def_readwrite("type", &VN::RegisterScan::SaveConfigurationFilter::type)
+    .def_readwrite("list", &VN::RegisterScan::SaveConfigurationFilter::list);
 
-    Plugins.def("saveConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigWriter<RegisterScan::AsciiConfigWriter>&, RegisterScan::SaveConfigurationFilter>(&RegisterScan::saveConfiguration<RegisterScan::AsciiConfigWriter>),
+    // saveConfiguration
+    RegisterScan.def("saveConfiguration", [] (BridgeSensor& sensor,
+            VN::RegisterScan::ConfigWriter<VN::RegisterScan::AsciiConfigWriter>& writer,
+            VN::RegisterScan::SaveConfigurationFilter filter) {
+            VN::Error error = VN::RegisterScan::saveConfiguration<VN::RegisterScan::AsciiConfigWriter>(sensor, writer, filter);
+            if (error != VN::Error::None) { throwError(error); } },
         py::arg("sensor"),
         py::arg("configWriter"),
-        py::arg("filter") = RegisterScan::SaveConfigurationFilter{RegisterScan::SaveConfigurationFilter::Type::Include, RegisterScan::getDefaultConfigRegisters()},
-        "Save config to an Ascii file");
-    Plugins.def("saveConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigWriter<RegisterScan::XmlConfigWriter>&, RegisterScan::SaveConfigurationFilter>(&RegisterScan::saveConfiguration<RegisterScan::XmlConfigWriter>),
+        py::arg("filter") = VN::RegisterScan::SaveConfigurationFilter{ VN::RegisterScan::SaveConfigurationFilter::Type::Include,
+            VN::RegisterScan::getDefaultConfigRegisters() },
+        "Save config to an Ascii file" );
+
+    RegisterScan.def("saveConfiguration", [] (BridgeSensor& sensor,
+            VN::RegisterScan::ConfigWriter<VN::RegisterScan::XmlConfigWriter>& writer,
+            VN::RegisterScan::SaveConfigurationFilter filter) {
+            VN::Error error = VN::RegisterScan::saveConfiguration<VN::RegisterScan::XmlConfigWriter>(sensor, writer, filter);
+            if (error != VN::Error::None) { throwError(error); } },
         py::arg("sensor"),
         py::arg("configWriter"),
-        py::arg("filter") = RegisterScan::SaveConfigurationFilter{RegisterScan::SaveConfigurationFilter::Type::Include, RegisterScan::getDefaultConfigRegisters()},
-        "Save config to an Xml file");
-    Plugins.def("saveConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigWriter<RegisterScan::GenericConfigWriter>&, RegisterScan::SaveConfigurationFilter>(&RegisterScan::saveConfiguration<RegisterScan::GenericConfigWriter>),
+        py::arg("filter") = VN::RegisterScan::SaveConfigurationFilter{ VN::RegisterScan::SaveConfigurationFilter::Type::Include,
+            VN::RegisterScan::getDefaultConfigRegisters() },
+        "Save config to an Xml file" );
+
+    RegisterScan.def("saveConfiguration", [] (BridgeSensor& sensor,
+            VN::RegisterScan::ConfigWriter<VN::RegisterScan::GenericConfigWriter>& writer,
+            VN::RegisterScan::SaveConfigurationFilter filter) {
+            VN::Error error = VN::RegisterScan::saveConfiguration<VN::RegisterScan::GenericConfigWriter>(sensor, writer, filter);
+            if (error != VN::Error::None) { throwError(error); } },
         py::arg("sensor"),
         py::arg("configWriter"),
-        py::arg("filter") = RegisterScan::SaveConfigurationFilter{RegisterScan::SaveConfigurationFilter::Type::Include, RegisterScan::getDefaultConfigRegisters()},
-        "Save config generically");
+        py::arg("filter") = VN::RegisterScan::SaveConfigurationFilter{ VN::RegisterScan::SaveConfigurationFilter::Type::Include,
+            VN::RegisterScan::getDefaultConfigRegisters() },
+        "Save config generically" );
 
-    Plugins.def("saveNonDefaultConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigWriter<RegisterScan::AsciiConfigWriter>&>(&RegisterScan::saveNonDefaultConfiguration<RegisterScan::AsciiConfigWriter>));
-    Plugins.def("saveNonDefaultConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigWriter<RegisterScan::XmlConfigWriter>&>(&RegisterScan::saveNonDefaultConfiguration<RegisterScan::XmlConfigWriter>));
-    Plugins.def("saveNonDefaultConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigWriter<RegisterScan::GenericConfigWriter>&>(&RegisterScan::saveNonDefaultConfiguration<RegisterScan::GenericConfigWriter>));
-    
-    
-    Plugins.def("getDefaultConfigRegisters", &RegisterScan::getDefaultConfigRegisters);
+    // saveNonDefaultConfiguration
+    RegisterScan.def("saveNonDefaultConfiguration", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigWriter<VN::RegisterScan::AsciiConfigWriter>& writer) {
+            VN::Error error = VN::RegisterScan::saveNonDefaultConfiguration<VN::RegisterScan::AsciiConfigWriter>(sensor, writer);
+            if (error != VN::Error::None) { throwError(error);}});
 
-    py::class_<RegisterScan::ConfigReader<RegisterScan::AsciiConfigReader>>(Plugins, "ConfigReader_Ascii")
-        .def("getNextConfig", &RegisterScan::ConfigReader<RegisterScan::AsciiConfigReader>::getNextConfig);
+    RegisterScan.def("saveNonDefaultConfiguration", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigWriter<VN::RegisterScan::XmlConfigWriter>& writer) {
+            VN::Error error = VN::RegisterScan::saveNonDefaultConfiguration<VN::RegisterScan::XmlConfigWriter>(sensor, writer);
+            if (error != VN::Error::None) { throwError(error);}});
 
-    py::class_<RegisterScan::AsciiConfigReader, RegisterScan::ConfigReader<RegisterScan::AsciiConfigReader>>(Plugins, "AsciiConfigReader")
+    RegisterScan.def("saveNonDefaultConfiguration", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigWriter<VN::RegisterScan::GenericConfigWriter>& writer) {
+            VN::Error error = VN::RegisterScan::saveNonDefaultConfiguration<VN::RegisterScan::GenericConfigWriter>(sensor, writer);
+            if (error != VN::Error::None) { throwError(error);}});
+
+    RegisterScan.def("getDefaultConfigRegisters", &VN::RegisterScan::getDefaultConfigRegisters);
+
+    py::class_<VN::RegisterScan::ConfigReader<VN::RegisterScan::AsciiConfigReader>>(RegisterScan, "ConfigReader_Ascii")
+        .def("getNextConfig", &VN::RegisterScan::ConfigReader<VN::RegisterScan::AsciiConfigReader>::getNextConfig);
+
+    py::class_<VN::RegisterScan::AsciiConfigReader, VN::RegisterScan::ConfigReader<VN::RegisterScan::AsciiConfigReader>>(RegisterScan, "AsciiConfigReader")
         .def(py::init<const Filesystem::FilePath&>())
-        .def("next", &RegisterScan::AsciiConfigReader::next);
+        .def("next", &VN::RegisterScan::AsciiConfigReader::next);
 
-    py::class_<RegisterScan::ConfigReader<RegisterScan::XmlConfigReader>>(Plugins, "ConfigReader_Xml")
-        .def("getNextConfig", &RegisterScan::ConfigReader<RegisterScan::XmlConfigReader>::getNextConfig);
+    py::class_<VN::RegisterScan::ConfigReader<VN::RegisterScan::XmlConfigReader>>(RegisterScan, "ConfigReader_Xml")
+        .def("getNextConfig", &VN::RegisterScan::ConfigReader<VN::RegisterScan::XmlConfigReader>::getNextConfig);
 
-    py::class_<RegisterScan::XmlConfigReader, RegisterScan::ConfigReader<RegisterScan::XmlConfigReader>>(Plugins, "XmlConfigReader")
+    py::class_<VN::RegisterScan::XmlConfigReader, VN::RegisterScan::ConfigReader<VN::RegisterScan::XmlConfigReader>>(RegisterScan, "XmlConfigReader")
         .def(py::init<const Filesystem::FilePath&>())
-        .def("next", &RegisterScan::XmlConfigReader::next);
+        .def("next", &VN::RegisterScan::XmlConfigReader::next);
 
-    py::class_<RegisterScan::ConfigReader<RegisterScan::GenericConfigReader>>(Plugins, "ConfigReader_Generic")
-        .def("getNextConfig", &RegisterScan::ConfigReader<RegisterScan::GenericConfigReader>::getNextConfig);
+    py::class_<VN::RegisterScan::ConfigReader<VN::RegisterScan::GenericConfigReader>>(RegisterScan, "ConfigReader_Generic")
+        .def("getNextConfig", &VN::RegisterScan::ConfigReader<VN::RegisterScan::GenericConfigReader>::getNextConfig);
 
-    py::class_<RegisterScan::GenericConfigReader, RegisterScan::ConfigReader<RegisterScan::GenericConfigReader>>(Plugins, "GenericConfigReader")
+    py::class_<VN::RegisterScan::GenericConfigReader, VN::RegisterScan::ConfigReader<VN::RegisterScan::GenericConfigReader>>(RegisterScan, "GenericConfigReader")
         .def(py::init<std::function<VN::Error(AsciiMessage&)>>())
-        .def("next", &RegisterScan::GenericConfigReader::next);
+        .def("next", &VN::RegisterScan::GenericConfigReader::next);
 
-    Plugins.def("loadConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigReader<RegisterScan::AsciiConfigReader>&>(&RegisterScan::loadConfiguration<RegisterScan::AsciiConfigReader>));
-    Plugins.def("loadConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigReader<RegisterScan::XmlConfigReader>&>(&RegisterScan::loadConfiguration<RegisterScan::XmlConfigReader>));
-    Plugins.def("loadConfiguration", py::overload_cast<Sensor&, RegisterScan::ConfigReader<RegisterScan::GenericConfigReader>&>(&RegisterScan::loadConfiguration<RegisterScan::GenericConfigReader>));      
+    // setConfigurationRegisters
+    RegisterScan.def("setConfigurationRegisters", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigReader<VN::RegisterScan::AsciiConfigReader>& reader) {
+            VN::Error error = VN::RegisterScan::setConfigurationRegisters<VN::RegisterScan::AsciiConfigReader>(sensor, reader);
+            if (error != VN::Error::None) { throwError(error);}});
+      
+    RegisterScan.def("setConfigurationRegisters", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigReader<VN::RegisterScan::XmlConfigReader>& reader) {
+            VN::Error error = VN::RegisterScan::setConfigurationRegisters<VN::RegisterScan::XmlConfigReader>(sensor, reader);
+            if (error != VN::Error::None) { throwError(error);}});
+
+    RegisterScan.def("setConfigurationRegisters", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigReader<VN::RegisterScan::GenericConfigReader>& reader) {
+            VN::Error error = VN::RegisterScan::setConfigurationRegisters<VN::RegisterScan::GenericConfigReader>(sensor, reader);
+            if (error != VN::Error::None) { throwError(error);}});
+
+    // loadConfiguration
+    RegisterScan.def("loadConfiguration", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigReader<VN::RegisterScan::AsciiConfigReader>& reader) {
+            VN::Error error = VN::RegisterScan::loadConfiguration<VN::RegisterScan::AsciiConfigReader>(sensor, reader);
+            if (error != VN::Error::None) { throwError(error);}});
+
+    RegisterScan.def("loadConfiguration", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigReader<VN::RegisterScan::XmlConfigReader>& reader) {
+            VN::Error error = VN::RegisterScan::loadConfiguration<VN::RegisterScan::XmlConfigReader>(sensor, reader);
+            if (error != VN::Error::None) { throwError(error);}});
+
+    RegisterScan.def("loadConfiguration", [] (BridgeSensor& sensor, VN::RegisterScan::ConfigReader<VN::RegisterScan::GenericConfigReader>& reader) {
+            VN::Error error = VN::RegisterScan::loadConfiguration<VN::RegisterScan::GenericConfigReader>(sensor, reader);
+            if (error != VN::Error::None) { throwError(error);}});
 
   declare_vector<uint8_t, 256>(m, "RegisterList");
   py::implicitly_convertible<py::list, Vector<uint8_t, 256>>();

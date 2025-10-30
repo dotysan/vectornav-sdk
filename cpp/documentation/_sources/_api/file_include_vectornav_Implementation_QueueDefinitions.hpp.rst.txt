@@ -46,7 +46,11 @@ Included By
 
 - :ref:`file_include_vectornav_Implementation_AsciiPacketDispatcher.hpp`
 
+- :ref:`file_include_vectornav_Implementation_DynamicPacketQueue.hpp`
+
 - :ref:`file_include_vectornav_Implementation_FaPacketDispatcher.hpp`
+
+- :ref:`file_include_vectornav_Implementation_PacketSynchronizer.hpp`
 
 - :ref:`file_include_vectornav_Interface_Sensor.hpp`
 

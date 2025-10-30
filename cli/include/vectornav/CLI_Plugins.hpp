@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,16 +28,19 @@
 #include "CLI_Calibration.hpp"
 #endif
 #if (PLUGIN_DATAEXPORT)
-#include "CLI_Exporter.hpp"
+#include "CLI_DataExport.hpp"
 #endif
-#if (PLUGIN_FIRMWAREUPDATE)
-#include "CLI_FirmwareUpdate.hpp"
+#if (PLUGIN_FIRMWAREPROGRAMMER)
+#include "CLI_FirmwareProgrammer.hpp"
 #endif
-// #if (PLUGIN_REGISTERSCAN)
-// #include "CLI_RegisterScan.hpp"
-// #endif
-#if (PLUGIN_SIMPLELOGGER)
-#include "CLI_SimpleLogger.hpp"
+#if (PLUGIN_REGISTERSCAN)
+#include "CLI_RegisterScan.hpp"
+#endif
+#if (PLUGIN_LOGGER)
+#include "CLI_Logger.hpp"
+#endif
+#if (PLUGIN_MATH)
+#include "CLI_Math.hpp"
 #endif
 
 #endif  // VN_CLI_PLUGINS_HPP_

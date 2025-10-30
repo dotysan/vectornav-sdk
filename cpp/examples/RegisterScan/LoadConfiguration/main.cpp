@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,12 +42,20 @@ enum class ReadType
 
 int main(int argc, char* argv[])
 {
-    // This load configuration example will walk through how to load a configuration from an xml or ascii file.
+    /*
+    This load configuration example walks through the C++ usage of the SDK to load a configuration from an XML or ASCII file onto a VectorNav unit.
 
-    // [1] Handle input arguments
+    This example will achieve the following:
+    1. Handle input arguments
+    2. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    3. Load the configuration onto the VectorNav unit
+    4. Disconnect from the VectorNav unit
+    */
+
+    // 1. Handle input arguments
     if (argc > 3) { std::cerr << "Usage: LoadConfiguration " << usage << std::endl; };
 
-    const std::string portName = (argc > 1) ? argv[1] : "COM10";  // Pass in port name as a positional argument, or edit here
+    const std::string portName = (argc > 1) ? argv[1] : "COM1";  // Pass in port name as a positional argument or edit here
     std::filesystem::path filePath = (argc > 2) ? argv[2] : (std::filesystem::path(__FILE__).parent_path() / "configSettings.xml");
     // std::filesystem::path filePath = "generic";
 
@@ -70,19 +78,25 @@ int main(int argc, char* argv[])
         else { readType = ReadType::Ascii; }
     }
 
-    // [2] Instantiate and connect to the sensor
+    // 2. Instantiate a Sensor object and use it to connect to the VectorNav unit
     Sensor sensor;
     Error latestError = sensor.autoConnect(portName);
     if (latestError != Error::None)
     {
-        std::cerr << "Error " << latestError << " encountered when connecting to " + portName << ".\t" << std::endl;
+        std::cerr << "Error " << latestError << " encountered when connecting to " + portName << std::endl;
         if (argc > 1) { std::cout << "Usage: ./LoadConfiguration " << usage << std::endl; };
         return static_cast<int>(latestError);
     }
     std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
 
-    // [3] Load the configuration onto the sensor
-    VN::Error err;
+    // 3. Load the configuration onto the VectorNav unit - There are a few different file types that can be used to upload
+    // a previously saved configuration file onto a VectorNav unit, such as an XML file or text file. When using
+    // the RegisterScan::loadConfiguration method, a Restore Factory Settings command will be issued to the unit
+    // prior to attempting to load the user-defined configuration settings onto the unit. Following the upload, a
+    // Write Settings command and a Reset command will also be issued to the unit. If performing a Restore Factory
+    // Settings command is not desired, the RegisterScan::setConfigurationRegisters() method should instead be used
+    // to load the user-defined settings onto the unit.
+    Error err;
     if (readType == ReadType::Xml)
     {
         RegisterScan::XmlConfigReader configReader(filePath.string());
@@ -96,27 +110,28 @@ int main(int argc, char* argv[])
     else  // readType == ReadType::Generic
     {
         uint16_t messageCount{0};
-        std::vector<VN::AsciiMessage> messages{"$VNRRG,06,1,1*0865", "$VNRRG,07,1,1*A234", "$VNRRG,75,3,400,01,0321*3B31"};
+        std::vector<AsciiMessage> messages{"$VNRRG,06,1,1*0865", "$VNRRG,07,1,1*A234", "$VNRRG,75,3,400,01,0321*3B31"};
         RegisterScan::GenericConfigReader configReader(
-            [&messages, &messageCount](VN::AsciiMessage& msg)
+            [&messages, &messageCount](AsciiMessage& msg)
             {
                 if (messageCount < messages.size())
                 {
                     msg = messages[messageCount];
                     messageCount++;
-                    return VN::Error::None;
+                    return Error::None;
                 }
-                else { return VN::Error::FileReadFailed; }
+                else { return Error::FileReadFailed; }
             });
         err = RegisterScan::loadConfiguration(sensor, configReader);
     }
-    if (err != VN::Error::None)
+    if (err != Error::None)
     {
         std::cerr << "Error " << err << " occured when loading configuration." << std::endl;
         return 1;
     }
     std::cout << "Configuration has been loaded to the sensor." << std::endl;
 
+    // 4. Disconnect from the VectorNav unit
     sensor.disconnect();
     std::cout << "LoadConfiguration example complete." << std::endl;
 }

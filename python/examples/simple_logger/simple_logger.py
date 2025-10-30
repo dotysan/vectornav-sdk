@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # 
-# VectorNav SDK (v0.22.0)
+# VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,33 +21,56 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import time, sys
+import sys
+import time
 
-from vectornav import Sensor, ByteBuffer, Registers
-from vectornav.Plugins import SimpleLogger
+from vectornav import ByteBuffer, Registers, Sensor
+from vectornav.Plugins import Logger
+
 
 def main(argv):
+    """
+    This simple logger example walks through the Python usage of the SDK to log data from a VectorNav unit.
+
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Set up resources needed for data logging
+    3. Register the logger's input buffer to receive all bytes from the unit
+    4. Log data from the VectorNav unit
+        4.1. Check for any asynchronous errors
+    5. Disconnect from the VectorNav unit
+    """
 
     # Pass in port name and path as positional arguments, or edit them here
-    sensorComPort = argv[0] if len(argv) == 1 else "COM30"
-    filePath = argv[1] if len(argv) == 2 else "log.bin"
-    
-    vs = Sensor()
-    vs.autoConnect(sensorComPort)
+    portName = argv[0] if len(argv) > 0 else "COM1"
+    filePath = argv[1] if len(argv) > 2 else "log.bin"
 
-    modelRegister = Registers.Model()
-    vs.readRegister(modelRegister)
+    # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    sensor = Sensor()
+    try:
+        sensor.autoConnect(portName)
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when connecting to {portName}.\n")
+        return
+    print(f"Connected to {portName} at {sensor.connectedBaudRate()}")
 
+    modelRegister = Registers.System.Model()
+    try:
+        sensor.readRegister(modelRegister)
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when reading register 1 (Model).\n")
+        return
     print(f"Sensor Model Number: {modelRegister.model}")
 
-    # Set up resources needed for data logging
+    # 2. Set up resources needed for data logging
     bufferToLog = ByteBuffer(1024 * 3)
-    logger = SimpleLogger(bufferToLog, filePath)
-    
-    # Register the logger's input buffer to receive all bytes from the sensor
-    vs.registerReceivedByteBuffer(bufferToLog);
+    logger = Logger.SimpleLogger(bufferToLog, filePath)
 
-    if (logger.start()):
+    # 3. Register the logger's input buffer to receive all bytes from the unit
+    sensor.registerReceivedByteBuffer(bufferToLog)
+
+    # 4. Log data from the VectorNav unit
+    if logger.start():
         print("Error: Failed to write to file")
 
     print(f"Logging to {filePath}")
@@ -56,19 +79,22 @@ def main(argv):
 
     while (time.time() - start_time) < 5:
         time.sleep(0.001)
-        # Check to make sure we didn't get any async errors. Any buffer overruns means we have dropped data.
-        asyncError = vs.getAsynchronousError()
-        if asyncError is not None:
-            print(f"Received async error: {int(asyncError.error)}") 
+
+        # 4.1. Check for any asynchronous errors - Any buffer overruns means data has been dropped.
+        try:
+            sensor.throwIfAsyncError()
+        except Exception as asyncError:
+            print(f"Received async error: {asyncError}")
 
     logger.stop()
-
-    vs.deregisterReceivedByteBuffer()
-    vs.disconnect()
+    sensor.deregisterReceivedByteBuffer()
 
     print(f"Logged {logger.numBytesLogged()} bytes.")
 
+    # 5. Disconnect from the VectorNav unit
+    sensor.disconnect()
     print("SimpleLogger example complete.")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main(sys.argv[1:])

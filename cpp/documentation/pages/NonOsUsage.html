@@ -106,61 +106,60 @@ All of the HAL classes are set up similarly, split up between at least 3 files:<
 </div>
 <section id="serial">
 <h3>Serial<a class="headerlink" href="#serial" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="../_api/class_v_n_1_1_serial___base.html#_CPPv4N2VN11Serial_BaseE" title="VN::Serial_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">VN::Serial_Base</span></code></a></p>
+<p><a class="reference internal" href="../_api/class_v_n_1_1_serial___base.html#_CPPv4N2VN11Serial_BaseE" title="VN::Serial_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Serial_Base</span></code></a></p>
 </section>
 <section id="mutex">
 <h3>Mutex<a class="headerlink" href="#mutex" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="../_api/class_v_n_1_1_mutex___base.html#_CPPv4N2VN10Mutex_BaseE" title="VN::Mutex_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">VN::Mutex_Base</span></code></a></p>
+<p><a class="reference internal" href="../_api/class_v_n_1_1_mutex___base.html#_CPPv4N2VN10Mutex_BaseE" title="VN::Mutex_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Mutex_Base</span></code></a></p>
 </section>
 <section id="timer">
 <h3>Timer<a class="headerlink" href="#timer" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="../_api/class_v_n_1_1_timer___base.html#_CPPv4N2VN10Timer_BaseE" title="VN::Timer_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">VN::Timer_Base</span></code></a></p>
+<p><a class="reference internal" href="../_api/class_v_n_1_1_timer___base.html#_CPPv4N2VN10Timer_BaseE" title="VN::Timer_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Timer_Base</span></code></a></p>
 </section>
 <section id="thread">
 <h3>Thread<a class="headerlink" href="#thread" title="Link to this heading">¶</a></h3>
-<p><a class="reference internal" href="../_api/class_v_n_1_1_thread___base.html#_CPPv4N2VN11Thread_BaseE" title="VN::Thread_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">VN::Thread_Base</span></code></a></p>
+<p><a class="reference internal" href="../_api/class_v_n_1_1_thread___base.html#_CPPv4N2VN11Thread_BaseE" title="VN::Thread_Base"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Thread_Base</span></code></a></p>
 </section>
 </section>
 <section id="single-threaded-operation">
 <h2>Single-Threaded Operation<a class="headerlink" href="#single-threaded-operation" title="Link to this heading">¶</a></h2>
-<p>By default, the VnSdk is multi-threaded, where a high-priority listening thread is spawned upon the <cite>connect</cite> call, and joined on the <cite>disconnect</cite> call. This behavior can be disabled via Config.hpp, with the THREADING_ENABLE parameter.</p>
-<p>The high-priority normally handles</p>
+<p>By default, the VnSdk is multi-threaded, where a high-priority listening thread is spawned upon the <a class="reference internal" href="../_api/class_v_n_1_1_sensor.html#_CPPv4N2VN6Sensor7connectERKN11Serial_Base8PortNameEK8BaudRate" title="VN::Sensor::connect"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">connect()</span></code></a> call, and joined on the <a class="reference internal" href="../_api/class_v_n_1_1_sensor.html#_CPPv4N2VN6Sensor10disconnectEv" title="VN::Sensor::disconnect"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">disconnect()</span></code></a> call. This behavior can be disabled via <a class="reference internal" href="../_api/file_include_vectornav_Config.hpp.html#file-include-vectornav-config-hpp"><span class="std std-ref">Config.hpp</span></a>, with the <code class="docutils literal notranslate"><span class="pre">THREADING_ENABLE</span></code> parameter.</p>
+<p>The high-priority thread normally handles</p>
 <ol class="arabic simple">
-<li><p>Polling data from serial port</p></li>
-<li><p>Attempt to find a packet</p></li>
-<li><p>If found, route that packet through to its respective output queue, parsing if applicable</p></li>
+<li><p>Polling data from the serial port</p></li>
+<li><p>Attempting to find a packet</p></li>
+<li><p>If found, routing that packet through to its respective output queue, parsing if applicable</p></li>
 </ol>
 <p>In most applications no special care needs to be taken, as all blocking calls automatically manage those two functions. For example, a function which is only interested in asynchronous measurement output, content to block until the next received measurement, can safely run as:</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos">2</span><span class="w">     </span><span class="k">auto</span><span class="w"> </span><span class="n">nextMeasurement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sensor</span><span class="p">.</span><span class="n">getNextMeasurement</span><span class="p">();</span>
-<span class="linenos">3</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nextMeasurement</span><span class="p">.</span><span class="n">has_value</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos">4</span><span class="w">         </span><span class="c1">// Identify composite data object and pass to respective listeners as before.</span>
-<span class="linenos">5</span><span class="w">     </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos">6</span><span class="w">         </span><span class="c1">// Measurement timed out, handle case</span>
-<span class="linenos">7</span><span class="w">     </span><span class="p">}</span>
-<span class="linenos">8</span><span class="w">     </span><span class="c1">// ... Do other system-level things</span>
-<span class="linenos">9</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">nextMeasurement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sensor</span><span class="p">.</span><span class="n">getNextMeasurement</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nextMeasurement</span><span class="p">.</span><span class="n">has_value</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Identify composite data object and pass to respective listeners as before.</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Measurement timed out, handle case</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ... Do other system-level things</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-<p>Because the <cite>getNextMeasurement</cite> call is blocking, it will manage polling the serial and pushing packets through the pipeline until a measurement is found. The same holds true for any commands to the sensor (including read/write register): so long as the call to send the command is blocking, no special code needs to be added.</p>
-<p>If it is unacceptable that a blocking call is used (for example where other system control inputs are necessary), the serial polling and triggering of packet identification/routing must be handled explicitly. To this end, there are two methods available only when threading is disabled: <cite>loadMainBufferFromSerial</cite> and <cite>processNextPacket</cite>.</p>
+<p>Because the <a class="reference internal" href="../_api/class_v_n_1_1_sensor.html#_CPPv4N2VN6Sensor18getNextMeasurementEKb" title="VN::Sensor::getNextMeasurement"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">getNextMeasurement()</span></code></a> call is blocking, it will manage polling the serial and pushing packets through the pipeline until a measurement is found. The same holds true for any commands to the sensor (including read/write register): so long as the call to send the command is blocking, no special code needs to be added.</p>
+<p>If it is unacceptable that a blocking call is used (for example where other system control inputs are necessary), the serial polling and triggering of packet identification/routing must be handled explicitly. To this end, there are two methods available only when threading is disabled: <a class="reference internal" href="../_api/class_v_n_1_1_sensor.html#_CPPv4N2VN6Sensor24loadMainBufferFromSerialEv" title="VN::Sensor::loadMainBufferFromSerial"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">loadMainBufferFromSerial()</span></code></a> and <a class="reference internal" href="../_api/class_v_n_1_1_sensor.html#_CPPv4N2VN6Sensor17processNextPacketEv" title="VN::Sensor::processNextPacket"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">processNextPacket()</span></code></a> .</p>
 <p>To avoid data drops, best practice is to</p>
-<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="w">     </span><span class="c1">// ... Do system-level work</span>
-<span class="linenos"> 4</span>
-<span class="hll"><span class="linenos"> 5</span><span class="w">     </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">needsMoreData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sensor</span><span class="p">.</span><span class="n">processNextPacket</span><span class="p">();</span>
-</span><span class="linenos"> 6</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">needsMoreData</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="hll"><span class="linenos"> 7</span><span class="w">         </span><span class="n">sensor</span><span class="p">.</span><span class="n">loadMainBufferFromSerial</span><span class="p">();</span>
-</span><span class="linenos"> 8</span><span class="w">     </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos"> 9</span><span class="w">         </span><span class="k">auto</span><span class="w"> </span><span class="n">nextMeasurement_maybe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sensor</span><span class="p">.</span><span class="n">getNextMeasurement</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
-<span class="linenos">10</span><span class="w">         </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nextMeasurement_maybe</span><span class="p">.</span><span class="n">has_value</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="linenos">11</span><span class="w">             </span><span class="c1">// ... Handle next measurmenet</span>
-<span class="linenos">12</span><span class="w">     </span><span class="p">}</span>
-<span class="linenos">13</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">     </span><span class="c1">// ... Do system-level work</span>
+
+<span class="hll"><span class="w">     </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">needsMoreData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sensor</span><span class="p">.</span><span class="n">processNextPacket</span><span class="p">();</span>
+</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">needsMoreData</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">         </span><span class="n">sensor</span><span class="p">.</span><span class="n">loadMainBufferFromSerial</span><span class="p">();</span>
+</span><span class="w">     </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="k">auto</span><span class="w"> </span><span class="n">nextMeasurement_maybe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sensor</span><span class="p">.</span><span class="n">getNextMeasurement</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="w">         </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nextMeasurement_maybe</span><span class="p">.</span><span class="n">has_value</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">             </span><span class="c1">// ... Handle next measurmenet</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w"> </span><span class="p">}</span>
 </pre></div>
 </div>
-<p>some methods are no longer const</p>
 </section>
 </section>
 

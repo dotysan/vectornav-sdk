@@ -16,7 +16,6 @@ Subdirectories
 --------------
 
 - :ref:`dir_plugins_RegisterScan_include`
-- :ref:`dir_plugins_RegisterScan_src`
 
 
 

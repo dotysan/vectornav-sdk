@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -182,20 +182,34 @@ public:
         else { std::snprintf(_commandString.begin(), _commandString.capacity(), "SBL,%d", static_cast<uint8_t>(processorId)); }
         return _commandString;
     }
-    bool matchResponse(const AsciiMessage& responseToCheck, time_point timestamp) noexcept override
+
+    Errored isMatchingResponse(const AsciiMessage& responseToCheck, time_point timestamp) noexcept override
     {
-        // Necessary because polling is an option, where we would like to populate the processorId with the response.
-        if (GenericCommand::matchResponse(responseToCheck, timestamp))
+        LockGuard lock(_mutex);
+        _awaitingResponse = false;
+        _responseMatched = false;
+        AsciiMessage stringToMatch{};
+        std::snprintf(stringToMatch.begin(), 3 + 1 + _numCharToMatch, "$VN%s", _commandString.c_str());
+        if (StringUtils::startsWith(responseToCheck, stringToMatch))
         {
-            if (!isMatchingError(_commandString))
-            {
-                auto u8_maybe = StringUtils::fromString<uint8_t>(_commandString.data() + 7, _commandString.data() + 8);
-                if (!u8_maybe.has_value()) { return false; }             // This was invalid somehow.
-                processorId = static_cast<Processor>(u8_maybe.value());  // SBL only has 1 digit processor ids
-            }
-            return true;
+            _responseMatched = true;
+
+            // Necessary because polling is an option, where we would like to populate the processorId with the response.
+            auto u8_maybe = StringUtils::fromString<uint8_t>(responseToCheck.data() + 7, responseToCheck.data() + 8);
+            if (!u8_maybe.has_value()) { return false; }             // This was invalid somehow.
+            processorId = static_cast<Processor>(u8_maybe.value());  // SBL only has 1 digit processor ids
         }
-        else { return false; }
+        else
+        {
+            if (isMatchingError(responseToCheck)) { _responseMatched = true; }
+            else { VN_DEBUG_1("response NOT matched.\n Expected response:\t" + stringToMatch + "\nReceived response:\t" + responseToCheck); }
+        }
+        if (_responseMatched)
+        {
+            _commandString = responseToCheck;
+            _responseTime = timestamp;
+        }
+        return _responseMatched;
     }
 };
 
@@ -218,14 +232,19 @@ public:
     }
     /// @brief Populates the contents of this register from a command.
     /// @return An error occurred.
-    bool fromCommand(GenericCommand& commandIn) { return fromString(commandIn.getResponse()); }
+    Errored fromCommand(GenericCommand& commandIn) { return fromString(commandIn.getResponse()); }
 
     /// @brief Populates the contents of this register from a string.
     /// @return An error occurred.
-    virtual bool fromString(const AsciiMessage& sensorResponse) = 0;
+    virtual Errored fromString(const AsciiMessage& sensorResponse) = 0;
 
     /// @brief Formats the string payload necessary for a read or write register command.
-    AsciiMessage toString() { return (_id < 10) ? "0" + std::to_string(_id) : std::to_string(_id); }
+    AsciiMessage toString()
+    {
+        AsciiMessage ret;
+        sprintf(ret.data(), "%02u", _id);
+        return ret;
+    }
 
     /// @brief Gets the register id.
     uint8_t id() const { return _id; }
@@ -251,12 +270,14 @@ public:
 
     virtual AsciiMessage toString() const = 0;
 
-    /// @brief Generates a Write Register command from this object.
-    GenericCommand toWriteCommand()
+    /// @brief Generates a Write Register command from this object.  Can fail if not all fields are set.
+    std::optional<GenericCommand> toWriteCommand()
     {
         AsciiMessage responseMatch;
-        std::snprintf(responseMatch.begin(), responseMatch.capacity(), "WRG,%02d,%s", _id, toString().c_str());
-        return GenericCommand{responseMatch, static_cast<uint8_t>((_id > 99) ? 7 : 6)};
+        String cmdStr = toString();
+        if (cmdStr.empty() && _id != 0) { return std::nullopt; }
+        std::snprintf(responseMatch.begin(), responseMatch.capacity(), "WRG,%02d,%s", _id, cmdStr.c_str());
+        return std::make_optional<GenericCommand>(GenericCommand{responseMatch, static_cast<uint8_t>((_id > 99) ? 7 : 6)});
     }
 
 protected:

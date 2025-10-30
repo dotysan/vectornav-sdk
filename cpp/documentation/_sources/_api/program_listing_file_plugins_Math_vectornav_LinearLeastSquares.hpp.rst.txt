@@ -30,19 +30,20 @@ Program Listing for File LinearLeastSquares.hpp
    public:
        enum class LlsError
        {
-           None = 0,
-           InsufficientData = 9,
-           FailedEigenDecomposition = 11,
+           None = 0,                      
+           InsufficientData = 9,          
+           FailedEigenDecomposition = 11  
        };
+   
        template <uint16_t n, typename T>
        struct LeastSquaresSolution
        {
-           Matrix<n, 1, T> solution;
-           Matrix<n, n, T> eigenVectors;
-           Matrix<n, 1, T> eigenValuesReal;
-           Matrix<n, 1, T> eigenValuesImag;
-           T FOM;
-           LlsError error;  // Replace with error struct
+           Matrix<n, 1, T> solution;         
+           Matrix<n, n, T> eigenVectors;     
+           Matrix<n, 1, T> eigenValuesReal;  
+           Matrix<n, 1, T> eigenValuesImag;  
+           T FOM;                            
+           LlsError error;                   
        };
    
        LinearLeastSquares() = default;

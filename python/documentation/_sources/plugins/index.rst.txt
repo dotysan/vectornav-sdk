@@ -4,9 +4,11 @@ Plugins
 *******
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
+    calibration
     data_export
-    firmware_update
+    firmware_programmer
+    logger
+    math
     register_scan
-    simple_logger

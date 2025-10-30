@@ -1,4 +1,0 @@
-Simple Logger
-#############
-
-:class:`VNSDK::SimpleLogger`

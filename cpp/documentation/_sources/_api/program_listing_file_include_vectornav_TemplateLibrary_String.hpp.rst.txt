@@ -81,16 +81,16 @@ Program Listing for File String.hpp
        char& at(uint16_t index) noexcept
        {
            VN_ASSERT(index <= length());
-           return str.at(index);
+           return str[index];
        }
    
        char at(uint16_t index) const noexcept
        {
            VN_ASSERT(index <= length());
-           return str.at(index);
+           return str[index];
        }
    
-       bool push_back(const char charToPush) noexcept
+       Errored push_back(const char charToPush) noexcept
        {
            if (length() >= Capacity) { return true; }
            str[length()] = charToPush;
@@ -113,7 +113,7 @@ Program Listing for File String.hpp
        const char* end() const noexcept { return &str[length()]; }
        char* end() noexcept { return &str[length()]; }
    
-       uint16_t length() const noexcept { return strnlen(str.data(), Capacity); }
+       uint16_t length() const noexcept { return static_cast<uint16_t>(strnlen(str.data(), Capacity)); }
    
        bool empty() const noexcept { return (str[0] == '\0'); }
    
@@ -307,7 +307,6 @@ Program Listing for File String.hpp
    {
        return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
    }
-   
    namespace StringUtils
    {
    // ###################
@@ -465,5 +464,4 @@ Program Listing for File String.hpp
            return hash;
        }
    };
-   
    #endif  // VN_STRING_HPP_

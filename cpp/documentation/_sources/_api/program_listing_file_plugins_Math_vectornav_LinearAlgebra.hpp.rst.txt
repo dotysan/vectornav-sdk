@@ -25,6 +25,7 @@ Program Listing for File LinearAlgebra.hpp
    {
    
    // Vector math
+   
    template <typename T, typename S>
    T dot(const Matrix<3, 1, T>& lhs, const Matrix<3, 1, S>& rhs) noexcept
    {
@@ -55,7 +56,6 @@ Program Listing for File LinearAlgebra.hpp
        return retMatrix;
    }
    
-   // If non-invertable it will return an identity matrix
    template <uint16_t n, typename T>
    Matrix<n, n, T> inverse(const Matrix<n, n, T>& mat) noexcept
    {
@@ -143,6 +143,30 @@ Program Listing for File LinearAlgebra.hpp
        return nm * invDet;
    }
    
+   template <typename T>
+   Matrix<3, 3, T> inverse(const Matrix<3, 3, T>& mat) noexcept
+   {
+       Matrix<3, 3, T> nm;
+       T det = mat(0, 0) * (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) - mat(0, 1) * (mat(1, 0) * mat(2, 2) - mat(1, 2) * mat(2, 0)) +
+               mat(0, 2) * (mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0));
+   
+       if (std::abs(det) < std::numeric_limits<T>::epsilon()) { return Matrix<3, 3, T>::null(); }
+   
+       T invDet = 1 / det;
+   
+       nm(0, 0) = (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) * invDet;
+       nm(0, 1) = (mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2)) * invDet;
+       nm(0, 2) = (mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1)) * invDet;
+       nm(1, 0) = (mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2)) * invDet;
+       nm(1, 1) = (mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0)) * invDet;
+       nm(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2)) * invDet;
+       nm(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1)) * invDet;
+       nm(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1)) * invDet;
+       nm(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1)) * invDet;
+   
+       return nm;
+   }
+   
    template <uint16_t n, typename T>
    Matrix<n, 1, T> solveLinearSystemLU(Matrix<n, n, T> U, const Matrix<n, 1, T>& b) noexcept
    {
@@ -223,33 +247,9 @@ Program Listing for File LinearAlgebra.hpp
    }
    
    template <typename T>
-   Matrix<3, 3, T> inverse(const Matrix<3, 3, T>& mat) noexcept
-   {
-       Matrix<3, 3, T> nm;
-       T det = mat(0, 0) * (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) - mat(0, 1) * (mat(1, 0) * mat(2, 2) - mat(1, 2) * mat(2, 0)) +
-               mat(0, 2) * (mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0));
-   
-       if (std::abs(det) < std::numeric_limits<T>::epsilon()) { return Matrix<3, 3, T>::null(); }
-   
-       T invDet = 1 / det;
-   
-       nm(0, 0) = (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) * invDet;
-       nm(0, 1) = (mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2)) * invDet;
-       nm(0, 2) = (mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1)) * invDet;
-       nm(1, 0) = (mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2)) * invDet;
-       nm(1, 1) = (mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0)) * invDet;
-       nm(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2)) * invDet;
-       nm(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1)) * invDet;
-       nm(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1)) * invDet;
-       nm(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1)) * invDet;
-   
-       return nm;
-   }
-   
-   template <typename T>
    T sign(T val) noexcept
    {
-       return (T(0) < val) - (val < T(0));
+       return static_cast<T>((T(0) < val) - (val < T(0)));
    }
    
    template <typename T>
@@ -278,9 +278,9 @@ Program Listing for File LinearAlgebra.hpp
    template <uint16_t n, typename T>
    uint16_t mini(const Matrix<n, 1, T>& vec) noexcept
    {
-       uint16_t maxIndex = 0;
-       for (uint16_t i = 1; i < n; i++) { maxIndex = (vec[i] < vec[maxIndex]) ? i : maxIndex; }
-       return maxIndex;
+       uint16_t minIndex = 0;
+       for (uint16_t i = 1; i < n; i++) { minIndex = (vec[i] < vec[minIndex]) ? i : minIndex; }
+       return minIndex;
    }
    
    template <uint16_t m>
@@ -290,24 +290,23 @@ Program Listing for File LinearAlgebra.hpp
    }
    
    template <uint16_t m, typename T>
-   std::optional<Matrix<m, 1, T>> normalize(Matrix<m, 1, T>& mat) noexcept
+   std::optional<Matrix<m, 1, T>> normalize(Matrix<m, 1, T>& vec) noexcept
    {
-       T normM = norm(mat);
+       T normM = norm(vec);
        if (normM < std::numeric_limits<T>::epsilon()) { return std::nullopt; }
-       return std::make_optional<Matrix<m, 1, T>>(mat / normM);
+       return std::make_optional<Matrix<m, 1, T>>(vec / normM);
    }
    
    template <uint16_t m, typename T>
    Matrix<m, m, T> outer(const Matrix<m, 1, T>& lhs) noexcept
    {
-       Matrix<m, m, T> retMatrix;
        return lhs * transpose(lhs);
    }
    
    template <uint16_t m, typename T>
-   Matrix<m, m, T> outer(const Matrix<m, 1, T>& mat1, const Matrix<m, 1, T>& mat2) noexcept
+   Matrix<m, m, T> outer(const Matrix<m, 1, T>& vec1, const Matrix<m, 1, T>& vec2) noexcept
    {
-       return mat1 * transpose(mat2);
+       return vec1 * transpose(vec2);
    }
    
    template <uint16_t n1, uint16_t m, uint16_t n2, typename T>

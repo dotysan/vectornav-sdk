@@ -119,7 +119,7 @@ Program Listing for File GenericCommand.hpp
    
        virtual AsciiMessage getCommandString() noexcept;
    
-       virtual bool matchResponse(const AsciiMessage& responseToCheck, const time_point timestamp) noexcept;
+       virtual bool isMatchingResponse(const AsciiMessage& responseToCheck, const time_point timestamp) noexcept;
    
        void prepareToSend() noexcept;
    

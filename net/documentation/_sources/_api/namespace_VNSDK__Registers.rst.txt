@@ -44,4 +44,6 @@ Classes
 -------
 
 
-- :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_register`
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_config_register`
+
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_registers_1_1_meas_register`

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,16 +24,11 @@
 #ifndef VN_CLI_GENERICCOMMAND_HPP_
 #define VN_CLI_GENERICCOMMAND_HPP_
 
-#include "Windows.h"
-#include <conio.h>
 #include <msclr/marshal.h>
 
 #pragma managed(push, off)
 #include "vectornav/Interface/GenericCommand.hpp"
-#include "vectornav/Interface/Commands.hpp"
 #pragma managed(pop)
-
-#include <string>
 
 using namespace System;
 using namespace msclr::interop;

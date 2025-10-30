@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,19 +38,20 @@ namespace VN
 
 CommandProcessor::RegisterCommandReturn CommandProcessor::registerCommand(GenericCommand* pCommand, const Microseconds timeoutThreshold) noexcept
 {  // Should only be called on main thread
-    if (pCommand->isAwaitingResponse()) { return RegisterCommandReturn{RegisterCommandReturn::Error::CommandResent, AsciiMessage{}}; }
+    if (pCommand->isAwaitingResponse()) { return RegisterCommandReturn{Error::CommandResent, AsciiMessage{}}; }
 
     {
         LockGuard guard{_mutex};
         auto curr_time = now();
         while (!_cmdQueue.isEmpty())
         {
-            const auto item = _cmdQueue.peek().value();
-            if ((curr_time - item.cmd->getSentTime()) > item.timeoutThreshold) { _cmdQueue.get().value().cmd->setStale(); }
+            const auto item = _cmdQueue.peek();
+            VN_ASSERT(item.has_value());  // while loop confirms value exists
+            if ((curr_time - item.value().cmd->getSentTime()) > item.value().timeoutThreshold) { _cmdQueue.get().value().cmd->setStale(); }
             else { break; }
         }
 
-        if (_cmdQueue.isFull()) { return RegisterCommandReturn{RegisterCommandReturn::Error::CommandQueueFull, AsciiMessage{}}; }
+        if (_cmdQueue.isFull()) { return RegisterCommandReturn{Error::CommandQueueFull, AsciiMessage{}}; }
     }
 
     pCommand->prepareToSend();
@@ -66,16 +67,17 @@ CommandProcessor::RegisterCommandReturn CommandProcessor::registerCommand(Generi
         LockGuard guard{_mutex};
         _cmdQueue.put({pCommand, timeoutThreshold});
     }
-    return RegisterCommandReturn{RegisterCommandReturn::Error::None, messageToSend};
+    return RegisterCommandReturn{Error::None, messageToSend};
 }
 
-bool CommandProcessor::matchResponse(const AsciiMessage& response, const AsciiPacketProtocol::Metadata& metadata) noexcept
+Errored CommandProcessor::matchResponse(const AsciiMessage& response, const AsciiPacketProtocol::Metadata& metadata) noexcept
 {  // Should be called on high-priority thread
     LockGuard guard{_mutex};
     while (!_cmdQueue.isEmpty())
     {
-        const auto item = _cmdQueue.peek().value();
-        if ((metadata.timestamp - item.cmd->getSentTime()) > item.timeoutThreshold) { _cmdQueue.get().value().cmd->setStale(); }
+        const auto item = _cmdQueue.peek();
+        VN_ASSERT(item.has_value());  // while loop confirms value exists
+        if ((metadata.timestamp - item.value().cmd->getSentTime()) > item.value().timeoutThreshold) { _cmdQueue.get().value().cmd->setStale(); }
         else { break; }
     }
 
@@ -86,15 +88,10 @@ bool CommandProcessor::matchResponse(const AsciiMessage& response, const AsciiPa
         if (GenericCommand::isMatchingError(response))
         {
             auto frontCommand = _cmdQueue.get();
-            if (frontCommand.has_value())
+            if (!frontCommand.has_value() || !frontCommand.value().cmd->isMatchingResponse(response, metadata.timestamp))
             {
-                // If we get a synchronous error, assume it is the oldest command.
-                if (!frontCommand.value().cmd->matchResponse(response, metadata.timestamp))
-                {
-                    VN_ABORT();  // We just made sure it is a valid vnerr, should not be possible
-                }
+                _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response, now()));
             }
-            else { _asyncErrorQueuePush(AsyncError(Error::ReceivedUnexpectedMessage, response, now())); }
         }
         else
         {
@@ -113,7 +110,7 @@ bool CommandProcessor::matchResponse(const AsciiMessage& response, const AsciiPa
             bool validResponse = false;
             auto frontCommand = _cmdQueue.get();
             VN_ASSERT(frontCommand.has_value());  // The while loop validates that the command queue is not empty
-            validResponse = (*frontCommand).cmd->matchResponse(response, metadata.timestamp);
+            validResponse = (*frontCommand).cmd->isMatchingResponse(response, metadata.timestamp);
             if (validResponse)
             {
                 responseHasBeenMatched = true;

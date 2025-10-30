@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,23 +39,54 @@ namespace RegisterScan
 {
 
 template <typename T>
+/**
+ * @struct ConfigWriter
+ * @brief Base template interface for writing VectorNav configurations using the CRTP patter
+ * @tparam T The derived writer class implementing the specific writing mechanism.
+ */
 struct ConfigWriter
 {
-    VN::Error writeConfig(const AsciiMessage& msg) { return static_cast<T*>(this)->write(msg); }
+    /**
+     * @brief Writes a configuration message using the derived class implementation.
+     * @param msg The ASCII message containing the configuration to write.
+     * @return Error code indicating success or failure of the operation.
+     */
+    Error writeConfig(const AsciiMessage& msg) { return static_cast<T*>(this)->write(msg); }
+
+    /**
+     * @brief Finalizes the writing process, closing files or performing cleanup.
+     */
     void close() { static_cast<T*>(this)->finalize(); }
 };
 
+/**
+ * @class AsciiConfigWriter
+ * @brief A writer that saves VectorNav configurations to ASCII text files.
+ * @details Writes configuration commands directly to a file without formatting changes.
+ */
 class AsciiConfigWriter : public ConfigWriter<AsciiConfigWriter>
 {
 public:
+    /**
+     * @brief Constructs an AsciiConfigWriter that writes to the specified file path.
+     * @param path The file path where configurations will be saved.
+     */
     AsciiConfigWriter(const Filesystem::FilePath& path) : file(path) {}
 
-    VN::Error write(const AsciiMessage& msg)
+    /**
+     * @brief Writes an ASCII message to the output file.
+     * @param msg The ASCII message to write.
+     * @return Error code indicating success or failure of the operation.
+     */
+    Error write(const AsciiMessage& msg)
     {
-        if (file.write(msg.c_str())) { return VN::Error::FileWriteFailed; }
-        else { return VN::Error::None; }
+        if (file.write(msg.c_str())) { return Error::FileWriteFailed; }
+        else { return Error::None; }
     }
 
+    /**
+     * @brief Finalizes the writing process by closing the output file.
+     */
     void finalize()
     {
         if (file.is_open()) { file.close(); }
@@ -65,31 +96,70 @@ private:
     OutputFile file;
 };
 
+/**
+ * @class GenericConfigWriter
+ * @brief A configurable writer that uses custom functions for writing VectorNav configurations.
+ * @details Delegates writing and finalization operations to user-provided callback functions.
+ */
 class GenericConfigWriter : public ConfigWriter<GenericConfigWriter>
 {
 public:
+    /**
+     * @brief Constructs a GenericConfigWriter with custom callback functions.
+     * @param writeConfig Function object that implements the configuration writing logic.
+     * @param finalizeConfig Optional function object that implements finalization logic. If not provided a default empty lambda is used.
+     */
     GenericConfigWriter(
-        std::function<VN::Error(const AsciiMessage& msg)> writeConfig, std::function<void()> finalizeConfig = []() {})
+        std::function<Error(const AsciiMessage& msg)> writeConfig, std::function<void()> finalizeConfig = []() {})
         : _writeConfig(writeConfig), _finalizeConfig(finalizeConfig)
     {
     }
 
-    VN::Error write(const AsciiMessage& msg) { return _writeConfig(msg); }
+    /**
+     * @brief Writes a configuration message using the provided callback function.
+     * @param msg The ASCII message to write.
+     * @return Error code returned by the callback function.
+     */
+    Error write(const AsciiMessage& msg) { return _writeConfig(msg); }
 
+    /**
+     * @brief Finalizes the writing process using the provided callback function.
+     */
     void finalize() { _finalizeConfig(); }
 
 private:
-    std::function<VN::Error(const AsciiMessage& msg)> _writeConfig;
+    std::function<Error(const AsciiMessage& msg)> _writeConfig;
     std::function<void()> _finalizeConfig;
 };
 
+/**
+ * @class XmlConfigWriter
+ * @brief A writer that converts VectorNav ASCII configuration messages to XML format.
+ * @details Creates an XML document with information from a VectorNav unit and register configurations,
+ *          handling special cases for certain registers that require aggregation of multiple commands.
+ */
 class XmlConfigWriter : public ConfigWriter<XmlConfigWriter>
 {
 public:
+    /**
+     * @brief Constructs an XmlConfigWriter for the specified sensor object and output path.
+     * @param sensor The sensor object to read from.
+     * @param path The file path where the XML document will be saved.
+     */
     XmlConfigWriter(Sensor& sensor, const Filesystem::FilePath path) : sensor(sensor), _path(path) {}
 
-    VN::Error write(const AsciiMessage& msg);
+    /**
+     * @brief Processes and stores an ASCII configuration message for later XML output.
+     * @param msg The ASCII message containing the configuration command.
+     * @return Error code indicating success or failure of the operation.
+     * @details Special handling for registers 5, 6, 7, and 99 which may require aggregation of values.
+     */
+    Error write(const AsciiMessage& msg);
 
+    /**
+     * @brief Finalizes the XML document and writes it to the specified file path.
+     * @details Aggregates any pending register values and saves the complete XML configuration.
+     */
     void finalize();
 
 private:
@@ -104,8 +174,8 @@ private:
     AsciiMessage _reg7 = "";
     AsciiMessage _reg99 = "";
 
-    VN::Error _initialize();
-    VN::Error _write(const AsciiMessage& msg, const uint16_t regId);
+    Error _initialize();
+    Error _write(const AsciiMessage& msg, const uint16_t regId);
 };
 
 }  // namespace RegisterScan

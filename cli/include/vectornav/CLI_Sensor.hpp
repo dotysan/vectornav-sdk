@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,13 +25,16 @@
 #define VN_CLI_SENSOR_HPP_
 
 #include "vectornav/CLI_ByteBuffer.hpp"
+#include "vectornav/CLI_Commands.hpp"
 #include "vectornav/CLI_CompositeData.hpp"
+#include "vectornav/CLI_Exceptions.hpp"
 #include "vectornav/CLI_GenericCommand.hpp"
 #include "vectornav/CLI_Registers.hpp"
 #include "vectornav/CLI_SteadyClock.hpp"
+#include "vectornav/CLI_QueueDefinitions.hpp"
 
 #pragma managed(push, off)
-#include "vectornav/TemplateLibrary/ByteBuffer.hpp"
+#include "vectornav/Interface/BridgeSensor.hpp"
 #include "vectornav/Interface/Sensor.hpp"
 #pragma managed(pop)
 
@@ -41,7 +44,10 @@ namespace VNSDK
 {
 
 #if (PLUGIN_DATAEXPORT)
+namespace DataExport
+{
     ref class Exporter;
+}
 #endif
 #if (PLUGIN_CALIBRATION)
 namespace Calibration
@@ -49,15 +55,6 @@ namespace Calibration
     ref class HsiCalibration_Base;
 }  // namespace Calibration
 #endif
-
-public
-ref class VnException : public Exception
-{
-public:
-    VnException(VN::Error error) : Exception(gcnew String(VN::errorCodeToString(error)))
-    {
-    }
-};
 
 public
 value struct AsyncError
@@ -69,27 +66,140 @@ value struct AsyncError
     System::DateTime Timestamp;
 };
 
+
+public enum class MeasQueueMode
+{
+    Off = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Off),
+    Force = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Force),
+    Try = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Try),
+#if THREADING_ENABLE
+    Retry = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Retry)
+#endif
+};  
+
+inline VN::BridgeSensor::MeasQueueMode ToNativeInstance(MeasQueueMode mode)
+{
+    return static_cast<VN::BridgeSensor::MeasQueueMode>(static_cast<int>(mode));
+}
+
+inline MeasQueueMode ToManagedInstance(VN::BridgeSensor::MeasQueueMode mode)
+{
+    return static_cast<MeasQueueMode>(static_cast<int>(mode));
+}
+
+public ref class BinaryOutputMeasurements
+{
+    private:
+        VN::BridgeSensor::BinaryOutputMeasurements* _output_measurements;
+
+    public:
+        BinaryOutputMeasurements()
+        {
+            _output_measurements = new VN::BridgeSensor::BinaryOutputMeasurements{};
+        }
+
+        ~BinaryOutputMeasurements()
+        {
+            this->!BinaryOutputMeasurements();
+        }
+
+        !BinaryOutputMeasurements()
+        {
+            delete _output_measurements;
+            _output_measurements = nullptr;
+        }
+
+        VN::BridgeSensor::BinaryOutputMeasurements& ToNativePointer()
+        {
+            return *_output_measurements;
+        }
+};
+
+public enum class FaSubscriberFilterType
+{
+    ExactMatch = static_cast<int>(VN::BridgeSensor::FaSubscriberFilterType::ExactMatch),
+    AnyMatch = static_cast<int>(VN::BridgeSensor::FaSubscriberFilterType::AnyMatch),
+    NotExactMatch = static_cast<int>(VN::BridgeSensor::FaSubscriberFilterType::NotExactMatch),
+};
+
+inline VN::BridgeSensor::FaSubscriberFilterType ToNativeInstance(FaSubscriberFilterType filterType)
+{
+    return static_cast<VN::BridgeSensor::FaSubscriberFilterType>(static_cast<int>(filterType));
+}
+
+inline FaSubscriberFilterType ToManagedInstance(VN::BridgeSensor::FaSubscriberFilterType filterType)
+{
+    return static_cast<FaSubscriberFilterType>(static_cast<int>(filterType));
+}
+
+
+public enum class AsciiSubscriberFilterType
+{
+    StartsWith = static_cast<int>(VN::BridgeSensor::AsciiSubscriberFilterType::StartsWith),
+    DoesNotStartWith = static_cast<int>(VN::BridgeSensor::AsciiSubscriberFilterType::DoesNotStartWith)
+};
+
+inline VN::BridgeSensor::AsciiSubscriberFilterType ToNativeInstance(AsciiSubscriberFilterType filterType)
+{
+    return static_cast<VN::BridgeSensor::AsciiSubscriberFilterType>(static_cast<int>(filterType));
+}
+
+inline AsciiSubscriberFilterType ToManagedInstance(VN::BridgeSensor::AsciiSubscriberFilterType filterType)
+{
+    return static_cast<AsciiSubscriberFilterType>(static_cast<int>(filterType));
+}
+
+public enum class SyncByte
+{
+    Ascii = static_cast<int>(VN::BridgeSensor::SyncByte::Ascii),
+    FA = static_cast<int>(VN::BridgeSensor::SyncByte::FA),
+    FB = static_cast<int>(VN::BridgeSensor::SyncByte::FB),
+    None = static_cast<int>(VN::BridgeSensor::SyncByte::None),
+};
+
+inline VN::BridgeSensor::SyncByte ToNativeInstance(SyncByte filterType)
+{
+    return static_cast<VN::BridgeSensor::SyncByte>(static_cast<int>(filterType));
+}
+
+inline SyncByte ToManagedInstance(VN::BridgeSensor::SyncByte filterType)
+{
+    return static_cast<SyncByte>(static_cast<int>(filterType));
+}
+
 public
 ref class Sensor
 {
 private:
-    VN::Sensor * _sensor;
+    VN::BridgeSensor * _sensor;
     SteadyClock _clock{};
+
 
 public:
     using BaudRate = Registers::System::BaudRate::BaudRates;
     Sensor()
     {
-        _sensor = new VN::Sensor();
+        _sensor = new VN::BridgeSensor();
+    }
+
+    Sensor(MeasQueueMode mode)
+    {
+        VN::BridgeSensor::MeasQueueMode native_mode = ToNativeInstance(mode);
+        _sensor = new VN::BridgeSensor(native_mode);
     }
     
     ~Sensor()
+    {
+        this->!Sensor();
+    }
+
+    !Sensor()
     {
         delete _sensor;
     }
 
 
-    VN::Sensor &GetNativeInstance()
+    VN::BridgeSensor &GetNativeInstance()
     {
         return *_sensor;
     };
@@ -100,11 +210,31 @@ public:
 
     /// @brief Opens the serial port at the specified baud rate. This does not verify any connectivity, and as such only validates that the serial port is
     /// available available for opening.
+    void Connect(String ^ portName, BaudRate baudRate);
+
+    /// @brief Opens the serial port at the specified baud rate. This does not verify any connectivity, and as such only validates that the serial port is
+    /// available available for opening.
     void Connect(String ^ portName, UInt32 baudRate);
+
+    /// @brief Opens the serial port at the specified baud rate. This does not verify any connectivity, and as such only validates that the serial port is
+    /// available available for opening. Extra flag is passed in to monitor for asynchronous errors
+    void Connect(String ^ portName, UInt32 baudRate, bool monitorAsyncErrors);
+
+    /// @brief Opens the serial port at the specified baud rate. This does not verify any connectivity, and as such only validates that the serial port is
+    /// available available for opening. Extra flag is passed in to monitor for asynchronous errors
+    void Connect(String ^ portName, BaudRate baudRate, bool monitorAsyncErrors);
+
+    /// @brief Opens the file specified. If THREADING_ENABLE, this starts the Listening Thread.
+    void Connect(String^ fileName);
 
     /// @brief Opens the serial port, scanning all possible baud rates until the sensor is verified connected. This performs a verifySensorConnectivity at each
     /// possible baud rate.
     void AutoConnect(String ^ portName);
+
+    /// @brief Opens the serial port, scanning all possible baud rates until the sensor is verified connected. This performs a verifySensorConnectivity at each
+    /// possible baud rate. Extra flag is passed in to monitor for asynchronous errors
+    void AutoConnect(String ^ portName, bool moniforAsyncErrors);
+
 
     /// @brief Sends a ReadRegister for the Model register. Returns true if a valid response is received, otherwise returns false.
     bool VerifySensorConnectivity();
@@ -116,8 +246,20 @@ public:
     uint32_t ConnectedBaudRate();
 
     /// @brief Sends a Write Register for the new baud rate to the sensor and reopens to the serial port under the new baud rate. Will retry on failure.
+    void ChangeBaudRate(BaudRate baudRate);
+
+    /// @brief Sends a Write Register for the new baud rate to the sensor and reopens to the serial port under the new baud rate. Will retry on failure.
     void ChangeBaudRate(UInt32 baudRate);
 
+    /// @brief Sends a Write Register for the new baud rate to the sensor on the specified serial port. Reopens to the serial port under the new baud rate if it wrote to the active port. Will retry on failure.
+    void ChangeBaudRate(BaudRate baudRate, Registers::System::BaudRate::SerialPort serialPort);
+    
+    /// @brief Sends a Write Register for the new baud rate to the sensor on the specified serial port. Reopens to the serial port under the new baud rate if it wrote to the active port. Will retry on failure.
+    void ChangeBaudRate(UInt32 baudRate, System::Byte serialPort);
+
+    /// @brief Changes the host (computer) baud rate without commanding a change to the VectorNav unit's baud rate. Use with caution.
+    void ChangeHostBaudRate(BaudRate baudRate);
+    
     /// @brief Changes the host (computer) baud rate without commanding a change to the VectorNav unit's baud rate. Use with caution.
     void ChangeHostBaudRate(UInt32 baudRate);
 
@@ -139,12 +281,12 @@ public:
     /// @param block If true, wait a maximum of getMeasurementTimeoutLength for a new measurement.
     Nullable<CompositeData> GetMostRecentMeasurement();
 
-        /// @brief Block mode for sending a command. @see sendCommand()
+    /// @brief Block mode for sending a command. @see sendCommand()
     enum class SendCommandBlockMode
     {
-        None = (int)VN::Sensor::SendCommandBlockMode::None,            ///< Do not wait for a response from the unit before returning.
-        Block = (int)VN::Sensor::SendCommandBlockMode::Block,           ///< Block upon a response from the unit until the specific timeout; will return ResponseTimeout if timeout is hit.
-        BlockWithRetry = (int)VN::Sensor::SendCommandBlockMode::BlockWithRetry,  ///< Block upon a response from the unit until the specific timeout; retry sending the command and blocking commandSendRetriesAllowed
+        None = (int)VN::BridgeSensor::SendCommandBlockMode::None,            ///< Do not wait for a response from the unit before returning.
+        Block = (int)VN::BridgeSensor::SendCommandBlockMode::Block,           ///< Block upon a response from the unit until the specific timeout; will return ResponseTimeout if timeout is hit.
+        BlockWithRetry = (int)VN::BridgeSensor::SendCommandBlockMode::BlockWithRetry,  ///< Block upon a response from the unit until the specific timeout; retry sending the command and blocking commandSendRetriesAllowed
     };
 
     // ------------------------------------------
@@ -152,10 +294,11 @@ public:
     // ------------------------------------------
 
     /// @brief Sends a Read Register command to the unit to poll register values. This is always a blocking call.
-    void ReadRegister(Registers::Register ^ reg);
+    void ReadRegister(Registers::ConfigRegister ^ reg);
+    void ReadRegister(Registers::MeasRegister ^ reg);
 
     /// @brief Sends a Write Register command to the unit to set register values. This is always a blocking call.
-    void WriteRegister(Registers::Register ^ reg);
+    void WriteRegister(Registers::ConfigRegister ^ reg);
 
     /// @brief Sends the Write Settings command to the unit and blocks on the unit's confirmation.
     void WriteSettings();
@@ -169,7 +312,13 @@ public:
     void RestoreFactorySettings();
 
     /// @brief Sends a Known Magnetic Disturbance command to the sensor and blocks on the unit's message confirmation.
+    void KnownMagneticDisturbance(KnownMagneticDisturbance::State state);
+
+    /// @brief Sends a Known Magnetic Disturbance command to the sensor and blocks on the unit's message confirmation.
     void KnownMagneticDisturbance(uint8_t state);
+
+    /// @brief Sends a Known Acceleration Disturbance command to the sensor and blocks on the unit's message confirmation.
+    void KnownAccelerationDisturbance(KnownAccelerationDisturbance::State state);
 
     /// @brief Sends a Known Acceleration Disturbance command to the sensor and blocks on the unit's message confirmation.
     void KnownAccelerationDisturbance(uint8_t state);
@@ -178,6 +327,9 @@ public:
     void SetInitialHeading(float heading);
     void SetInitialHeading(Ypr ypr);
     void SetInitialHeading(Quaternion quat);
+
+    /// @brief Sends an Async Output Enable command to the sensor and blocks on the unit's message confirmation.
+    void Sensor::AsyncOutputEnable(AsyncOutputEnable::State state);
 
     /// @brief Sends an Async Output Enable command to the sensor and blocks on the unit's message confirmation.
     void AsyncOutputEnable(uint8_t state);
@@ -200,33 +352,50 @@ public:
     // Error Handling
     // ------------------------------------------
 
-    /// @brief Return any Asynchronous Errors (as a UInt16) reported by the sensor
-    Nullable<AsyncError> Sensor::GetAsynchronousError();
+    /// @brief Throws any Asynchronous Errors (as a UInt16) reported by the sensor
+    void ThrowIfAsyncError();
 
     /// @brief Get the current timestamp. Used mostly for debugging purposes.
-    System::DateTime Sensor::Now();
+    System::DateTime Now();
 
     // -----------------------------------------
     // Additional logging
     // ------------------------------------------
+    /// @brief Subscribes a queue to be populated (write only) with every matching measurement message as received. Multiple can be simultaneously registered.
+    void SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, BinaryOutputMeasurements^ binaryOutputMeasurementFilter);
 
+    /// @brief Subscribes a queue to be populated (write only) with every matching measurement message as received. Multiple can be simultaneously registered.
+    void SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, BinaryOutputMeasurements^ binaryOutputMeasurementFilter, FaSubscriberFilterType filterType);
+
+    /// @brief Unsubscribes particular FA packet queue.
+    void UnsubscribeFromMessage(ManagedQueuePointer^ queueToUnsubscribe, BinaryOutputMeasurements^ binaryOutputMeasurementFilter);
+
+    /// @brief Subscribes a queue to be populated (write only) with every matching measurement message as received. Multiple can be simultaneously registered.
+    void SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, System::String^ asciiHeaderFilter);
+
+    /// @brief Subscribes a queue to be populated (write only) with every matching measurement message as received. Multiple can be simultaneously registered.
+    void SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, System::String^ asciiHeaderFilter, AsciiSubscriberFilterType filterType);
+
+    /// @brief Unsubscribes particular ASCII packet queue.
+    void UnsubscribeFromMessage(ManagedQueuePointer^ queueToUnsubscribe, System::String^ asciiHeaderFilter);
+
+    /// @brief Subscribes a queue to be populated (write only) with every matching measurement message as received. Multiple can be simultaneously registered.
+    void SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, SyncByte syncByte);
+
+    /// @brief Unsubscribes queue based on type.
+    void UnsubscribeFromMessage(ManagedQueuePointer^ queueToUnsubscribe, SyncByte syncByte);
+
+    /// @brief Registers a ByteBuffer to capture all bytes received.  Only one may be registered at a time.
     void RegisterReceivedByteBuffer(ByteBuffer^ buffer);
+
+    /// @brief Unregisters the ReceivedByteBuffer.
     void DeregisterReceivedByteBuffer();
-    void RegisterSkippedByteBuffer(ByteBuffer^ buffer);
-    void DeregisterSkippedByteBuffer();
 
 #if (PLUGIN_DATAEXPORT)
     /// @brief Registers a Data Exporter, subscribing it to all ASCII and Binary messages.
-    void RegisterDataExporter(Exporter^ exporter);
+    void RegisterDataExporter(DataExport::Exporter^ exporter);
     /// @brief Deregisters the Data Exporter.
-    void DeregisterDataExporter(Exporter^ exporter);
-#endif
-
-#if (PLUGIN_CALIBRATION)
-    /// @brief Registers an HSI Calibration, subscribing it to VNYMR ASCII Message
-    void RegisterHsiCalibration(Calibration::HsiCalibration_Base^ hsi);
-    /// @brief Deregisters the HSI Calibration
-    void DeregisterHsiCalibration(Calibration::HsiCalibration_Base^ hsi);
+    void DeregisterDataExporter(DataExport::Exporter ^ exporter);
 #endif
     // ------------------------------------------
     // Unthreaded Packet Processing

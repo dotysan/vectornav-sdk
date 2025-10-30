@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,9 +24,11 @@
 // clang-format off
 #ifndef VN_PYTEMPLATES_HPP_
 #define VN_PYTEMPLATES_HPP_
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
+
 #include <iostream>
 #include <string>
 
@@ -44,7 +46,7 @@ void declare_matrix(py::module& m, const std::string& typestr) {
     .def("__repr__",
       [](const Class& mat) {
         std::string str = "[";
-        for (int i = 0; i < M*N - 1; i++) {
+        for (size_t i = 0; i < M*N - 1; i++) {
           str += std::to_string(mat[i]) + ",";
         }
         str += std::to_string(mat[M*N - 1]) + "]";
@@ -93,13 +95,53 @@ void declare_string(py::module &m, const std::string& typestr) {
 template<typename T, size_t Capacity>
 void declare_direct_access_queue(py::module& m, const std::string& typestr) {
   using Class = VN::DirectAccessQueue<T, Capacity>;
-  py::class_<Class, VN::DirectAccessQueue_Interface<T>>(m, typestr.c_str());
+
+  py::class_<Class, VN::DirectAccessQueue_Interface<T>> daq(m, typestr.c_str());
+
+  if constexpr (std::is_same_v<T, VN::Packet>)
+  {
+    daq.def(py::init<typename VN::DirectAccessQueue_Interface<T>::PutMode, uint16_t>());
+  }
+  else
+  {
+    daq.def(py::init<typename VN::DirectAccessQueue_Interface<T>::PutMode>());
+  }
+    // .def("put", &Class::put)  // Should not be called by user
+  daq.def("get", [](Class& queue) -> std::optional<T> {
+      auto qptr = queue.get();
+      if (qptr)
+      {
+        if constexpr (std::is_same_v<T, VN::Packet>)
+        {
+          std::optional<VN::Packet> packetOut(qptr->length());
+          packetOut->details = qptr->details;
+          std::memcpy(packetOut->buffer, qptr->buffer, qptr->length());
+          return packetOut;
+        }
+        else { return std::make_optional(*qptr); }
+      }
+      else { return std::nullopt; }
+    })
+    // .def("getBack", &Class::getBack)  // Should not be called by user
+    .def("reset", &Class::reset)
+    .def("size", &Class::size)
+    .def("isEmpty", &Class::isEmpty)
+    .def("capacity", &Class::capacity)
+  ;
+  
+  py::enum_<typename VN::DirectAccessQueue_Interface<T>::PutMode>(daq, "PutMode")
+      .value("Force", VN::DirectAccessQueue_Interface<T>::PutMode::Force)
+      .value("Try", VN::DirectAccessQueue_Interface<T>::PutMode::Try)
+#if THREADING_ENABLE
+      .value("Retry", VN::DirectAccessQueue_Interface<T>::PutMode::Retry)
+#endif  
+  ;
+
 }
 
 template<typename T>
 void declare_direct_access_queue_base(py::module& m, const std::string& typestr) {
-  using Class = VN::DirectAccessQueue_Interface<T>;
-  py::class_<Class>(m, typestr.c_str());
+  py::class_<typename VN::DirectAccessQueue_Interface<T>>(m, typestr.c_str());
 }
 
 #endif  // VN_PYTEMPLATES_HPP_

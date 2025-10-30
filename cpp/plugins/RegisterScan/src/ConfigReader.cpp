@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,21 +29,21 @@ namespace VN
 namespace RegisterScan
 {
 
-VN::Error AsciiConfigReader::next(AsciiMessage& msg)
+Error AsciiConfigReader::next(AsciiMessage& msg)
 {
-    VN::Error error{VN::Error::None};
-    if (file.read(msg.data(), msg.capacity(), '\n')) { error = VN::Error::FileReadFailed; }
+    Error error{Error::None};
+    if (file.read(msg.data(), msg.capacity(), '\n')) { error = Error::FileReadFailed; }
     return error;
 }
 
-VN::Error XmlConfigReader::next(AsciiMessage& msg)
+Error XmlConfigReader::next(AsciiMessage& msg)
 {
-    VN::Error error{VN::Error::None};
+    Error error{Error::None};
     if (_doc.document_element().root().empty())
     {
         if (!_doc.load_file(_path.c_str()))
         {
-            error = VN::Error::FileReadFailed;
+            error = Error::FileReadFailed;
             return error;
         }
         _next_node = _doc.child("VectorNav_Sensor").child("Register");
@@ -53,7 +53,7 @@ VN::Error XmlConfigReader::next(AsciiMessage& msg)
 
     if (!_curr_node)
     {
-        error = VN::Error::FileReadFailed;
+        error = Error::FileReadFailed;
         return error;
     }
 

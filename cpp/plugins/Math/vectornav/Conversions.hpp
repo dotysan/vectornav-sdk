@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,26 +39,67 @@ namespace Math
 // Angles
 // ******
 
+/**
+ * @brief Converts an angle from radians to degrees.
+ * @param angleInRads Angle in radians.
+ * @return Equivalent angle in degrees.
+ */
 inline float rad2deg(float angleInRads) noexcept { return angleInRads * 180.0f / static_cast<float>(M_PI); }
 
+/**
+ * @brief Converts an angle from radians to degrees.
+ * @param angleInRads Angle in radians.
+ * @return Equivalent angle in degrees.
+ */
 inline double rad2deg(double angleInRads) noexcept { return angleInRads * 180.0 / static_cast<double>(M_PI); }
 
+/**
+ * @brief Converts an angle from degrees to radians.
+ * @param angleInDegs Angle in degrees.
+ * @return Equivalent angle in radians.
+ */
 inline float deg2rad(float angleInDegs) noexcept { return angleInDegs * static_cast<float>(M_PI) / 180.0f; }
 
+/**
+ * @brief Converts an angle from degrees to radians.
+ * @param angleInDegs Angle in degrees.
+ * @return Equivalent angle in radians.
+ */
 inline double deg2rad(double angleInDegs) noexcept { return angleInDegs * static_cast<double>(M_PI) / 180.0; }
 
+/**
+ * @brief Converts a matrix of angles from radians to degrees.
+ * @tparam n Number of rows in the matrix.
+ * @tparam m Number of columns in the matrix.
+ * @tparam T The type of elements in the matrix.
+ * @param vec Matrix containing angles in radians.
+ * @return Equivalent matrix with angles in degrees.
+ */
 template <uint16_t n, uint16_t m, typename T>
-inline Matrix<n, m, T> rad2deg(Matrix<n, m, T> vec) noexcept
+inline constexpr Matrix<n, m, T> rad2deg(Matrix<n, m, T> vec) noexcept
 {
     return vec * (static_cast<T>(180.0) / static_cast<T>(M_PI));
 }
 
+/**
+ * @brief Converts a matrix of angles from degrees to radians.
+ * @tparam n Number of rows in the matrix.
+ * @tparam m Number of columns in the matrix.
+ * @tparam T The type of elements in the matrix.
+ * @param vec Matrix containing angles in degrees.
+ * @return Equivalent matrix with angles in radians.
+ */
 template <uint16_t n, uint16_t m, typename T>
-inline Matrix<n, m, T> deg2rad(Matrix<n, m, T> vec) noexcept
+inline constexpr Matrix<n, m, T> deg2rad(Matrix<n, m, T> vec) noexcept
 {
     return vec * (static_cast<T>(M_PI) / static_cast<T>(180.0));
 }
 
+/**
+ * @brief Converts yaw-pitch-roll from degrees to radians.
+ * @param ypr Yaw-pitch-roll in degrees.
+ * @return Equivalent yaw-pitch-roll in radians.
+ */
 inline Ypr deg2rad(Ypr ypr) noexcept
 {
     ypr.yaw *= (static_cast<float>(M_PI) / 180.0f);
@@ -67,6 +108,11 @@ inline Ypr deg2rad(Ypr ypr) noexcept
     return ypr;
 }
 
+/**
+ * @brief Converts yaw-pitch-roll from radians to degrees.
+ * @param ypr Yaw-pitch-roll in radians.
+ * @return Equivalent yaw-pitch-roll in degrees.
+ */
 inline Ypr rad2deg(Ypr ypr) noexcept
 {
     ypr.yaw *= (180.0f / static_cast<float>(M_PI));
@@ -79,28 +125,88 @@ inline Ypr rad2deg(Ypr ypr) noexcept
 // Temperature
 // ***********
 
+/**
+ * @brief Converts temperature from Celsius to Fahrenheit.
+ * @param tempInCelsius Temperature in Celsius.
+ * @return Equivalent temperature in Fahrenheit.
+ */
 inline float celsius2fahren(float tempInCelsius) noexcept { return (tempInCelsius * 9.0f) / 5.0f + 32.0f; }
 
+/**
+ * @brief Converts temperature from Celsius to Fahrenheit.
+ * @param tempInCelsius Temperature in Celsius.
+ * @return Equivalent temperature in Fahrenheit.
+ */
 inline double celsius2fahren(double tempInCelsius) noexcept { return (tempInCelsius * 9.0) / 5.0 + 32.0; }
 
+/**
+ * @brief Converts temperature from Fahrenheit to Celsius.
+ * @param tempInFahren Temperature in Fahrenheit.
+ * @return Equivalent temperature in Celsius.
+ */
 inline float fahren2celsius(float tempInFahren) noexcept { return (tempInFahren - 32.0f) * 5.0f / 9.0f; }
 
+/**
+ * @brief Converts temperature from Fahrenheit to Celsius.
+ * @param tempInFahren Temperature in Fahrenheit.
+ * @return Equivalent temperature in Celsius.
+ */
 inline double fahren2celsius(double tempInFahren) noexcept { return (tempInFahren - 32.0) * 5.0 / 9.0; }
 
+/**
+ * @brief Converts temperature from Celsius to Kelvin.
+ * @param tempInCelsius Temperature in Celsius.
+ * @return Equivalent temperature in Kelvin.
+ */
 inline float celsius2kelvin(float tempInCelsius) noexcept { return tempInCelsius + 273.15f; }
 
+/**
+ * @brief Converts temperature from Celsius to Kelvin.
+ * @param tempInCelsius Temperature in Celsius.
+ * @return Equivalent temperature in Kelvin.
+ */
 inline double celsius2kelvin(double tempInCelsius) noexcept { return tempInCelsius + 273.15; }
 
+/**
+ * @brief Converts temperature from Kelvin to Celsius.
+ * @param tempInKelvin Temperature in Kelvin.
+ * @return Equivalent temperature in Celsius.
+ */
 inline float kelvin2celsius(float tempInKelvin) noexcept { return tempInKelvin - 273.15f; }
 
+/**
+ * @brief Converts temperature from Kelvin to Celsius.
+ * @param tempInKelvin Temperature in Kelvin.
+ * @return Equivalent temperature in Celsius.
+ */
 inline double kelvin2celsius(double tempInKelvin) noexcept { return tempInKelvin - 273.15; }
 
+/**
+ * @brief Converts temperature from Fahrenheit to Kelvin.
+ * @param tempInFahren Temperature in Fahrenheit.
+ * @return Equivalent temperature in Kelvin.
+ */
 inline float fahren2kelvin(float tempInFahren) noexcept { return celsius2kelvin(fahren2celsius(tempInFahren)); }
 
+/**
+ * @brief Converts temperature from Fahrenheit to Kelvin.
+ * @param tempInFahren Temperature in Fahrenheit.
+ * @return Equivalent temperature in Kelvin.
+ */
 inline double fahren2kelvin(double tempInFahren) noexcept { return celsius2kelvin(fahren2celsius(tempInFahren)); }
 
+/**
+ * @brief Converts temperature from Kelvin to Fahrenheit.
+ * @param tempInKelvin Temperature in Kelvin.
+ * @return Equivalent temperature in Fahrenheit.
+ */
 inline float kelvin2fahren(float tempInKelvin) noexcept { return celsius2fahren(tempInKelvin - 273.15f); }
 
+/**
+ * @brief Converts temperature from Kelvin to Fahrenheit.
+ * @param tempInKelvin Temperature in Kelvin.
+ * @return Equivalent temperature in Fahrenheit.
+ */
 inline double kelvin2fahren(double tempInKelvin) noexcept { return celsius2fahren(tempInKelvin - 273.15); }
 
 }  // namespace Math

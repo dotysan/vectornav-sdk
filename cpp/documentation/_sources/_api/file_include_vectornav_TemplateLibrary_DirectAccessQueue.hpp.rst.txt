@@ -36,6 +36,8 @@ Includes
 
 - ``memory``
 
+- ``vectornav/Config.hpp``
+
 - ``vectornav/HAL/Mutex.hpp``
 
 - ``vectornav/TemplateLibrary/Queue.hpp``
@@ -45,6 +47,8 @@ Includes
 Included By
 -----------
 
+
+- :ref:`file_include_vectornav_Implementation_DynamicPacketQueue.hpp`
 
 - :ref:`file_include_vectornav_Implementation_QueueDefinitions.hpp`
 

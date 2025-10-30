@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,12 +25,10 @@
 #define VN_CLI_REGISTERS_HPP_
 
 #define NOMINMAX 1
-#include "Windows.h"
-#include <string>
-#include <conio.h>
-#include <msclr/marshal.h>
 
 #include "CLI_GenericCommand.hpp"
+
+#include <msclr/marshal.h>
 
 #pragma managed(push, off)
 #include "vectornav/Interface/Registers.hpp"
@@ -43,21 +41,19 @@ namespace VNSDK
 {
 namespace Registers
 {
-public ref class Register
+public ref class ConfigRegister
 {
     protected:
     VN::Register* _reg;
     
     public:
-    Register(VN::Register* reg) : _reg(reg) {};
-    ~Register() { delete _reg; };
-    VN::Register* GetReference() {return _reg;};
+    ConfigRegister(VN::Register* reg) : _reg(reg) {};
+    ~ConfigRegister() { delete _reg; };
+    VN::Register* GetReference() { return _reg; };
     
     VNSDK::GenericCommand^ ToReadCommand()
     {
-        VN::GenericCommand* cmd_c = new VN::GenericCommand(_reg->toReadCommand());
-        VNSDK::GenericCommand^ cmd = gcnew VNSDK::GenericCommand(cmd_c);
-        return cmd;
+        return gcnew VNSDK::GenericCommand(&_reg->toReadCommand());
     };
     
     VNSDK::GenericCommand^ ToWriteCommand()
@@ -65,634 +61,193 @@ public ref class Register
         VN::ConfigurationRegister* configReg = dynamic_cast<VN::ConfigurationRegister*>(_reg);
         if (configReg != nullptr)
         {
-            VN::GenericCommand* cmd_c = new VN::GenericCommand(configReg->toWriteCommand());
-            VNSDK::GenericCommand^ cmd = gcnew GenericCommand(cmd_c);
-            return cmd;
+            std::optional<VN::GenericCommand> writeCmd =  configReg->toWriteCommand();
+            if (!writeCmd.has_value()) {
+                return nullptr;;
+            }
+            return gcnew VNSDK::GenericCommand(new VN::GenericCommand(*writeCmd));
         }
         else
         {
-            throw gcnew InvalidCastException("Cast to ConfigurationRegister failed.");
+            return nullptr;
         }
     };
 };
+
+public ref class MeasRegister
+{
+    protected:
+    VN::Register* _reg;
+    
+    public:
+    MeasRegister(VN::Register* reg) : _reg(reg) {};
+    ~MeasRegister() { delete _reg; };
+    VN::Register* GetReference() { return _reg; };
+    
+    VNSDK::GenericCommand^ ToReadCommand()
+    {
+        VN::GenericCommand* cmd_c = new VN::GenericCommand(_reg->toReadCommand());
+        VNSDK::GenericCommand^ cmd = gcnew VNSDK::GenericCommand(cmd_c);
+        return cmd;
+    };
+};
+
 
 namespace Attitude
 {
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 8 - Yaw Pitch Roll </summary>
-<remarks>
-
-Attitude solution as yaw, pitch, and roll in degrees. The yaw, pitch, and roll is given as a 3,2,1 
-Euler angle rotation sequence describing the orientation of the sensor with respect to the inertial 
-North East Down (NED) frame. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class YawPitchRoll : public Register
-{
-    public:
-    YawPitchRoll() : Register(new VN::Registers::Attitude::YawPitchRoll())
-    {
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YawPitchRoll *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YawPitchRoll *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YawPitchRoll *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YawPitchRoll *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YawPitchRoll *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YawPitchRoll *)_reg)->roll = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 9 - Quaternion </summary>
-<remarks>
-
-Attitude solution as a quaternion. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Quaternion : public Register
-{
-    public:
-    Quaternion() : Register(new VN::Registers::Attitude::Quaternion())
-    {
-    };
-    
-    property float quatX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::Quaternion *)_reg)->quatX = value;
-        }
-        
-    };
-    
-    property float quatY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::Quaternion *)_reg)->quatY = value;
-        }
-        
-    };
-    
-    property float quatZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::Quaternion *)_reg)->quatZ = value;
-        }
-        
-    };
-    
-    property float quatS
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatS;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::Quaternion *)_reg)->quatS = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 15 - Quaternion & Compensated IMU </summary>
-<remarks>
-
-Quaternion attitude solution, and compensated (Magnetic, Acceleration, Angular Rate) values. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class QuatMagAccelRate : public Register
-{
-    public:
-    QuatMagAccelRate() : Register(new VN::Registers::Attitude::QuatMagAccelRate())
-    {
-    };
-    
-    property float quatX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatX = value;
-        }
-        
-    };
-    
-    property float quatY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatY = value;
-        }
-        
-    };
-    
-    property float quatZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatZ = value;
-        }
-        
-    };
-    
-    property float quatS
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatS;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatS = value;
-        }
-        
-    };
-    
-    property float magX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magX = value;
-        }
-        
-    };
-    
-    property float magY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magY = value;
-        }
-        
-    };
-    
-    property float magZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magZ = value;
-        }
-        
-    };
-    
-    property float accelX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelX = value;
-        }
-        
-    };
-    
-    property float accelY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelY = value;
-        }
-        
-    };
-    
-    property float accelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelZ = value;
-        }
-        
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroZ = value;
-        }
-        
-    };
-    
-    
-};
-
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 21 - Magnetic and Gravity Reference Vectors </summary>
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class MagGravRefVec : public Register
+public ref class MagGravRefVec : public ConfigRegister
 {
     public:
-    MagGravRefVec() : Register(new VN::Registers::Attitude::MagGravRefVec())
+    MagGravRefVec() : ConfigRegister(new VN::Registers::Attitude::MagGravRefVec())
     {
     };
     
-    property float magRefN
+    property Nullable<float> magRefN
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefN;
-        }
+            if(((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefN.has_value())
+            {
+                return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefN.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefN = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefN = value.Value;
+            }
+        };
         
     };
     
-    property float magRefE
+    property Nullable<float> magRefE
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefE;
-        }
+            if(((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefE.has_value())
+            {
+                return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefE.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefE = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefE = value.Value;
+            }
+        };
         
     };
     
-    property float magRefD
+    property Nullable<float> magRefD
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefD;
-        }
+            if(((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefD.has_value())
+            {
+                return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefD.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefD = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::MagGravRefVec *)_reg)->magRefD = value.Value;
+            }
+        };
         
     };
     
-    property float gravRefN
+    property Nullable<float> gravRefN
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefN;
-        }
+            if(((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefN.has_value())
+            {
+                return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefN.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefN = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefN = value.Value;
+            }
+        };
         
     };
     
-    property float gravRefE
+    property Nullable<float> gravRefE
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefE;
-        }
+            if(((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefE.has_value())
+            {
+                return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefE.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefE = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefE = value.Value;
+            }
+        };
         
     };
     
-    property float gravRefD
+    property Nullable<float> gravRefD
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefD;
-        }
+            if(((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefD.has_value())
+            {
+                return ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefD.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefD = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 27 - Yaw-Pitch-Roll & Compensated IMU </summary>
-<remarks>
-
-Yaw, Pitch, Roll, Accel, and Angular Rates 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class YprMagAccelAngularRates : public Register
-{
-    public:
-    YprMagAccelAngularRates() : Register(new VN::Registers::Attitude::YprMagAccelAngularRates())
-    {
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->roll = value;
-        }
-        
-    };
-    
-    property float magX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magX = value;
-        }
-        
-    };
-    
-    property float magY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magY = value;
-        }
-        
-    };
-    
-    property float magZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magZ = value;
-        }
-        
-    };
-    
-    property float accelX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelX = value;
-        }
-        
-    };
-    
-    property float accelY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelY = value;
-        }
-        
-    };
-    
-    property float accelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelZ = value;
-        }
-        
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::MagGravRefVec *)_reg)->gravRefD = value.Value;
+            }
+        };
         
     };
     
@@ -704,24 +259,34 @@ public ref class YprMagAccelAngularRates : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class VpeBasicControl : public Register
+public ref class VpeBasicControl : public ConfigRegister
 {
     public:
-    VpeBasicControl() : Register(new VN::Registers::Attitude::VpeBasicControl())
+    VpeBasicControl() : ConfigRegister(new VN::Registers::Attitude::VpeBasicControl())
     {
     };
     
-    property uint8_t resv
+    property Nullable<uint8_t> resv
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::Attitude::VpeBasicControl *)_reg)->resv;
-        }
+            if(((VN::Registers::Attitude::VpeBasicControl *)_reg)->resv.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeBasicControl *)_reg)->resv.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::Attitude::VpeBasicControl *)_reg)->resv = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeBasicControl *)_reg)->resv = value.Value;
+            }
+        };
         
     };
     
@@ -735,7 +300,7 @@ public ref class VpeBasicControl : public Register
     {
         HeadingMode get()
         {
-            return static_cast<VpeBasicControl::HeadingMode>(((VN::Registers::Attitude::VpeBasicControl *)_reg)->headingMode);
+            return static_cast<VpeBasicControl::HeadingMode>(((VN::Registers::Attitude::VpeBasicControl *)_reg)->headingMode.value());
         }
         
         void set(HeadingMode value)
@@ -754,7 +319,7 @@ public ref class VpeBasicControl : public Register
     {
         FilteringMode get()
         {
-            return static_cast<VpeBasicControl::FilteringMode>(((VN::Registers::Attitude::VpeBasicControl *)_reg)->filteringMode);
+            return static_cast<VpeBasicControl::FilteringMode>(((VN::Registers::Attitude::VpeBasicControl *)_reg)->filteringMode.value());
         }
         
         void set(FilteringMode value)
@@ -773,7 +338,7 @@ public ref class VpeBasicControl : public Register
     {
         TuningMode get()
         {
-            return static_cast<VpeBasicControl::TuningMode>(((VN::Registers::Attitude::VpeBasicControl *)_reg)->tuningMode);
+            return static_cast<VpeBasicControl::TuningMode>(((VN::Registers::Attitude::VpeBasicControl *)_reg)->tuningMode.value());
         }
         
         void set(TuningMode value)
@@ -791,136 +356,226 @@ public ref class VpeBasicControl : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class VpeMagBasicTuning : public Register
+public ref class VpeMagBasicTuning : public ConfigRegister
 {
     public:
-    VpeMagBasicTuning() : Register(new VN::Registers::Attitude::VpeMagBasicTuning())
+    VpeMagBasicTuning() : ConfigRegister(new VN::Registers::Attitude::VpeMagBasicTuning())
     {
     };
     
-    property float baseTuningX
+    property Nullable<float> baseTuningX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningX;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningX.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningX = value.Value;
+            }
+        };
         
     };
     
-    property float baseTuningY
+    property Nullable<float> baseTuningY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningY;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningY.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningY = value.Value;
+            }
+        };
         
     };
     
-    property float baseTuningZ
+    property Nullable<float> baseTuningZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningZ;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningZ.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->baseTuningZ = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveTuningX
+    property Nullable<float> adaptiveTuningX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningX;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningX.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningX = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveTuningY
+    property Nullable<float> adaptiveTuningY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningY;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningY.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningY = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveTuningZ
+    property Nullable<float> adaptiveTuningZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningZ;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningZ.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveTuningZ = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveFilteringX
+    property Nullable<float> adaptiveFilteringX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringX;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringX.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringX = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveFilteringY
+    property Nullable<float> adaptiveFilteringY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringY;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringY.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringY = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveFilteringZ
+    property Nullable<float> adaptiveFilteringZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringZ;
-        }
+            if(((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringZ.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeMagBasicTuning *)_reg)->adaptiveFilteringZ = value.Value;
+            }
+        };
         
     };
     
@@ -932,424 +587,226 @@ public ref class VpeMagBasicTuning : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class VpeAccelBasicTuning : public Register
+public ref class VpeAccelBasicTuning : public ConfigRegister
 {
     public:
-    VpeAccelBasicTuning() : Register(new VN::Registers::Attitude::VpeAccelBasicTuning())
+    VpeAccelBasicTuning() : ConfigRegister(new VN::Registers::Attitude::VpeAccelBasicTuning())
     {
     };
     
-    property float baseTuningX
+    property Nullable<float> baseTuningX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningX;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningX.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningX = value.Value;
+            }
+        };
         
     };
     
-    property float baseTuningY
+    property Nullable<float> baseTuningY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningY;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningY.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningY = value.Value;
+            }
+        };
         
     };
     
-    property float baseTuningZ
+    property Nullable<float> baseTuningZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningZ;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningZ.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->baseTuningZ = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveTuningX
+    property Nullable<float> adaptiveTuningX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningX;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningX.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningX = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveTuningY
+    property Nullable<float> adaptiveTuningY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningY;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningY.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningY = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveTuningZ
+    property Nullable<float> adaptiveTuningZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningZ;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningZ.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveTuningZ = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveFilteringX
+    property Nullable<float> adaptiveFilteringX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringX;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringX.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringX = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveFilteringY
+    property Nullable<float> adaptiveFilteringY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringY;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringY.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringY = value.Value;
+            }
+        };
         
     };
     
-    property float adaptiveFilteringZ
+    property Nullable<float> adaptiveFilteringZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringZ;
-        }
+            if(((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringZ.has_value())
+            {
+                return ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 239 - Yaw-Pitch-Roll, Linear Acceleration & Gyro </summary>
-<remarks>
-
-Yaw, Pitch, Roll, Linear Body Accel, and Angular Rates. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class YprLinearBodyAccelAngularRates : public Register
-{
-    public:
-    YprLinearBodyAccelAngularRates() : Register(new VN::Registers::Attitude::YprLinearBodyAccelAngularRates())
-    {
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->roll = value;
-        }
-        
-    };
-    
-    property float linAccelX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelX = value;
-        }
-        
-    };
-    
-    property float linAccelY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelY = value;
-        }
-        
-    };
-    
-    property float linAccelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelZ = value;
-        }
-        
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 240 - Yaw-Pitch-Roll, Inertial Linear Acceleration & Gyro </summary>
-<remarks>
-
-Yaw, Pitch, Roll, Linear Inertial Accel, and Angular Rates. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class YprLinearInertialAccelAngularRates : public Register
-{
-    public:
-    YprLinearInertialAccelAngularRates() : Register(new VN::Registers::Attitude::YprLinearInertialAccelAngularRates())
-    {
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->roll = value;
-        }
-        
-    };
-    
-    property float linAccelN
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelN;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelN = value;
-        }
-        
-    };
-    
-    property float linAccelE
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelE;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelE = value;
-        }
-        
-    };
-    
-    property float linAccelD
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelD;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelD = value;
-        }
-        
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Attitude::VpeAccelBasicTuning *)_reg)->adaptiveFilteringZ = value.Value;
+            }
+        };
         
     };
     
@@ -1365,10 +822,10 @@ namespace GNSS
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class GnssBasicConfig : public Register
+public ref class GnssBasicConfig : public ConfigRegister
 {
     public:
-    GnssBasicConfig() : Register(new VN::Registers::GNSS::GnssBasicConfig())
+    GnssBasicConfig() : ConfigRegister(new VN::Registers::GNSS::GnssBasicConfig())
     {
     };
     
@@ -1387,7 +844,7 @@ public ref class GnssBasicConfig : public Register
     {
         ReceiverEnable get()
         {
-            return static_cast<GnssBasicConfig::ReceiverEnable>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->receiverEnable);
+            return static_cast<GnssBasicConfig::ReceiverEnable>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->receiverEnable.value());
         }
         
         void set(ReceiverEnable value)
@@ -1409,7 +866,7 @@ public ref class GnssBasicConfig : public Register
     {
         PpsSource get()
         {
-            return static_cast<GnssBasicConfig::PpsSource>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->ppsSource);
+            return static_cast<GnssBasicConfig::PpsSource>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->ppsSource.value());
         }
         
         void set(PpsSource value)
@@ -1428,7 +885,7 @@ public ref class GnssBasicConfig : public Register
     {
         Rate get()
         {
-            return static_cast<GnssBasicConfig::Rate>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->rate);
+            return static_cast<GnssBasicConfig::Rate>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->rate.value());
         }
         
         void set(Rate value)
@@ -1438,17 +895,27 @@ public ref class GnssBasicConfig : public Register
         
     };
     
-    property uint8_t resv4
+    property Nullable<uint8_t> resv4
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::GNSS::GnssBasicConfig *)_reg)->resv4;
-        }
+            if(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->resv4.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssBasicConfig *)_reg)->resv4.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::GNSS::GnssBasicConfig *)_reg)->resv4 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssBasicConfig *)_reg)->resv4 = value.Value;
+            }
+        };
         
     };
     
@@ -1462,7 +929,7 @@ public ref class GnssBasicConfig : public Register
     {
         AntPower get()
         {
-            return static_cast<GnssBasicConfig::AntPower>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->antPower);
+            return static_cast<GnssBasicConfig::AntPower>(((VN::Registers::GNSS::GnssBasicConfig *)_reg)->antPower.value());
         }
         
         void set(AntPower value)
@@ -1480,528 +947,82 @@ public ref class GnssBasicConfig : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class GnssAOffset : public Register
+public ref class GnssAOffset : public ConfigRegister
 {
     public:
-    GnssAOffset() : Register(new VN::Registers::GNSS::GnssAOffset())
+    GnssAOffset() : ConfigRegister(new VN::Registers::GNSS::GnssAOffset())
     {
     };
     
-    property float positionX
+    property Nullable<float> positionX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionX;
-        }
+            if(((VN::Registers::GNSS::GnssAOffset *)_reg)->positionX.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionX = value.Value;
+            }
+        };
         
     };
     
-    property float positionY
+    property Nullable<float> positionY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionY;
-        }
+            if(((VN::Registers::GNSS::GnssAOffset *)_reg)->positionY.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionY = value.Value;
+            }
+        };
         
     };
     
-    property float positionZ
+    property Nullable<float> positionZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionZ;
-        }
+            if(((VN::Registers::GNSS::GnssAOffset *)_reg)->positionZ.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 58 - GNSS Solution - LLA </summary>
-<remarks>
-
-Primary GNSS receiver measurement with lat/lon/alt position and velocity in NED frame. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class GnssSolLla : public Register
-{
-    public:
-    GnssSolLla() : Register(new VN::Registers::GNSS::GnssSolLla())
-    {
-    };
-    
-    property double gps1Tow
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Tow;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Tow = value;
-        }
-        
-    };
-    
-    property uint16_t gps1Week
-    {
-        uint16_t get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Week;
-        }
-        
-        void set(uint16_t value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Week = value;
-        }
-        
-    };
-    
-    enum class Gnss1Fix : uint8_t
-    {
-        NoFix = 0,
-        TimeFix = 1,
-        Fix2D = 2,
-        Fix3D = 3,
-        SBAS = 4,
-        RtkFloat = 7,
-        RtkFix = 8,
-    };
-    property Gnss1Fix gnss1Fix
-    {
-        Gnss1Fix get()
-        {
-            return static_cast<GnssSolLla::Gnss1Fix>(((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Fix);
-        }
-        
-        void set(Gnss1Fix value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Fix = static_cast<VN::Registers::GNSS::GnssSolLla::Gnss1Fix>(value);
-        }
-        
-    };
-    
-    property uint8_t gnss1NumSats
-    {
-        uint8_t get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1NumSats;
-        }
-        
-        void set(uint8_t value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1NumSats = value;
-        }
-        
-    };
-    
-    property double lat
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->lat;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->lat = value;
-        }
-        
-    };
-    
-    property double lon
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->lon;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->lon = value;
-        }
-        
-    };
-    
-    property double alt
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->alt;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->alt = value;
-        }
-        
-    };
-    
-    property float velN
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->velN;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->velN = value;
-        }
-        
-    };
-    
-    property float velE
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->velE;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->velE = value;
-        }
-        
-    };
-    
-    property float velD
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->velD;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->velD = value;
-        }
-        
-    };
-    
-    property float posUncertaintyN
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->posUncertaintyN;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->posUncertaintyN = value;
-        }
-        
-    };
-    
-    property float posUncertaintyE
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->posUncertaintyE;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->posUncertaintyE = value;
-        }
-        
-    };
-    
-    property float posUncertaintyD
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->posUncertaintyD;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->posUncertaintyD = value;
-        }
-        
-    };
-    
-    property float gnss1VelUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelUncertainty = value;
-        }
-        
-    };
-    
-    property float gnss1TimeUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1TimeUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1TimeUncertainty = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 59 - GNSS Solution - ECEF </summary>
-<remarks>
-
-Primary GNSS receiver measurement in ECEF frame. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class GnssSolEcef : public Register
-{
-    public:
-    GnssSolEcef() : Register(new VN::Registers::GNSS::GnssSolEcef())
-    {
-    };
-    
-    property double gps1Tow
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Tow;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Tow = value;
-        }
-        
-    };
-    
-    property uint16_t gps1Week
-    {
-        uint16_t get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Week;
-        }
-        
-        void set(uint16_t value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Week = value;
-        }
-        
-    };
-    
-    enum class Gnss1Fix : uint8_t
-    {
-        NoFix = 0,
-        TimeFix = 1,
-        Fix2D = 2,
-        Fix3D = 3,
-        SBAS = 4,
-        RtkFloat = 7,
-        RtkFix = 8,
-    };
-    property Gnss1Fix gnss1Fix
-    {
-        Gnss1Fix get()
-        {
-            return static_cast<GnssSolEcef::Gnss1Fix>(((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1Fix);
-        }
-        
-        void set(Gnss1Fix value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1Fix = static_cast<VN::Registers::GNSS::GnssSolEcef::Gnss1Fix>(value);
-        }
-        
-    };
-    
-    property uint8_t gnss1NumSats
-    {
-        uint8_t get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1NumSats;
-        }
-        
-        void set(uint8_t value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1NumSats = value;
-        }
-        
-    };
-    
-    property double posX
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posX;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posX = value;
-        }
-        
-    };
-    
-    property double posY
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posY;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posY = value;
-        }
-        
-    };
-    
-    property double posZ
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posZ;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posZ = value;
-        }
-        
-    };
-    
-    property float velX
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->velX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->velX = value;
-        }
-        
-    };
-    
-    property float velY
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->velY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->velY = value;
-        }
-        
-    };
-    
-    property float velZ
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->velZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->velZ = value;
-        }
-        
-    };
-    
-    property float posUncertaintyX
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posUncertaintyX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posUncertaintyX = value;
-        }
-        
-    };
-    
-    property float posUncertaintyY
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posUncertaintyY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posUncertaintyY = value;
-        }
-        
-    };
-    
-    property float posUncertaintyZ
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posUncertaintyZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->posUncertaintyZ = value;
-        }
-        
-    };
-    
-    property float gnss1VelUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelUncertainty = value;
-        }
-        
-    };
-    
-    property float gnss1TimeUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1TimeUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1TimeUncertainty = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssAOffset *)_reg)->positionZ = value.Value;
+            }
+        };
         
     };
     
@@ -2013,10 +1034,10 @@ public ref class GnssSolEcef : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class GnssSystemConfig : public Register
+public ref class GnssSystemConfig : public ConfigRegister
 {
     public:
-    GnssSystemConfig() : Register(new VN::Registers::GNSS::GnssSystemConfig())
+    GnssSystemConfig() : ConfigRegister(new VN::Registers::GNSS::GnssSystemConfig())
     {
         systems = gcnew Systems(_reg);
         sbasMode = gcnew SbasMode(_reg);
@@ -2035,183 +1056,267 @@ public ref class GnssSystemConfig : public Register
             _reg = reg;
         }
         
-        property uint16_t _value                ///< BitField value for systems
+        property Nullable<uint16_t> _value      ///< BitField value for systems
         {
-            uint16_t get()
+            Nullable<uint16_t> get()
             {
-                return uint16_t(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems);
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return uint16_t(systems.value()); }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(uint16_t value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems = uint16_t(value);
             }
-            
         };
         
         // GPS
-        property bool gps
+        property Nullable<uint16_t> gps
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.gps;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().gps; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.gps = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->gps = uint16_t(value);
             }
-            
         };
         
         // SBAS
-        property bool sbas
+        property Nullable<uint16_t> sbas
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.sbas;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().sbas; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.sbas = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->sbas = uint16_t(value);
             }
-            
         };
         
         // GLONASS
-        property bool glonass
+        property Nullable<uint16_t> glonass
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.glonass;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().glonass; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.glonass = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->glonass = uint16_t(value);
             }
-            
         };
         
         // Beidou
-        property bool beidou
+        property Nullable<uint16_t> beidou
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.beidou;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().beidou; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.beidou = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->beidou = uint16_t(value);
             }
-            
         };
         
         // Galileo
-        property bool galileo
+        property Nullable<uint16_t> galileo
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.galileo;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().galileo; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.galileo = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->galileo = uint16_t(value);
             }
-            
         };
         
         // IMES
-        property bool imes
+        property Nullable<uint16_t> imes
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.imes;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().imes; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.imes = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->imes = uint16_t(value);
             }
-            
         };
         
         // QZSS_L1_CA
-        property bool qzssL1Ca
+        property Nullable<uint16_t> qzssL1Ca
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.qzssL1Ca;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().qzssL1Ca; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.qzssL1Ca = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->qzssL1Ca = uint16_t(value);
             }
-            
         };
         
         // QZSS_L1_SAIF
-        property bool qzssL1Saif
+        property Nullable<uint16_t> qzssL1Saif
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.qzssL1Saif;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (systems.has_value()) { return systems.value().qzssL1Saif; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.qzssL1Saif = value;
+                auto systems = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems;
+                if (!systems.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->systems.emplace();
+                }
+                systems->qzssL1Saif = uint16_t(value);
             }
-            
         };
         
     };
     
     Systems^ systems;
     
-    property uint8_t minCno
+    property Nullable<uint8_t> minCno
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minCno;
-        }
+            if(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minCno.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minCno.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minCno = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minCno = value.Value;
+            }
+        };
         
     };
     
-    property uint8_t minElev
+    property Nullable<uint8_t> minElev
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minElev;
-        }
+            if(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minElev.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minElev.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minElev = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->minElev = value.Value;
+            }
+        };
         
     };
     
-    property uint8_t maxSats
+    property Nullable<uint8_t> maxSats
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->maxSats;
-        }
+            if(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->maxSats.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->maxSats.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->maxSats = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->maxSats = value.Value;
+            }
+        };
         
     };
     
@@ -2225,78 +1330,108 @@ public ref class GnssSystemConfig : public Register
             _reg = reg;
         }
         
-        property uint8_t _value                 ///< BitField value for sbasMode
+        property Nullable<uint8_t> _value       ///< BitField value for sbasMode
         {
-            uint8_t get()
+            Nullable<uint8_t> get()
             {
-                return uint8_t(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode);
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (sbasMode.has_value()) { return uint8_t(sbasMode.value()); }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(uint8_t value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode = value;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (!sbasMode.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.emplace();
+                }
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode = uint8_t(value);
             }
-            
         };
         
         // Ranging
-        property bool ranging
+        property Nullable<uint8_t> ranging
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.ranging;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (sbasMode.has_value()) { return sbasMode.value().ranging; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.ranging = value;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (!sbasMode.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.emplace();
+                }
+                sbasMode->ranging = uint8_t(value);
             }
-            
         };
         
         // DiffCorr
-        property bool diffCorr
+        property Nullable<uint8_t> diffCorr
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.diffCorr;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (sbasMode.has_value()) { return sbasMode.value().diffCorr; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.diffCorr = value;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (!sbasMode.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.emplace();
+                }
+                sbasMode->diffCorr = uint8_t(value);
             }
-            
         };
         
         // Integrity
-        property bool integrity
+        property Nullable<uint8_t> integrity
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.integrity;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (sbasMode.has_value()) { return sbasMode.value().integrity; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.integrity = value;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (!sbasMode.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.emplace();
+                }
+                sbasMode->integrity = uint8_t(value);
             }
-            
         };
         
         // TestMode
-        property bool testMode
+        property Nullable<uint8_t> testMode
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.testMode;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (sbasMode.has_value()) { return sbasMode.value().testMode; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.testMode = value;
+                auto sbasMode = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode;
+                if (!sbasMode.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasMode.emplace();
+                }
+                sbasMode->testMode = uint8_t(value);
             }
-            
         };
         
     };
@@ -2313,258 +1448,360 @@ public ref class GnssSystemConfig : public Register
             _reg = reg;
         }
         
-        property uint16_t _value                ///< BitField value for sbasSelect1
+        property Nullable<uint16_t> _value      ///< BitField value for sbasSelect1
         {
-            uint16_t get()
+            Nullable<uint16_t> get()
             {
-                return uint16_t(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1);
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return uint16_t(sbasSelect1.value()); }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(uint16_t value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1 = uint16_t(value);
             }
-            
         };
         
         // Sbas120
-        property bool sbas120
+        property Nullable<uint16_t> sbas120
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas120;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas120; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas120 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas120 = uint16_t(value);
             }
-            
         };
         
         // Sbas121
-        property bool sbas121
+        property Nullable<uint16_t> sbas121
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas121;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas121; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas121 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas121 = uint16_t(value);
             }
-            
         };
         
         // Sbas122
-        property bool sbas122
+        property Nullable<uint16_t> sbas122
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas122;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas122; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas122 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas122 = uint16_t(value);
             }
-            
         };
         
         // Sbas123
-        property bool sbas123
+        property Nullable<uint16_t> sbas123
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas123;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas123; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas123 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas123 = uint16_t(value);
             }
-            
         };
         
         // Sbas124
-        property bool sbas124
+        property Nullable<uint16_t> sbas124
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas124;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas124; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas124 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas124 = uint16_t(value);
             }
-            
         };
         
         // Sbas125
-        property bool sbas125
+        property Nullable<uint16_t> sbas125
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas125;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas125; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas125 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas125 = uint16_t(value);
             }
-            
         };
         
         // Sbas126
-        property bool sbas126
+        property Nullable<uint16_t> sbas126
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas126;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas126; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas126 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas126 = uint16_t(value);
             }
-            
         };
         
         // Sbas127
-        property bool sbas127
+        property Nullable<uint16_t> sbas127
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas127;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas127; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas127 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas127 = uint16_t(value);
             }
-            
         };
         
         // Sbas128
-        property bool sbas128
+        property Nullable<uint16_t> sbas128
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas128;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas128; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas128 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas128 = uint16_t(value);
             }
-            
         };
         
         // Sbas129
-        property bool sbas129
+        property Nullable<uint16_t> sbas129
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas129;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas129; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas129 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas129 = uint16_t(value);
             }
-            
         };
         
         // Sbas130
-        property bool sbas130
+        property Nullable<uint16_t> sbas130
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas130;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas130; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas130 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas130 = uint16_t(value);
             }
-            
         };
         
         // Sbas131
-        property bool sbas131
+        property Nullable<uint16_t> sbas131
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas131;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas131; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas131 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas131 = uint16_t(value);
             }
-            
         };
         
         // Sbas132
-        property bool sbas132
+        property Nullable<uint16_t> sbas132
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas132;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas132; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas132 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas132 = uint16_t(value);
             }
-            
         };
         
         // Sbas133
-        property bool sbas133
+        property Nullable<uint16_t> sbas133
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas133;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas133; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas133 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas133 = uint16_t(value);
             }
-            
         };
         
         // Sbas134
-        property bool sbas134
+        property Nullable<uint16_t> sbas134
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas134;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas134; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas134 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas134 = uint16_t(value);
             }
-            
         };
         
         // Sbas135
-        property bool sbas135
+        property Nullable<uint16_t> sbas135
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas135;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (sbasSelect1.has_value()) { return sbasSelect1.value().sbas135; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.sbas135 = value;
+                auto sbasSelect1 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1;
+                if (!sbasSelect1.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect1.emplace();
+                }
+                sbasSelect1->sbas135 = uint16_t(value);
             }
-            
         };
         
     };
@@ -2581,258 +1818,360 @@ public ref class GnssSystemConfig : public Register
             _reg = reg;
         }
         
-        property uint16_t _value                ///< BitField value for sbasSelect2
+        property Nullable<uint16_t> _value      ///< BitField value for sbasSelect2
         {
-            uint16_t get()
+            Nullable<uint16_t> get()
             {
-                return uint16_t(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2);
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return uint16_t(sbasSelect2.value()); }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(uint16_t value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2 = uint16_t(value);
             }
-            
         };
         
         // Sbas136
-        property bool sbas136
+        property Nullable<uint16_t> sbas136
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas136;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas136; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas136 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas136 = uint16_t(value);
             }
-            
         };
         
         // Sbas137
-        property bool sbas137
+        property Nullable<uint16_t> sbas137
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas137;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas137; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas137 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas137 = uint16_t(value);
             }
-            
         };
         
         // Sbas138
-        property bool sbas138
+        property Nullable<uint16_t> sbas138
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas138;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas138; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas138 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas138 = uint16_t(value);
             }
-            
         };
         
         // Sbas139
-        property bool sbas139
+        property Nullable<uint16_t> sbas139
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas139;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas139; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas139 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas139 = uint16_t(value);
             }
-            
         };
         
         // Sbas140
-        property bool sbas140
+        property Nullable<uint16_t> sbas140
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas140;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas140; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas140 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas140 = uint16_t(value);
             }
-            
         };
         
         // Sbas141
-        property bool sbas141
+        property Nullable<uint16_t> sbas141
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas141;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas141; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas141 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas141 = uint16_t(value);
             }
-            
         };
         
         // Sbas142
-        property bool sbas142
+        property Nullable<uint16_t> sbas142
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas142;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas142; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas142 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas142 = uint16_t(value);
             }
-            
         };
         
         // Sbas143
-        property bool sbas143
+        property Nullable<uint16_t> sbas143
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas143;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas143; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas143 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas143 = uint16_t(value);
             }
-            
         };
         
         // Sbas144
-        property bool sbas144
+        property Nullable<uint16_t> sbas144
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas144;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas144; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas144 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas144 = uint16_t(value);
             }
-            
         };
         
         // Sbas145
-        property bool sbas145
+        property Nullable<uint16_t> sbas145
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas145;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas145; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas145 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas145 = uint16_t(value);
             }
-            
         };
         
         // Sbas146
-        property bool sbas146
+        property Nullable<uint16_t> sbas146
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas146;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas146; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas146 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas146 = uint16_t(value);
             }
-            
         };
         
         // Sbas147
-        property bool sbas147
+        property Nullable<uint16_t> sbas147
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas147;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas147; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas147 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas147 = uint16_t(value);
             }
-            
         };
         
         // Sbas148
-        property bool sbas148
+        property Nullable<uint16_t> sbas148
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas148;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas148; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas148 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas148 = uint16_t(value);
             }
-            
         };
         
         // Sbas149
-        property bool sbas149
+        property Nullable<uint16_t> sbas149
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas149;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas149; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas149 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas149 = uint16_t(value);
             }
-            
         };
         
         // Sbas150
-        property bool sbas150
+        property Nullable<uint16_t> sbas150
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas150;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas150; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas150 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas150 = uint16_t(value);
             }
-            
         };
         
         // Sbas151
-        property bool sbas151
+        property Nullable<uint16_t> sbas151
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas151;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (sbasSelect2.has_value()) { return sbasSelect2.value().sbas151; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.sbas151 = value;
+                auto sbasSelect2 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2;
+                if (!sbasSelect2.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect2.emplace();
+                }
+                sbasSelect2->sbas151 = uint16_t(value);
             }
-            
         };
         
     };
@@ -2849,123 +2188,171 @@ public ref class GnssSystemConfig : public Register
             _reg = reg;
         }
         
-        property uint16_t _value                ///< BitField value for sbasSelect3
+        property Nullable<uint16_t> _value      ///< BitField value for sbasSelect3
         {
-            uint16_t get()
+            Nullable<uint16_t> get()
             {
-                return uint16_t(((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3);
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return uint16_t(sbasSelect3.value()); }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(uint16_t value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3 = uint16_t(value);
             }
-            
         };
         
         // Sbas152
-        property bool sbas152
+        property Nullable<uint16_t> sbas152
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas152;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return sbasSelect3.value().sbas152; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas152 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                sbasSelect3->sbas152 = uint16_t(value);
             }
-            
         };
         
         // Sbas153
-        property bool sbas153
+        property Nullable<uint16_t> sbas153
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas153;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return sbasSelect3.value().sbas153; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas153 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                sbasSelect3->sbas153 = uint16_t(value);
             }
-            
         };
         
         // Sbas154
-        property bool sbas154
+        property Nullable<uint16_t> sbas154
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas154;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return sbasSelect3.value().sbas154; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas154 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                sbasSelect3->sbas154 = uint16_t(value);
             }
-            
         };
         
         // Sbas155
-        property bool sbas155
+        property Nullable<uint16_t> sbas155
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas155;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return sbasSelect3.value().sbas155; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas155 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                sbasSelect3->sbas155 = uint16_t(value);
             }
-            
         };
         
         // Sbas156
-        property bool sbas156
+        property Nullable<uint16_t> sbas156
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas156;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return sbasSelect3.value().sbas156; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas156 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                sbasSelect3->sbas156 = uint16_t(value);
             }
-            
         };
         
         // Sbas157
-        property bool sbas157
+        property Nullable<uint16_t> sbas157
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas157;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return sbasSelect3.value().sbas157; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas157 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                sbasSelect3->sbas157 = uint16_t(value);
             }
-            
         };
         
         // Sbas158
-        property bool sbas158
+        property Nullable<uint16_t> sbas158
         {
-            bool get()
+            Nullable<uint16_t> get()
             {
-                return ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas158;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (sbasSelect3.has_value()) { return sbasSelect3.value().sbas158; }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.sbas158 = value;
+                auto sbasSelect3 = ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3;
+                if (!sbasSelect3.has_value())
+                {
+                    ((VN::Registers::GNSS::GnssSystemConfig *)_reg)->sbasSelect3.emplace();
+                }
+                sbasSelect3->sbas158 = uint16_t(value);
             }
-            
         };
         
     };
@@ -3000,10 +2387,10 @@ public ref class GnssSystemConfig : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class GnssSyncConfig : public Register
+public ref class GnssSyncConfig : public ConfigRegister
 {
     public:
-    GnssSyncConfig() : Register(new VN::Registers::GNSS::GnssSyncConfig())
+    GnssSyncConfig() : ConfigRegister(new VN::Registers::GNSS::GnssSyncConfig())
     {
     };
     
@@ -3017,7 +2404,7 @@ public ref class GnssSyncConfig : public Register
     {
         GnssSyncEnable get()
         {
-            return static_cast<GnssSyncConfig::GnssSyncEnable>(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->gnssSyncEnable);
+            return static_cast<GnssSyncConfig::GnssSyncEnable>(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->gnssSyncEnable.value());
         }
         
         void set(GnssSyncEnable value)
@@ -3036,7 +2423,7 @@ public ref class GnssSyncConfig : public Register
     {
         Polarity get()
         {
-            return static_cast<GnssSyncConfig::Polarity>(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->polarity);
+            return static_cast<GnssSyncConfig::Polarity>(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->polarity.value());
         }
         
         void set(Polarity value)
@@ -3055,7 +2442,7 @@ public ref class GnssSyncConfig : public Register
     {
         SpecType get()
         {
-            return static_cast<GnssSyncConfig::SpecType>(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->specType);
+            return static_cast<GnssSyncConfig::SpecType>(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->specType.value());
         }
         
         void set(SpecType value)
@@ -3065,537 +2452,99 @@ public ref class GnssSyncConfig : public Register
         
     };
     
-    property uint8_t resv
+    property Nullable<uint8_t> resv
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->resv;
-        }
+            if(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->resv.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->resv.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->resv = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->resv = value.Value;
+            }
+        };
         
     };
     
-    property uint32_t period
+    property Nullable<uint32_t> period
     {
-        uint32_t get()
+        Nullable<uint32_t> get()
         {
-            return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->period;
-        }
+            if(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->period.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->period.value();
+            }
+            else
+            {
+                return Nullable<uint32_t>();
+            }
+        };
         
-        void set(uint32_t value)
+        void set(Nullable<uint32_t> value)
         {
-            ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->period = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->period = value.Value;
+            }
+        };
         
     };
     
-    property uint32_t pulseWidth
+    property Nullable<uint32_t> pulseWidth
     {
-        uint32_t get()
+        Nullable<uint32_t> get()
         {
-            return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->pulseWidth;
-        }
+            if(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->pulseWidth.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->pulseWidth.value();
+            }
+            else
+            {
+                return Nullable<uint32_t>();
+            }
+        };
         
-        void set(uint32_t value)
+        void set(Nullable<uint32_t> value)
         {
-            ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->pulseWidth = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->pulseWidth = value.Value;
+            }
+        };
         
     };
     
-    property int32_t offset
+    property Nullable<int32_t> offset
     {
-        int32_t get()
+        Nullable<int32_t> get()
         {
-            return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->offset;
-        }
+            if(((VN::Registers::GNSS::GnssSyncConfig *)_reg)->offset.has_value())
+            {
+                return ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->offset.value();
+            }
+            else
+            {
+                return Nullable<int32_t>();
+            }
+        };
         
-        void set(int32_t value)
+        void set(Nullable<int32_t> value)
         {
-            ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->offset = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 103 - GNSS 2 Solution - LLA </summary>
-<remarks>
-
-Estimated GNSS 2 Solution with lat/lon/alt position. This register is deprecated and will be 
-removed in future firmware versions. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Gnss2SolLla : public Register
-{
-    public:
-    Gnss2SolLla() : Register(new VN::Registers::GNSS::Gnss2SolLla())
-    {
-    };
-    
-    property double gps2Tow
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Tow;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Tow = value;
-        }
-        
-    };
-    
-    property uint16_t gps2Week
-    {
-        uint16_t get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Week;
-        }
-        
-        void set(uint16_t value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Week = value;
-        }
-        
-    };
-    
-    enum class Gnss2Fix : uint8_t
-    {
-        NoFix = 0,
-        TimeFix = 1,
-        Fix2D = 2,
-        Fix3D = 3,
-        SBAS = 4,
-        RtkFloat = 7,
-        RtkFix = 8,
-    };
-    property Gnss2Fix gnss2Fix
-    {
-        Gnss2Fix get()
-        {
-            return static_cast<Gnss2SolLla::Gnss2Fix>(((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Fix);
-        }
-        
-        void set(Gnss2Fix value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Fix = static_cast<VN::Registers::GNSS::Gnss2SolLla::Gnss2Fix>(value);
-        }
-        
-    };
-    
-    property uint8_t gnss2NumSats
-    {
-        uint8_t get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2NumSats;
-        }
-        
-        void set(uint8_t value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2NumSats = value;
-        }
-        
-    };
-    
-    property double lat
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->lat;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->lat = value;
-        }
-        
-    };
-    
-    property double lon
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->lon;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->lon = value;
-        }
-        
-    };
-    
-    property double alt
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->alt;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->alt = value;
-        }
-        
-    };
-    
-    property float velN
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->velN;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->velN = value;
-        }
-        
-    };
-    
-    property float velE
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->velE;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->velE = value;
-        }
-        
-    };
-    
-    property float velD
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->velD;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->velD = value;
-        }
-        
-    };
-    
-    property float posUncertaintyN
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->posUncertaintyN;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->posUncertaintyN = value;
-        }
-        
-    };
-    
-    property float posUncertaintyE
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->posUncertaintyE;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->posUncertaintyE = value;
-        }
-        
-    };
-    
-    property float posUncertaintyD
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->posUncertaintyD;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->posUncertaintyD = value;
-        }
-        
-    };
-    
-    property float gnss2VelUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelUncertainty = value;
-        }
-        
-    };
-    
-    property float gnss2TimeUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2TimeUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2TimeUncertainty = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 104 - GNSS 2 Solution - ECEF </summary>
-<remarks>
-
-Estimated GNSS 2 Solution with ECEF position. This register is deprecated and will be removed in 
-future firmware versions. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Gnss2SolEcef : public Register
-{
-    public:
-    Gnss2SolEcef() : Register(new VN::Registers::GNSS::Gnss2SolEcef())
-    {
-    };
-    
-    property double gps2Tow
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Tow;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Tow = value;
-        }
-        
-    };
-    
-    property uint16_t gps2Week
-    {
-        uint16_t get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Week;
-        }
-        
-        void set(uint16_t value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Week = value;
-        }
-        
-    };
-    
-    enum class Gnss2Fix : uint8_t
-    {
-        NoFix = 0,
-        TimeFix = 1,
-        Fix2D = 2,
-        Fix3D = 3,
-        SBAS = 4,
-        RtkFloat = 7,
-        RtkFix = 8,
-    };
-    property Gnss2Fix gnss2Fix
-    {
-        Gnss2Fix get()
-        {
-            return static_cast<Gnss2SolEcef::Gnss2Fix>(((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2Fix);
-        }
-        
-        void set(Gnss2Fix value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2Fix = static_cast<VN::Registers::GNSS::Gnss2SolEcef::Gnss2Fix>(value);
-        }
-        
-    };
-    
-    property uint8_t gnss2NumSats
-    {
-        uint8_t get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2NumSats;
-        }
-        
-        void set(uint8_t value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2NumSats = value;
-        }
-        
-    };
-    
-    property double posX
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posX;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posX = value;
-        }
-        
-    };
-    
-    property double posY
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posY;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posY = value;
-        }
-        
-    };
-    
-    property double posZ
-    {
-        double get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posZ;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posZ = value;
-        }
-        
-    };
-    
-    property float velX
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->velX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->velX = value;
-        }
-        
-    };
-    
-    property float velY
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->velY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->velY = value;
-        }
-        
-    };
-    
-    property float velZ
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->velZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->velZ = value;
-        }
-        
-    };
-    
-    property float posUncertaintyX
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posUncertaintyX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posUncertaintyX = value;
-        }
-        
-    };
-    
-    property float posUncertaintyY
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posUncertaintyY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posUncertaintyY = value;
-        }
-        
-    };
-    
-    property float posUncertaintyZ
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posUncertaintyZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->posUncertaintyZ = value;
-        }
-        
-    };
-    
-    property float gnss2VelUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelUncertainty = value;
-        }
-        
-    };
-    
-    property float gnss2TimeUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2TimeUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2TimeUncertainty = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::GnssSyncConfig *)_reg)->offset = value.Value;
+            }
+        };
         
     };
     
@@ -3607,52 +2556,82 @@ public ref class Gnss2SolEcef : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class ExtGnssOffset : public Register
+public ref class ExtGnssOffset : public ConfigRegister
 {
     public:
-    ExtGnssOffset() : Register(new VN::Registers::GNSS::ExtGnssOffset())
+    ExtGnssOffset() : ConfigRegister(new VN::Registers::GNSS::ExtGnssOffset())
     {
     };
     
-    property float positionX
+    property Nullable<float> positionX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionX;
-        }
+            if(((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionX.has_value())
+            {
+                return ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionX = value.Value;
+            }
+        };
         
     };
     
-    property float positionY
+    property Nullable<float> positionY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionY;
-        }
+            if(((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionY.has_value())
+            {
+                return ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionY = value.Value;
+            }
+        };
         
     };
     
-    property float positionZ
+    property Nullable<float> positionZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionZ;
-        }
+            if(((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionZ.has_value())
+            {
+                return ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSS::ExtGnssOffset *)_reg)->positionZ = value.Value;
+            }
+        };
         
     };
     
@@ -3664,419 +2643,158 @@ public ref class ExtGnssOffset : public Register
 namespace GNSSCompass
 {
 /**--------------------------------------------------------------------------------------------------
-<summary> Register 86 - GNSS Compass Signal Health Status </summary>
-<remarks>
-
-Provides several indicators that serve as an overall health status of the GNSS compass subsystem. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class GnssCompassSignalHealthStatus : public Register
-{
-    public:
-    GnssCompassSignalHealthStatus() : Register(new VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus())
-    {
-    };
-    
-    property float numSatsPvtA
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtA;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtA = value;
-        }
-        
-    };
-    
-    property float numSatsRtkA
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkA;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkA = value;
-        }
-        
-    };
-    
-    property float highestCn0A
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0A;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0A = value;
-        }
-        
-    };
-    
-    property float numSatsPvtB
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtB;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtB = value;
-        }
-        
-    };
-    
-    property float numSatsRtkB
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkB;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkB = value;
-        }
-        
-    };
-    
-    property float highestCn0B
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0B;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0B = value;
-        }
-        
-    };
-    
-    property float numComSatsPvt
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsPvt;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsPvt = value;
-        }
-        
-    };
-    
-    property float numComSatsRtk
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsRtk;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsRtk = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
 <summary> Register 93 - GNSS Compass Antenna Baseline </summary>
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class GnssCompassBaseline : public Register
+public ref class GnssCompassBaseline : public ConfigRegister
 {
     public:
-    GnssCompassBaseline() : Register(new VN::Registers::GNSSCompass::GnssCompassBaseline())
+    GnssCompassBaseline() : ConfigRegister(new VN::Registers::GNSSCompass::GnssCompassBaseline())
     {
     };
     
-    property float positionX
+    property Nullable<float> positionX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionX;
-        }
+            if(((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionX.has_value())
+            {
+                return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionX = value.Value;
+            }
+        };
         
     };
     
-    property float positionY
+    property Nullable<float> positionY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionY;
-        }
+            if(((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionY.has_value())
+            {
+                return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionY = value.Value;
+            }
+        };
         
     };
     
-    property float positionZ
+    property Nullable<float> positionZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionZ;
-        }
+            if(((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionZ.has_value())
+            {
+                return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->positionZ = value.Value;
+            }
+        };
         
     };
     
-    property float uncertaintyX
+    property Nullable<float> uncertaintyX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyX;
-        }
+            if(((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyX.has_value())
+            {
+                return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyX = value.Value;
+            }
+        };
         
     };
     
-    property float uncertaintyY
+    property Nullable<float> uncertaintyY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyY;
-        }
+            if(((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyY.has_value())
+            {
+                return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyY = value.Value;
+            }
+        };
         
     };
     
-    property float uncertaintyZ
+    property Nullable<float> uncertaintyZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyZ;
-        }
+            if(((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyZ.has_value())
+            {
+                return ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 97 - GNSS Compass Estimated Baseline </summary>
-<remarks>
-
-Provides the estimated GNSS compass baseline measurement. The estimated position offset and 
-measurement uncertainty is for antenna B relative to antenna A in the body reference frame. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class GnssCompassEstBaseline : public Register
-{
-    public:
-    GnssCompassEstBaseline() : Register(new VN::Registers::GNSSCompass::GnssCompassEstBaseline())
-    {
-    };
-    
-    property uint8_t estBaselineComplete
-    {
-        uint8_t get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->estBaselineComplete;
-        }
-        
-        void set(uint8_t value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->estBaselineComplete = value;
-        }
-        
-    };
-    
-    property uint8_t resv
-    {
-        uint8_t get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->resv;
-        }
-        
-        void set(uint8_t value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->resv = value;
-        }
-        
-    };
-    
-    property uint16_t numMeas
-    {
-        uint16_t get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->numMeas;
-        }
-        
-        void set(uint16_t value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->numMeas = value;
-        }
-        
-    };
-    
-    property float positionX
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionX = value;
-        }
-        
-    };
-    
-    property float positionY
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionY = value;
-        }
-        
-    };
-    
-    property float positionZ
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionZ = value;
-        }
-        
-    };
-    
-    property float uncertaintyX
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyX = value;
-        }
-        
-    };
-    
-    property float uncertaintyY
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyY = value;
-        }
-        
-    };
-    
-    property float uncertaintyZ
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 98 - GNSS Compass Startup Status </summary>
-<remarks>
-
-Provides status information on the GNSS compass startup process. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class GnssCompassStartupStatus : public Register
-{
-    public:
-    GnssCompassStartupStatus() : Register(new VN::Registers::GNSSCompass::GnssCompassStartupStatus())
-    {
-    };
-    
-    property uint8_t percentComplete
-    {
-        uint8_t get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->percentComplete;
-        }
-        
-        void set(uint8_t value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->percentComplete = value;
-        }
-        
-    };
-    
-    property float currentHeading
-    {
-        float get()
-        {
-            return ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->currentHeading;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->currentHeading = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::GNSSCompass::GnssCompassBaseline *)_reg)->uncertaintyZ = value.Value;
+            }
+        };
         
     };
     
@@ -4092,10 +2810,10 @@ namespace HardSoftIronEstimator
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class RealTimeHsiControl : public Register
+public ref class RealTimeHsiControl : public ConfigRegister
 {
     public:
-    RealTimeHsiControl() : Register(new VN::Registers::HardSoftIronEstimator::RealTimeHsiControl())
+    RealTimeHsiControl() : ConfigRegister(new VN::Registers::HardSoftIronEstimator::RealTimeHsiControl())
     {
     };
     
@@ -4109,7 +2827,7 @@ public ref class RealTimeHsiControl : public Register
     {
         Mode get()
         {
-            return static_cast<RealTimeHsiControl::Mode>(((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->mode);
+            return static_cast<RealTimeHsiControl::Mode>(((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->mode.value());
         }
         
         void set(Mode value)
@@ -4128,7 +2846,7 @@ public ref class RealTimeHsiControl : public Register
     {
         ApplyCompensation get()
         {
-            return static_cast<RealTimeHsiControl::ApplyCompensation>(((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->applyCompensation);
+            return static_cast<RealTimeHsiControl::ApplyCompensation>(((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->applyCompensation.value());
         }
         
         void set(ApplyCompensation value)
@@ -4138,203 +2856,27 @@ public ref class RealTimeHsiControl : public Register
         
     };
     
-    property uint8_t convergeRate
+    property Nullable<uint8_t> convergeRate
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->convergeRate;
-        }
+            if(((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->convergeRate.has_value())
+            {
+                return ((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->convergeRate.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->convergeRate = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 47 - Real-Time HSI Results </summary>
-<remarks>
-
-Magnetometer calibration values calculated by the real-time HSI calibration filter. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class EstMagCal : public Register
-{
-    public:
-    EstMagCal() : Register(new VN::Registers::HardSoftIronEstimator::EstMagCal())
-    {
-    };
-    
-    property float magGain00
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain00;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain00 = value;
-        }
-        
-    };
-    
-    property float magGain01
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain01;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain01 = value;
-        }
-        
-    };
-    
-    property float magGain02
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain02;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain02 = value;
-        }
-        
-    };
-    
-    property float magGain10
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain10;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain10 = value;
-        }
-        
-    };
-    
-    property float magGain11
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain11;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain11 = value;
-        }
-        
-    };
-    
-    property float magGain12
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain12;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain12 = value;
-        }
-        
-    };
-    
-    property float magGain20
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain20;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain20 = value;
-        }
-        
-    };
-    
-    property float magGain21
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain21;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain21 = value;
-        }
-        
-    };
-    
-    property float magGain22
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain22;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain22 = value;
-        }
-        
-    };
-    
-    property float magBiasX
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasX = value;
-        }
-        
-    };
-    
-    property float magBiasY
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasY = value;
-        }
-        
-    };
-    
-    property float magBiasZ
-    {
-        float get()
-        {
-            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::HardSoftIronEstimator::RealTimeHsiControl *)_reg)->convergeRate = value.Value;
+            }
+        };
         
     };
     
@@ -4346,172 +2888,182 @@ public ref class EstMagCal : public Register
 namespace Heave
 {
 /**--------------------------------------------------------------------------------------------------
-<summary> Register 115 - Heave and Heave Rate </summary>
-<remarks>
-
-Real-time heave and heave-rate estimates, plus a delayed-heave estimate. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class HeaveOutputs : public Register
-{
-    public:
-    HeaveOutputs() : Register(new VN::Registers::Heave::HeaveOutputs())
-    {
-    };
-    
-    property float heave
-    {
-        float get()
-        {
-            return ((VN::Registers::Heave::HeaveOutputs *)_reg)->heave;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Heave::HeaveOutputs *)_reg)->heave = value;
-        }
-        
-    };
-    
-    property float heaveRate
-    {
-        float get()
-        {
-            return ((VN::Registers::Heave::HeaveOutputs *)_reg)->heaveRate;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Heave::HeaveOutputs *)_reg)->heaveRate = value;
-        }
-        
-    };
-    
-    property float delayedHeave
-    {
-        float get()
-        {
-            return ((VN::Registers::Heave::HeaveOutputs *)_reg)->delayedHeave;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::Heave::HeaveOutputs *)_reg)->delayedHeave = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
 <summary> Register 116 - Heave Basic Configuration </summary>
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class HeaveBasicConfig : public Register
+public ref class HeaveBasicConfig : public ConfigRegister
 {
     public:
-    HeaveBasicConfig() : Register(new VN::Registers::Heave::HeaveBasicConfig())
+    HeaveBasicConfig() : ConfigRegister(new VN::Registers::Heave::HeaveBasicConfig())
     {
     };
     
-    property float initialWavePeriod
+    property Nullable<float> initialWavePeriod
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWavePeriod;
-        }
+            if(((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWavePeriod.has_value())
+            {
+                return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWavePeriod.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWavePeriod = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWavePeriod = value.Value;
+            }
+        };
         
     };
     
-    property float initialWaveAmplitude
+    property Nullable<float> initialWaveAmplitude
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWaveAmplitude;
-        }
+            if(((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWaveAmplitude.has_value())
+            {
+                return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWaveAmplitude.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWaveAmplitude = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->initialWaveAmplitude = value.Value;
+            }
+        };
         
     };
     
-    property float maxWavePeriod
+    property Nullable<float> maxWavePeriod
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->maxWavePeriod;
-        }
+            if(((VN::Registers::Heave::HeaveBasicConfig *)_reg)->maxWavePeriod.has_value())
+            {
+                return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->maxWavePeriod.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->maxWavePeriod = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->maxWavePeriod = value.Value;
+            }
+        };
         
     };
     
-    property float minWaveAmplitude
+    property Nullable<float> minWaveAmplitude
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->minWaveAmplitude;
-        }
+            if(((VN::Registers::Heave::HeaveBasicConfig *)_reg)->minWaveAmplitude.has_value())
+            {
+                return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->minWaveAmplitude.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->minWaveAmplitude = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->minWaveAmplitude = value.Value;
+            }
+        };
         
     };
     
-    property float delayedHeaveCutoffFreq
+    property Nullable<float> delayedHeaveCutoffFreq
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->delayedHeaveCutoffFreq;
-        }
+            if(((VN::Registers::Heave::HeaveBasicConfig *)_reg)->delayedHeaveCutoffFreq.has_value())
+            {
+                return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->delayedHeaveCutoffFreq.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->delayedHeaveCutoffFreq = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->delayedHeaveCutoffFreq = value.Value;
+            }
+        };
         
     };
     
-    property float heaveCutoffFreq
+    property Nullable<float> heaveCutoffFreq
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveCutoffFreq;
-        }
+            if(((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveCutoffFreq.has_value())
+            {
+                return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveCutoffFreq.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveCutoffFreq = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveCutoffFreq = value.Value;
+            }
+        };
         
     };
     
-    property float heaveRateCutoffFreq
+    property Nullable<float> heaveRateCutoffFreq
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveRateCutoffFreq;
-        }
+            if(((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveRateCutoffFreq.has_value())
+            {
+                return ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveRateCutoffFreq.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveRateCutoffFreq = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::Heave::HeaveBasicConfig *)_reg)->heaveRateCutoffFreq = value.Value;
+            }
+        };
         
     };
     
@@ -4523,506 +3075,302 @@ public ref class HeaveBasicConfig : public Register
 namespace IMU
 {
 /**--------------------------------------------------------------------------------------------------
-<summary> Register 17 - Compensated Magnetometer </summary>
-<remarks>
-
-Compensated magnetometer measurements. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Mag : public Register
-{
-    public:
-    Mag() : Register(new VN::Registers::IMU::Mag())
-    {
-    };
-    
-    property float magX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Mag *)_reg)->magX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Mag *)_reg)->magX = value;
-        }
-        
-    };
-    
-    property float magY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Mag *)_reg)->magY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Mag *)_reg)->magY = value;
-        }
-        
-    };
-    
-    property float magZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Mag *)_reg)->magZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Mag *)_reg)->magZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 18 - Compensated Accelerometer </summary>
-<remarks>
-
-Compensated acceleration measurements 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Accel : public Register
-{
-    public:
-    Accel() : Register(new VN::Registers::IMU::Accel())
-    {
-    };
-    
-    property float accelX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Accel *)_reg)->accelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Accel *)_reg)->accelX = value;
-        }
-        
-    };
-    
-    property float accelY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Accel *)_reg)->accelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Accel *)_reg)->accelY = value;
-        }
-        
-    };
-    
-    property float accelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Accel *)_reg)->accelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Accel *)_reg)->accelZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 19 - Compensated Gyro </summary>
-<remarks>
-
-Compensated angular rate measurements. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Gyro : public Register
-{
-    public:
-    Gyro() : Register(new VN::Registers::IMU::Gyro())
-    {
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Gyro *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Gyro *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Gyro *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Gyro *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::Gyro *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::Gyro *)_reg)->gyroZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 20 - Compensated IMU </summary>
-<remarks>
-
-Compensated magnetic, acceleration, and angular rate measurements. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class MagAccelGyro : public Register
-{
-    public:
-    MagAccelGyro() : Register(new VN::Registers::IMU::MagAccelGyro())
-    {
-    };
-    
-    property float magX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->magX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->magX = value;
-        }
-        
-    };
-    
-    property float magY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->magY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->magY = value;
-        }
-        
-    };
-    
-    property float magZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->magZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->magZ = value;
-        }
-        
-    };
-    
-    property float accelX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelX = value;
-        }
-        
-    };
-    
-    property float accelY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelY = value;
-        }
-        
-    };
-    
-    property float accelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelZ = value;
-        }
-        
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
 <summary> Register 23 - Magnetometer Calibration </summary>
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class MagCal : public Register
+public ref class MagCal : public ConfigRegister
 {
     public:
-    MagCal() : Register(new VN::Registers::IMU::MagCal())
+    MagCal() : ConfigRegister(new VN::Registers::IMU::MagCal())
     {
     };
     
-    property float magGain00
+    property Nullable<float> magGain00
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain00;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain00.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain00.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain00 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain00 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain01
+    property Nullable<float> magGain01
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain01;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain01.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain01.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain01 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain01 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain02
+    property Nullable<float> magGain02
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain02;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain02.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain02.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain02 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain02 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain10
+    property Nullable<float> magGain10
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain10;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain10.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain10.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain10 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain10 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain11
+    property Nullable<float> magGain11
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain11;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain11.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain11.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain11 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain11 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain12
+    property Nullable<float> magGain12
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain12;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain12.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain12.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain12 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain12 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain20
+    property Nullable<float> magGain20
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain20;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain20.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain20.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain20 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain20 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain21
+    property Nullable<float> magGain21
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain21;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain21.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain21.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain21 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain21 = value.Value;
+            }
+        };
         
     };
     
-    property float magGain22
+    property Nullable<float> magGain22
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magGain22;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magGain22.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magGain22.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magGain22 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magGain22 = value.Value;
+            }
+        };
         
     };
     
-    property float magBiasX
+    property Nullable<float> magBiasX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magBiasX;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magBiasX.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magBiasX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magBiasX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magBiasX = value.Value;
+            }
+        };
         
     };
     
-    property float magBiasY
+    property Nullable<float> magBiasY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magBiasY;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magBiasY.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magBiasY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magBiasY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magBiasY = value.Value;
+            }
+        };
         
     };
     
-    property float magBiasZ
+    property Nullable<float> magBiasZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::MagCal *)_reg)->magBiasZ;
-        }
+            if(((VN::Registers::IMU::MagCal *)_reg)->magBiasZ.has_value())
+            {
+                return ((VN::Registers::IMU::MagCal *)_reg)->magBiasZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::MagCal *)_reg)->magBiasZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::MagCal *)_reg)->magBiasZ = value.Value;
+            }
+        };
         
     };
     
@@ -5034,178 +3382,298 @@ public ref class MagCal : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class AccelCal : public Register
+public ref class AccelCal : public ConfigRegister
 {
     public:
-    AccelCal() : Register(new VN::Registers::IMU::AccelCal())
+    AccelCal() : ConfigRegister(new VN::Registers::IMU::AccelCal())
     {
     };
     
-    property float accelGain00
+    property Nullable<float> accelGain00
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain00;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain00.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain00.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain00 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain00 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain01
+    property Nullable<float> accelGain01
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain01;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain01.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain01.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain01 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain01 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain02
+    property Nullable<float> accelGain02
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain02;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain02.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain02.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain02 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain02 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain10
+    property Nullable<float> accelGain10
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain10;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain10.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain10.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain10 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain10 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain11
+    property Nullable<float> accelGain11
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain11;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain11.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain11.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain11 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain11 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain12
+    property Nullable<float> accelGain12
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain12;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain12.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain12.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain12 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain12 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain20
+    property Nullable<float> accelGain20
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain20;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain20.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain20.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain20 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain20 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain21
+    property Nullable<float> accelGain21
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain21;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain21.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain21.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain21 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain21 = value.Value;
+            }
+        };
         
     };
     
-    property float accelGain22
+    property Nullable<float> accelGain22
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain22;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelGain22.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelGain22.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelGain22 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelGain22 = value.Value;
+            }
+        };
         
     };
     
-    property float accelBiasX
+    property Nullable<float> accelBiasX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasX;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelBiasX.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasX = value.Value;
+            }
+        };
         
     };
     
-    property float accelBiasY
+    property Nullable<float> accelBiasY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasY;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelBiasY.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasY = value.Value;
+            }
+        };
         
     };
     
-    property float accelBiasZ
+    property Nullable<float> accelBiasZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasZ;
-        }
+            if(((VN::Registers::IMU::AccelCal *)_reg)->accelBiasZ.has_value())
+            {
+                return ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::AccelCal *)_reg)->accelBiasZ = value.Value;
+            }
+        };
         
     };
     
@@ -5217,424 +3685,226 @@ public ref class AccelCal : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class RefFrameRot : public Register
+public ref class RefFrameRot : public ConfigRegister
 {
     public:
-    RefFrameRot() : Register(new VN::Registers::IMU::RefFrameRot())
+    RefFrameRot() : ConfigRegister(new VN::Registers::IMU::RefFrameRot())
     {
     };
     
-    property float rfr00
+    property Nullable<float> rfr00
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr00;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr00.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr00.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr00 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr00 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr01
+    property Nullable<float> rfr01
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr01;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr01.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr01.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr01 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr01 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr02
+    property Nullable<float> rfr02
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr02;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr02.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr02.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr02 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr02 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr10
+    property Nullable<float> rfr10
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr10;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr10.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr10.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr10 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr10 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr11
+    property Nullable<float> rfr11
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr11;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr11.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr11.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr11 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr11 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr12
+    property Nullable<float> rfr12
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr12;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr12.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr12.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr12 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr12 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr20
+    property Nullable<float> rfr20
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr20;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr20.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr20.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr20 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr20 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr21
+    property Nullable<float> rfr21
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr21;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr21.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr21.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr21 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr21 = value.Value;
+            }
+        };
         
     };
     
-    property float rfr22
+    property Nullable<float> rfr22
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr22;
-        }
+            if(((VN::Registers::IMU::RefFrameRot *)_reg)->rfr22.has_value())
+            {
+                return ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr22.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr22 = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 54 - IMU Measurements </summary>
-<remarks>
-
-Provides the calibrated IMU measurements including barometric pressure. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class ImuMeas : public Register
-{
-    public:
-    ImuMeas() : Register(new VN::Registers::IMU::ImuMeas())
-    {
-    };
-    
-    property float uncompMagX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagX = value;
-        }
-        
-    };
-    
-    property float uncompMagY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagY = value;
-        }
-        
-    };
-    
-    property float uncompMagZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagZ = value;
-        }
-        
-    };
-    
-    property float uncompAccX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccX = value;
-        }
-        
-    };
-    
-    property float uncompAccY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccY = value;
-        }
-        
-    };
-    
-    property float uncompAccZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccZ = value;
-        }
-        
-    };
-    
-    property float uncompGyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroX = value;
-        }
-        
-    };
-    
-    property float uncompGyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroY = value;
-        }
-        
-    };
-    
-    property float uncompGyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroZ = value;
-        }
-        
-    };
-    
-    property float temperature
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->temperature;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->temperature = value;
-        }
-        
-    };
-    
-    property float pressure
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::ImuMeas *)_reg)->pressure;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::ImuMeas *)_reg)->pressure = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 80 - Delta Theta and Delta Velocity </summary>
-<remarks>
-
-This register contains the output values of the onboard coning and sculling algorithm. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class DeltaThetaVelocity : public Register
-{
-    public:
-    DeltaThetaVelocity() : Register(new VN::Registers::IMU::DeltaThetaVelocity())
-    {
-    };
-    
-    property float deltaTime
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaTime;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaTime = value;
-        }
-        
-    };
-    
-    property float deltaThetaX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaX = value;
-        }
-        
-    };
-    
-    property float deltaThetaY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaY = value;
-        }
-        
-    };
-    
-    property float deltaThetaZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaZ = value;
-        }
-        
-    };
-    
-    property float deltaVelX
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelX = value;
-        }
-        
-    };
-    
-    property float deltaVelY
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelY = value;
-        }
-        
-    };
-    
-    property float deltaVelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::RefFrameRot *)_reg)->rfr22 = value.Value;
+            }
+        };
         
     };
     
@@ -5646,10 +3916,10 @@ public ref class DeltaThetaVelocity : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class DeltaThetaVelConfig : public Register
+public ref class DeltaThetaVelConfig : public ConfigRegister
 {
     public:
-    DeltaThetaVelConfig() : Register(new VN::Registers::IMU::DeltaThetaVelConfig())
+    DeltaThetaVelConfig() : ConfigRegister(new VN::Registers::IMU::DeltaThetaVelConfig())
     {
     };
     
@@ -5662,7 +3932,7 @@ public ref class DeltaThetaVelConfig : public Register
     {
         IntegrationFrame get()
         {
-            return static_cast<DeltaThetaVelConfig::IntegrationFrame>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->integrationFrame);
+            return static_cast<DeltaThetaVelConfig::IntegrationFrame>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->integrationFrame.value());
         }
         
         void set(IntegrationFrame value)
@@ -5681,7 +3951,7 @@ public ref class DeltaThetaVelConfig : public Register
     {
         GyroCompensation get()
         {
-            return static_cast<DeltaThetaVelConfig::GyroCompensation>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->gyroCompensation);
+            return static_cast<DeltaThetaVelConfig::GyroCompensation>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->gyroCompensation.value());
         }
         
         void set(GyroCompensation value)
@@ -5702,7 +3972,7 @@ public ref class DeltaThetaVelConfig : public Register
     {
         AccelCompensation get()
         {
-            return static_cast<DeltaThetaVelConfig::AccelCompensation>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->accelCompensation);
+            return static_cast<DeltaThetaVelConfig::AccelCompensation>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->accelCompensation.value());
         }
         
         void set(AccelCompensation value)
@@ -5723,7 +3993,7 @@ public ref class DeltaThetaVelConfig : public Register
     {
         EarthRateCompensation get()
         {
-            return static_cast<DeltaThetaVelConfig::EarthRateCompensation>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->earthRateCompensation);
+            return static_cast<DeltaThetaVelConfig::EarthRateCompensation>(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->earthRateCompensation.value());
         }
         
         void set(EarthRateCompensation value)
@@ -5733,17 +4003,27 @@ public ref class DeltaThetaVelConfig : public Register
         
     };
     
-    property uint16_t resv
+    property Nullable<uint16_t> resv
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->resv;
-        }
+            if(((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->resv.has_value())
+            {
+                return ((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->resv.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->resv = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::DeltaThetaVelConfig *)_reg)->resv = value.Value;
+            }
+        };
         
     };
     
@@ -5755,178 +4035,298 @@ public ref class DeltaThetaVelConfig : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class GyroCal : public Register
+public ref class GyroCal : public ConfigRegister
 {
     public:
-    GyroCal() : Register(new VN::Registers::IMU::GyroCal())
+    GyroCal() : ConfigRegister(new VN::Registers::IMU::GyroCal())
     {
     };
     
-    property float gyroGain00
+    property Nullable<float> gyroGain00
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain00;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain00.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain00.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain00 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain00 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain01
+    property Nullable<float> gyroGain01
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain01;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain01.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain01.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain01 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain01 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain02
+    property Nullable<float> gyroGain02
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain02;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain02.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain02.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain02 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain02 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain10
+    property Nullable<float> gyroGain10
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain10;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain10.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain10.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain10 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain10 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain11
+    property Nullable<float> gyroGain11
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain11;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain11.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain11.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain11 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain11 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain12
+    property Nullable<float> gyroGain12
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain12;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain12.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain12.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain12 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain12 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain20
+    property Nullable<float> gyroGain20
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain20;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain20.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain20.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain20 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain20 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain21
+    property Nullable<float> gyroGain21
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain21;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain21.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain21.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain21 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain21 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroGain22
+    property Nullable<float> gyroGain22
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain22;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroGain22.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain22.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain22 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroGain22 = value.Value;
+            }
+        };
         
     };
     
-    property float gyroBiasX
+    property Nullable<float> gyroBiasX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasX;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasX.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasX = value.Value;
+            }
+        };
         
     };
     
-    property float gyroBiasY
+    property Nullable<float> gyroBiasY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasY;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasY.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasY = value.Value;
+            }
+        };
         
     };
     
-    property float gyroBiasZ
+    property Nullable<float> gyroBiasZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasZ;
-        }
+            if(((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasZ.has_value())
+            {
+                return ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::GyroCal *)_reg)->gyroBiasZ = value.Value;
+            }
+        };
         
     };
     
@@ -5938,10 +4338,10 @@ public ref class GyroCal : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class ImuFilterControl : public Register
+public ref class ImuFilterControl : public ConfigRegister
 {
     public:
-    ImuFilterControl() : Register(new VN::Registers::IMU::ImuFilterControl())
+    ImuFilterControl() : ConfigRegister(new VN::Registers::IMU::ImuFilterControl())
     {
         magFilterMode = gcnew MagFilterMode(_reg);
         accelFilterMode = gcnew AccelFilterMode(_reg);
@@ -5950,73 +4350,123 @@ public ref class ImuFilterControl : public Register
         presFilterMode = gcnew PresFilterMode(_reg);
     };
     
-    property uint16_t magWindowSize
+    property Nullable<uint16_t> magWindowSize
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::IMU::ImuFilterControl *)_reg)->magWindowSize;
-        }
+            if(((VN::Registers::IMU::ImuFilterControl *)_reg)->magWindowSize.has_value())
+            {
+                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->magWindowSize.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::IMU::ImuFilterControl *)_reg)->magWindowSize = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->magWindowSize = value.Value;
+            }
+        };
         
     };
     
-    property uint16_t accelWindowSize
+    property Nullable<uint16_t> accelWindowSize
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelWindowSize;
-        }
+            if(((VN::Registers::IMU::ImuFilterControl *)_reg)->accelWindowSize.has_value())
+            {
+                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelWindowSize.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelWindowSize = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelWindowSize = value.Value;
+            }
+        };
         
     };
     
-    property uint16_t gyroWindowSize
+    property Nullable<uint16_t> gyroWindowSize
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroWindowSize;
-        }
+            if(((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroWindowSize.has_value())
+            {
+                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroWindowSize.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroWindowSize = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroWindowSize = value.Value;
+            }
+        };
         
     };
     
-    property uint16_t tempWindowSize
+    property Nullable<uint16_t> tempWindowSize
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempWindowSize;
-        }
+            if(((VN::Registers::IMU::ImuFilterControl *)_reg)->tempWindowSize.has_value())
+            {
+                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempWindowSize.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempWindowSize = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempWindowSize = value.Value;
+            }
+        };
         
     };
     
-    property uint16_t presWindowSize
+    property Nullable<uint16_t> presWindowSize
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::IMU::ImuFilterControl *)_reg)->presWindowSize;
-        }
+            if(((VN::Registers::IMU::ImuFilterControl *)_reg)->presWindowSize.has_value())
+            {
+                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->presWindowSize.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::IMU::ImuFilterControl *)_reg)->presWindowSize = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->presWindowSize = value.Value;
+            }
+        };
         
     };
     
@@ -6030,48 +4480,66 @@ public ref class ImuFilterControl : public Register
             _reg = reg;
         }
         
-        property uint8_t _value                 ///< BitField value for magFilterMode
+        property Nullable<uint8_t> _value       ///< BitField value for magFilterMode
         {
-            uint8_t get()
+            Nullable<uint8_t> get()
             {
-                return uint8_t(((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode);
+                auto magFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode;
+                if (magFilterMode.has_value()) { return uint8_t(magFilterMode.value()); }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(uint8_t value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode = value;
+                auto magFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode;
+                if (!magFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode.emplace();
+                }
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode = uint8_t(value);
             }
-            
         };
         
         // Uncomp
-        property bool uncomp
+        property Nullable<uint8_t> uncomp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode.uncomp;
+                auto magFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode;
+                if (magFilterMode.has_value()) { return magFilterMode.value().uncomp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode.uncomp = value;
+                auto magFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode;
+                if (!magFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode.emplace();
+                }
+                magFilterMode->uncomp = uint8_t(value);
             }
-            
         };
         
         // Comp
-        property bool comp
+        property Nullable<uint8_t> comp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode.comp;
+                auto magFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode;
+                if (magFilterMode.has_value()) { return magFilterMode.value().comp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode.comp = value;
+                auto magFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode;
+                if (!magFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->magFilterMode.emplace();
+                }
+                magFilterMode->comp = uint8_t(value);
             }
-            
         };
         
     };
@@ -6088,48 +4556,66 @@ public ref class ImuFilterControl : public Register
             _reg = reg;
         }
         
-        property uint8_t _value                 ///< BitField value for accelFilterMode
+        property Nullable<uint8_t> _value       ///< BitField value for accelFilterMode
         {
-            uint8_t get()
+            Nullable<uint8_t> get()
             {
-                return uint8_t(((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode);
+                auto accelFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode;
+                if (accelFilterMode.has_value()) { return uint8_t(accelFilterMode.value()); }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(uint8_t value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode = value;
+                auto accelFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode;
+                if (!accelFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode.emplace();
+                }
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode = uint8_t(value);
             }
-            
         };
         
         // Uncomp
-        property bool uncomp
+        property Nullable<uint8_t> uncomp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode.uncomp;
+                auto accelFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode;
+                if (accelFilterMode.has_value()) { return accelFilterMode.value().uncomp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode.uncomp = value;
+                auto accelFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode;
+                if (!accelFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode.emplace();
+                }
+                accelFilterMode->uncomp = uint8_t(value);
             }
-            
         };
         
         // Comp
-        property bool comp
+        property Nullable<uint8_t> comp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode.comp;
+                auto accelFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode;
+                if (accelFilterMode.has_value()) { return accelFilterMode.value().comp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode.comp = value;
+                auto accelFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode;
+                if (!accelFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->accelFilterMode.emplace();
+                }
+                accelFilterMode->comp = uint8_t(value);
             }
-            
         };
         
     };
@@ -6146,48 +4632,66 @@ public ref class ImuFilterControl : public Register
             _reg = reg;
         }
         
-        property uint8_t _value                 ///< BitField value for gyroFilterMode
+        property Nullable<uint8_t> _value       ///< BitField value for gyroFilterMode
         {
-            uint8_t get()
+            Nullable<uint8_t> get()
             {
-                return uint8_t(((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode);
+                auto gyroFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode;
+                if (gyroFilterMode.has_value()) { return uint8_t(gyroFilterMode.value()); }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(uint8_t value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode = value;
+                auto gyroFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode;
+                if (!gyroFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode.emplace();
+                }
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode = uint8_t(value);
             }
-            
         };
         
         // Uncomp
-        property bool uncomp
+        property Nullable<uint8_t> uncomp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode.uncomp;
+                auto gyroFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode;
+                if (gyroFilterMode.has_value()) { return gyroFilterMode.value().uncomp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode.uncomp = value;
+                auto gyroFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode;
+                if (!gyroFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode.emplace();
+                }
+                gyroFilterMode->uncomp = uint8_t(value);
             }
-            
         };
         
         // Comp
-        property bool comp
+        property Nullable<uint8_t> comp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode.comp;
+                auto gyroFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode;
+                if (gyroFilterMode.has_value()) { return gyroFilterMode.value().comp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode.comp = value;
+                auto gyroFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode;
+                if (!gyroFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->gyroFilterMode.emplace();
+                }
+                gyroFilterMode->comp = uint8_t(value);
             }
-            
         };
         
     };
@@ -6204,48 +4708,66 @@ public ref class ImuFilterControl : public Register
             _reg = reg;
         }
         
-        property uint8_t _value                 ///< BitField value for tempFilterMode
+        property Nullable<uint8_t> _value       ///< BitField value for tempFilterMode
         {
-            uint8_t get()
+            Nullable<uint8_t> get()
             {
-                return uint8_t(((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode);
+                auto tempFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode;
+                if (tempFilterMode.has_value()) { return uint8_t(tempFilterMode.value()); }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(uint8_t value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode = value;
+                auto tempFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode;
+                if (!tempFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode.emplace();
+                }
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode = uint8_t(value);
             }
-            
         };
         
         // Uncomp
-        property bool uncomp
+        property Nullable<uint8_t> uncomp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode.uncomp;
+                auto tempFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode;
+                if (tempFilterMode.has_value()) { return tempFilterMode.value().uncomp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode.uncomp = value;
+                auto tempFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode;
+                if (!tempFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode.emplace();
+                }
+                tempFilterMode->uncomp = uint8_t(value);
             }
-            
         };
         
         // Comp
-        property bool comp
+        property Nullable<uint8_t> comp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode.comp;
+                auto tempFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode;
+                if (tempFilterMode.has_value()) { return tempFilterMode.value().comp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode.comp = value;
+                auto tempFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode;
+                if (!tempFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->tempFilterMode.emplace();
+                }
+                tempFilterMode->comp = uint8_t(value);
             }
-            
         };
         
     };
@@ -6262,48 +4784,66 @@ public ref class ImuFilterControl : public Register
             _reg = reg;
         }
         
-        property uint8_t _value                 ///< BitField value for presFilterMode
+        property Nullable<uint8_t> _value       ///< BitField value for presFilterMode
         {
-            uint8_t get()
+            Nullable<uint8_t> get()
             {
-                return uint8_t(((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode);
+                auto presFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode;
+                if (presFilterMode.has_value()) { return uint8_t(presFilterMode.value()); }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(uint8_t value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode = value;
+                auto presFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode;
+                if (!presFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode.emplace();
+                }
+                ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode = uint8_t(value);
             }
-            
         };
         
         // Uncomp
-        property bool uncomp
+        property Nullable<uint8_t> uncomp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode.uncomp;
+                auto presFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode;
+                if (presFilterMode.has_value()) { return presFilterMode.value().uncomp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode.uncomp = value;
+                auto presFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode;
+                if (!presFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode.emplace();
+                }
+                presFilterMode->uncomp = uint8_t(value);
             }
-            
         };
         
         // Comp
-        property bool comp
+        property Nullable<uint8_t> comp
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode.comp;
+                auto presFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode;
+                if (presFilterMode.has_value()) { return presFilterMode.value().comp; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode.comp = value;
+                auto presFilterMode = ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode;
+                if (!presFilterMode.has_value())
+                {
+                    ((VN::Registers::IMU::ImuFilterControl *)_reg)->presFilterMode.emplace();
+                }
+                presFilterMode->comp = uint8_t(value);
             }
-            
         };
         
     };
@@ -6318,470 +4858,14 @@ public ref class ImuFilterControl : public Register
 namespace INS
 {
 /**--------------------------------------------------------------------------------------------------
-<summary> Register 63 - INS Solution - LLA </summary>
-<remarks>
-
-Estimated INS solution with lat/lon/alt position. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class InsSolLla : public Register
-{
-    public:
-    InsSolLla() : Register(new VN::Registers::INS::InsSolLla())
-    {
-    };
-    
-    property double timeGpsTow
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsTow;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsTow = value;
-        }
-        
-    };
-    
-    property uint16_t timeGpsWeek
-    {
-        uint16_t get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsWeek;
-        }
-        
-        void set(uint16_t value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsWeek = value;
-        }
-        
-    };
-    
-    property VN::InsStatus insStatus
-    {
-        VN::InsStatus get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->insStatus;
-        }
-        
-        void set(VN::InsStatus value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->insStatus = value;
-        }
-        
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->roll = value;
-        }
-        
-    };
-    
-    property double posLat
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->posLat;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->posLat = value;
-        }
-        
-    };
-    
-    property double posLon
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->posLon;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->posLon = value;
-        }
-        
-    };
-    
-    property double posAlt
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->posAlt;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->posAlt = value;
-        }
-        
-    };
-    
-    property float velN
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->velN;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->velN = value;
-        }
-        
-    };
-    
-    property float velE
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->velE;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->velE = value;
-        }
-        
-    };
-    
-    property float velD
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->velD;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->velD = value;
-        }
-        
-    };
-    
-    property float attUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->attUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->attUncertainty = value;
-        }
-        
-    };
-    
-    property float posUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->posUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->posUncertainty = value;
-        }
-        
-    };
-    
-    property float velUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolLla *)_reg)->velUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolLla *)_reg)->velUncertainty = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 64 - INS Solution - ECEF </summary>
-<remarks>
-
-Estimated INS Solution with ECEF position 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class InsSolEcef : public Register
-{
-    public:
-    InsSolEcef() : Register(new VN::Registers::INS::InsSolEcef())
-    {
-    };
-    
-    property double timeGpsTow
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsTow;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsTow = value;
-        }
-        
-    };
-    
-    property uint16_t timeGpsWeek
-    {
-        uint16_t get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsWeek;
-        }
-        
-        void set(uint16_t value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsWeek = value;
-        }
-        
-    };
-    
-    property VN::InsStatus insStatus
-    {
-        VN::InsStatus get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->insStatus;
-        }
-        
-        void set(VN::InsStatus value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->insStatus = value;
-        }
-        
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->roll = value;
-        }
-        
-    };
-    
-    property double posEx
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->posEx;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->posEx = value;
-        }
-        
-    };
-    
-    property double posEy
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->posEy;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->posEy = value;
-        }
-        
-    };
-    
-    property double posEz
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->posEz;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->posEz = value;
-        }
-        
-    };
-    
-    property float velEx
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->velEx;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->velEx = value;
-        }
-        
-    };
-    
-    property float velEy
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->velEy;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->velEy = value;
-        }
-        
-    };
-    
-    property float velEz
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->velEz;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->velEz = value;
-        }
-        
-    };
-    
-    property float attUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->attUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->attUncertainty = value;
-        }
-        
-    };
-    
-    property float posUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->posUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->posUncertainty = value;
-        }
-        
-    };
-    
-    property float velUncertainty
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsSolEcef *)_reg)->velUncertainty;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsSolEcef *)_reg)->velUncertainty = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
 <summary> Register 67 - INS Basic Configuration </summary>
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class InsBasicConfig : public Register
+public ref class InsBasicConfig : public ConfigRegister
 {
     public:
-    InsBasicConfig() : Register(new VN::Registers::INS::InsBasicConfig())
+    InsBasicConfig() : ConfigRegister(new VN::Registers::INS::InsBasicConfig())
     {
     };
     
@@ -6797,7 +4881,7 @@ public ref class InsBasicConfig : public Register
     {
         Scenario get()
         {
-            return static_cast<InsBasicConfig::Scenario>(((VN::Registers::INS::InsBasicConfig *)_reg)->scenario);
+            return static_cast<InsBasicConfig::Scenario>(((VN::Registers::INS::InsBasicConfig *)_reg)->scenario.value());
         }
         
         void set(Scenario value)
@@ -6816,7 +4900,7 @@ public ref class InsBasicConfig : public Register
     {
         AhrsAiding get()
         {
-            return static_cast<InsBasicConfig::AhrsAiding>(((VN::Registers::INS::InsBasicConfig *)_reg)->ahrsAiding);
+            return static_cast<InsBasicConfig::AhrsAiding>(((VN::Registers::INS::InsBasicConfig *)_reg)->ahrsAiding.value());
         }
         
         void set(AhrsAiding value)
@@ -6835,7 +4919,7 @@ public ref class InsBasicConfig : public Register
     {
         EstBaseline get()
         {
-            return static_cast<InsBasicConfig::EstBaseline>(((VN::Registers::INS::InsBasicConfig *)_reg)->estBaseline);
+            return static_cast<InsBasicConfig::EstBaseline>(((VN::Registers::INS::InsBasicConfig *)_reg)->estBaseline.value());
         }
         
         void set(EstBaseline value)
@@ -6845,473 +4929,27 @@ public ref class InsBasicConfig : public Register
         
     };
     
-    property uint8_t resv
+    property Nullable<uint8_t> resv
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::INS::InsBasicConfig *)_reg)->resv;
-        }
+            if(((VN::Registers::INS::InsBasicConfig *)_reg)->resv.has_value())
+            {
+                return ((VN::Registers::INS::InsBasicConfig *)_reg)->resv.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::INS::InsBasicConfig *)_reg)->resv = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 72 - INS State - LLA </summary>
-<remarks>
-
-Estimated INS state with lat/lon/alt position. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class InsStateLla : public Register
-{
-    public:
-    InsStateLla() : Register(new VN::Registers::INS::InsStateLla())
-    {
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->roll = value;
-        }
-        
-    };
-    
-    property double posLat
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->posLat;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->posLat = value;
-        }
-        
-    };
-    
-    property double posLon
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->posLon;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->posLon = value;
-        }
-        
-    };
-    
-    property double posAlt
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->posAlt;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->posAlt = value;
-        }
-        
-    };
-    
-    property float velN
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->velN;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->velN = value;
-        }
-        
-    };
-    
-    property float velE
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->velE;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->velE = value;
-        }
-        
-    };
-    
-    property float velD
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->velD;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->velD = value;
-        }
-        
-    };
-    
-    property float accelX
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->accelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->accelX = value;
-        }
-        
-    };
-    
-    property float accelY
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->accelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->accelY = value;
-        }
-        
-    };
-    
-    property float accelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->accelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->accelZ = value;
-        }
-        
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateLla *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateLla *)_reg)->gyroZ = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 73 - INS State - ECEF </summary>
-<remarks>
-
-Estimated INS state with ECEF position. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class InsStateEcef : public Register
-{
-    public:
-    InsStateEcef() : Register(new VN::Registers::INS::InsStateEcef())
-    {
-    };
-    
-    property float yaw
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->yaw;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->yaw = value;
-        }
-        
-    };
-    
-    property float pitch
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->pitch;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->pitch = value;
-        }
-        
-    };
-    
-    property float roll
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->roll;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->roll = value;
-        }
-        
-    };
-    
-    property double posEx
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->posEx;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->posEx = value;
-        }
-        
-    };
-    
-    property double posEy
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->posEy;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->posEy = value;
-        }
-        
-    };
-    
-    property double posEz
-    {
-        double get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->posEz;
-        }
-        
-        void set(double value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->posEz = value;
-        }
-        
-    };
-    
-    property float velEx
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->velEx;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->velEx = value;
-        }
-        
-    };
-    
-    property float velEy
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->velEy;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->velEy = value;
-        }
-        
-    };
-    
-    property float velEz
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->velEz;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->velEz = value;
-        }
-        
-    };
-    
-    property float accelX
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->accelX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->accelX = value;
-        }
-        
-    };
-    
-    property float accelY
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->accelY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->accelY = value;
-        }
-        
-    };
-    
-    property float accelZ
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->accelZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->accelZ = value;
-        }
-        
-    };
-    
-    property float gyroX
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->gyroX;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->gyroX = value;
-        }
-        
-    };
-    
-    property float gyroY
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->gyroY;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->gyroY = value;
-        }
-        
-    };
-    
-    property float gyroZ
-    {
-        float get()
-        {
-            return ((VN::Registers::INS::InsStateEcef *)_reg)->gyroZ;
-        }
-        
-        void set(float value)
-        {
-            ((VN::Registers::INS::InsStateEcef *)_reg)->gyroZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsBasicConfig *)_reg)->resv = value.Value;
+            }
+        };
         
     };
     
@@ -7323,108 +4961,178 @@ public ref class InsStateEcef : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class FilterStartupBias : public Register
+public ref class FilterStartupBias : public ConfigRegister
 {
     public:
-    FilterStartupBias() : Register(new VN::Registers::INS::FilterStartupBias())
+    FilterStartupBias() : ConfigRegister(new VN::Registers::INS::FilterStartupBias())
     {
     };
     
-    property float gyroBiasX
+    property Nullable<float> gyroBiasX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasX;
-        }
+            if(((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasX.has_value())
+            {
+                return ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasX = value.Value;
+            }
+        };
         
     };
     
-    property float gyroBiasY
+    property Nullable<float> gyroBiasY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasY;
-        }
+            if(((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasY.has_value())
+            {
+                return ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasY = value.Value;
+            }
+        };
         
     };
     
-    property float gyroBiasZ
+    property Nullable<float> gyroBiasZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasZ;
-        }
+            if(((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasZ.has_value())
+            {
+                return ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::FilterStartupBias *)_reg)->gyroBiasZ = value.Value;
+            }
+        };
         
     };
     
-    property float accelBiasX
+    property Nullable<float> accelBiasX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasX;
-        }
+            if(((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasX.has_value())
+            {
+                return ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasX = value.Value;
+            }
+        };
         
     };
     
-    property float accelBiasY
+    property Nullable<float> accelBiasY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasY;
-        }
+            if(((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasY.has_value())
+            {
+                return ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasY = value.Value;
+            }
+        };
         
     };
     
-    property float accelBiasZ
+    property Nullable<float> accelBiasZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasZ;
-        }
+            if(((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasZ.has_value())
+            {
+                return ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::FilterStartupBias *)_reg)->accelBiasZ = value.Value;
+            }
+        };
         
     };
     
-    property float presBias
+    property Nullable<float> presBias
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::FilterStartupBias *)_reg)->presBias;
-        }
+            if(((VN::Registers::INS::FilterStartupBias *)_reg)->presBias.has_value())
+            {
+                return ((VN::Registers::INS::FilterStartupBias *)_reg)->presBias.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::FilterStartupBias *)_reg)->presBias = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::FilterStartupBias *)_reg)->presBias = value.Value;
+            }
+        };
         
     };
     
@@ -7436,94 +5144,154 @@ public ref class FilterStartupBias : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class InsRefOffset : public Register
+public ref class InsRefOffset : public ConfigRegister
 {
     public:
-    InsRefOffset() : Register(new VN::Registers::INS::InsRefOffset())
+    InsRefOffset() : ConfigRegister(new VN::Registers::INS::InsRefOffset())
     {
     };
     
-    property float refOffsetX
+    property Nullable<float> refOffsetX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetX;
-        }
+            if(((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetX.has_value())
+            {
+                return ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetX = value.Value;
+            }
+        };
         
     };
     
-    property float refOffsetY
+    property Nullable<float> refOffsetY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetY;
-        }
+            if(((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetY.has_value())
+            {
+                return ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetY = value.Value;
+            }
+        };
         
     };
     
-    property float refOffsetZ
+    property Nullable<float> refOffsetZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetZ;
-        }
+            if(((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetZ.has_value())
+            {
+                return ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsRefOffset *)_reg)->refOffsetZ = value.Value;
+            }
+        };
         
     };
     
-    property float refUncertX
+    property Nullable<float> refUncertX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertX;
-        }
+            if(((VN::Registers::INS::InsRefOffset *)_reg)->refUncertX.has_value())
+            {
+                return ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertX = value.Value;
+            }
+        };
         
     };
     
-    property float refUncertY
+    property Nullable<float> refUncertY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertY;
-        }
+            if(((VN::Registers::INS::InsRefOffset *)_reg)->refUncertY.has_value())
+            {
+                return ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertY = value.Value;
+            }
+        };
         
     };
     
-    property float refUncertZ
+    property Nullable<float> refUncertZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertZ;
-        }
+            if(((VN::Registers::INS::InsRefOffset *)_reg)->refUncertZ.has_value())
+            {
+                return ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsRefOffset *)_reg)->refUncertZ = value.Value;
+            }
+        };
         
     };
     
@@ -7535,10 +5303,10 @@ public ref class InsRefOffset : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class InsGnssSelect : public Register
+public ref class InsGnssSelect : public ConfigRegister
 {
     public:
-    InsGnssSelect() : Register(new VN::Registers::INS::InsGnssSelect())
+    InsGnssSelect() : ConfigRegister(new VN::Registers::INS::InsGnssSelect())
     {
     };
     
@@ -7554,7 +5322,7 @@ public ref class InsGnssSelect : public Register
     {
         ActiveReceiverSelect get()
         {
-            return static_cast<InsGnssSelect::ActiveReceiverSelect>(((VN::Registers::INS::InsGnssSelect *)_reg)->activeReceiverSelect);
+            return static_cast<InsGnssSelect::ActiveReceiverSelect>(((VN::Registers::INS::InsGnssSelect *)_reg)->activeReceiverSelect.value());
         }
         
         void set(ActiveReceiverSelect value)
@@ -7564,31 +5332,51 @@ public ref class InsGnssSelect : public Register
         
     };
     
-    property uint8_t usedForNavTime
+    property Nullable<uint8_t> usedForNavTime
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::INS::InsGnssSelect *)_reg)->usedForNavTime;
-        }
+            if(((VN::Registers::INS::InsGnssSelect *)_reg)->usedForNavTime.has_value())
+            {
+                return ((VN::Registers::INS::InsGnssSelect *)_reg)->usedForNavTime.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::INS::InsGnssSelect *)_reg)->usedForNavTime = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsGnssSelect *)_reg)->usedForNavTime = value.Value;
+            }
+        };
         
     };
     
-    property uint8_t hysteresisTime
+    property Nullable<uint8_t> hysteresisTime
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::INS::InsGnssSelect *)_reg)->hysteresisTime;
-        }
+            if(((VN::Registers::INS::InsGnssSelect *)_reg)->hysteresisTime.has_value())
+            {
+                return ((VN::Registers::INS::InsGnssSelect *)_reg)->hysteresisTime.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::INS::InsGnssSelect *)_reg)->hysteresisTime = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsGnssSelect *)_reg)->hysteresisTime = value.Value;
+            }
+        };
         
     };
     
@@ -7601,7 +5389,7 @@ public ref class InsGnssSelect : public Register
     {
         UseGnssCompass get()
         {
-            return static_cast<InsGnssSelect::UseGnssCompass>(((VN::Registers::INS::InsGnssSelect *)_reg)->useGnssCompass);
+            return static_cast<InsGnssSelect::UseGnssCompass>(((VN::Registers::INS::InsGnssSelect *)_reg)->useGnssCompass.value());
         }
         
         void set(UseGnssCompass value)
@@ -7611,31 +5399,51 @@ public ref class InsGnssSelect : public Register
         
     };
     
-    property uint8_t resv1
+    property Nullable<uint8_t> resv1
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::INS::InsGnssSelect *)_reg)->resv1;
-        }
+            if(((VN::Registers::INS::InsGnssSelect *)_reg)->resv1.has_value())
+            {
+                return ((VN::Registers::INS::InsGnssSelect *)_reg)->resv1.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::INS::InsGnssSelect *)_reg)->resv1 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsGnssSelect *)_reg)->resv1 = value.Value;
+            }
+        };
         
     };
     
-    property uint8_t resv2
+    property Nullable<uint8_t> resv2
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::INS::InsGnssSelect *)_reg)->resv2;
-        }
+            if(((VN::Registers::INS::InsGnssSelect *)_reg)->resv2.has_value())
+            {
+                return ((VN::Registers::INS::InsGnssSelect *)_reg)->resv2.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::INS::InsGnssSelect *)_reg)->resv2 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::INS::InsGnssSelect *)_reg)->resv2 = value.Value;
+            }
+        };
         
     };
     
@@ -7651,10 +5459,10 @@ namespace System
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class UserTag : public Register
+public ref class UserTag : public ConfigRegister
 {
     public:
-    UserTag() : Register(new VN::Registers::System::UserTag())
+    UserTag() : ConfigRegister(new VN::Registers::System::UserTag())
     {
     };
     
@@ -7663,7 +5471,7 @@ public ref class UserTag : public Register
         String^ get()
         {
             marshal_context^ context = gcnew marshal_context();
-            String^ value = context->marshal_as<String^>(((VN::Registers::System::UserTag *)_reg)->tag.c_str());
+            String^ value = context->marshal_as<String^>(((VN::Registers::System::UserTag *)_reg)->tag.value().c_str());
             delete context;
             return value;
         }
@@ -7681,166 +5489,14 @@ public ref class UserTag : public Register
 };
 
 /**--------------------------------------------------------------------------------------------------
-<summary> Register 1 - Model </summary>
-<remarks>
-
-Product model string. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Model : public Register
-{
-    public:
-    Model() : Register(new VN::Registers::System::Model())
-    {
-    };
-    
-    property String^ model
-    {
-        String^ get()
-        {
-            marshal_context^ context = gcnew marshal_context();
-            String^ value = context->marshal_as<String^>(((VN::Registers::System::Model *)_reg)->model.c_str());
-            delete context;
-            return value;
-        }
-        
-        void set(String^ value)
-        {
-            marshal_context^ context = gcnew marshal_context();
-            ((VN::Registers::System::Model *)_reg)->model = context->marshal_as<const char*>(value);
-            delete context;
-        }
-        
-    }
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 2 - Hardware Version </summary>
-<remarks>
-
-Hardware version number. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class HwVer : public Register
-{
-    public:
-    HwVer() : Register(new VN::Registers::System::HwVer())
-    {
-    };
-    
-    property uint32_t hwVer
-    {
-        uint32_t get()
-        {
-            return ((VN::Registers::System::HwVer *)_reg)->hwVer;
-        }
-        
-        void set(uint32_t value)
-        {
-            ((VN::Registers::System::HwVer *)_reg)->hwVer = value;
-        }
-        
-    };
-    
-    property uint32_t hwMinVer
-    {
-        uint32_t get()
-        {
-            return ((VN::Registers::System::HwVer *)_reg)->hwMinVer;
-        }
-        
-        void set(uint32_t value)
-        {
-            ((VN::Registers::System::HwVer *)_reg)->hwMinVer = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 3 - Serial Number </summary>
-<remarks>
-
-Device serial number. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class Serial : public Register
-{
-    public:
-    Serial() : Register(new VN::Registers::System::Serial())
-    {
-    };
-    
-    property uint32_t serialNum
-    {
-        uint32_t get()
-        {
-            return ((VN::Registers::System::Serial *)_reg)->serialNum;
-        }
-        
-        void set(uint32_t value)
-        {
-            ((VN::Registers::System::Serial *)_reg)->serialNum = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 4 - Firmware Version </summary>
-<remarks>
-
-Firmware version number. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class FwVer : public Register
-{
-    public:
-    FwVer() : Register(new VN::Registers::System::FwVer())
-    {
-    };
-    
-    property String^ fwVer
-    {
-        String^ get()
-        {
-            marshal_context^ context = gcnew marshal_context();
-            String^ value = context->marshal_as<String^>(((VN::Registers::System::FwVer *)_reg)->fwVer.c_str());
-            delete context;
-            return value;
-        }
-        
-        void set(String^ value)
-        {
-            marshal_context^ context = gcnew marshal_context();
-            ((VN::Registers::System::FwVer *)_reg)->fwVer = context->marshal_as<const char*>(value);
-            delete context;
-        }
-        
-    }
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
 <summary> Register 5 - Baud Rate </summary>
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class BaudRate : public Register
+public ref class BaudRate : public ConfigRegister
 {
     public:
-    BaudRate() : Register(new VN::Registers::System::BaudRate())
+    BaudRate() : ConfigRegister(new VN::Registers::System::BaudRate())
     {
     };
     
@@ -7860,7 +5516,7 @@ public ref class BaudRate : public Register
     {
         BaudRates get()
         {
-            return static_cast<BaudRate::BaudRates>(((VN::Registers::System::BaudRate *)_reg)->baudRate);
+            return static_cast<BaudRate::BaudRates>(((VN::Registers::System::BaudRate *)_reg)->baudRate.value());
         }
         
         void set(BaudRates value)
@@ -7894,15 +5550,17 @@ public ref class BaudRate : public Register
     
 };
 
+inline VN::Registers::System::BaudRate::BaudRates ToNativeInstance(BaudRate::BaudRates baudrate) { return static_cast<VN::Registers::System::BaudRate::BaudRates>(static_cast<int>(baudrate)); }
+
 /**--------------------------------------------------------------------------------------------------
 <summary> Register 6 - Async Data Output Type </summary>
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class AsyncOutputType : public Register
+public ref class AsyncOutputType : public ConfigRegister
 {
     public:
-    AsyncOutputType() : Register(new VN::Registers::System::AsyncOutputType())
+    AsyncOutputType() : ConfigRegister(new VN::Registers::System::AsyncOutputType())
     {
     };
     
@@ -7935,7 +5593,7 @@ public ref class AsyncOutputType : public Register
     {
         Ador get()
         {
-            return static_cast<AsyncOutputType::Ador>(((VN::Registers::System::AsyncOutputType *)_reg)->ador);
+            return static_cast<AsyncOutputType::Ador>(((VN::Registers::System::AsyncOutputType *)_reg)->ador.value());
         }
         
         void set(Ador value)
@@ -7974,10 +5632,10 @@ public ref class AsyncOutputType : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class AsyncOutputFreq : public Register
+public ref class AsyncOutputFreq : public ConfigRegister
 {
     public:
-    AsyncOutputFreq() : Register(new VN::Registers::System::AsyncOutputFreq())
+    AsyncOutputFreq() : ConfigRegister(new VN::Registers::System::AsyncOutputFreq())
     {
     };
     
@@ -8000,7 +5658,7 @@ public ref class AsyncOutputFreq : public Register
     {
         Adof get()
         {
-            return static_cast<AsyncOutputFreq::Adof>(((VN::Registers::System::AsyncOutputFreq *)_reg)->adof);
+            return static_cast<AsyncOutputFreq::Adof>(((VN::Registers::System::AsyncOutputFreq *)_reg)->adof.value());
         }
         
         void set(Adof value)
@@ -8039,10 +5697,10 @@ public ref class AsyncOutputFreq : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class ProtocolControl : public Register
+public ref class ProtocolControl : public ConfigRegister
 {
     public:
-    ProtocolControl() : Register(new VN::Registers::System::ProtocolControl())
+    ProtocolControl() : ConfigRegister(new VN::Registers::System::ProtocolControl())
     {
     };
     
@@ -8059,7 +5717,7 @@ public ref class ProtocolControl : public Register
     {
         AsciiAppendCount get()
         {
-            return static_cast<ProtocolControl::AsciiAppendCount>(((VN::Registers::System::ProtocolControl *)_reg)->asciiAppendCount);
+            return static_cast<ProtocolControl::AsciiAppendCount>(((VN::Registers::System::ProtocolControl *)_reg)->asciiAppendCount.value());
         }
         
         void set(AsciiAppendCount value)
@@ -8083,7 +5741,7 @@ public ref class ProtocolControl : public Register
     {
         AsciiAppendStatus get()
         {
-            return static_cast<ProtocolControl::AsciiAppendStatus>(((VN::Registers::System::ProtocolControl *)_reg)->asciiAppendStatus);
+            return static_cast<ProtocolControl::AsciiAppendStatus>(((VN::Registers::System::ProtocolControl *)_reg)->asciiAppendStatus.value());
         }
         
         void set(AsciiAppendStatus value)
@@ -8106,7 +5764,7 @@ public ref class ProtocolControl : public Register
     {
         SpiAppendCount get()
         {
-            return static_cast<ProtocolControl::SpiAppendCount>(((VN::Registers::System::ProtocolControl *)_reg)->spiAppendCount);
+            return static_cast<ProtocolControl::SpiAppendCount>(((VN::Registers::System::ProtocolControl *)_reg)->spiAppendCount.value());
         }
         
         void set(SpiAppendCount value)
@@ -8130,7 +5788,7 @@ public ref class ProtocolControl : public Register
     {
         SpiAppendStatus get()
         {
-            return static_cast<ProtocolControl::SpiAppendStatus>(((VN::Registers::System::ProtocolControl *)_reg)->spiAppendStatus);
+            return static_cast<ProtocolControl::SpiAppendStatus>(((VN::Registers::System::ProtocolControl *)_reg)->spiAppendStatus.value());
         }
         
         void set(SpiAppendStatus value)
@@ -8149,7 +5807,7 @@ public ref class ProtocolControl : public Register
     {
         AsciiChecksum get()
         {
-            return static_cast<ProtocolControl::AsciiChecksum>(((VN::Registers::System::ProtocolControl *)_reg)->asciiChecksum);
+            return static_cast<ProtocolControl::AsciiChecksum>(((VN::Registers::System::ProtocolControl *)_reg)->asciiChecksum.value());
         }
         
         void set(AsciiChecksum value)
@@ -8169,7 +5827,7 @@ public ref class ProtocolControl : public Register
     {
         SpiChecksum get()
         {
-            return static_cast<ProtocolControl::SpiChecksum>(((VN::Registers::System::ProtocolControl *)_reg)->spiChecksum);
+            return static_cast<ProtocolControl::SpiChecksum>(((VN::Registers::System::ProtocolControl *)_reg)->spiChecksum.value());
         }
         
         void set(SpiChecksum value)
@@ -8189,7 +5847,7 @@ public ref class ProtocolControl : public Register
     {
         ErrorMode get()
         {
-            return static_cast<ProtocolControl::ErrorMode>(((VN::Registers::System::ProtocolControl *)_reg)->errorMode);
+            return static_cast<ProtocolControl::ErrorMode>(((VN::Registers::System::ProtocolControl *)_reg)->errorMode.value());
         }
         
         void set(ErrorMode value)
@@ -8207,10 +5865,10 @@ public ref class ProtocolControl : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class SyncControl : public Register
+public ref class SyncControl : public ConfigRegister
 {
     public:
-    SyncControl() : Register(new VN::Registers::System::SyncControl())
+    SyncControl() : ConfigRegister(new VN::Registers::System::SyncControl())
     {
     };
     
@@ -8226,7 +5884,7 @@ public ref class SyncControl : public Register
     {
         SyncInMode get()
         {
-            return static_cast<SyncControl::SyncInMode>(((VN::Registers::System::SyncControl *)_reg)->syncInMode);
+            return static_cast<SyncControl::SyncInMode>(((VN::Registers::System::SyncControl *)_reg)->syncInMode.value());
         }
         
         void set(SyncInMode value)
@@ -8245,7 +5903,7 @@ public ref class SyncControl : public Register
     {
         SyncInEdge get()
         {
-            return static_cast<SyncControl::SyncInEdge>(((VN::Registers::System::SyncControl *)_reg)->syncInEdge);
+            return static_cast<SyncControl::SyncInEdge>(((VN::Registers::System::SyncControl *)_reg)->syncInEdge.value());
         }
         
         void set(SyncInEdge value)
@@ -8255,31 +5913,51 @@ public ref class SyncControl : public Register
         
     };
     
-    property uint16_t syncInSkipFactor
+    property Nullable<uint16_t> syncInSkipFactor
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::System::SyncControl *)_reg)->syncInSkipFactor;
-        }
+            if(((VN::Registers::System::SyncControl *)_reg)->syncInSkipFactor.has_value())
+            {
+                return ((VN::Registers::System::SyncControl *)_reg)->syncInSkipFactor.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::System::SyncControl *)_reg)->syncInSkipFactor = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::System::SyncControl *)_reg)->syncInSkipFactor = value.Value;
+            }
+        };
         
     };
     
-    property uint32_t resv1
+    property Nullable<uint32_t> resv1
     {
-        uint32_t get()
+        Nullable<uint32_t> get()
         {
-            return ((VN::Registers::System::SyncControl *)_reg)->resv1;
-        }
+            if(((VN::Registers::System::SyncControl *)_reg)->resv1.has_value())
+            {
+                return ((VN::Registers::System::SyncControl *)_reg)->resv1.value();
+            }
+            else
+            {
+                return Nullable<uint32_t>();
+            }
+        };
         
-        void set(uint32_t value)
+        void set(Nullable<uint32_t> value)
         {
-            ((VN::Registers::System::SyncControl *)_reg)->resv1 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::System::SyncControl *)_reg)->resv1 = value.Value;
+            }
+        };
         
     };
     
@@ -8295,7 +5973,7 @@ public ref class SyncControl : public Register
     {
         SyncOutMode get()
         {
-            return static_cast<SyncControl::SyncOutMode>(((VN::Registers::System::SyncControl *)_reg)->syncOutMode);
+            return static_cast<SyncControl::SyncOutMode>(((VN::Registers::System::SyncControl *)_reg)->syncOutMode.value());
         }
         
         void set(SyncOutMode value)
@@ -8314,7 +5992,7 @@ public ref class SyncControl : public Register
     {
         SyncOutPolarity get()
         {
-            return static_cast<SyncControl::SyncOutPolarity>(((VN::Registers::System::SyncControl *)_reg)->syncOutPolarity);
+            return static_cast<SyncControl::SyncOutPolarity>(((VN::Registers::System::SyncControl *)_reg)->syncOutPolarity.value());
         }
         
         void set(SyncOutPolarity value)
@@ -8324,116 +6002,86 @@ public ref class SyncControl : public Register
         
     };
     
-    property uint16_t syncOutSkipFactor
+    property Nullable<uint16_t> syncOutSkipFactor
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::System::SyncControl *)_reg)->syncOutSkipFactor;
-        }
+            if(((VN::Registers::System::SyncControl *)_reg)->syncOutSkipFactor.has_value())
+            {
+                return ((VN::Registers::System::SyncControl *)_reg)->syncOutSkipFactor.value();
+            }
+            else
+            {
+                return Nullable<uint16_t>();
+            }
+        };
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::System::SyncControl *)_reg)->syncOutSkipFactor = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::System::SyncControl *)_reg)->syncOutSkipFactor = value.Value;
+            }
+        };
         
     };
     
-    property uint32_t syncOutPulseWidth
+    property Nullable<uint32_t> syncOutPulseWidth
     {
-        uint32_t get()
+        Nullable<uint32_t> get()
         {
-            return ((VN::Registers::System::SyncControl *)_reg)->syncOutPulseWidth;
-        }
+            if(((VN::Registers::System::SyncControl *)_reg)->syncOutPulseWidth.has_value())
+            {
+                return ((VN::Registers::System::SyncControl *)_reg)->syncOutPulseWidth.value();
+            }
+            else
+            {
+                return Nullable<uint32_t>();
+            }
+        };
         
-        void set(uint32_t value)
+        void set(Nullable<uint32_t> value)
         {
-            ((VN::Registers::System::SyncControl *)_reg)->syncOutPulseWidth = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::System::SyncControl *)_reg)->syncOutPulseWidth = value.Value;
+            }
+        };
         
     };
     
-    property uint32_t resv2
+    property Nullable<uint32_t> resv2
     {
-        uint32_t get()
+        Nullable<uint32_t> get()
         {
-            return ((VN::Registers::System::SyncControl *)_reg)->resv2;
-        }
+            if(((VN::Registers::System::SyncControl *)_reg)->resv2.has_value())
+            {
+                return ((VN::Registers::System::SyncControl *)_reg)->resv2.value();
+            }
+            else
+            {
+                return Nullable<uint32_t>();
+            }
+        };
         
-        void set(uint32_t value)
+        void set(Nullable<uint32_t> value)
         {
-            ((VN::Registers::System::SyncControl *)_reg)->resv2 = value;
-        }
-        
-    };
-    
-    
-};
-
-/**--------------------------------------------------------------------------------------------------
-<summary> Register 33 - Synchronization Status </summary>
-<remarks>
-
-Contains counters based on the SyncIn and SyncOut events. 
-
-</remarks>
-*-----------------------------------------------------------------------------------------------**/
-public ref class SyncStatus : public Register
-{
-    public:
-    SyncStatus() : Register(new VN::Registers::System::SyncStatus())
-    {
-    };
-    
-    property uint32_t syncInCount
-    {
-        uint32_t get()
-        {
-            return ((VN::Registers::System::SyncStatus *)_reg)->syncInCount;
-        }
-        
-        void set(uint32_t value)
-        {
-            ((VN::Registers::System::SyncStatus *)_reg)->syncInCount = value;
-        }
-        
-    };
-    
-    property uint32_t syncInTime
-    {
-        uint32_t get()
-        {
-            return ((VN::Registers::System::SyncStatus *)_reg)->syncInTime;
-        }
-        
-        void set(uint32_t value)
-        {
-            ((VN::Registers::System::SyncStatus *)_reg)->syncInTime = value;
-        }
-        
-    };
-    
-    property uint32_t syncOutCount
-    {
-        uint32_t get()
-        {
-            return ((VN::Registers::System::SyncStatus *)_reg)->syncOutCount;
-        }
-        
-        void set(uint32_t value)
-        {
-            ((VN::Registers::System::SyncStatus *)_reg)->syncOutCount = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::System::SyncControl *)_reg)->resv2 = value.Value;
+            }
+        };
         
     };
     
     
 };
 
-public ref class BinaryOutput : public Register
+public ref class BinaryOutput : public ConfigRegister
 {
     
     public:
-    BinaryOutput(VN::Register* reg) : Register(reg)
+    BinaryOutput(VN::Register* reg) : ConfigRegister(reg)
     {
         asyncMode = gcnew AsyncMode(reg);
         common = gcnew CommonGroup(reg);
@@ -8457,80 +6105,85 @@ public ref class BinaryOutput : public Register
             _reg = reg;
         }
         
-        property uint16_t _value                ///< BitField value for asyncMode
+        property Nullable<uint16_t> _value      ///< BitField value for asyncMode
         {
-            uint16_t get()
+            Nullable<uint16_t> get()
             {
-                return uint16_t(((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode);
+                auto asyncMode = ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode;
+                if (asyncMode.has_value()) { return uint16_t(asyncMode.value()); }
+                else { return Nullable<uint16_t>(); }
             }
             
-            void set(uint16_t value)
+            void set(Nullable<uint16_t> value)
             {
-                ((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode = value;
+                auto asyncMode = ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode;
+                if (!asyncMode.has_value())
+                {
+                    ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode = VN::Registers::System::BinaryOutput::AsyncMode();
+                }
+                ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode = uint16_t(value);
             }
-            
         };
         
         // Serial1
-        property bool serial1
+        property Nullable<bool> serial1
         {
-            bool get()
+            Nullable<bool> get()
             {
-                return ((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode.serial1;
+                auto asyncMode = ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode;
+                if (asyncMode.has_value()) { return asyncMode.value().serial1; }
+                else { return Nullable<bool>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<bool> value)
             {
-                ((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode.serial1 = value;
+                auto asyncMode = ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode;
+                if (!asyncMode.has_value())
+                {
+                    ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode.emplace();
+                }
+                ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode->serial1 = bool(value);
             }
-            
         };
         
         // Serial2
-        property bool serial2
+        property Nullable<bool> serial2
         {
-            bool get()
+            Nullable<bool> get()
             {
-                return ((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode.serial2;
+                auto asyncMode = ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode;
+                if (asyncMode.has_value()) { return asyncMode.value().serial2; }
+                else { return Nullable<bool>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<bool> value)
             {
-                ((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode.serial2 = value;
+                auto asyncMode = ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode;
+                if (!asyncMode.has_value())
+                {
+                    ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode.emplace();
+                }
+                ((VN::Registers::System::BinaryOutput *)_reg)->asyncMode->serial2 = bool(value);
             }
-            
-        };
-        
-        // Spi
-        property bool spi
-        {
-            bool get()
-            {
-                return ((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode.spi;
-            }
-            
-            void set(bool value)
-            {
-                ((VN::Registers::System::BinaryOutput1 *)_reg)->asyncMode.spi = value;
-            }
-            
         };
         
     };
     
     AsyncMode^ asyncMode;
     
-    property uint16_t rateDivisor
+    property Nullable<uint16_t> rateDivisor
     {
-        uint16_t get()
+        Nullable<uint16_t> get()
         {
-            return ((VN::Registers::System::BinaryOutput *)_reg)->rateDivisor;
-        };
+            auto rateDivisor = ((VN::Registers::System::BinaryOutput *)_reg)->rateDivisor;
+            if (rateDivisor.has_value()) { return uint16_t(rateDivisor.value()); }
+            else { return Nullable<uint16_t>(); }
+        }
         
-        void set(uint16_t value)
+        void set(Nullable<uint16_t> value)
         {
-            ((VN::Registers::System::BinaryOutput *)_reg)->rateDivisor = value;
-        };
+            ((VN::Registers::System::BinaryOutput *)_reg)->rateDivisor = uint16_t(value);
+        }
         
     };
     
@@ -10469,10 +8122,10 @@ public ref class BinaryOutput3 : public BinaryOutput
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class NmeaOutput1 : public Register
+public ref class NmeaOutput1 : public ConfigRegister
 {
     public:
-    NmeaOutput1() : Register(new VN::Registers::System::NmeaOutput1())
+    NmeaOutput1() : ConfigRegister(new VN::Registers::System::NmeaOutput1())
     {
         msgSelection = gcnew MsgSelection(_reg);
     };
@@ -10488,7 +8141,7 @@ public ref class NmeaOutput1 : public Register
     {
         Port get()
         {
-            return static_cast<NmeaOutput1::Port>(((VN::Registers::System::NmeaOutput1 *)_reg)->port);
+            return static_cast<NmeaOutput1::Port>(((VN::Registers::System::NmeaOutput1 *)_reg)->port.value());
         }
         
         void set(Port value)
@@ -10510,7 +8163,7 @@ public ref class NmeaOutput1 : public Register
     {
         Rate get()
         {
-            return static_cast<NmeaOutput1::Rate>(((VN::Registers::System::NmeaOutput1 *)_reg)->rate);
+            return static_cast<NmeaOutput1::Rate>(((VN::Registers::System::NmeaOutput1 *)_reg)->rate.value());
         }
         
         void set(Rate value)
@@ -10530,7 +8183,7 @@ public ref class NmeaOutput1 : public Register
     {
         Mode get()
         {
-            return static_cast<NmeaOutput1::Mode>(((VN::Registers::System::NmeaOutput1 *)_reg)->mode);
+            return static_cast<NmeaOutput1::Mode>(((VN::Registers::System::NmeaOutput1 *)_reg)->mode.value());
         }
         
         void set(Mode value)
@@ -10549,7 +8202,7 @@ public ref class NmeaOutput1 : public Register
     {
         GnssSelect get()
         {
-            return static_cast<NmeaOutput1::GnssSelect>(((VN::Registers::System::NmeaOutput1 *)_reg)->gnssSelect);
+            return static_cast<NmeaOutput1::GnssSelect>(((VN::Registers::System::NmeaOutput1 *)_reg)->gnssSelect.value());
         }
         
         void set(GnssSelect value)
@@ -10569,288 +8222,402 @@ public ref class NmeaOutput1 : public Register
             _reg = reg;
         }
         
-        property uint32_t _value                ///< BitField value for msgSelection
+        property Nullable<uint32_t> _value      ///< BitField value for msgSelection
         {
-            uint32_t get()
+            Nullable<uint32_t> get()
             {
-                return uint32_t(((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection);
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return uint32_t(msgSelection.value()); }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(uint32_t value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection = uint32_t(value);
             }
-            
         };
         
         // RMC_GNSS
-        property bool rmcGnss
+        property Nullable<uint32_t> rmcGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.rmcGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().rmcGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.rmcGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->rmcGnss = uint32_t(value);
             }
-            
         };
         
         // RMC_INS
-        property bool rmcIns
+        property Nullable<uint32_t> rmcIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.rmcIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().rmcIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.rmcIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->rmcIns = uint32_t(value);
             }
-            
         };
         
         // GGA_GNSS
-        property bool ggaGnss
+        property Nullable<uint32_t> ggaGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.ggaGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().ggaGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.ggaGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->ggaGnss = uint32_t(value);
             }
-            
         };
         
         // GGA_INS
-        property bool ggaIns
+        property Nullable<uint32_t> ggaIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.ggaIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().ggaIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.ggaIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->ggaIns = uint32_t(value);
             }
-            
         };
         
         // GLL_GNSS
-        property bool gllGnss
+        property Nullable<uint32_t> gllGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gllGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gllGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gllGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gllGnss = uint32_t(value);
             }
-            
         };
         
         // GLL_INS
-        property bool gllIns
+        property Nullable<uint32_t> gllIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gllIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gllIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gllIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gllIns = uint32_t(value);
             }
-            
         };
         
         // GSA_GNSS
-        property bool gsaGnss
+        property Nullable<uint32_t> gsaGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gsaGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gsaGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gsaGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gsaGnss = uint32_t(value);
             }
-            
         };
         
         // GSV_GNSS
-        property bool gsvGnss
+        property Nullable<uint32_t> gsvGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gsvGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gsvGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.gsvGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gsvGnss = uint32_t(value);
             }
-            
         };
         
         // HDG_INS
-        property bool hdgIns
+        property Nullable<uint32_t> hdgIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.hdgIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().hdgIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.hdgIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->hdgIns = uint32_t(value);
             }
-            
         };
         
         // HDT_INS
-        property bool hdtIns
+        property Nullable<uint32_t> hdtIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.hdtIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().hdtIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.hdtIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->hdtIns = uint32_t(value);
             }
-            
         };
         
         // THS_INS
-        property bool thsIns
+        property Nullable<uint32_t> thsIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.thsIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().thsIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.thsIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->thsIns = uint32_t(value);
             }
-            
         };
         
         // VTG_GNSS
-        property bool vtgGnss
+        property Nullable<uint32_t> vtgGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.vtgGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().vtgGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.vtgGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->vtgGnss = uint32_t(value);
             }
-            
         };
         
         // VTG_INS
-        property bool vtgIns
+        property Nullable<uint32_t> vtgIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.vtgIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().vtgIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.vtgIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->vtgIns = uint32_t(value);
             }
-            
         };
         
         // ZDA_GNSS
-        property bool zdaGnss
+        property Nullable<uint32_t> zdaGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.zdaGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().zdaGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.zdaGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->zdaGnss = uint32_t(value);
             }
-            
         };
         
         // ZDA_INS
-        property bool zdaIns
+        property Nullable<uint32_t> zdaIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.zdaIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().zdaIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.zdaIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->zdaIns = uint32_t(value);
             }
-            
         };
         
         // PASHR_INS
-        property bool pashrIns
+        property Nullable<uint32_t> pashrIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.pashrIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().pashrIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.pashrIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->pashrIns = uint32_t(value);
             }
-            
         };
         
         // TSS1_INS
-        property bool tss1Ins
+        property Nullable<uint32_t> tss1Ins
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.tss1Ins;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().tss1Ins; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.tss1Ins = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->tss1Ins = uint32_t(value);
             }
-            
         };
         
         // INDYN
-        property bool indyn
+        property Nullable<uint32_t> indyn
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.indyn;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().indyn; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.indyn = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput1 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->indyn = uint32_t(value);
             }
-            
         };
         
     };
@@ -10865,10 +8632,10 @@ public ref class NmeaOutput1 : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class NmeaOutput2 : public Register
+public ref class NmeaOutput2 : public ConfigRegister
 {
     public:
-    NmeaOutput2() : Register(new VN::Registers::System::NmeaOutput2())
+    NmeaOutput2() : ConfigRegister(new VN::Registers::System::NmeaOutput2())
     {
         msgSelection = gcnew MsgSelection(_reg);
     };
@@ -10884,7 +8651,7 @@ public ref class NmeaOutput2 : public Register
     {
         Port get()
         {
-            return static_cast<NmeaOutput2::Port>(((VN::Registers::System::NmeaOutput2 *)_reg)->port);
+            return static_cast<NmeaOutput2::Port>(((VN::Registers::System::NmeaOutput2 *)_reg)->port.value());
         }
         
         void set(Port value)
@@ -10906,7 +8673,7 @@ public ref class NmeaOutput2 : public Register
     {
         Rate get()
         {
-            return static_cast<NmeaOutput2::Rate>(((VN::Registers::System::NmeaOutput2 *)_reg)->rate);
+            return static_cast<NmeaOutput2::Rate>(((VN::Registers::System::NmeaOutput2 *)_reg)->rate.value());
         }
         
         void set(Rate value)
@@ -10926,7 +8693,7 @@ public ref class NmeaOutput2 : public Register
     {
         Mode get()
         {
-            return static_cast<NmeaOutput2::Mode>(((VN::Registers::System::NmeaOutput2 *)_reg)->mode);
+            return static_cast<NmeaOutput2::Mode>(((VN::Registers::System::NmeaOutput2 *)_reg)->mode.value());
         }
         
         void set(Mode value)
@@ -10945,7 +8712,7 @@ public ref class NmeaOutput2 : public Register
     {
         GnssSelect get()
         {
-            return static_cast<NmeaOutput2::GnssSelect>(((VN::Registers::System::NmeaOutput2 *)_reg)->gnssSelect);
+            return static_cast<NmeaOutput2::GnssSelect>(((VN::Registers::System::NmeaOutput2 *)_reg)->gnssSelect.value());
         }
         
         void set(GnssSelect value)
@@ -10965,288 +8732,402 @@ public ref class NmeaOutput2 : public Register
             _reg = reg;
         }
         
-        property uint32_t _value                ///< BitField value for msgSelection
+        property Nullable<uint32_t> _value      ///< BitField value for msgSelection
         {
-            uint32_t get()
+            Nullable<uint32_t> get()
             {
-                return uint32_t(((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection);
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return uint32_t(msgSelection.value()); }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(uint32_t value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection = uint32_t(value);
             }
-            
         };
         
         // RMC_GNSS
-        property bool rmcGnss
+        property Nullable<uint32_t> rmcGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.rmcGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().rmcGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.rmcGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->rmcGnss = uint32_t(value);
             }
-            
         };
         
         // RMC_INS
-        property bool rmcIns
+        property Nullable<uint32_t> rmcIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.rmcIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().rmcIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.rmcIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->rmcIns = uint32_t(value);
             }
-            
         };
         
         // GGA_GNSS
-        property bool ggaGnss
+        property Nullable<uint32_t> ggaGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.ggaGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().ggaGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.ggaGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->ggaGnss = uint32_t(value);
             }
-            
         };
         
         // GGA_INS
-        property bool ggaIns
+        property Nullable<uint32_t> ggaIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.ggaIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().ggaIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.ggaIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->ggaIns = uint32_t(value);
             }
-            
         };
         
         // GLL_GNSS
-        property bool gllGnss
+        property Nullable<uint32_t> gllGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gllGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gllGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gllGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gllGnss = uint32_t(value);
             }
-            
         };
         
         // GLL_INS
-        property bool gllIns
+        property Nullable<uint32_t> gllIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gllIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gllIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gllIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gllIns = uint32_t(value);
             }
-            
         };
         
         // GSA_GNSS
-        property bool gsaGnss
+        property Nullable<uint32_t> gsaGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gsaGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gsaGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gsaGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gsaGnss = uint32_t(value);
             }
-            
         };
         
         // GSV_GNSS
-        property bool gsvGnss
+        property Nullable<uint32_t> gsvGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gsvGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().gsvGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.gsvGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->gsvGnss = uint32_t(value);
             }
-            
         };
         
         // HDG_INS
-        property bool hdgIns
+        property Nullable<uint32_t> hdgIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.hdgIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().hdgIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.hdgIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->hdgIns = uint32_t(value);
             }
-            
         };
         
         // HDT_INS
-        property bool hdtIns
+        property Nullable<uint32_t> hdtIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.hdtIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().hdtIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.hdtIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->hdtIns = uint32_t(value);
             }
-            
         };
         
         // THS_INS
-        property bool thsIns
+        property Nullable<uint32_t> thsIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.thsIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().thsIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.thsIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->thsIns = uint32_t(value);
             }
-            
         };
         
         // VTG_GNSS
-        property bool vtgGnss
+        property Nullable<uint32_t> vtgGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.vtgGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().vtgGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.vtgGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->vtgGnss = uint32_t(value);
             }
-            
         };
         
         // VTG_INS
-        property bool vtgIns
+        property Nullable<uint32_t> vtgIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.vtgIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().vtgIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.vtgIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->vtgIns = uint32_t(value);
             }
-            
         };
         
         // ZDA_GNSS
-        property bool zdaGnss
+        property Nullable<uint32_t> zdaGnss
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.zdaGnss;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().zdaGnss; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.zdaGnss = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->zdaGnss = uint32_t(value);
             }
-            
         };
         
         // ZDA_INS
-        property bool zdaIns
+        property Nullable<uint32_t> zdaIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.zdaIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().zdaIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.zdaIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->zdaIns = uint32_t(value);
             }
-            
         };
         
         // PASHR_INS
-        property bool pashrIns
+        property Nullable<uint32_t> pashrIns
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.pashrIns;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().pashrIns; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.pashrIns = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->pashrIns = uint32_t(value);
             }
-            
         };
         
         // TSS1_INS
-        property bool tss1Ins
+        property Nullable<uint32_t> tss1Ins
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.tss1Ins;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().tss1Ins; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.tss1Ins = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->tss1Ins = uint32_t(value);
             }
-            
         };
         
         // INDYN
-        property bool indyn
+        property Nullable<uint32_t> indyn
         {
-            bool get()
+            Nullable<uint32_t> get()
             {
-                return ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.indyn;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (msgSelection.has_value()) { return msgSelection.value().indyn; }
+                else { return Nullable<uint32_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint32_t> value)
             {
-                ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.indyn = value;
+                auto msgSelection = ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection;
+                if (!msgSelection.has_value())
+                {
+                    ((VN::Registers::System::NmeaOutput2 *)_reg)->msgSelection.emplace();
+                }
+                msgSelection->indyn = uint32_t(value);
             }
-            
         };
         
     };
@@ -11261,10 +9142,10 @@ public ref class NmeaOutput2 : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class LegacyCompatibilitySettings : public Register
+public ref class LegacyCompatibilitySettings : public ConfigRegister
 {
     public:
-    LegacyCompatibilitySettings() : Register(new VN::Registers::System::LegacyCompatibilitySettings())
+    LegacyCompatibilitySettings() : ConfigRegister(new VN::Registers::System::LegacyCompatibilitySettings())
     {
         gnssLegacy = gcnew GnssLegacy(_reg);
     };
@@ -11278,7 +9159,7 @@ public ref class LegacyCompatibilitySettings : public Register
     {
         InsLegacy get()
         {
-            return static_cast<LegacyCompatibilitySettings::InsLegacy>(((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->insLegacy);
+            return static_cast<LegacyCompatibilitySettings::InsLegacy>(((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->insLegacy.value());
         }
         
         void set(InsLegacy value)
@@ -11298,63 +9179,87 @@ public ref class LegacyCompatibilitySettings : public Register
             _reg = reg;
         }
         
-        property uint8_t _value                 ///< BitField value for gnssLegacy
+        property Nullable<uint8_t> _value       ///< BitField value for gnssLegacy
         {
-            uint8_t get()
+            Nullable<uint8_t> get()
             {
-                return uint8_t(((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy);
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (gnssLegacy.has_value()) { return uint8_t(gnssLegacy.value()); }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(uint8_t value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy = value;
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (!gnssLegacy.has_value())
+                {
+                    ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.emplace();
+                }
+                ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy = uint8_t(value);
             }
-            
         };
         
         // LegacyGnssFix
-        property bool legacyGnssFix
+        property Nullable<uint8_t> legacyGnssFix
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.legacyGnssFix;
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (gnssLegacy.has_value()) { return gnssLegacy.value().legacyGnssFix; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.legacyGnssFix = value;
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (!gnssLegacy.has_value())
+                {
+                    ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.emplace();
+                }
+                gnssLegacy->legacyGnssFix = uint8_t(value);
             }
-            
         };
         
         // RequireReg55Reset
-        property bool requireReg55Reset
+        property Nullable<uint8_t> requireReg55Reset
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.requireReg55Reset;
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (gnssLegacy.has_value()) { return gnssLegacy.value().requireReg55Reset; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.requireReg55Reset = value;
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (!gnssLegacy.has_value())
+                {
+                    ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.emplace();
+                }
+                gnssLegacy->requireReg55Reset = uint8_t(value);
             }
-            
         };
         
         // alwaysPpsPulse
-        property bool alwaysPpsPulse
+        property Nullable<uint8_t> alwaysPpsPulse
         {
-            bool get()
+            Nullable<uint8_t> get()
             {
-                return ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.alwaysPpsPulse;
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (gnssLegacy.has_value()) { return gnssLegacy.value().alwaysPpsPulse; }
+                else { return Nullable<uint8_t>(); }
             }
             
-            void set(bool value)
+            void set(Nullable<uint8_t> value)
             {
-                ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.alwaysPpsPulse = value;
+                auto gnssLegacy = ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy;
+                if (!gnssLegacy.has_value())
+                {
+                    ((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->gnssLegacy.emplace();
+                }
+                gnssLegacy->alwaysPpsPulse = uint8_t(value);
             }
-            
         };
         
     };
@@ -11370,7 +9275,7 @@ public ref class LegacyCompatibilitySettings : public Register
     {
         ImuLegacy get()
         {
-            return static_cast<LegacyCompatibilitySettings::ImuLegacy>(((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->imuLegacy);
+            return static_cast<LegacyCompatibilitySettings::ImuLegacy>(((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->imuLegacy.value());
         }
         
         void set(ImuLegacy value)
@@ -11389,7 +9294,7 @@ public ref class LegacyCompatibilitySettings : public Register
     {
         HwLegacy get()
         {
-            return static_cast<LegacyCompatibilitySettings::HwLegacy>(((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->hwLegacy);
+            return static_cast<LegacyCompatibilitySettings::HwLegacy>(((VN::Registers::System::LegacyCompatibilitySettings *)_reg)->hwLegacy.value());
         }
         
         void set(HwLegacy value)
@@ -11411,52 +9316,82 @@ namespace VelocityAiding
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class VelAidingMeas : public Register
+public ref class VelAidingMeas : public ConfigRegister
 {
     public:
-    VelAidingMeas() : Register(new VN::Registers::VelocityAiding::VelAidingMeas())
+    VelAidingMeas() : ConfigRegister(new VN::Registers::VelocityAiding::VelAidingMeas())
     {
     };
     
-    property float velocityX
+    property Nullable<float> velocityX
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityX;
-        }
+            if(((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityX.has_value())
+            {
+                return ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityX.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityX = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityX = value.Value;
+            }
+        };
         
     };
     
-    property float velocityY
+    property Nullable<float> velocityY
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityY;
-        }
+            if(((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityY.has_value())
+            {
+                return ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityY.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityY = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityY = value.Value;
+            }
+        };
         
     };
     
-    property float velocityZ
+    property Nullable<float> velocityZ
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityZ;
-        }
+            if(((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityZ.has_value())
+            {
+                return ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityZ.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityZ = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::VelocityAiding::VelAidingMeas *)_reg)->velocityZ = value.Value;
+            }
+        };
         
     };
     
@@ -11468,10 +9403,10 @@ public ref class VelAidingMeas : public Register
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class VelAidingControl : public Register
+public ref class VelAidingControl : public ConfigRegister
 {
     public:
-    VelAidingControl() : Register(new VN::Registers::VelocityAiding::VelAidingControl())
+    VelAidingControl() : ConfigRegister(new VN::Registers::VelocityAiding::VelAidingControl())
     {
     };
     
@@ -11484,7 +9419,7 @@ public ref class VelAidingControl : public Register
     {
         VelAidEnable get()
         {
-            return static_cast<VelAidingControl::VelAidEnable>(((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->velAidEnable);
+            return static_cast<VelAidingControl::VelAidEnable>(((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->velAidEnable.value());
         }
         
         void set(VelAidEnable value)
@@ -11494,31 +9429,51 @@ public ref class VelAidingControl : public Register
         
     };
     
-    property float velUncertTuning
+    property Nullable<float> velUncertTuning
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->velUncertTuning;
-        }
+            if(((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->velUncertTuning.has_value())
+            {
+                return ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->velUncertTuning.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->velUncertTuning = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->velUncertTuning = value.Value;
+            }
+        };
         
     };
     
-    property float resv
+    property Nullable<float> resv
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->resv;
-        }
+            if(((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->resv.has_value())
+            {
+                return ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->resv.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->resv = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::VelocityAiding::VelAidingControl *)_reg)->resv = value.Value;
+            }
+        };
         
     };
     
@@ -11534,10 +9489,10 @@ namespace WorldMagGravityModel
 <remarks>
 </remarks>
 *-----------------------------------------------------------------------------------------------**/
-public ref class RefModelConfig : public Register
+public ref class RefModelConfig : public ConfigRegister
 {
     public:
-    RefModelConfig() : Register(new VN::Registers::WorldMagGravityModel::RefModelConfig())
+    RefModelConfig() : ConfigRegister(new VN::Registers::WorldMagGravityModel::RefModelConfig())
     {
     };
     
@@ -11550,7 +9505,7 @@ public ref class RefModelConfig : public Register
     {
         EnableMagModel get()
         {
-            return static_cast<RefModelConfig::EnableMagModel>(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->enableMagModel);
+            return static_cast<RefModelConfig::EnableMagModel>(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->enableMagModel.value());
         }
         
         void set(EnableMagModel value)
@@ -11569,7 +9524,7 @@ public ref class RefModelConfig : public Register
     {
         EnableGravityModel get()
         {
-            return static_cast<RefModelConfig::EnableGravityModel>(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->enableGravityModel);
+            return static_cast<RefModelConfig::EnableGravityModel>(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->enableGravityModel.value());
         }
         
         void set(EnableGravityModel value)
@@ -11579,101 +9534,171 @@ public ref class RefModelConfig : public Register
         
     };
     
-    property uint8_t resv1
+    property Nullable<uint8_t> resv1
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv1;
-        }
+            if(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv1.has_value())
+            {
+                return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv1.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv1 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv1 = value.Value;
+            }
+        };
         
     };
     
-    property uint8_t resv2
+    property Nullable<uint8_t> resv2
     {
-        uint8_t get()
+        Nullable<uint8_t> get()
         {
-            return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv2;
-        }
+            if(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv2.has_value())
+            {
+                return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv2.value();
+            }
+            else
+            {
+                return Nullable<uint8_t>();
+            }
+        };
         
-        void set(uint8_t value)
+        void set(Nullable<uint8_t> value)
         {
-            ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv2 = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->resv2 = value.Value;
+            }
+        };
         
     };
     
-    property uint32_t recalcThreshold
+    property Nullable<uint32_t> recalcThreshold
     {
-        uint32_t get()
+        Nullable<uint32_t> get()
         {
-            return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->recalcThreshold;
-        }
+            if(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->recalcThreshold.has_value())
+            {
+                return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->recalcThreshold.value();
+            }
+            else
+            {
+                return Nullable<uint32_t>();
+            }
+        };
         
-        void set(uint32_t value)
+        void set(Nullable<uint32_t> value)
         {
-            ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->recalcThreshold = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->recalcThreshold = value.Value;
+            }
+        };
         
     };
     
-    property float year
+    property Nullable<float> year
     {
-        float get()
+        Nullable<float> get()
         {
-            return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->year;
-        }
+            if(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->year.has_value())
+            {
+                return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->year.value();
+            }
+            else
+            {
+                return Nullable<float>();
+            }
+        };
         
-        void set(float value)
+        void set(Nullable<float> value)
         {
-            ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->year = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->year = value.Value;
+            }
+        };
         
     };
     
-    property double latitude
+    property Nullable<double> latitude
     {
-        double get()
+        Nullable<double> get()
         {
-            return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->latitude;
-        }
+            if(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->latitude.has_value())
+            {
+                return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->latitude.value();
+            }
+            else
+            {
+                return Nullable<double>();
+            }
+        };
         
-        void set(double value)
+        void set(Nullable<double> value)
         {
-            ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->latitude = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->latitude = value.Value;
+            }
+        };
         
     };
     
-    property double longitude
+    property Nullable<double> longitude
     {
-        double get()
+        Nullable<double> get()
         {
-            return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->longitude;
-        }
+            if(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->longitude.has_value())
+            {
+                return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->longitude.value();
+            }
+            else
+            {
+                return Nullable<double>();
+            }
+        };
         
-        void set(double value)
+        void set(Nullable<double> value)
         {
-            ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->longitude = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->longitude = value.Value;
+            }
+        };
         
     };
     
-    property double altitude
+    property Nullable<double> altitude
     {
-        double get()
+        Nullable<double> get()
         {
-            return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->altitude;
-        }
+            if(((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->altitude.has_value())
+            {
+                return ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->altitude.value();
+            }
+            else
+            {
+                return Nullable<double>();
+            }
+        };
         
-        void set(double value)
+        void set(Nullable<double> value)
         {
-            ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->altitude = value;
-        }
+            if(value.HasValue)
+            {
+                ((VN::Registers::WorldMagGravityModel::RefModelConfig *)_reg)->altitude = value.Value;
+            }
+        };
         
     };
     
@@ -11682,15 +9707,3659 @@ public ref class RefModelConfig : public Register
 
 } // namespace WorldMagGravityModel
 
+namespace Attitude
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 8 - Yaw Pitch Roll </summary>
+<remarks>
+
+Attitude solution as yaw, pitch, and roll in degrees. The yaw, pitch, and roll is given as a 3,2,1 
+Euler angle rotation sequence describing the orientation of the sensor with respect to the inertial 
+North East Down (NED) frame. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class YawPitchRoll : public MeasRegister
+{
+    public:
+    YawPitchRoll() : MeasRegister(new VN::Registers::Attitude::YawPitchRoll())
+    {
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YawPitchRoll *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YawPitchRoll *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YawPitchRoll *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YawPitchRoll *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YawPitchRoll *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YawPitchRoll *)_reg)->roll = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 9 - Quaternion </summary>
+<remarks>
+
+Attitude solution as a quaternion. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Quaternion : public MeasRegister
+{
+    public:
+    Quaternion() : MeasRegister(new VN::Registers::Attitude::Quaternion())
+    {
+    };
+    
+    property float quatX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::Quaternion *)_reg)->quatX = value;
+        }
+    };
+    
+    property float quatY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::Quaternion *)_reg)->quatY = value;
+        }
+    };
+    
+    property float quatZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::Quaternion *)_reg)->quatZ = value;
+        }
+    };
+    
+    property float quatS
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::Quaternion *)_reg)->quatS;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::Quaternion *)_reg)->quatS = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 15 - Quaternion & Compensated IMU </summary>
+<remarks>
+
+Quaternion attitude solution, and compensated (Magnetic, Acceleration, Angular Rate) values. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class QuatMagAccelRate : public MeasRegister
+{
+    public:
+    QuatMagAccelRate() : MeasRegister(new VN::Registers::Attitude::QuatMagAccelRate())
+    {
+    };
+    
+    property float quatX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatX = value;
+        }
+    };
+    
+    property float quatY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatY = value;
+        }
+    };
+    
+    property float quatZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatZ = value;
+        }
+    };
+    
+    property float quatS
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatS;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->quatS = value;
+        }
+    };
+    
+    property float magX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magX = value;
+        }
+    };
+    
+    property float magY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magY = value;
+        }
+    };
+    
+    property float magZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->magZ = value;
+        }
+    };
+    
+    property float accelX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelX = value;
+        }
+    };
+    
+    property float accelY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelY = value;
+        }
+    };
+    
+    property float accelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->accelZ = value;
+        }
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::QuatMagAccelRate *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 27 - Yaw-Pitch-Roll & Compensated IMU </summary>
+<remarks>
+
+Yaw, Pitch, Roll, Accel, and Angular Rates 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class YprMagAccelAngularRates : public MeasRegister
+{
+    public:
+    YprMagAccelAngularRates() : MeasRegister(new VN::Registers::Attitude::YprMagAccelAngularRates())
+    {
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->roll = value;
+        }
+    };
+    
+    property float magX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magX = value;
+        }
+    };
+    
+    property float magY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magY = value;
+        }
+    };
+    
+    property float magZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->magZ = value;
+        }
+    };
+    
+    property float accelX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelX = value;
+        }
+    };
+    
+    property float accelY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelY = value;
+        }
+    };
+    
+    property float accelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->accelZ = value;
+        }
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprMagAccelAngularRates *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 239 - Yaw-Pitch-Roll, Linear Acceleration & Gyro </summary>
+<remarks>
+
+Yaw, Pitch, Roll, Linear Body Accel, and Angular Rates. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class YprLinearBodyAccelAngularRates : public MeasRegister
+{
+    public:
+    YprLinearBodyAccelAngularRates() : MeasRegister(new VN::Registers::Attitude::YprLinearBodyAccelAngularRates())
+    {
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->roll = value;
+        }
+    };
+    
+    property float linAccelX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelX = value;
+        }
+    };
+    
+    property float linAccelY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelY = value;
+        }
+    };
+    
+    property float linAccelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->linAccelZ = value;
+        }
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearBodyAccelAngularRates *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 240 - Yaw-Pitch-Roll, Inertial Linear Acceleration & Gyro </summary>
+<remarks>
+
+Yaw, Pitch, Roll, Linear Inertial Accel, and Angular Rates. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class YprLinearInertialAccelAngularRates : public MeasRegister
+{
+    public:
+    YprLinearInertialAccelAngularRates() : MeasRegister(new VN::Registers::Attitude::YprLinearInertialAccelAngularRates())
+    {
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->roll = value;
+        }
+    };
+    
+    property float linAccelN
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelN;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelN = value;
+        }
+    };
+    
+    property float linAccelE
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelE;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelE = value;
+        }
+    };
+    
+    property float linAccelD
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelD;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->linAccelD = value;
+        }
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Attitude::YprLinearInertialAccelAngularRates *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+} // namespace Attitude
+
+namespace GNSS
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 58 - GNSS Solution - LLA </summary>
+<remarks>
+
+Primary GNSS receiver measurement with lat/lon/alt position and velocity in NED frame. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class GnssSolLla : public ConfigRegister
+{
+    public:
+    GnssSolLla() : ConfigRegister(new VN::Registers::GNSS::GnssSolLla())
+    {
+    };
+    
+    property double gps1Tow
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Tow;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Tow = value;
+        }
+    };
+    
+    property uint16_t gps1Week
+    {
+        uint16_t get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Week;
+        }
+        void set(uint16_t value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gps1Week = value;
+        }
+    };
+    
+    enum class Gnss1Fix : uint8_t
+    {
+        NoFix = 0,
+        TimeFix = 1,
+        Fix2D = 2,
+        Fix3D = 3,
+        SBAS = 4,
+        RtkFloat = 7,
+        RtkFix = 8,
+    };
+    property Gnss1Fix gnss1Fix
+    {
+        Gnss1Fix get()
+        {
+            return static_cast<GnssSolLla::Gnss1Fix>(((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Fix);
+        }
+        void set(Gnss1Fix value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Fix = static_cast<VN::Registers::GNSS::GnssSolLla::Gnss1Fix>(value);
+        }
+        
+    };
+    
+    property uint8_t gnss1NumSats
+    {
+        uint8_t get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1NumSats;
+        }
+        void set(uint8_t value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1NumSats = value;
+        }
+    };
+    
+    property double gnss1Lat
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Lat;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Lat = value;
+        }
+    };
+    
+    property double gnss1Lon
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Lon;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Lon = value;
+        }
+    };
+    
+    property double gnss1Alt
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Alt;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1Alt = value;
+        }
+    };
+    
+    property float gnss1VelN
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelN;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelN = value;
+        }
+    };
+    
+    property float gnss1VelE
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelE;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelE = value;
+        }
+    };
+    
+    property float gnss1VelD
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelD;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelD = value;
+        }
+    };
+    
+    property float gnss1PosUncertaintyN
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1PosUncertaintyN;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1PosUncertaintyN = value;
+        }
+    };
+    
+    property float gnss1PosUncertaintyE
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1PosUncertaintyE;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1PosUncertaintyE = value;
+        }
+    };
+    
+    property float gnss1PosUncertaintyD
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1PosUncertaintyD;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1PosUncertaintyD = value;
+        }
+    };
+    
+    property float gnss1VelUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1VelUncertainty = value;
+        }
+    };
+    
+    property float gnss1TimeUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1TimeUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolLla *)_reg)->gnss1TimeUncertainty = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 59 - GNSS Solution - ECEF </summary>
+<remarks>
+
+Primary GNSS receiver measurement in ECEF frame. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class GnssSolEcef : public ConfigRegister
+{
+    public:
+    GnssSolEcef() : ConfigRegister(new VN::Registers::GNSS::GnssSolEcef())
+    {
+    };
+    
+    property double gps1Tow
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Tow;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Tow = value;
+        }
+    };
+    
+    property uint16_t gps1Week
+    {
+        uint16_t get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Week;
+        }
+        void set(uint16_t value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gps1Week = value;
+        }
+    };
+    
+    enum class Gnss1Fix : uint8_t
+    {
+        NoFix = 0,
+        TimeFix = 1,
+        Fix2D = 2,
+        Fix3D = 3,
+        SBAS = 4,
+        RtkFloat = 7,
+        RtkFix = 8,
+    };
+    property Gnss1Fix gnss1Fix
+    {
+        Gnss1Fix get()
+        {
+            return static_cast<GnssSolEcef::Gnss1Fix>(((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1Fix);
+        }
+        void set(Gnss1Fix value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1Fix = static_cast<VN::Registers::GNSS::GnssSolEcef::Gnss1Fix>(value);
+        }
+        
+    };
+    
+    property uint8_t gnss1NumSats
+    {
+        uint8_t get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1NumSats;
+        }
+        void set(uint8_t value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1NumSats = value;
+        }
+    };
+    
+    property double gnss1PosX
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosX;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosX = value;
+        }
+    };
+    
+    property double gnss1PosY
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosY;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosY = value;
+        }
+    };
+    
+    property double gnss1PosZ
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosZ;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosZ = value;
+        }
+    };
+    
+    property float gnss1VelX
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelX = value;
+        }
+    };
+    
+    property float gnss1VelY
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelY = value;
+        }
+    };
+    
+    property float gnss1VelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelZ = value;
+        }
+    };
+    
+    property float gnss1PosUncertaintyX
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosUncertaintyX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosUncertaintyX = value;
+        }
+    };
+    
+    property float gnss1PosUncertaintyY
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosUncertaintyY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosUncertaintyY = value;
+        }
+    };
+    
+    property float gnss1PosUncertaintyZ
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosUncertaintyZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1PosUncertaintyZ = value;
+        }
+    };
+    
+    property float gnss1VelUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1VelUncertainty = value;
+        }
+    };
+    
+    property float gnss1TimeUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1TimeUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::GnssSolEcef *)_reg)->gnss1TimeUncertainty = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 103 - GNSS 2 Solution - LLA </summary>
+<remarks>
+
+Estimated GNSS 2 Solution with lat/lon/alt position. This register is deprecated and will be 
+removed in future firmware versions. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Gnss2SolLla : public MeasRegister
+{
+    public:
+    Gnss2SolLla() : MeasRegister(new VN::Registers::GNSS::Gnss2SolLla())
+    {
+    };
+    
+    property double gps2Tow
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Tow;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Tow = value;
+        }
+    };
+    
+    property uint16_t gps2Week
+    {
+        uint16_t get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Week;
+        }
+        void set(uint16_t value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gps2Week = value;
+        }
+    };
+    
+    enum class Gnss2Fix : uint8_t
+    {
+        NoFix = 0,
+        TimeFix = 1,
+        Fix2D = 2,
+        Fix3D = 3,
+        SBAS = 4,
+        RtkFloat = 7,
+        RtkFix = 8,
+    };
+    property Gnss2Fix gnss2Fix
+    {
+        Gnss2Fix get()
+        {
+            return static_cast<Gnss2SolLla::Gnss2Fix>(((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Fix);
+        }
+        void set(Gnss2Fix value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Fix = static_cast<VN::Registers::GNSS::Gnss2SolLla::Gnss2Fix>(value);
+        }
+        
+    };
+    
+    property uint8_t gnss2NumSats
+    {
+        uint8_t get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2NumSats;
+        }
+        void set(uint8_t value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2NumSats = value;
+        }
+    };
+    
+    property double gnss2Lat
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Lat;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Lat = value;
+        }
+    };
+    
+    property double gnss2Lon
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Lon;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Lon = value;
+        }
+    };
+    
+    property double gnss2Alt
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Alt;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2Alt = value;
+        }
+    };
+    
+    property float gnss2VelN
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelN;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelN = value;
+        }
+    };
+    
+    property float gnss2VelE
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelE;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelE = value;
+        }
+    };
+    
+    property float gnss2VelD
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelD;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelD = value;
+        }
+    };
+    
+    property float gnss2PosUncertaintyN
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2PosUncertaintyN;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2PosUncertaintyN = value;
+        }
+    };
+    
+    property float gnss2PosUncertaintyE
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2PosUncertaintyE;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2PosUncertaintyE = value;
+        }
+    };
+    
+    property float gnss2PosUncertaintyD
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2PosUncertaintyD;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2PosUncertaintyD = value;
+        }
+    };
+    
+    property float gnss2VelUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2VelUncertainty = value;
+        }
+    };
+    
+    property float gnss2TimeUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2TimeUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolLla *)_reg)->gnss2TimeUncertainty = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 104 - GNSS 2 Solution - ECEF </summary>
+<remarks>
+
+Estimated GNSS 2 Solution with ECEF position. This register is deprecated and will be removed in 
+future firmware versions. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Gnss2SolEcef : public MeasRegister
+{
+    public:
+    Gnss2SolEcef() : MeasRegister(new VN::Registers::GNSS::Gnss2SolEcef())
+    {
+    };
+    
+    property double gps2Tow
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Tow;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Tow = value;
+        }
+    };
+    
+    property uint16_t gps2Week
+    {
+        uint16_t get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Week;
+        }
+        void set(uint16_t value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gps2Week = value;
+        }
+    };
+    
+    enum class Gnss2Fix : uint8_t
+    {
+        NoFix = 0,
+        TimeFix = 1,
+        Fix2D = 2,
+        Fix3D = 3,
+        SBAS = 4,
+        RtkFloat = 7,
+        RtkFix = 8,
+    };
+    property Gnss2Fix gnss2Fix
+    {
+        Gnss2Fix get()
+        {
+            return static_cast<Gnss2SolEcef::Gnss2Fix>(((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2Fix);
+        }
+        void set(Gnss2Fix value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2Fix = static_cast<VN::Registers::GNSS::Gnss2SolEcef::Gnss2Fix>(value);
+        }
+        
+    };
+    
+    property uint8_t gnss2NumSats
+    {
+        uint8_t get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2NumSats;
+        }
+        void set(uint8_t value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2NumSats = value;
+        }
+    };
+    
+    property double gnss2PosX
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosX;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosX = value;
+        }
+    };
+    
+    property double gnss2PosY
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosY;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosY = value;
+        }
+    };
+    
+    property double gnss2PosZ
+    {
+        double get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosZ;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosZ = value;
+        }
+    };
+    
+    property float gnss2VelX
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelX = value;
+        }
+    };
+    
+    property float gnss2VelY
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelY = value;
+        }
+    };
+    
+    property float gnss2VelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelZ = value;
+        }
+    };
+    
+    property float gnss2PosUncertaintyX
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosUncertaintyX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosUncertaintyX = value;
+        }
+    };
+    
+    property float gnss2PosUncertaintyY
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosUncertaintyY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosUncertaintyY = value;
+        }
+    };
+    
+    property float gnss2PosUncertaintyZ
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosUncertaintyZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2PosUncertaintyZ = value;
+        }
+    };
+    
+    property float gnss2VelUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2VelUncertainty = value;
+        }
+    };
+    
+    property float gnss2TimeUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2TimeUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSS::Gnss2SolEcef *)_reg)->gnss2TimeUncertainty = value;
+        }
+    };
+    
+    
+};
+
+} // namespace GNSS
+
+namespace GNSSCompass
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 86 - GNSS Compass Signal Health Status </summary>
+<remarks>
+
+Provides several indicators that serve as an overall health status of the GNSS compass subsystem. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class GnssCompassSignalHealthStatus : public MeasRegister
+{
+    public:
+    GnssCompassSignalHealthStatus() : MeasRegister(new VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus())
+    {
+    };
+    
+    property float numSatsPvtA
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtA;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtA = value;
+        }
+    };
+    
+    property float numSatsRtkA
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkA;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkA = value;
+        }
+    };
+    
+    property float highestCn0A
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0A;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0A = value;
+        }
+    };
+    
+    property float numSatsPvtB
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtB;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsPvtB = value;
+        }
+    };
+    
+    property float numSatsRtkB
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkB;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numSatsRtkB = value;
+        }
+    };
+    
+    property float highestCn0B
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0B;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->highestCn0B = value;
+        }
+    };
+    
+    property float numComSatsPvt
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsPvt;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsPvt = value;
+        }
+    };
+    
+    property float numComSatsRtk
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsRtk;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus *)_reg)->numComSatsRtk = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 97 - GNSS Compass Estimated Baseline </summary>
+<remarks>
+
+Provides the estimated GNSS compass baseline measurement. The estimated position offset and 
+measurement uncertainty is for antenna B relative to antenna A in the body reference frame. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class GnssCompassEstBaseline : public MeasRegister
+{
+    public:
+    GnssCompassEstBaseline() : MeasRegister(new VN::Registers::GNSSCompass::GnssCompassEstBaseline())
+    {
+    };
+    
+    property uint8_t estBaselineComplete
+    {
+        uint8_t get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->estBaselineComplete;
+        }
+        void set(uint8_t value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->estBaselineComplete = value;
+        }
+    };
+    
+    property uint8_t resv
+    {
+        uint8_t get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->resv;
+        }
+        void set(uint8_t value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->resv = value;
+        }
+    };
+    
+    property uint16_t numMeas
+    {
+        uint16_t get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->numMeas;
+        }
+        void set(uint16_t value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->numMeas = value;
+        }
+    };
+    
+    property float positionX
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionX = value;
+        }
+    };
+    
+    property float positionY
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionY = value;
+        }
+    };
+    
+    property float positionZ
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->positionZ = value;
+        }
+    };
+    
+    property float uncertaintyX
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyX = value;
+        }
+    };
+    
+    property float uncertaintyY
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyY = value;
+        }
+    };
+    
+    property float uncertaintyZ
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassEstBaseline *)_reg)->uncertaintyZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 98 - GNSS Compass Startup Status </summary>
+<remarks>
+
+Provides status information on the GNSS compass startup process. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class GnssCompassStartupStatus : public MeasRegister
+{
+    public:
+    GnssCompassStartupStatus() : MeasRegister(new VN::Registers::GNSSCompass::GnssCompassStartupStatus())
+    {
+    };
+    
+    property uint8_t percentComplete
+    {
+        uint8_t get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->percentComplete;
+        }
+        void set(uint8_t value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->percentComplete = value;
+        }
+    };
+    
+    property float currentHeading
+    {
+        float get()
+        {
+            return ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->currentHeading;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::GNSSCompass::GnssCompassStartupStatus *)_reg)->currentHeading = value;
+        }
+    };
+    
+    
+};
+
+} // namespace GNSSCompass
+
+namespace HardSoftIronEstimator
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 47 - Real-Time HSI Results </summary>
+<remarks>
+
+Magnetometer calibration values calculated by the real-time HSI calibration filter. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class EstMagCal : public MeasRegister
+{
+    public:
+    EstMagCal() : MeasRegister(new VN::Registers::HardSoftIronEstimator::EstMagCal())
+    {
+    };
+    
+    property float magGain00
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain00;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain00 = value;
+        }
+    };
+    
+    property float magGain01
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain01;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain01 = value;
+        }
+    };
+    
+    property float magGain02
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain02;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain02 = value;
+        }
+    };
+    
+    property float magGain10
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain10;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain10 = value;
+        }
+    };
+    
+    property float magGain11
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain11;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain11 = value;
+        }
+    };
+    
+    property float magGain12
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain12;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain12 = value;
+        }
+    };
+    
+    property float magGain20
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain20;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain20 = value;
+        }
+    };
+    
+    property float magGain21
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain21;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain21 = value;
+        }
+    };
+    
+    property float magGain22
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain22;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magGain22 = value;
+        }
+    };
+    
+    property float magBiasX
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasX = value;
+        }
+    };
+    
+    property float magBiasY
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasY = value;
+        }
+    };
+    
+    property float magBiasZ
+    {
+        float get()
+        {
+            return ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::HardSoftIronEstimator::EstMagCal *)_reg)->magBiasZ = value;
+        }
+    };
+    
+    
+};
+
+} // namespace HardSoftIronEstimator
+
+namespace Heave
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 115 - Heave and Heave Rate </summary>
+<remarks>
+
+Real-time heave and heave-rate estimates, plus a delayed-heave estimate. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class HeaveOutputs : public MeasRegister
+{
+    public:
+    HeaveOutputs() : MeasRegister(new VN::Registers::Heave::HeaveOutputs())
+    {
+    };
+    
+    property float heave
+    {
+        float get()
+        {
+            return ((VN::Registers::Heave::HeaveOutputs *)_reg)->heave;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Heave::HeaveOutputs *)_reg)->heave = value;
+        }
+    };
+    
+    property float heaveRate
+    {
+        float get()
+        {
+            return ((VN::Registers::Heave::HeaveOutputs *)_reg)->heaveRate;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Heave::HeaveOutputs *)_reg)->heaveRate = value;
+        }
+    };
+    
+    property float delayedHeave
+    {
+        float get()
+        {
+            return ((VN::Registers::Heave::HeaveOutputs *)_reg)->delayedHeave;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::Heave::HeaveOutputs *)_reg)->delayedHeave = value;
+        }
+    };
+    
+    
+};
+
+} // namespace Heave
+
+namespace IMU
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 17 - Compensated Magnetometer </summary>
+<remarks>
+
+Compensated magnetometer measurements. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Mag : public MeasRegister
+{
+    public:
+    Mag() : MeasRegister(new VN::Registers::IMU::Mag())
+    {
+    };
+    
+    property float magX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Mag *)_reg)->magX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Mag *)_reg)->magX = value;
+        }
+    };
+    
+    property float magY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Mag *)_reg)->magY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Mag *)_reg)->magY = value;
+        }
+    };
+    
+    property float magZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Mag *)_reg)->magZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Mag *)_reg)->magZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 18 - Compensated Accelerometer </summary>
+<remarks>
+
+Compensated acceleration measurements 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Accel : public MeasRegister
+{
+    public:
+    Accel() : MeasRegister(new VN::Registers::IMU::Accel())
+    {
+    };
+    
+    property float accelX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Accel *)_reg)->accelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Accel *)_reg)->accelX = value;
+        }
+    };
+    
+    property float accelY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Accel *)_reg)->accelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Accel *)_reg)->accelY = value;
+        }
+    };
+    
+    property float accelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Accel *)_reg)->accelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Accel *)_reg)->accelZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 19 - Compensated Gyro </summary>
+<remarks>
+
+Compensated angular rate measurements. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Gyro : public MeasRegister
+{
+    public:
+    Gyro() : MeasRegister(new VN::Registers::IMU::Gyro())
+    {
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Gyro *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Gyro *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Gyro *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Gyro *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::Gyro *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::Gyro *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 20 - Compensated IMU </summary>
+<remarks>
+
+Compensated magnetic, acceleration, and angular rate measurements. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class MagAccelGyro : public MeasRegister
+{
+    public:
+    MagAccelGyro() : MeasRegister(new VN::Registers::IMU::MagAccelGyro())
+    {
+    };
+    
+    property float magX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->magX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->magX = value;
+        }
+    };
+    
+    property float magY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->magY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->magY = value;
+        }
+    };
+    
+    property float magZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->magZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->magZ = value;
+        }
+    };
+    
+    property float accelX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelX = value;
+        }
+    };
+    
+    property float accelY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelY = value;
+        }
+    };
+    
+    property float accelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->accelZ = value;
+        }
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::MagAccelGyro *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 54 - IMU Measurements </summary>
+<remarks>
+
+Provides the calibrated IMU measurements including barometric pressure. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class ImuMeas : public MeasRegister
+{
+    public:
+    ImuMeas() : MeasRegister(new VN::Registers::IMU::ImuMeas())
+    {
+    };
+    
+    property float uncompMagX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagX = value;
+        }
+    };
+    
+    property float uncompMagY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagY = value;
+        }
+    };
+    
+    property float uncompMagZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompMagZ = value;
+        }
+    };
+    
+    property float uncompAccX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccX = value;
+        }
+    };
+    
+    property float uncompAccY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccY = value;
+        }
+    };
+    
+    property float uncompAccZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompAccZ = value;
+        }
+    };
+    
+    property float uncompGyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroX = value;
+        }
+    };
+    
+    property float uncompGyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroY = value;
+        }
+    };
+    
+    property float uncompGyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->uncompGyroZ = value;
+        }
+    };
+    
+    property float temperature
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->temperature;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->temperature = value;
+        }
+    };
+    
+    property float pressure
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::ImuMeas *)_reg)->pressure;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::ImuMeas *)_reg)->pressure = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 80 - Delta Theta and Delta Velocity </summary>
+<remarks>
+
+This register contains the output values of the onboard coning and sculling algorithm. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class DeltaThetaVelocity : public MeasRegister
+{
+    public:
+    DeltaThetaVelocity() : MeasRegister(new VN::Registers::IMU::DeltaThetaVelocity())
+    {
+    };
+    
+    property float deltaTime
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaTime;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaTime = value;
+        }
+    };
+    
+    property float deltaThetaX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaX = value;
+        }
+    };
+    
+    property float deltaThetaY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaY = value;
+        }
+    };
+    
+    property float deltaThetaZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaThetaZ = value;
+        }
+    };
+    
+    property float deltaVelX
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelX = value;
+        }
+    };
+    
+    property float deltaVelY
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelY = value;
+        }
+    };
+    
+    property float deltaVelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::IMU::DeltaThetaVelocity *)_reg)->deltaVelZ = value;
+        }
+    };
+    
+    
+};
+
+} // namespace IMU
+
+namespace INS
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 63 - INS Solution - LLA </summary>
+<remarks>
+
+Estimated INS solution with lat/lon/alt position. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class InsSolLla : public MeasRegister
+{
+    public:
+    InsSolLla() : MeasRegister(new VN::Registers::INS::InsSolLla())
+    {
+    };
+    
+    property double timeGpsTow
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsTow;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsTow = value;
+        }
+    };
+    
+    property uint16_t timeGpsWeek
+    {
+        uint16_t get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsWeek;
+        }
+        void set(uint16_t value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->timeGpsWeek = value;
+        }
+    };
+    
+    property VN::InsStatus insStatus
+    {
+        VN::InsStatus get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->insStatus;
+        }
+        void set(VN::InsStatus value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->insStatus = value;
+        }
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->roll = value;
+        }
+    };
+    
+    property double posLat
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->posLat;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->posLat = value;
+        }
+    };
+    
+    property double posLon
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->posLon;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->posLon = value;
+        }
+    };
+    
+    property double posAlt
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->posAlt;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->posAlt = value;
+        }
+    };
+    
+    property float velN
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->velN;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->velN = value;
+        }
+    };
+    
+    property float velE
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->velE;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->velE = value;
+        }
+    };
+    
+    property float velD
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->velD;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->velD = value;
+        }
+    };
+    
+    property float attUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->attUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->attUncertainty = value;
+        }
+    };
+    
+    property float posUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->posUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->posUncertainty = value;
+        }
+    };
+    
+    property float velUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolLla *)_reg)->velUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolLla *)_reg)->velUncertainty = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 64 - INS Solution - ECEF </summary>
+<remarks>
+
+Estimated INS Solution with ECEF position 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class InsSolEcef : public MeasRegister
+{
+    public:
+    InsSolEcef() : MeasRegister(new VN::Registers::INS::InsSolEcef())
+    {
+    };
+    
+    property double timeGpsTow
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsTow;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsTow = value;
+        }
+    };
+    
+    property uint16_t timeGpsWeek
+    {
+        uint16_t get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsWeek;
+        }
+        void set(uint16_t value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->timeGpsWeek = value;
+        }
+    };
+    
+    property VN::InsStatus insStatus
+    {
+        VN::InsStatus get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->insStatus;
+        }
+        void set(VN::InsStatus value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->insStatus = value;
+        }
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->roll = value;
+        }
+    };
+    
+    property double posEx
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->posEx;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->posEx = value;
+        }
+    };
+    
+    property double posEy
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->posEy;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->posEy = value;
+        }
+    };
+    
+    property double posEz
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->posEz;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->posEz = value;
+        }
+    };
+    
+    property float velEx
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->velEx;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->velEx = value;
+        }
+    };
+    
+    property float velEy
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->velEy;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->velEy = value;
+        }
+    };
+    
+    property float velEz
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->velEz;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->velEz = value;
+        }
+    };
+    
+    property float attUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->attUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->attUncertainty = value;
+        }
+    };
+    
+    property float posUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->posUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->posUncertainty = value;
+        }
+    };
+    
+    property float velUncertainty
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsSolEcef *)_reg)->velUncertainty;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsSolEcef *)_reg)->velUncertainty = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 72 - INS State - LLA </summary>
+<remarks>
+
+Estimated INS state with lat/lon/alt position. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class InsStateLla : public MeasRegister
+{
+    public:
+    InsStateLla() : MeasRegister(new VN::Registers::INS::InsStateLla())
+    {
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->roll = value;
+        }
+    };
+    
+    property double posLat
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->posLat;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->posLat = value;
+        }
+    };
+    
+    property double posLon
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->posLon;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->posLon = value;
+        }
+    };
+    
+    property double posAlt
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->posAlt;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->posAlt = value;
+        }
+    };
+    
+    property float velN
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->velN;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->velN = value;
+        }
+    };
+    
+    property float velE
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->velE;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->velE = value;
+        }
+    };
+    
+    property float velD
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->velD;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->velD = value;
+        }
+    };
+    
+    property float accelX
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->accelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->accelX = value;
+        }
+    };
+    
+    property float accelY
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->accelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->accelY = value;
+        }
+    };
+    
+    property float accelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->accelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->accelZ = value;
+        }
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateLla *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateLla *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 73 - INS State - ECEF </summary>
+<remarks>
+
+Estimated INS state with ECEF position. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class InsStateEcef : public MeasRegister
+{
+    public:
+    InsStateEcef() : MeasRegister(new VN::Registers::INS::InsStateEcef())
+    {
+    };
+    
+    property float yaw
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->yaw;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->yaw = value;
+        }
+    };
+    
+    property float pitch
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->pitch;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->pitch = value;
+        }
+    };
+    
+    property float roll
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->roll;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->roll = value;
+        }
+    };
+    
+    property double posEx
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->posEx;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->posEx = value;
+        }
+    };
+    
+    property double posEy
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->posEy;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->posEy = value;
+        }
+    };
+    
+    property double posEz
+    {
+        double get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->posEz;
+        }
+        void set(double value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->posEz = value;
+        }
+    };
+    
+    property float velEx
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->velEx;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->velEx = value;
+        }
+    };
+    
+    property float velEy
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->velEy;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->velEy = value;
+        }
+    };
+    
+    property float velEz
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->velEz;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->velEz = value;
+        }
+    };
+    
+    property float accelX
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->accelX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->accelX = value;
+        }
+    };
+    
+    property float accelY
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->accelY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->accelY = value;
+        }
+    };
+    
+    property float accelZ
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->accelZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->accelZ = value;
+        }
+    };
+    
+    property float gyroX
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->gyroX;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->gyroX = value;
+        }
+    };
+    
+    property float gyroY
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->gyroY;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->gyroY = value;
+        }
+    };
+    
+    property float gyroZ
+    {
+        float get()
+        {
+            return ((VN::Registers::INS::InsStateEcef *)_reg)->gyroZ;
+        }
+        void set(float value)
+        {
+            ((VN::Registers::INS::InsStateEcef *)_reg)->gyroZ = value;
+        }
+    };
+    
+    
+};
+
+} // namespace INS
+
+namespace System
+{
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 1 - Model </summary>
+<remarks>
+
+Product model string. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Model : public MeasRegister
+{
+    public:
+    Model() : MeasRegister(new VN::Registers::System::Model())
+    {
+    };
+    
+    property String^ model
+    {
+        String^ get()
+        {
+            marshal_context^ context = gcnew marshal_context();
+            String^ value = context->marshal_as<String^>(((VN::Registers::System::Model *)_reg)->model.c_str());
+            delete context;
+            return value;
+        }
+        
+        void set(String^ value)
+        {
+            marshal_context^ context = gcnew marshal_context();
+            ((VN::Registers::System::Model *)_reg)->model = context->marshal_as<const char*>(value);
+            delete context;
+        }
+        
+    }
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 2 - Hardware Version </summary>
+<remarks>
+
+Hardware version number. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class HwVer : public MeasRegister
+{
+    public:
+    HwVer() : MeasRegister(new VN::Registers::System::HwVer())
+    {
+    };
+    
+    property uint32_t hwVer
+    {
+        uint32_t get()
+        {
+            return ((VN::Registers::System::HwVer *)_reg)->hwVer;
+        }
+        void set(uint32_t value)
+        {
+            ((VN::Registers::System::HwVer *)_reg)->hwVer = value;
+        }
+    };
+    
+    property uint32_t hwMinVer
+    {
+        uint32_t get()
+        {
+            return ((VN::Registers::System::HwVer *)_reg)->hwMinVer;
+        }
+        void set(uint32_t value)
+        {
+            ((VN::Registers::System::HwVer *)_reg)->hwMinVer = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 3 - Serial Number </summary>
+<remarks>
+
+Device serial number. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class Serial : public MeasRegister
+{
+    public:
+    Serial() : MeasRegister(new VN::Registers::System::Serial())
+    {
+    };
+    
+    property uint32_t serialNum
+    {
+        uint32_t get()
+        {
+            return ((VN::Registers::System::Serial *)_reg)->serialNum;
+        }
+        void set(uint32_t value)
+        {
+            ((VN::Registers::System::Serial *)_reg)->serialNum = value;
+        }
+    };
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 4 - Firmware Version </summary>
+<remarks>
+
+Firmware version number. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class FwVer : public MeasRegister
+{
+    public:
+    FwVer() : MeasRegister(new VN::Registers::System::FwVer())
+    {
+    };
+    
+    property String^ fwVer
+    {
+        String^ get()
+        {
+            marshal_context^ context = gcnew marshal_context();
+            String^ value = context->marshal_as<String^>(((VN::Registers::System::FwVer *)_reg)->fwVer.c_str());
+            delete context;
+            return value;
+        }
+        
+        void set(String^ value)
+        {
+            marshal_context^ context = gcnew marshal_context();
+            ((VN::Registers::System::FwVer *)_reg)->fwVer = context->marshal_as<const char*>(value);
+            delete context;
+        }
+        
+    }
+    
+    
+};
+
+/**--------------------------------------------------------------------------------------------------
+<summary> Register 33 - Synchronization Status </summary>
+<remarks>
+
+Contains counters based on the SyncIn and SyncOut events. 
+
+</remarks>
+*-----------------------------------------------------------------------------------------------**/
+public ref class SyncStatus : public MeasRegister
+{
+    public:
+    SyncStatus() : MeasRegister(new VN::Registers::System::SyncStatus())
+    {
+    };
+    
+    property uint32_t syncInCount
+    {
+        uint32_t get()
+        {
+            return ((VN::Registers::System::SyncStatus *)_reg)->syncInCount;
+        }
+        void set(uint32_t value)
+        {
+            ((VN::Registers::System::SyncStatus *)_reg)->syncInCount = value;
+        }
+    };
+    
+    property uint32_t syncInTime
+    {
+        uint32_t get()
+        {
+            return ((VN::Registers::System::SyncStatus *)_reg)->syncInTime;
+        }
+        void set(uint32_t value)
+        {
+            ((VN::Registers::System::SyncStatus *)_reg)->syncInTime = value;
+        }
+    };
+    
+    property uint32_t syncOutCount
+    {
+        uint32_t get()
+        {
+            return ((VN::Registers::System::SyncStatus *)_reg)->syncOutCount;
+        }
+        void set(uint32_t value)
+        {
+            ((VN::Registers::System::SyncStatus *)_reg)->syncOutCount = value;
+        }
+    };
+    
+    
+};
+
+} // namespace System
+
 namespace ById {
 using reg0 = VNSDK::Registers::System::UserTag;
+using reg5 = VNSDK::Registers::System::BaudRate;
+using reg6 = VNSDK::Registers::System::AsyncOutputType;
+using reg7 = VNSDK::Registers::System::AsyncOutputFreq;
+using reg21 = VNSDK::Registers::Attitude::MagGravRefVec;
+using reg23 = VNSDK::Registers::IMU::MagCal;
+using reg25 = VNSDK::Registers::IMU::AccelCal;
+using reg26 = VNSDK::Registers::IMU::RefFrameRot;
+using reg30 = VNSDK::Registers::System::ProtocolControl;
+using reg32 = VNSDK::Registers::System::SyncControl;
+using reg35 = VNSDK::Registers::Attitude::VpeBasicControl;
+using reg36 = VNSDK::Registers::Attitude::VpeMagBasicTuning;
+using reg38 = VNSDK::Registers::Attitude::VpeAccelBasicTuning;
+using reg44 = VNSDK::Registers::HardSoftIronEstimator::RealTimeHsiControl;
+using reg50 = VNSDK::Registers::VelocityAiding::VelAidingMeas;
+using reg51 = VNSDK::Registers::VelocityAiding::VelAidingControl;
+using reg55 = VNSDK::Registers::GNSS::GnssBasicConfig;
+using reg57 = VNSDK::Registers::GNSS::GnssAOffset;
+using reg67 = VNSDK::Registers::INS::InsBasicConfig;
+using reg74 = VNSDK::Registers::INS::FilterStartupBias;
+using reg75 = VNSDK::Registers::System::BinaryOutput1;
+using reg76 = VNSDK::Registers::System::BinaryOutput2;
+using reg77 = VNSDK::Registers::System::BinaryOutput3;
+using reg82 = VNSDK::Registers::IMU::DeltaThetaVelConfig;
+using reg83 = VNSDK::Registers::WorldMagGravityModel::RefModelConfig;
+using reg84 = VNSDK::Registers::IMU::GyroCal;
+using reg85 = VNSDK::Registers::IMU::ImuFilterControl;
+using reg93 = VNSDK::Registers::GNSSCompass::GnssCompassBaseline;
+using reg99 = VNSDK::Registers::GNSS::GnssSystemConfig;
+using reg100 = VNSDK::Registers::GNSS::GnssSyncConfig;
+using reg101 = VNSDK::Registers::System::NmeaOutput1;
+using reg102 = VNSDK::Registers::System::NmeaOutput2;
+using reg105 = VNSDK::Registers::INS::InsRefOffset;
+using reg116 = VNSDK::Registers::Heave::HeaveBasicConfig;
+using reg144 = VNSDK::Registers::INS::InsGnssSelect;
+using reg157 = VNSDK::Registers::GNSS::ExtGnssOffset;
+using reg206 = VNSDK::Registers::System::LegacyCompatibilitySettings;
 using reg1 = VNSDK::Registers::System::Model;
 using reg2 = VNSDK::Registers::System::HwVer;
 using reg3 = VNSDK::Registers::System::Serial;
 using reg4 = VNSDK::Registers::System::FwVer;
-using reg5 = VNSDK::Registers::System::BaudRate;
-using reg6 = VNSDK::Registers::System::AsyncOutputType;
-using reg7 = VNSDK::Registers::System::AsyncOutputFreq;
 using reg8 = VNSDK::Registers::Attitude::YawPitchRoll;
 using reg9 = VNSDK::Registers::Attitude::Quaternion;
 using reg15 = VNSDK::Registers::Attitude::QuatMagAccelRate;
@@ -11698,56 +13367,23 @@ using reg17 = VNSDK::Registers::IMU::Mag;
 using reg18 = VNSDK::Registers::IMU::Accel;
 using reg19 = VNSDK::Registers::IMU::Gyro;
 using reg20 = VNSDK::Registers::IMU::MagAccelGyro;
-using reg21 = VNSDK::Registers::Attitude::MagGravRefVec;
-using reg23 = VNSDK::Registers::IMU::MagCal;
-using reg25 = VNSDK::Registers::IMU::AccelCal;
-using reg26 = VNSDK::Registers::IMU::RefFrameRot;
 using reg27 = VNSDK::Registers::Attitude::YprMagAccelAngularRates;
-using reg30 = VNSDK::Registers::System::ProtocolControl;
-using reg32 = VNSDK::Registers::System::SyncControl;
 using reg33 = VNSDK::Registers::System::SyncStatus;
-using reg35 = VNSDK::Registers::Attitude::VpeBasicControl;
-using reg36 = VNSDK::Registers::Attitude::VpeMagBasicTuning;
-using reg38 = VNSDK::Registers::Attitude::VpeAccelBasicTuning;
-using reg44 = VNSDK::Registers::HardSoftIronEstimator::RealTimeHsiControl;
 using reg47 = VNSDK::Registers::HardSoftIronEstimator::EstMagCal;
-using reg50 = VNSDK::Registers::VelocityAiding::VelAidingMeas;
-using reg51 = VNSDK::Registers::VelocityAiding::VelAidingControl;
 using reg54 = VNSDK::Registers::IMU::ImuMeas;
-using reg55 = VNSDK::Registers::GNSS::GnssBasicConfig;
-using reg57 = VNSDK::Registers::GNSS::GnssAOffset;
 using reg58 = VNSDK::Registers::GNSS::GnssSolLla;
 using reg59 = VNSDK::Registers::GNSS::GnssSolEcef;
 using reg63 = VNSDK::Registers::INS::InsSolLla;
 using reg64 = VNSDK::Registers::INS::InsSolEcef;
-using reg67 = VNSDK::Registers::INS::InsBasicConfig;
 using reg72 = VNSDK::Registers::INS::InsStateLla;
 using reg73 = VNSDK::Registers::INS::InsStateEcef;
-using reg74 = VNSDK::Registers::INS::FilterStartupBias;
-using reg75 = VNSDK::Registers::System::BinaryOutput1;
-using reg76 = VNSDK::Registers::System::BinaryOutput2;
-using reg77 = VNSDK::Registers::System::BinaryOutput3;
 using reg80 = VNSDK::Registers::IMU::DeltaThetaVelocity;
-using reg82 = VNSDK::Registers::IMU::DeltaThetaVelConfig;
-using reg83 = VNSDK::Registers::WorldMagGravityModel::RefModelConfig;
-using reg84 = VNSDK::Registers::IMU::GyroCal;
-using reg85 = VNSDK::Registers::IMU::ImuFilterControl;
 using reg86 = VNSDK::Registers::GNSSCompass::GnssCompassSignalHealthStatus;
-using reg93 = VNSDK::Registers::GNSSCompass::GnssCompassBaseline;
 using reg97 = VNSDK::Registers::GNSSCompass::GnssCompassEstBaseline;
 using reg98 = VNSDK::Registers::GNSSCompass::GnssCompassStartupStatus;
-using reg99 = VNSDK::Registers::GNSS::GnssSystemConfig;
-using reg100 = VNSDK::Registers::GNSS::GnssSyncConfig;
-using reg101 = VNSDK::Registers::System::NmeaOutput1;
-using reg102 = VNSDK::Registers::System::NmeaOutput2;
 using reg103 = VNSDK::Registers::GNSS::Gnss2SolLla;
 using reg104 = VNSDK::Registers::GNSS::Gnss2SolEcef;
-using reg105 = VNSDK::Registers::INS::InsRefOffset;
 using reg115 = VNSDK::Registers::Heave::HeaveOutputs;
-using reg116 = VNSDK::Registers::Heave::HeaveBasicConfig;
-using reg144 = VNSDK::Registers::INS::InsGnssSelect;
-using reg157 = VNSDK::Registers::GNSS::ExtGnssOffset;
-using reg206 = VNSDK::Registers::System::LegacyCompatibilitySettings;
 using reg239 = VNSDK::Registers::Attitude::YprLinearBodyAccelAngularRates;
 using reg240 = VNSDK::Registers::Attitude::YprLinearInertialAccelAngularRates;
 } // namespace ById

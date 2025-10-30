@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,6 +29,8 @@
 
 #include "AsciiPacketProtocol.hpp"
 #include "FaPacketProtocol.hpp"
+#include "FbPacketProtocol.hpp"
+#include "PacketDispatcher.hpp"
 
 namespace VN
 {
@@ -37,8 +39,9 @@ struct PacketDetails
 {
     enum class SyncByte : uint8_t
     {
-        Ascii = '$',
         FA = 0xFA,
+        Ascii = '$',
+        FB = 0xFB,
         None = 0,
     } syncByte;
 
@@ -46,16 +49,18 @@ struct PacketDetails
     {
         AsciiPacketProtocol::Metadata asciiMetadata;
         FaPacketProtocol::Metadata faMetadata;
+        FbPacketProtocol::Metadata fbMetadata;
+        PacketMetadata<uint8_t> defaultMetadata;
     };
-    PacketDetails() : syncByte(SyncByte::None), faMetadata() {}
+    PacketDetails() : syncByte(SyncByte::None), defaultMetadata() {}
 };
 
 struct Packet
 {
-    Packet(size_t length) : buffer(new uint8_t[length]), size(length) {}
+    Packet(uint16_t capacity) : buffer(new uint8_t[capacity]), capacity(capacity) {}
 
-    template <size_t Capacity>
-    Packet(std::array<uint8_t, Capacity>& externalBuffer) : buffer(externalBuffer.data()), size(Capacity), _autoAllocated(false)
+    template <uint16_t Capacity>
+    Packet(std::array<uint8_t, Capacity>& externalBuffer) : buffer(externalBuffer.data()), capacity(Capacity), _autoAllocated(false)
     {
     }
     ~Packet()
@@ -65,12 +70,56 @@ struct Packet
 
     Packet(const Packet&) = delete;
     Packet& operator=(const Packet&) = delete;
-    Packet(Packet&&) = delete;
+
+    Packet(Packet&& other) noexcept : details(std::move(other.details)), _autoAllocated(true)
+    {
+        if (other._autoAllocated) { std::swap(buffer, other.buffer); }
+        else
+        {
+            buffer = new uint8_t[other.capacity];
+            std::memcpy(buffer, other.buffer, other.capacity);
+        }
+        std::swap(capacity, other.capacity);
+    }
+
     Packet& operator=(Packet&&) = delete;
 
     PacketDetails details{};
-    uint8_t* buffer;
-    size_t size = 0;
+    uint8_t* buffer = nullptr;
+    uint16_t capacity = 0;
+    uint16_t length() const noexcept
+    {
+        switch (details.syncByte)
+        {
+            case PacketDetails::SyncByte::FA:
+                return details.faMetadata.length;
+            case PacketDetails::SyncByte::Ascii:
+                return details.asciiMetadata.length;
+            case PacketDetails::SyncByte::FB:
+                return details.fbMetadata.length;
+            case PacketDetails::SyncByte::None:
+                return details.defaultMetadata.length;
+            default:
+                return 0;
+        }
+    }
+
+    time_point timestamp() const noexcept
+    {
+        switch (details.syncByte)
+        {
+            case PacketDetails::SyncByte::FA:
+                return details.faMetadata.timestamp;
+            case PacketDetails::SyncByte::Ascii:
+                return details.asciiMetadata.timestamp;
+            case PacketDetails::SyncByte::FB:
+                return details.fbMetadata.timestamp;
+            case PacketDetails::SyncByte::None:
+                return details.defaultMetadata.timestamp;
+            default:
+                return time_point();
+        }
+    }
 
 private:
     const bool _autoAllocated = true;

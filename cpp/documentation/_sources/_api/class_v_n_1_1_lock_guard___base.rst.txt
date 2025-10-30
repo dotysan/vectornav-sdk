@@ -9,11 +9,9 @@ Class LockGuard_Base
 Inheritance Relationships
 -------------------------
 
-Derived Types
-*************
+Derived Type
+************
 
-- ``public VN::LockGuard`` (:ref:`exhale_class_class_v_n_1_1_lock_guard`)
-- ``public VN::LockGuard`` (:ref:`exhale_class_class_v_n_1_1_lock_guard`)
 - ``public VN::LockGuard`` (:ref:`exhale_class_class_v_n_1_1_lock_guard`)
 
 

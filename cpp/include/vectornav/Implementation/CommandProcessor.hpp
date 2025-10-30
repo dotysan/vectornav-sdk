@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -41,7 +41,7 @@ namespace VN
 {
 
 /// @brief The CommandProcessor class is the handshake between the user-facing code (such as Sensor) and the communication code interfacing with the sensor
-/// (such as Serial and PacketProcessor). Consequently, it exists on multiple threads (all exists on the main thread except for matchReponse, which is called
+/// (such as Serial and PacketProcessor). Consequently, it exists on multiple threads (all exists on the main thread except for matchResponse, which is called
 /// from the high-priority thread) with an internal queue to handle the cross-thread communication. Its chief responsibility is to facilitate the communication
 /// of commands between the user and the sensor, tracking received responses (sent via matchResponse) and correlating them with known-sent commands.
 class CommandProcessor
@@ -51,12 +51,7 @@ public:
 
     struct RegisterCommandReturn
     {
-        enum class Error
-        {
-            None,
-            CommandQueueFull,
-            CommandResent
-        } error;
+        Error error;
         AsciiMessage message;
     };
 
@@ -71,7 +66,7 @@ public:
     RegisterCommandReturn registerCommand(GenericCommand* pCommand,
                                           const Microseconds timeoutThreshold = Config::CommandProcessor::commandRemovalTimeoutLength) noexcept;
 
-    bool matchResponse(const AsciiMessage& response, const AsciiPacketProtocol::Metadata& metadata) noexcept;
+    Errored matchResponse(const AsciiMessage& response, const AsciiPacketProtocol::Metadata& metadata) noexcept;
     int queueSize() const noexcept;
     int queueCapacity() const noexcept;
     void popCommandFromQueueBack() noexcept;

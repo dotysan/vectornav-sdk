@@ -12,7 +12,7 @@ Inheritance Relationships
 Base Type
 *********
 
-- ``public VN::MeasurementRegister`` (:ref:`exhale_class_class_v_n_1_1_measurement_register`)
+- ``public VN::ConfigurationRegister`` (:ref:`exhale_class_class_v_n_1_1_configuration_register`)
 
 
 Class Documentation

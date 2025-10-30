@@ -78,6 +78,7 @@
 <li><p><a class="reference internal" href="#functions" id="id7">Functions</a></p></li>
 <li><p><a class="reference internal" href="#defines" id="id8">Defines</a></p></li>
 <li><p><a class="reference internal" href="#typedefs" id="id9">Typedefs</a></p></li>
+<li><p><a class="reference internal" href="#variables" id="id10">Variables</a></p></li>
 </ul>
 </nav>
 <section id="definition-include-vectornav-interface-errors-hpp">
@@ -92,6 +93,7 @@
 <h2>Includes<a class="headerlink" href="#includes" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">stdint.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">variant</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/Config.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/HAL/Timer.hpp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">vectornav/TemplateLibrary/String.hpp</span></code></p></li>
@@ -103,11 +105,14 @@
 <li><p><a class="reference internal" href="file_include_vectornav_HAL_Serial_Base.hpp.html#file-include-vectornav-hal-serial-base-hpp"><span class="std std-ref">File Serial_Base.hpp</span></a></p></li>
 <li><p><a class="reference internal" href="file_include_vectornav_HAL_Serial_Linux.hpp.html#file-include-vectornav-hal-serial-linux-hpp"><span class="std std-ref">File Serial_Linux.hpp</span></a></p></li>
 <li><p><a class="reference internal" href="file_include_vectornav_Implementation_CommandProcessor.hpp.html#file-include-vectornav-implementation-commandprocessor-hpp"><span class="std std-ref">File CommandProcessor.hpp</span></a></p></li>
+<li><p><a class="reference internal" href="file_include_vectornav_Implementation_PacketDispatcher.hpp.html#file-include-vectornav-implementation-packetdispatcher-hpp"><span class="std std-ref">File PacketDispatcher.hpp</span></a></p></li>
 <li><p><a class="reference internal" href="file_include_vectornav_Implementation_PacketSynchronizer.hpp.html#file-include-vectornav-implementation-packetsynchronizer-hpp"><span class="std std-ref">File PacketSynchronizer.hpp</span></a></p></li>
 <li><p><a class="reference internal" href="file_include_vectornav_Interface_GenericCommand.hpp.html#file-include-vectornav-interface-genericcommand-hpp"><span class="std std-ref">File GenericCommand.hpp</span></a></p></li>
 <li><p><a class="reference internal" href="file_include_vectornav_Interface_Sensor.hpp.html#file-include-vectornav-interface-sensor-hpp"><span class="std std-ref">File Sensor.hpp</span></a></p></li>
-<li><p><a class="reference internal" href="file_plugins_FirmwareUpdate_include_vectornav_VnXml.hpp.html#file-plugins-firmwareupdate-include-vectornav-vnxml-hpp"><span class="std std-ref">File VnXml.hpp</span></a></p></li>
-<li><p><a class="reference internal" href="file_plugins_RegisterScan_src_ConfigWriter.cpp.html#file-plugins-registerscan-src-configwriter-cpp"><span class="std std-ref">File ConfigWriter.cpp</span></a></p></li>
+<li><p><a class="reference internal" href="file_include_vectornav_TemplateLibrary_ByteBuffer.hpp.html#file-include-vectornav-templatelibrary-bytebuffer-hpp"><span class="std std-ref">File ByteBuffer.hpp</span></a></p></li>
+<li><p><a class="reference internal" href="file_plugins_FirmwareProgrammer_include_vectornav_Bootloader.hpp.html#file-plugins-firmwareprogrammer-include-vectornav-bootloader-hpp"><span class="std std-ref">File Bootloader.hpp</span></a></p></li>
+<li><p><a class="reference internal" href="file_plugins_FirmwareProgrammer_include_vectornav_FirmwareUpdater.hpp.html#file-plugins-firmwareprogrammer-include-vectornav-firmwareupdater-hpp"><span class="std std-ref">File FirmwareUpdater.hpp</span></a></p></li>
+<li><p><a class="reference internal" href="file_plugins_FirmwareProgrammer_include_vectornav_VnXml.hpp.html#file-plugins-firmwareprogrammer-include-vectornav-vnxml-hpp"><span class="std std-ref">File VnXml.hpp</span></a></p></li>
 </ul>
 </section>
 <section id="namespaces">
@@ -120,6 +125,7 @@
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="struct_v_n_1_1_async_error.html#exhale-struct-struct-v-n-1-1-async-error"><span class="std std-ref">Struct AsyncError</span></a></p></li>
+<li><p><a class="reference internal" href="struct_v_n_1_1_error_all.html#exhale-struct-struct-v-n-1-1-error-all"><span class="std std-ref">Struct ErrorAll</span></a></p></li>
 <li><p><a class="reference internal" href="class_v_n_1_1_enum_check.html#exhale-class-class-v-n-1-1-enum-check"><span class="std std-ref">Template Class EnumCheck</span></a></p></li>
 <li><p><a class="reference internal" href="class_v_n_1_1_enum_check_3_01_enum_type_01_4.html#exhale-class-class-v-n-1-1-enum-check-3-01-enum-type-01-4"><span class="std std-ref">Template Class EnumCheck&lt; EnumType &gt;</span></a></p></li>
 <li><p><a class="reference internal" href="class_v_n_1_1_enum_check_3_01_enum_type_00_01_v_00_01_next_8_8_8_01_4.html#exhale-class-class-v-n-1-1-enum-check-3-01-enum-type-00-01-v-00-01-next-8-8-8-01-4"><span class="std std-ref">Template Class EnumCheck&lt; EnumType, V, Next… &gt;</span></a></p></li>
@@ -134,23 +140,34 @@
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="function__errors_8hpp_1a48a0d4e28bdfe3eb34e6518e9bf68533.html#exhale-function-errors-8hpp-1a48a0d4e28bdfe3eb34e6518e9bf68533"><span class="std std-ref">Function VN::errorCodeToString</span></a></p></li>
-<li><p><a class="reference internal" href="function__errors_8hpp_1a3d123bd4576b3f4e309f9f490317ccb7.html#exhale-function-errors-8hpp-1a3d123bd4576b3f4e309f9f490317ccb7"><span class="std std-ref">Function VN::operator&lt;&lt;(std::ostream&amp;, const Error&amp;)</span></a></p></li>
-<li><p><a class="reference internal" href="function__errors_8hpp_1a330a009fd14755c55a5a2c40e2cf4583.html#exhale-function-errors-8hpp-1a330a009fd14755c55a5a2c40e2cf4583"><span class="std std-ref">Function VN::SensorException_Is_Asynchronous</span></a></p></li>
-<li><p><a class="reference internal" href="function__errors_8hpp_1a7ec6dd141f2d55d3d6d6c8c9ffac27fd.html#exhale-function-errors-8hpp-1a7ec6dd141f2d55d3d6d6c8c9ffac27fd"><span class="std std-ref">Function VN::SensorException_Is_Synchronous</span></a></p></li>
+<li><p><a class="reference internal" href="function__errors_8hpp_1aa222360f63ba885d4a33a35204d4254c.html#exhale-function-errors-8hpp-1aa222360f63ba885d4a33a35204d4254c"><span class="std std-ref">Function VN::errorCodeToString(ErrorAll)</span></a></p></li>
+<li><p><a class="reference internal" href="function__errors_8hpp_1a093c61ae7397754bf3aa150f16ddc544.html#exhale-function-errors-8hpp-1a093c61ae7397754bf3aa150f16ddc544"><span class="std std-ref">Function VN::errorCodeToString(Error)</span></a></p></li>
+<li><p><a class="reference internal" href="function__firmware_programmer_errors_8hpp_1ab856e059bda44121e5f3f018357d0af3.html#exhale-function-firmware-programmer-errors-8hpp-1ab856e059bda44121e5f3f018357d0af3"><span class="std std-ref">Function VN::errorCodeToString(FirmwareProgrammer::ErrorBL)</span></a></p></li>
+<li><p><a class="reference internal" href="function__errors_8hpp_1ac0fdc1412dbe31bbfb9a04eaedd883d7.html#exhale-function-errors-8hpp-1ac0fdc1412dbe31bbfb9a04eaedd883d7"><span class="std std-ref">Function VN::operator&lt;&lt;(std::ostream&amp;, const AsyncError&amp;)</span></a></p></li>
+<li><p><a class="reference internal" href="function__errors_8hpp_1ae439ba621563d2b7e116a5eb8931672c.html#exhale-function-errors-8hpp-1ae439ba621563d2b7e116a5eb8931672c"><span class="std std-ref">Template Function VN::operator&lt;&lt;(std::ostream&amp;, const T&amp;)</span></a></p></li>
+<li><p><a class="reference internal" href="function__errors_8hpp_1a64098a03ece461c5e73a00a7fb0da439.html#exhale-function-errors-8hpp-1a64098a03ece461c5e73a00a7fb0da439"><span class="std std-ref">Function VN::operator&lt;&lt;(std::ostream&amp;, const ErrorAll&amp;)</span></a></p></li>
 </ul>
 </section>
 <section id="defines">
 <h2>Defines<a class="headerlink" href="#defines" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="define__errors_8hpp_1a824517c54dc515081505f464e98ad68d.html#exhale-define-errors-8hpp-1a824517c54dc515081505f464e98ad68d"><span class="std std-ref">Define DEBUG_MESSAGE_ENABLE</span></a></p></li>
+<li><p><a class="reference internal" href="define__errors_8hpp_1ae513be44956eaa6258a647c54b362b02.html#exhale-define-errors-8hpp-1ae513be44956eaa6258a647c54b362b02"><span class="std std-ref">Define _VN_ERROR_BL</span></a></p></li>
+<li><p><a class="reference internal" href="define__errors_8hpp_1ae904ad6431c72085c0114c9dac1b1127.html#exhale-define-errors-8hpp-1ae904ad6431c72085c0114c9dac1b1127"><span class="std std-ref">Define _VN_ERROR_CAL</span></a></p></li>
+<li><p><a class="reference internal" href="define__errors_8hpp_1aaa9713eb2f41e08a20eff475fe59cfb3.html#exhale-define-errors-8hpp-1aaa9713eb2f41e08a20eff475fe59cfb3"><span class="std std-ref">Define _VN_ERROR_LIST</span></a></p></li>
 </ul>
 </section>
 <section id="typedefs">
 <h2>Typedefs<a class="headerlink" href="#typedefs" title="Link to this heading">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference internal" href="typedef__errors_8hpp_1add8cd27f9bb274bbf1fbb34a1331a4c1.html#exhale-typedef-errors-8hpp-1add8cd27f9bb274bbf1fbb34a1331a4c1"><span class="std std-ref">Typedef VN::Errored</span></a></p></li>
 <li><p><a class="reference internal" href="typedef__errors_8hpp_1a21bf15df0ad9aaadc6d9eb5832b660ea.html#exhale-typedef-errors-8hpp-1a21bf15df0ad9aaadc6d9eb5832b660ea"><span class="std std-ref">Typedef VN::VnErr_Asynchronous</span></a></p></li>
 <li><p><a class="reference internal" href="typedef__errors_8hpp_1ae3837d21bd03010a1e70aa2bec8a4639.html#exhale-typedef-errors-8hpp-1ae3837d21bd03010a1e70aa2bec8a4639"><span class="std std-ref">Typedef VN::VnErr_Synchronous</span></a></p></li>
+</ul>
+</section>
+<section id="variables">
+<h2>Variables<a class="headerlink" href="#variables" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="variable__errors_8hpp_1a4f6b6857d8e5b5967df27225f2f80417.html#exhale-variable-errors-8hpp-1a4f6b6857d8e5b5967df27225f2f80417"><span class="std std-ref">Variable VN::is_same_any</span></a></p></li>
 </ul>
 </section>
 </section>

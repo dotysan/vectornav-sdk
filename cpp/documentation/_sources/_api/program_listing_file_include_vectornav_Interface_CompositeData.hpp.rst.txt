@@ -88,8 +88,7 @@ Program Listing for File CompositeData.hpp
                pressure;  
    #endif
    #if (IMU_GROUP_ENABLE & IMU_DELTATHETA_BIT)
-           std::optional<DeltaTheta>
-               deltaTheta;  
+           std::optional<DeltaTheta> deltaTheta;  
    #endif
    #if (IMU_GROUP_ENABLE & IMU_DELTAVEL_BIT)
            std::optional<Vec3f> deltaVel;  
@@ -415,7 +414,7 @@ Program Listing for File CompositeData.hpp
        std::optional<uint16_t> asciiAppendStatus;
    
        template <class Extractor>
-       bool copyFromBuffer(Extractor& extractor, const uint8_t measGroupIndex, const uint8_t measTypeIndex);
+       Errored copyFromBuffer(Extractor& extractor, const uint8_t measGroupIndex, const uint8_t measTypeIndex);
    
    private:
        std::optional<AsciiHeader> _asciiHeader = std::nullopt;
@@ -424,7 +423,7 @@ Program Listing for File CompositeData.hpp
    };  // class CompositeData
    
    template <class Extractor>
-   bool CompositeData::copyFromBuffer(Extractor& extractor, const uint8_t measGroupIndex, const uint8_t measTypeIndex)
+   Errored CompositeData::copyFromBuffer(Extractor& extractor, const uint8_t measGroupIndex, const uint8_t measTypeIndex)
    {
        switch (measGroupIndex)
        {

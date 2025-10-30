@@ -51,11 +51,13 @@ Namespaces
 
 - :ref:`namespace_VN`
 
+- :ref:`namespace_VN__DataExport`
+
 
 Classes
 -------
 
 
 
-- :ref:`exhale_class_class_v_n_1_1_exporter_ascii`
+- :ref:`exhale_class_class_v_n_1_1_data_export_1_1_exporter_ascii`
 

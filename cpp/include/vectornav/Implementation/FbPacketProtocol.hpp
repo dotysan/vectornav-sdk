@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,15 +27,16 @@
 #include <cstdint>
 
 #include "vectornav/Config.hpp"
-#include "vectornav/Implementation/CoreUtils.hpp"
+#include "vectornav/HAL/Timer.hpp"
 #include "vectornav/Implementation/PacketDispatcher.hpp"
-#include "vectornav/Interface/CompositeData.hpp"
 #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 
 namespace VN
 {
 
-struct SplitPacketDetails
+namespace FbPacketProtocol
+{
+struct Header
 {
     uint8_t messageType = 0;
     uint8_t messageId = 0;
@@ -43,7 +44,7 @@ struct SplitPacketDetails
     uint8_t currentPacketCount = 0;
     uint16_t payloadLength = 0;
 
-    bool operator==(const SplitPacketDetails& rhs) const
+    bool operator==(const Header& rhs) const
     {
         if (messageType == rhs.messageType && messageId == rhs.messageId && totalPacketCount == rhs.totalPacketCount &&
             currentPacketCount == rhs.currentPacketCount && payloadLength == rhs.payloadLength)
@@ -54,17 +55,10 @@ struct SplitPacketDetails
     }
 };
 
-namespace FbPacketProtocol
-{
-
 using Validity = PacketDispatcher::FindPacketRetVal::Validity;
 constexpr uint16_t MAX_PACKET_LENGTH = VN::Config::PacketFinders::fbPacketMaxLength;
 
-struct Metadata
-{
-    SplitPacketDetails header;
-    uint16_t length;
-};
+using Metadata = PacketMetadata<Header>;
 
 struct FindPacketReturn
 {

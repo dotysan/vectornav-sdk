@@ -19,7 +19,7 @@ Classes
 
 - :ref:`exhale_struct_struct_v_n_1_1_fb_packet_protocol_1_1_find_packet_return`
 
-- :ref:`exhale_struct_struct_v_n_1_1_fb_packet_protocol_1_1_metadata`
+- :ref:`exhale_struct_struct_v_n_1_1_fb_packet_protocol_1_1_header`
 
 
 Functions
@@ -32,6 +32,8 @@ Functions
 Typedefs
 --------
 
+
+- :ref:`exhale_typedef__fb_packet_protocol_8hpp_1afaea34cac3a6c097023cd56cb2038086`
 
 - :ref:`exhale_typedef__fb_packet_protocol_8hpp_1af216c9cccc46b04674ed3fae54879964`
 

@@ -92,17 +92,34 @@
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan19GenericConfigReaderE">
 <span id="_CPPv3N2VN12RegisterScan19GenericConfigReaderE"></span><span id="_CPPv2N2VN12RegisterScan19GenericConfigReaderE"></span><span id="VN::RegisterScan::GenericConfigReader"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_generic_config_reader"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GenericConfigReader</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RegisterScan</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="struct_v_n_1_1_register_scan_1_1_config_reader.html#_CPPv4I0EN2VN12RegisterScan12ConfigReaderE" title="VN::RegisterScan::ConfigReader"><span class="n"><span class="pre">ConfigReader</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N2VN12RegisterScan19GenericConfigReaderE" title="VN::RegisterScan::GenericConfigReader"><span class="n"><span class="pre">GenericConfigReader</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan19GenericConfigReaderE" title="Link to this definition">¶</a><br /></dt>
-<dd><div class="breathe-sectiondef docutils container">
+<dd><p>A configurable reader that uses a function callback to retrieve VectorNav ASCII configuration messages. </p>
+<p>Allows for custom configuration reading logic through a user-provided callback function. Should return an error if the read operation fails. </p>
+<div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan19GenericConfigReader19GenericConfigReaderENSt8functionIFN2VN5ErrorER12AsciiMessageEEE">
 <span id="_CPPv3N2VN12RegisterScan19GenericConfigReader19GenericConfigReaderENSt8functionIFN2VN5ErrorER12AsciiMessageEEE"></span><span id="_CPPv2N2VN12RegisterScan19GenericConfigReader19GenericConfigReaderENSt8functionIFN2VN5ErrorER12AsciiMessageEEE"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_generic_config_reader_1a4b43b24ab1e256be8109a83475e2bf4d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GenericConfigReader</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="p"><span class="pre">(</span></span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">getNextConfig</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan19GenericConfigReader19GenericConfigReaderENSt8functionIFN2VN5ErrorER12AsciiMessageEEE" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Constructs a <a class="reference internal" href="#class_v_n_1_1_register_scan_1_1_generic_config_reader"><span class="std std-ref">GenericConfigReader</span></a> with a custom callback function. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>getNextConfig</strong> – Function object that implements the configuration reading logic. </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan19GenericConfigReader4nextER12AsciiMessage">
 <span id="_CPPv3N2VN12RegisterScan19GenericConfigReader4nextER12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan19GenericConfigReader4nextER12AsciiMessage"></span><span id="VN::RegisterScan::GenericConfigReader::next__AsciiMessageR"></span><span class="target" id="class_v_n_1_1_register_scan_1_1_generic_config_reader_1aabf4d0829f36d38cbc7f928e6f0916e7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">next</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan19GenericConfigReader4nextER12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Retrieves the next configuration message using the provided callback function. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> – <strong>[out]</strong> Reference to an AsciiMessage object that will be populated with the next configuration. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Error code indicating success or failure of the operation. </p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 </dd></dl>

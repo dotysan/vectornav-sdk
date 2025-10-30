@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +33,8 @@
 
 namespace VN
 {
+namespace DataExport
+{
 
 enum CsvType : uint8_t
 {
@@ -49,7 +51,7 @@ enum CsvType : uint8_t
     NON,
 };
 
-using VN::CsvType;
+using VN::DataExport::CsvType;
 
 struct CsvTypeInfo
 {
@@ -85,6 +87,7 @@ const char* getMeasurementString(const AsciiPacketProtocol::AsciiMeasurementHead
 
 const char* getMeasurementName(const size_t binaryGroup, const size_t binaryField);
 
+}  // namespace DataExport
 }  // namespace VN
 
 #endif  // VN_EXPORTERCSVUTILS_HPP_

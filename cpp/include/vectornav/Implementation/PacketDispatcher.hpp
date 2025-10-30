@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,11 +27,21 @@
 #include <cstdint>
 
 #include "vectornav/Config.hpp"
+#include "vectornav/Interface/Errors.hpp"
 #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
 #include "vectornav/TemplateLibrary/Vector.hpp"
 
 namespace VN
 {
+
+template <typename T>
+struct PacketMetadata
+{
+    T header;
+    uint16_t length = 0;
+    time_point timestamp;
+    bool operator==(const PacketMetadata<T>& other) const noexcept { return header == other.header && length == other.length; }
+};
 
 constexpr uint8_t SYNC_BYTE_CAPACITY = 1;
 
@@ -55,7 +65,7 @@ public:
 
     virtual FindPacketRetVal findPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept = 0;
 
-    virtual void dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept = 0;
+    virtual Error dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept = 0;
 
 private:
     Vector<uint8_t, SYNC_BYTE_CAPACITY> _syncBytes{};

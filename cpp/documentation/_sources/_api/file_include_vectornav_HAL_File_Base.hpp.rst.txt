@@ -40,8 +40,6 @@ Included By
 
 - :ref:`file_include_vectornav_HAL_File_PC.hpp`
 
-- :ref:`file_include_vectornav_HAL_File_Wasm.hpp`
-
 
 
 

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # 
-# VectorNav SDK (v0.22.0)
+# VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,43 +21,83 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import time, sys, os
+import os
+import sys
+import time
 
-import vectornav
 from vectornav import Sensor
-from vectornav.Plugins import ExporterCsv
+from vectornav.Plugins import DataExport
+
 
 def main(argv):
+    """
+    This data export example walks through the Python usage of the SDK to export data from a VectorNav unit to a CSV file.
 
-    port = argv[0] if argv else "COM30"
-    outputDirectory = argv[1] if len(argv)==2 else os.path.dirname(os.path.abspath(__file__))
-    
-    vs = Sensor()
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Create an ExportCsv object
+    3. Add a subscriber to all binary and ASCII packets
+    4. Log data from the VectorNav unit
+    5. Disconnect from the VectorNav unit
+    """
 
-    csvExporter = ExporterCsv(outputDirectory, True)
-    
-    vs.autoConnect(port)
+    # Parse command line arguments
+    portName = argv[0] if argv else "COM1"
+    outputDirectory = argv[1] if len(argv) == 2 else os.path.dirname(os.path.abspath(__file__))
+    print(outputDirectory)
 
-    # Add a subscriber to all VN FA and ASCII packets
-    vs.subscribeToMessage(
-        csvExporter.getQueuePtr(),
-        vectornav.Registers.BinaryOutputMeasurements(),
-        vectornav.FaPacketDispatcher.SubscriberFilterType.AnyMatch
-    )
-    
-    vs.subscribeToMessage(
-        csvExporter.getQueuePtr(),
-        "VN",
-        vectornav.AsciiPacketDispatcher.SubscriberFilterType.StartsWith
-    )
+    # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    sensor = Sensor()
+    try:
+        sensor.autoConnect(portName)
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when connecting to {portName}.\n")
+        return
+    print(f"Connected to {portName} at {sensor.connectedBaudRate()}")
 
+    # 2. Create an ExportCsv object
+    csvExporter = DataExport.ExporterCsv(outputDirectory)
+
+    # 3. Add a subscriber to all binary and ASCII packets
+    try:
+        sensor.subscribeToMessage(
+            csvExporter.getQueuePtr(),
+            Sensor.BinaryOutputMeasurements(),
+            Sensor.FaSubscriberFilterType.AnyMatch
+        )
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when subscribing.\n")
+        return
+
+    try:
+        sensor.subscribeToMessage(
+            csvExporter.getQueuePtr(), "VN", Sensor.AsciiSubscriberFilterType.StartsWith
+        )
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when subscribing.\n")
+        return
+
+    # 4. Log data from the VectorNav unit
     csvExporter.start()
     print("Logging to ", outputDirectory)
-    
-    time.sleep(5)
+
+    start_time = time.time()
+
+    while (time.time() - start_time) < 5:
+        time.sleep(0.001)
+
+        # Handle asynchronous errors
+        try:
+            sensor.throwIfAsyncError()
+        except Exception as asyncError:
+            print(f"Received async error: {asyncError}");
 
     csvExporter.stop()
-    print("ExportFromSensor example complete.")
 
-if __name__ == '__main__':
+    # 5. Disconnect from the VectorNav unit
+    sensor.disconnect()
+    print("DataExportFromSensor example complete.")
+
+
+if __name__ == "__main__":
     main(sys.argv[1:])

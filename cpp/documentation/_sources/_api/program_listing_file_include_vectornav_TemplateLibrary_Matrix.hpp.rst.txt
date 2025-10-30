@@ -47,7 +47,7 @@ Program Listing for File Matrix.hpp
            return nm;
        }
    
-       inline static Matrix null() { return Matrix<m, m, T>{}; }
+       inline static Matrix null() { return Matrix<m, n, T>{}; }
    
        // Compound Assignment Operator Overloads /////////////////////////////////////////////////////
        const T& operator()(uint16_t row, uint16_t col) const
@@ -307,49 +307,51 @@ Program Listing for File Matrix.hpp
    
    // // Common functions for working with matrices.
    template <uint16_t m, uint16_t n, typename T>
-   std::ostream& operator<<(std::ostream& out, const Matrix<m, n, T>& mat)
+   std::ostream& operator<<(std::ostream& out, const Matrix<m, n, T>& mat) noexcept
    {
-       std::string str = "[";
-   
+       out << "[";
        for (uint16_t i = 0; i < m; i++)
        {
-           str += '(';
-           for (uint16_t j = 0; j < n; j++) { str += (std::to_string(mat(i, j)) + ", "); }
-           str.pop_back();
-           str.back() = ')';
+           if (i == 0) { out << "("; }
+           else { out << std::endl << "("; }
+           for (uint16_t j = 0; j < n; j++) { out << " " << mat(i, j) << ","; }
+           out << "\b )";
        }
-       str += "]";
+       out << "]" << std::endl;
    
-       out << str;
        return out;
    }
    
    template <uint16_t m, uint16_t n, typename T>
-   Matrix<m, n, T> element_sqrt(Matrix<m, n, T> mat)
+   Matrix<m, n, T> element_sqrt(const Matrix<m, n, T>& mat)
    {
-       for (uint16_t i = 0; i < m * n; i++) { mat[i] = std::sqrt(mat[i]); }
-       return mat;
+       Matrix<m, n, T> out;
+       for (uint16_t i = 0; i < m * n; i++) { out[i] = std::sqrt(mat[i]); }
+       return out;
    }
    
    template <uint16_t m, uint16_t n, typename T>
-   Matrix<m, n, T> element_add(Matrix<m, n, T> mat, const Matrix<m, n, T>& rhs)
+   Matrix<m, n, T> element_add(const Matrix<m, n, T>& mat, const Matrix<m, n, T>& rhs)
    {
-       for (uint16_t i = 0; i < m * n; i++) { mat[i] += rhs[i]; }
-       return mat;
+       Matrix<m, n, T> out = mat;
+       for (uint16_t i = 0; i < m * n; i++) { out[i] += rhs[i]; }
+       return out;
    }
    
    template <uint16_t m, uint16_t n, typename T>
-   Matrix<m, n, T> element_mul(Matrix<m, n, T> mat, const Matrix<m, n, T>& rhs)
+   Matrix<m, n, T> element_mul(const Matrix<m, n, T>& mat, const Matrix<m, n, T>& rhs)
    {
-       for (uint16_t i = 0; i < m * n; i++) { mat[i] *= rhs[i]; }
-       return mat;
+       Matrix<m, n, T> out = mat;
+       for (uint16_t i = 0; i < m * n; i++) { out[i] *= rhs[i]; }
+       return out;
    }
    
    template <uint16_t m, uint16_t n, typename T>
-   Matrix<m, n, T> element_div(Matrix<m, n, T> mat, const Matrix<m, n, T>& rhs)
+   Matrix<m, n, T> element_div(const Matrix<m, n, T>& mat, const Matrix<m, n, T>& rhs)
    {
-       for (uint16_t i = 0; i < m * n; i++) { mat[i] /= rhs[i]; }
-       return mat;
+       Matrix<m, n, T> out = mat;
+       for (uint16_t i = 0; i < m * n; i++) { out[i] /= rhs[i]; }
+       return out;
    }
    
    using Mat2i = Matrix<2, 2, int>;

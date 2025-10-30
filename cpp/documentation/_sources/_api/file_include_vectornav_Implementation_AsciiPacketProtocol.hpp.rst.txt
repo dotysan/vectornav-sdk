@@ -30,6 +30,8 @@ Includes
 --------
 
 
+- ``cstddef``
+
 - ``vectornav/Config.hpp``
 
 - ``vectornav/HAL/Timer.hpp``
@@ -98,7 +100,7 @@ Functions
 
 - :ref:`exhale_function__ascii_packet_protocol_8hpp_1a2b339eb87e288d36fc6223a08c60942d`
 
-- :ref:`exhale_function__ascii_packet_protocol_8hpp_1afc396632c4c23c01b70127a7e5d149f7`
+- :ref:`exhale_function__ascii_packet_protocol_8hpp_1a5a4c4593116d6ea6d5ea54f75f39e92a`
 
 - :ref:`exhale_function__ascii_packet_protocol_8hpp_1a0983ad88f7f530567c30de1e36a8e6ff`
 

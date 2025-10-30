@@ -19,6 +19,7 @@ Program Listing for File Sensor.hpp
    #include <optional>
    
    #include "vectornav/Config.hpp"
+   #include "vectornav/HAL/File.hpp"
    #include "vectornav/HAL/Serial.hpp"
    #include "vectornav/HAL/Serial_Base.hpp"
    #include "vectornav/HAL/Thread.hpp"
@@ -44,12 +45,24 @@ Program Listing for File Sensor.hpp
    class Sensor
    {
    public:
+   
+       enum class MeasQueueMode : uint8_t
+       {
+           Off = 0,
+           Force = static_cast<uint8_t>(MeasurementQueue::PutMode::Force),
+           Try = static_cast<uint8_t>(MeasurementQueue::PutMode::Try),
+   #if THREADING_ENABLE
+           Retry = static_cast<uint8_t>(MeasurementQueue::PutMode::Retry)
+   #endif
+       };
+   
        // ------------------------------------------
        // ------------------------------------------
-       Sensor();
+       Sensor(MeasQueueMode mode = MeasQueueMode::Force);
    
        template <size_t MainByteBufferCapacity, size_t FbByteBufferCapacity>
-       Sensor(std::array<uint8_t, MainByteBufferCapacity>& mainBuffer, std::array<uint8_t, FbByteBufferCapacity>& fbBuffer);
+       Sensor(std::array<uint8_t, MainByteBufferCapacity>& mainBuffer, std::array<uint8_t, FbByteBufferCapacity>& fbBuffer,
+              MeasQueueMode mode = MeasQueueMode::Force);
    
        ~Sensor();
    
@@ -60,9 +73,13 @@ Program Listing for File Sensor.hpp
    
        Error connect(const Serial_Base::PortName& portName, const BaudRate baudRate) noexcept;
    
+       Error connect(const Filesystem::FilePath& fileName) noexcept;
+   
        Error autoConnect(const Serial_Base::PortName& portName) noexcept;
    
        bool verifySensorConnectivity() noexcept;
+   
+       Error autoBaud() noexcept;
    
        std::optional<Serial_Base::PortName> connectedPortName() const noexcept { return _serial.connectedPortName(); };
    
@@ -72,6 +89,8 @@ Program Listing for File Sensor.hpp
            return connectedBaudRate ? std::make_optional(static_cast<BaudRate>(*connectedBaudRate)) : std::nullopt;
        };
    
+       // @brief Changes the baud rate on a specified serial port of the sensor. If the targeted port is the currently active one, it also updates the host's baud
+       // rate to match.  Will retry on failure
        Error changeBaudRate(const BaudRate newBaudRate,
                             Registers::System::BaudRate::SerialPort serialPort = Registers::System::BaudRate::SerialPort::ActiveSerial) noexcept;
    
@@ -132,25 +151,25 @@ Program Listing for File Sensor.hpp
        // ------------------------------------------
        // ------------------------------------------
    
-       void registerSkippedByteBuffer(ByteBuffer* const skippedByteBuffer) noexcept { _packetSynchronizer.registerSkippedByteBuffer(skippedByteBuffer); }
+       void registerReceivedByteBuffer(ByteBuffer* const receivedByteBuffer) noexcept;
    
-       void deregisterSkippedByteBuffer() noexcept { _packetSynchronizer.deregisterSkippedByteBuffer(); }
-   
-       void registerReceivedByteBuffer(ByteBuffer* const receivedByteBuffer) noexcept { _packetSynchronizer.registerReceivedByteBuffer(receivedByteBuffer); };
-   
-       void deregisterReceivedByteBuffer() noexcept { _packetSynchronizer.deregisterReceivedByteBuffer(); };
+       void deregisterReceivedByteBuffer() noexcept;
    
        using SyncByte = PacketDetails::SyncByte;
-       using FaSubscriberFilterType = FaPacketDispatcher::SubscriberFilterType;
-       using BinaryOutputMeasurements = Registers::System::BinaryOutputMeasurements;
        using AsciiSubscriberFilterType = AsciiPacketDispatcher::SubscriberFilterType;
+       using FaSubscriberFilterType = FaPacketDispatcher::SubscriberFilterType;
+       using Fb00SubscriberFilter = FbPacketDispatcher::SubscriberFilter;
+       using BinaryOutputMeasurements = Registers::System::BinaryOutputMeasurements;
    
-       Error subscribeToMessage(PacketQueue_Interface* queueToSubscribe,
-                                const BinaryOutputMeasurements& binaryOutputMeasurementFilter = BinaryOutputMeasurements{},
+       Error subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const SyncByte syncByte) noexcept;
+   
+       Error subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const BinaryOutputMeasurements& binaryOutputMeasurementFilter,
                                 const FaSubscriberFilterType filterType = FaSubscriberFilterType::ExactMatch) noexcept;
    
-       Error subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const AsciiHeader& asciiHeaderFilter = AsciiHeader{},
+       Error subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const AsciiHeader& asciiHeaderFilter,
                                 const AsciiSubscriberFilterType filterType = AsciiSubscriberFilterType::StartsWith) noexcept;
+   
+       Error subscribeToMessage(PacketQueue_Interface* queueToSubscribe, const Fb00SubscriberFilter fb00Filter) noexcept;
    
        void unsubscribeFromMessage(PacketQueue_Interface* queueToUnsubscribe, const SyncByte syncByte) noexcept;
    
@@ -164,7 +183,9 @@ Program Listing for File Sensor.hpp
    
        Error loadMainBufferFromSerial() noexcept;
    
-       bool processNextPacket() noexcept;
+       Error loadMainBufferFromFile() noexcept;
+   
+       Errored processNextPacket() noexcept;
    #endif
    
        friend class SensorTestHarness;
@@ -172,9 +193,11 @@ Program Listing for File Sensor.hpp
        // -------------------------------
        // -------------------------------
    
-       uint16_t asynchronousErrorQueueSize() const noexcept;
+       uint16_t asyncErrorQueueSize() const noexcept { return _asyncErrorQueue.size(); }
    
-       std::optional<AsyncError> getAsynchronousError() noexcept;
+       std::optional<AsyncError> getNextAsyncError() noexcept { return _asyncErrorQueue.get(); }
+   
+       void clearAsyncErrorQueue() noexcept { _asyncErrorQueue.reset(); }
    
    private:
        //-------------------------------
@@ -182,21 +205,32 @@ Program Listing for File Sensor.hpp
        //-------------------------------
        ByteBuffer _mainByteBuffer{Config::PacketFinders::mainBufferCapacity};
        Serial _serial{_mainByteBuffer};
+       InputFile _file{false};
+   
+       enum class ConnectionType
+       {
+           None,
+           Serial,
+           File
+       };
+       ConnectionType _connectionType = ConnectionType::None;
    
    #if (THREADING_ENABLE)
        std::atomic<bool> _listening = false;
        std::unique_ptr<Thread> _listeningThread = nullptr;
        void _listen() noexcept;
        Error loadMainBufferFromSerial() noexcept;
-       bool processNextPacket() noexcept;
+       Error loadMainBufferFromFile() noexcept;
+       Errored processNextPacket() noexcept;
        void _startListening() noexcept;
        void _stopListening() noexcept;
+       mutable Mutex _sensorMutex;
    #endif
    
        // -------------------------------
        // Measurement Operators
        // -------------------------------
-       MeasurementQueue _measurementQueue{Config::PacketDispatchers::compositeDataQueueCapacity};
+       MeasurementQueue _measurementQueue{MeasurementQueue::PutMode::Force, Config::PacketDispatchers::compositeDataQueueCapacity};
        Sensor::CompositeDataQueueReturn _blockOnMeasurement(Timer& timer, const Microseconds sleepLength) noexcept;
    
        //-------------------------------
@@ -208,12 +242,16 @@ Program Listing for File Sensor.hpp
        // -------------------------------
        // Packet Processing
        // -------------------------------
-       FaPacketDispatcher _faPacketDispatcher{&_measurementQueue, Config::PacketDispatchers::cdEnabledMeasTypes};
-       AsciiPacketDispatcher _asciiPacketDispatcher{&_measurementQueue, Config::PacketDispatchers::cdEnabledMeasTypes, &_commandProcessor};
+       MeasQueueMode _measQueueMode;
+       bool _parseToCD;
+       FaPacketDispatcher _faPacketDispatcher{&_measurementQueue, Config::PacketDispatchers::cdEnabledMeasTypes, _parseToCD};
+       AsciiPacketDispatcher _asciiPacketDispatcher{&_measurementQueue, Config::PacketDispatchers::cdEnabledMeasTypes, &_commandProcessor, _parseToCD};
        FbPacketDispatcher _fbPacketDispatcher{&_faPacketDispatcher, Config::PacketFinders::fbBufferCapacity};
    
        PacketSynchronizer _packetSynchronizer{_mainByteBuffer, [this](AsyncError&& error) { _asyncErrorQueue.put(std::move(error)); }};
    
+       ByteBuffer* _receivedByteBuffer = nullptr;
+       void _copyToReceivedByteBuffer(size_t mainBufferIndex) noexcept;
        // -------------------------------
        // Error handling
        // -------------------------------
@@ -222,13 +260,17 @@ Program Listing for File Sensor.hpp
    };
    
    template <size_t MainByteBufferCapacity, size_t FbBufferCapacity>
-   Sensor::Sensor(std::array<uint8_t, MainByteBufferCapacity>& mainBuffer, std::array<uint8_t, FbBufferCapacity>& fbBuffer)
-       : _mainByteBuffer(mainBuffer.data(), mainBuffer.size()), _fbPacketDispatcher(&_faPacketDispatcher, fbBuffer.data(), fbBuffer.size())
+   Sensor::Sensor(std::array<uint8_t, MainByteBufferCapacity>& mainBuffer, std::array<uint8_t, FbBufferCapacity>& fbBuffer, MeasQueueMode mode)
+       : _mainByteBuffer(mainBuffer.data(), mainBuffer.size()),
+         _measQueueMode{mode},
+         _parseToCD{mode != MeasQueueMode::Off},
+         _fbPacketDispatcher(&_faPacketDispatcher, fbBuffer.data(), fbBuffer.size())
    {
        // Set up packet synchronizer
        _packetSynchronizer.addDispatcher(&_faPacketDispatcher);
        _packetSynchronizer.addDispatcher(&_asciiPacketDispatcher);
        _packetSynchronizer.addDispatcher(&_fbPacketDispatcher);
+       if (_parseToCD) { _measurementQueue.setPutMode(static_cast<MeasurementQueue::PutMode>(_measQueueMode)); }
    }
    }  // namespace VN
    

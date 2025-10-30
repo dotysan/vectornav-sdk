@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # 
-# VectorNav SDK (v0.22.0)
+# VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,88 +21,121 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import sys, time, random
+import random
+import sys
+import time
 
-from vectornav import Sensor, Registers
-from vectornav import GenericCommand, KnownMagneticDisturbance
+from vectornav import GenericCommand, KnownMagneticDisturbance, Registers, Sensor
 
 
 def main(argv):
     """
     This example demonstrates how to send commands without blocking, validating each command was received correctly
-    with different types of commands. For more information on non-blocking commands, please refer to the 'Advanced Functionality' 
-    section of documentation/Documentation.html.
+    with different types of commands. For more information on non-blocking commands, please refer to the 'Advanced Functionality'
+    section of the documentation.
 
     This example will achieve the following:
-    1. Connect to the sensor
-    2. Configure the ADOR and ADOF to YPR at 100Hz
-    3. Send generic command (known magnetic disturbance)
-    4. Wait and check response
-    5. Enter a loop for 5 seconds where it outputs VNYPR at 100 Hz and sends velocity aiding commands at 10 Hz:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Configure the asynchronous ASCII output to YPR at 100 Hz
+    3. Send generic command (Known Magnetic Disturbance command)
+    4. Wait and check response from the unit
+    5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds:
         5.1. Check if a valid response has been received from the velocity aiding command
         5.2. Print response and send new command
-    6. Disconnect from the sensor'
+    6. Disconnect from the VectorNav unit'
     """
 
-    #### 1. AUTOCONNECT TO THE SENSOR
+    # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    portName = argv[0] if argv else "COM1"  # Change the sensor port name to the com port of your local machine
+    sensor = Sensor()
+    try:
+        sensor.autoConnect(portName)
+        if not sensor.verifySensorConnectivity():
+            raise RuntimeError("VerificationFailure")
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when connecting to {portName}.\n")
+        return
+    print(f"Connected to {portName} at {sensor.connectedBaudRate()}")
 
-    sensorPortName = argv[0] if argv else "COM14" # Change the sensor port name to the com port of your local machine
-    vs = Sensor()
-    vs.autoConnect(sensorPortName)
-    vs.verifySensorConnectivity()
-    print(f"Connected to {sensorPortName} at {vs.connectedBaudRate()}")
+    modelRegister = Registers.System.Model()
+    try:
+        sensor.readRegister(modelRegister)
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when reading register 1 (Model).\n")
+        return
+    print(f"Sensor Model Number: {modelRegister.model}")
 
-    #### 2. CONFIGURE ADOR (ASYNCHRONOUS DATA OUTPUT REGISTER) AND ADOF (ASYNCHRONOUS DATA OUTPUT FREQUENCY)
-    asyncDataOutputType = Registers.AsyncOutputType()
-    asyncDataOutputType.ador = asyncDataOutputType.Ador.YPR # Configure for Yaw, Pitch, Roll data.
+    # 2. Configure the asynchronous ASCII output to YPR at 100 Hz
+    asyncDataOutputType = Registers.System.AsyncOutputType()
+    asyncDataOutputType.ador = asyncDataOutputType.Ador.YPR  # Configure for Yaw, Pitch, Roll data
     asyncDataOutputType.serialPort = asyncDataOutputType.SerialPort.Serial1
-    vs.writeRegister(asyncDataOutputType)
-    print("ADOR configured")
+    try:
+        sensor.writeRegister(asyncDataOutputType)
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when writing register 6 (AsyncOutputType).\n")
+        return
+    print("ADOR Configured")
 
-    asyncDataOutputFreq= Registers.AsyncOutputFreq()
-    asyncDataOutputFreq.adof = Registers.AsyncOutputFreq.Adof.Rate100Hz
-    asyncDataOutputFreq.serialPort = Registers.AsyncOutputFreq.SerialPort.Serial1
-    vs.writeRegister(asyncDataOutputFreq)
+    asyncDataOutputFrequency = Registers.System.AsyncOutputFreq()
+    asyncDataOutputFrequency.adof = asyncDataOutputFrequency.Adof.Rate100Hz  # Set output rate to 100Hz
+    asyncDataOutputFrequency.serialPort = asyncDataOutputFrequency.SerialPort.Serial1
+    try:
+        sensor.writeRegister(asyncDataOutputFrequency)
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when writing register 7 (AsyncOutputFreq).\n")
+        return
     print("ADOF Configured")
 
-    #### 3. SEND KNOWN MAGNETIC DISTURBANCE COMMAND
+    # 3. Send generic command (Known Magnetic Disturbance command)
     kmd = KnownMagneticDisturbance(KnownMagneticDisturbance.State.Present)
-    vs.sendCommand(kmd, Sensor.SendCommandBlockMode.none) # Non-blocking
+    try:
+        sensor.sendCommand(kmd, Sensor.SendCommandBlockMode.none)  # Non-blocking
+    except Exception as latestError:
+        print(f"Error: {latestError} received while sending the Known Magnetic Disturbance Command.\n")
+        return
+    # 4. Wait and check response from the unit
+    time.sleep(0.25)
 
-    #### 4. WAIT AND CHECK RESPONSE
-    time.sleep(.25)
-
-    # We could check kmd.awaitingResponse() but it will be removed from the command queue (setting kmd.awaitingResponse to false) after commandRemovalTimeoutLength (default 200ms), if any command has been sent or received since.
+    # We could check kmd.awaitingResponse() but it will be removed from the command queue (setting kmd.awaitingResponse to false) after
+    # commandRemovalTimeoutLength (default 200ms), if any command has been sent or received since.
     if kmd.hasValidResponse():
-        print(f"\nKMD Response: {kmd.getResponse()}")
+        print(f"KMD Response: {kmd.getResponse()}")
         error_maybe = kmd.getError()
         if error_maybe is not None:
-            print(f"Error: {error_maybe}")
+            print(f"\tError: {error_maybe}")
+            return
     else:
-        print(f"Error: KMD did not receive a valid response.")
+        print("Error: KMD did not receive a valid response.")
 
-    #### 5. ENTER LOOP FOR 5 SECONDS TO PROCESS COMMANDS AND MEASUREMENTS
+    # 5. Output VNYPR at 100 Hz and send velocity aiding commands at 10 Hz for 5 seconds
 
     # Initialize velocity aiding register, command, counters, flags, and timers
-    velAidRegister = Registers.VelAidingMeas()
-    velAidWRGCommand = GenericCommand()
+    velAidRegister = Registers.VelocityAiding.VelAidingMeas()
+    velAidRegister.velocityX = 0.0
+    velAidRegister.velocityY = 0.0
+    velAidRegister.velocityZ = 0.0
+    velAidWRGCmdOpt = velAidRegister.toWriteCommand()
+    if velAidWRGCmdOpt is None:
+        print("Error: Failed to create velocity aiding command.")
+        return
+    else:
+        velAidWRGCommand = velAidWRGCmdOpt
 
-    velAidSentCount = 0
     asciiCount = 0
-    validResponseReceived  = False
+    velAidSentCount = 0
+    validResponseReceived = False
 
     start_time = time.time()
     resend_time = time.time()
 
     while time.time() - start_time < 5:
-        # Handle ASCII YPR measurement
-        compositeData = vs.getNextMeasurement(True)
+        compositeData = sensor.getNextMeasurement(True)
         if compositeData and compositeData.matchesMessage("VNYPR"):
             ypr = compositeData.attitude.ypr
             print(f"YPR: {ypr.yaw}, {ypr.pitch}, {ypr.roll}")
             asciiCount += 1
 
-        #### 5.1. CHECK FOR VALID RESPONSE
+        # 5.1. Check if a valid response has been received from the velocity aiding command
         if not validResponseReceived and not velAidWRGCommand.isAwaitingResponse():
             error_maybe = velAidWRGCommand.getError()
             if velAidWRGCommand.hasValidResponse():
@@ -110,28 +143,45 @@ def main(argv):
                 validResponseReceived = True
             elif error_maybe is not None:
                 print(f"Error: {error_maybe}")
+                return
 
-        #### 5.2. SEND COMMAND AND CHECK RESPONSE AT 2 HZ
+        # 5.2. Print response and send new command
         if (time.time() - resend_time) > 0.5:
             if not validResponseReceived and velAidSentCount > 0:
-                print(f"Error: Response Timeout")
-            
-            velAidRegister.velocityX = random.random() # random.random() to simulate different velocities
+                print("Error: Response Timeout")
+                return
+
+            velAidRegister.velocityX = random.random()  # random.random() to simulate different velocities
             velAidRegister.velocityY = random.random()
             velAidRegister.velocityZ = random.random()
-            velAidWRGCommand = velAidRegister.toWriteCommand()
-            vs.sendCommand(velAidWRGCommand, Sensor.SendCommandBlockMode.none) # Non-blocking
+            velAidWRGCmdOpt = velAidRegister.toWriteCommand()
+            if velAidWRGCmdOpt is None:
+                print("Error: Failed to create velocity aiding command.")
+                return
+            else:
+                velAidWRGCommand = velAidWRGCmdOpt
+            try:
+                sensor.sendCommand(velAidWRGCommand, Sensor.SendCommandBlockMode.none)  # Non-blocking
+            except Exception as latestError:
+                print(f"Error: {latestError} encountered when writing to register.\n")
 
             validResponseReceived = False
             velAidSentCount += 1
-            resend_time = time.time() # Restart send timer
+            resend_time = time.time()  # Restart send timer
+      
+        # Handle asynchronous errors
+        try:
+            sensor.throwIfAsyncError()
+        except Exception as asyncError:
+            print(f"Received async error: {asyncError}");
 
     print(f"\nTotal ASCII YPR Packets Received: {asciiCount}")
     print(f"Total Velocity Aiding Commands Sent: {velAidSentCount}")
-    print("\nnonBlockingCommands example complete")
+    print("\nNonBlockingCommands example complete")
 
-    #### 6. DISCONNECT THE SENSOR
-    vs.disconnect()
+    # 6. Disconnect from the VectorNav unit
+    sensor.disconnect()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main(sys.argv[1:])

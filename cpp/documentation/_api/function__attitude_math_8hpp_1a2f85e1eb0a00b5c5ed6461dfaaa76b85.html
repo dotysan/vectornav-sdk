@@ -83,7 +83,16 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN4Math7dcm2crpERK5Mat3f">
 <span id="_CPPv3N2VN4Math7dcm2crpERK5Mat3f"></span><span id="_CPPv2N2VN4Math7dcm2crpERK5Mat3f"></span><span id="VN::Math::dcm2crp__Mat3fCR"></span><span class="target" id="_attitude_math_8hpp_1a2f85e1eb0a00b5c5ed6461dfaaa76b85"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">optional</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="typedef__matrix_8hpp_1adf2ea782d6429f0b4c647e9f857bcabd.html#_CPPv4N2VN5Vec3fE" title="VN::Vec3f"><span class="n"><span class="pre">Vec3f</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Math</span></span><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">dcm2crp</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef__matrix_8hpp_1aa2f838cc9b2b1f812ceb48621838fb91.html#_CPPv4N2VN5Mat3fE" title="VN::Mat3f"><span class="n"><span class="pre">Mat3f</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">dcm</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N2VN4Math7dcm2crpERK5Mat3f" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Converts direction cosine matrix to classical Rodrigues parameters. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dcm</strong> – Direction cosine matrix. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Equivalent classical Rodrigues parameters. Returns nullopt if scalar component of equivalent quaternion is less than epsilon. </p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 </section>

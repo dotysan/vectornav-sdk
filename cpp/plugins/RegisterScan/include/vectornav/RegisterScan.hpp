@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,31 +38,53 @@ namespace RegisterScan
 
 constexpr uint16_t NUM_REG = 256;
 
-VN::Error _setConfigurationRegister(Sensor& sensor, const AsciiMessage& msg);
+Error _setConfigurationRegister(Sensor& sensor, const AsciiMessage& msg);
 
 template <typename T>
-VN::Error setConfigurationRegisters(Sensor& sensor, ConfigReader<T>& configReader)
+/**
+ * @brief Applies multiple configuration settings to a VectorNav unit from a configuration reader.
+ * @tparam T The specific type of configuration reader.
+ * @param sensor The sensor object to configure.
+ * @param configReader The configuration reader providing the settings.
+ * @return Error code indicating success or failure of the operation.
+ * @details Iteratively reads configuration messages from the configuration reader and applies each one
+ *          to the sensor until no more configurations are available. This method only applies the
+ *          configuration settings in the configuration reader such that any settings previously
+ *          configured on the unit will persist.
+ */
+Error setConfigurationRegisters(Sensor& sensor, ConfigReader<T>& configReader)
 {
     AsciiMessage msg;
-    VN::Error err{VN::Error::None};
+    Error err{Error::None};
     bool readFlag = false;
-    while (configReader.getNextConfig(msg) == VN::Error::None)
+    while (configReader.getNextConfig(msg) == Error::None)
     {
         readFlag = true;
-        VN::Error err = _setConfigurationRegister(sensor, msg);
-        if (err != VN::Error::None) { return err; };
+        Error err = _setConfigurationRegister(sensor, msg);
+        if (err != Error::None) { return err; };
     }
-    if (readFlag == false) { err = VN::Error::FileReadFailed; }
+    if (readFlag == false) { err = Error::FileReadFailed; }
     return err;
 }
 
 template <typename T>
-VN::Error loadConfiguration(Sensor& sensor, ConfigReader<T>& configReader)
+/**
+ * @brief Loads a complete configuration onto a VectorNav sensor from a configuration reader.
+ * @tparam T The specific type of configuration reader.
+ * @param sensor The sensor object to configure.
+ * @param configReader The configuration reader providing the settings.
+ * @return Error code indicating success or failure of the operation.
+ * @details Restores factory settings first, then applies all configurations from the configuration
+ *          reader, and finally saves the settings and resets the device. If performing a restore
+ *          factory settings is not desired, the RegisterScan::setConfigurationRegisters()
+ *          method should instead be used to load the user-defined settings onto the unit.
+ */
+Error loadConfiguration(Sensor& sensor, ConfigReader<T>& configReader)
 {
-    VN::Error error = sensor.restoreFactorySettings();
-    if (error != VN::Error::None) { return error; }
-    VN::Error err = setConfigurationRegisters(sensor, configReader);
-    if (err != VN::Error::None) return err;
+    Error error = sensor.restoreFactorySettings();
+    if (error != Error::None) { return error; }
+    Error err = setConfigurationRegisters(sensor, configReader);
+    if (err != Error::None) return err;
 
     error = sensor.writeSettings();
     if (error != Error::None) { return error; }
@@ -72,8 +94,17 @@ VN::Error loadConfiguration(Sensor& sensor, ConfigReader<T>& configReader)
     return error;
 }
 
+/**
+ * @struct SaveConfigurationFilter
+ * @brief Defines which registers to include or exclude when saving a sensor configuration.
+ * @details Contains a filter type (Include or Exclude) and a list of register IDs to filter.
+ */
 struct SaveConfigurationFilter
 {
+    /**
+     * @enum Type
+     * @brief Determines whether the list specifies registers to include or exclude.
+     */
     enum class Type
     {
         Include,
@@ -83,12 +114,12 @@ struct SaveConfigurationFilter
 };
 
 template <typename T>
-VN::Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWriter, uint8_t regId)
+Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWriter, uint8_t regId)
 {
-    std::cout << "Polling register " << std::to_string(regId) << "...\n";
+    VN_DEBUG_0("Polling register " << std::to_string(regId) << "...\n");
     AsciiMessage msg;
     GenericCommand cmd;
-    Error err{VN::Error::None};
+    Error err{Error::None};
 
     if (!((regId == 5) || (regId == 6) || (regId == 7) || (regId == 99)))
     {
@@ -98,14 +129,14 @@ VN::Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWrit
         std::snprintf(msg.data(), msg.capacity(), "RRG,%d", regId);
         cmd = GenericCommand(msg);
         err = sensor.sendCommand(&cmd, Sensor::SendCommandBlockMode::BlockWithRetry);
-        if (err == Error::InvalidRegister || err == Error::UnauthorizedAccess || err == Error::NotEnoughParameters) { return VN::Error::None; }
+        if (err == Error::InvalidRegister || err == Error::UnauthorizedAccess || err == Error::NotEnoughParameters) { return Error::None; }
         else if (err != Error::None) { return err; }
 
         AsciiMessage tmp = cmd.getResponse();
         const auto start = tmp.find(',');
         const auto end = tmp.find('*');
 
-        if (tmp.find(',', start + 1) == AsciiMessage::npos) { return VN::Error::None; }  // catches responses with no arguments
+        if (tmp.find(',', start + 1) == AsciiMessage::npos) { return Error::None; }  // catches responses with no arguments
 
         std::snprintf(tmp.data(), tmp.capacity(), "WRG%.*s", int(end - start), &tmp[start]);
         auto wrg = GenericCommand(tmp);
@@ -114,12 +145,12 @@ VN::Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWrit
         if (err == Error::InvalidRegister || err == Error::UnauthorizedAccess)
         {
             // Read-only reg. (Some registers incorrectly report InvalidRegister, i.e. VN-100 WRG 101)
-            err = VN::Error::None;
+            err = Error::None;
             return err;
         }
         else if (err != Error::None) { return err; }
         err = configWriter.writeConfig(cmd.getResponse());
-        if (err != VN::Error::None) { return err; }
+        if (err != Error::None) { return err; }
     }
     else  // (regId == 5) || (regId == 6) || (regId == 7) || (regId == 99))
     {
@@ -138,11 +169,11 @@ VN::Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWrit
         if (err == Error::None)
         {
             err = configWriter.writeConfig(cmd.getResponse());
-            if (err != VN::Error::None) { return err; }
+            if (err != Error::None) { return err; }
         }
         else if (err == Error::InvalidRegister)  // Unsupported reg
         {
-            err = VN::Error::None;
+            err = Error::None;
             return err;
         }
         else if (err == Error::TooManyParameters)
@@ -162,11 +193,11 @@ VN::Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWrit
             if (err == Error::None)
             {
                 err = configWriter.writeConfig(cmd.getResponse());
-                if (err != VN::Error::None) { return err; }
+                if (err != Error::None) { return err; }
             }
             else if (err == Error::InvalidParameter)
             {
-                err = VN::Error::None;
+                err = Error::None;
                 return err;
             }
             else { return err; }
@@ -176,6 +207,10 @@ VN::Error _saveConfigurationRegister(Sensor& sensor, ConfigWriter<T>& configWrit
     return err;
 }
 
+/**
+ * @brief Gets the default list of configuration registers for VectorNav devices.
+ * @return Vector<uint8_t, NUM_REG> A vector containing IDs of all known configuration registers.
+ */
 constexpr Vector<uint8_t, NUM_REG> getDefaultConfigRegisters()
 {
     Vector<uint8_t, NUM_REG> retVal;
@@ -187,10 +222,21 @@ constexpr Vector<uint8_t, NUM_REG> getDefaultConfigRegisters()
 }
 
 template <typename T>
-VN::Error saveConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter,
-                            SaveConfigurationFilter filter = SaveConfigurationFilter{SaveConfigurationFilter::Type::Include, getDefaultConfigRegisters()})
+/**
+ * @brief Saves the current configuration of a VectorNav sensor using the provided configuration writer.
+ * @tparam T The specific type of configuration writer.
+ * @param sensor The sensor object to read from.
+ * @param configWriter The configuration writer that handles the actual storage of configurations.
+ * @param filter Optional filter specifying which registers to include or exclude.
+ * @return Error code indicating success or failure of the operation.
+ * @details Temporarily disables asynchronous output, reads each specified register,
+ *          and passes its configuration to the provided writer. The writer determines how and where
+ *          the configuration is actually stored.
+ */
+Error saveConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter,
+                        SaveConfigurationFilter filter = SaveConfigurationFilter{SaveConfigurationFilter::Type::Include, getDefaultConfigRegisters()})
 {
-    VN::Error error{VN::Error::None};
+    Error error{Error::None};
     Vector<uint8_t, NUM_REG> reg_to_poll;
     if (filter.type == SaveConfigurationFilter::Type::Include) { reg_to_poll = filter.list; }
     else
@@ -199,11 +245,7 @@ VN::Error saveConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter,
         {
             if (std::find(filter.list.begin(), filter.list.end(), i) == filter.list.end())
             {
-                if (reg_to_poll.push_back(i))
-                {
-                    std::cerr << "Filter vector overload.\n";
-                    VN_ABORT();
-                }
+                if (reg_to_poll.push_back(i)) { return Error::BufferFull; }
             }
         }
     }
@@ -214,7 +256,7 @@ VN::Error saveConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter,
     for (uint8_t regId : reg_to_poll)
     {
         error = _saveConfigurationRegister(sensor, configWriter, regId);
-        if (error != VN::Error::None) { return error; }
+        if (error != Error::None) { return error; }
     }
 
     configWriter.close();
@@ -225,12 +267,24 @@ VN::Error saveConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter,
 }
 
 template <typename T>
-VN::Error saveNonDefaultConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter)
+/**
+ * @brief Saves only the non-default configuration settings of a VectorNav sensor.
+ * @tparam T The specific type of configuration writer.
+ * @param sensor The sensor object to read from.
+ * @param configWriter The configuration writer that handles the actual storage of configurations.
+ * @return Error code indicating success or failure of the operation.
+ * @details Saves the current configuration, restores factory defaults, then compares
+ *          the two configurations to identify and save only the settings that differ
+ *          from factory defaults. If performing a Restore Factory Settings command is
+ *          not desired, the RegisterScan::saveConfiguration() method should instead be
+ *          used to save the current configuration of a VectorNav unit.
+ */
+Error saveNonDefaultConfiguration(Sensor& sensor, ConfigWriter<T>& configWriter)
 {
     const Filesystem::FilePath tmpFileName = "UserSettings.tmp.txt";
     AsciiConfigWriter tmpWriter(tmpFileName);
-    std::cout << "Collecting user settings...\n";
-    VN::Error error = saveConfiguration(sensor, tmpWriter);
+    VN_DEBUG_0("Collecting user settings...\n");
+    Error error = saveConfiguration(sensor, tmpWriter);
     if (error != Error::None) { return error; }
     error = sensor.restoreFactorySettings();
     if (error != Error::None) { return error; }
@@ -239,8 +293,8 @@ VN::Error saveNonDefaultConfiguration(Sensor& sensor, ConfigWriter<T>& configWri
     GenericConfigWriter writeNonDefault{[&tmpReader, &sensor, &configWriter](const AsciiMessage& defaultMsg)
                                         {
                                             AsciiMessage userMsg;
-                                            VN::Error err = tmpReader.next(userMsg);
-                                            if (err != VN::Error::None) { return err; }
+                                            Error err = tmpReader.next(userMsg);
+                                            if (err != Error::None) { return err; }
                                             // Only compare until the asterisk (crc might be different formats, and line endings change when reading from file
                                             // due to getLine)
                                             const auto userAsteriskPos = std::find(userMsg.begin(), userMsg.end(), '*');
@@ -250,7 +304,7 @@ VN::Error saveNonDefaultConfiguration(Sensor& sensor, ConfigWriter<T>& configWri
                                             if (userLength != defaultLength || !std::equal(userMsg.begin(), userAsteriskPos, defaultMsg.begin()))
                                             {
                                                 err = _setConfigurationRegister(sensor, userMsg);
-                                                if (err != VN::Error::None) { return err; }
+                                                if (err != Error::None) { return err; }
                                                 err = configWriter.writeConfig(userMsg);
                                                 return err;
                                             }
@@ -258,11 +312,11 @@ VN::Error saveNonDefaultConfiguration(Sensor& sensor, ConfigWriter<T>& configWri
                                         },
                                         [&configWriter]() { configWriter.close(); }};
 
-    std::cout << "Collecting default settings and writing diffs...\n";
+    VN_DEBUG_0("Collecting default settings and writing diffs...\n");
     error = saveConfiguration(sensor, writeNonDefault);
-    if (error != VN::Error::None) { return error; }
+    if (error != Error::None) { return error; }
 
-    std::cout << "Issuing Write Settings and Reset...\n";
+    VN_DEBUG_0("Issuing Write Settings and Reset...\n");
     error = sensor.writeSettings();
     if (error != Error::None) { return error; }
     error = sensor.reset();

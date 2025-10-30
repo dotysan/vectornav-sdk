@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # 
-# VectorNav SDK (v0.22.0)
+# VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,93 +22,114 @@
 # THE SOFTWARE.
 
 import sys
+
 import vectornav
 from vectornav import Sensor
-from vectornav.Plugins import FirmwareUpdater
+from vectornav.Plugins import FirmwareProgrammer
 
-usage = "[--PortName={port_name}] [--{Processor}={file_path}... | --VnXml={file_path}] [--firmwareBaudRate={baudRate}] [--bootloaderBaudRate={baudRate}]";
+usage = "[--PortName={port_name}] [--{Processor}={file_path}... | --VnXml={file_path}] [--firmwareBaudRate={baudRate}] [--bootloaderBaudRate={baudRate}]"
+
 
 class FirmwareUpdateArgs:
     portName: str
     filePaths: str
-    params: FirmwareUpdater.Params = FirmwareUpdater.Params()
+    params: FirmwareProgrammer.FirmwareUpdater.Params = FirmwareProgrammer.FirmwareUpdater.Params()
+
 
 def getIndexOfArg(needle, haystack):
     for i, arg in enumerate(haystack):
         if needle in arg:
-            return i+1
+            return i + 1
     return 0
 
+
 def main(argv):
+    """
+    This firmware update example walks through the Python usage of the SDK to connect to and update the firmware on a VectorNav unit.
+
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Create a FirmwareUpdater object
+    3. Update the firmware based on the file type
+    4. Disconnect from the VectorNav unit
+    """
 
     # Parse command line arguments
     fwArgs = FirmwareUpdateArgs()
 
-    # Get Port name
-    if (idx := getIndexOfArg('--PortName=', argv)):
-        fwArgs.portName = argv[idx-1].split('=')[-1]
+    # Define the port connection parameters to be used later
+    if idx := getIndexOfArg("--PortName=", argv):
+        fwArgs.portName = argv[idx - 1].split("=")[-1]
     else:
         print(f"PortName Required: \n usage -> {usage}")
         return
-    
-    # Get path to vnXml file if using .vnXml to update firmware
-    if (idx := getIndexOfArg("--vnXml=", argv)):
-        fwArgs.filePaths = argv[idx-1].split('=')[-1]
-    else:
 
+    # Get path to vnXml file if using .vnXml to update firmware
+    if idx := getIndexOfArg("--vnXml=", argv):
+        fwArgs.filePaths = argv[idx - 1].split("=")[-1]
+    else:
         fwArgs.filePaths = vectornav.FilePaths()
 
     # Parse list of processors and paths to .vnx files to update different processors
-    if (idx := getIndexOfArg('--Nav=', argv)):
+    if idx := getIndexOfArg("--Nav=", argv):
         fwArgs.filePaths.push_back(
-            FirmwareUpdater.File(
-                argv[idx-1].split('=')[-1],
-                FirmwareUpdater.Processor.Nav
+            FirmwareProgrammer.FirmwareUpdater.File(
+                argv[idx - 1].split("=")[-1], FirmwareProgrammer.FirmwareUpdater.Processor.Nav
             )
         )
-    if (idx := getIndexOfArg('--Gnss=', argv)):
+    if idx := getIndexOfArg("--Gnss=", argv):
         fwArgs.filePaths.push_back(
-            FirmwareUpdater.File(
-                argv[idx-1].split('=')[-1],
-                FirmwareUpdater.Processor.Gnss
+            FirmwareProgrammer.FirmwareUpdater.File(
+                argv[idx - 1].split("=")[-1], FirmwareProgrammer.FirmwareUpdater.Processor.Gnss
             )
         )
-        
-    if (idx := getIndexOfArg('--Imu=', argv)):
+
+    if idx := getIndexOfArg("--Imu=", argv):
         fwArgs.filePaths.push_back(
-            FirmwareUpdater.File(
-                argv[idx-1].split('=')[-1],
-                FirmwareUpdater.Processor.Gnss
+            FirmwareProgrammer.FirmwareUpdater.File(
+                argv[idx - 1].split("=")[-1], FirmwareProgrammer.FirmwareUpdater.Processor.Imu
             )
         )
 
     # Parse optional arguments for firmware and bootloader baud rates
-    if (idx := getIndexOfArg('--firmwareBaudRate=', argv)):
-        fwArgs.params.firmwareBaudRate = int(argv[idx-1].split('=')[-1])
-        
-    if (idx := getIndexOfArg('--bootloaderBaudRate=', argv)):
-        fwArgs.params.bootloaderBaudRate = int(argv[idx-1].split('=')[-1])
+    if idx := getIndexOfArg("--firmwareBaudRate=", argv):
+        fwArgs.params.firmwareBaudRate = int(argv[idx - 1].split("=")[-1])
 
-    print(f"{fwArgs.params.bootloaderBaudRate},{fwArgs.params.firmwareBaudRate}")
+    if idx := getIndexOfArg("--bootloaderBaudRate=", argv):
+        fwArgs.params.bootloaderBaudRate = int(argv[idx - 1].split("=")[-1])
 
-    # Connect to sensor
+    # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit.
+    #  We are not autoconnecting or verifying connectivity because we cannot assume the sensor has a valid firmware
     sensor = Sensor()
-    sensor.autoConnect(fwArgs.portName)
-    print(f"Connected to {fwArgs.portName} at {sensor.connectedBaudRate()}")
+    try:
+        sensor.connect(fwArgs.portName, fwArgs.params.firmwareBaudRate)
+    except Exception as latestError:
+        print(f"Error: {latestError} encountered when connecting to {fwArgs.portName}.\n")
+        return
+    print(f"Connected to {sensor.connectedPortName()} at {sensor.connectedBaudRate()}")
 
-    # Initialize firmware updater object
-    firmwareUpdater = FirmwareUpdater()
+    # 2. Create a FirmwareUpdater object
+    firmwareUpdater = FirmwareProgrammer.FirmwareUpdater()
 
-    # Update firmware
-    fwUpdateFailure = firmwareUpdater.updateFirmware(sensor, fwArgs.filePaths, fwArgs.params)
+    # 3. Update firmware based on the file type - There are two file types that can be used to update the firmware: VNX or VNXML
+    try:
+        firmwareUpdater.updateFirmware(sensor, fwArgs.filePaths, fwArgs.params)
+    except Exception as firmwareUpdateError:
+        print(f"Error: {firmwareUpdateError} firmware update failed.")
+        return
 
-    # Disconnect and check for failure
+    # Handle asynchronous errors that occurred during firmware upgrade
+    while True:
+        try:
+            sensor.throwIfAsyncError()
+            break
+        except Exception as asyncError:
+            print(f"Received async error: {asyncError}")
+
+    # 4. Disconnect from the VectorNav unit
     sensor.disconnect()
-    if fwUpdateFailure:
-        raise Exception("Failed to update the firmware")
-    
     print("FirmwareUpdate example complete")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1:])

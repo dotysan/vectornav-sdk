@@ -9,11 +9,9 @@ Class Mutex_Base
 Inheritance Relationships
 -------------------------
 
-Derived Types
-*************
+Derived Type
+************
 
-- ``public VN::Mutex`` (:ref:`exhale_class_class_v_n_1_1_mutex`)
-- ``public VN::Mutex`` (:ref:`exhale_class_class_v_n_1_1_mutex`)
 - ``public VN::Mutex`` (:ref:`exhale_class_class_v_n_1_1_mutex`)
 
 

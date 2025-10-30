@@ -14,13 +14,16 @@ Program Listing for File CLI_Sensor.hpp
    #define VN_CLI_SENSOR_HPP_
    
    #include "vectornav/CLI_ByteBuffer.hpp"
+   #include "vectornav/CLI_Commands.hpp"
    #include "vectornav/CLI_CompositeData.hpp"
+   #include "vectornav/CLI_Exceptions.hpp"
    #include "vectornav/CLI_GenericCommand.hpp"
    #include "vectornav/CLI_Registers.hpp"
    #include "vectornav/CLI_SteadyClock.hpp"
+   #include "vectornav/CLI_QueueDefinitions.hpp"
    
    #pragma managed(push, off)
-   #include "vectornav/TemplateLibrary/ByteBuffer.hpp"
+   #include "vectornav/Interface/BridgeSensor.hpp"
    #include "vectornav/Interface/Sensor.hpp"
    #pragma managed(pop)
    
@@ -30,7 +33,10 @@ Program Listing for File CLI_Sensor.hpp
    {
    
    #if (PLUGIN_DATAEXPORT)
+   namespace DataExport
+   {
       class Exporter;
+   }
    #endif
    #if (PLUGIN_CALIBRATION)
    namespace Calibration
@@ -38,14 +44,6 @@ Program Listing for File CLI_Sensor.hpp
       class HsiCalibration_Base;
    }  // namespace Calibration
    #endif
-   
-    class VnException : public Exception
-   {
-   public:
-       VnException(VN::Error error) : Exception(gcnew String(VN::errorCodeToString(error)))
-       {
-       }
-   };
    
     struct AsyncError
    {
@@ -56,26 +54,139 @@ Program Listing for File CLI_Sensor.hpp
        System::DateTime Timestamp;
    };
    
+   
+   public enum class MeasQueueMode
+   {
+       Off = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Off),
+       Force = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Force),
+       Try = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Try),
+   #if THREADING_ENABLE
+       Retry = static_cast<int>(VN::BridgeSensor::MeasQueueMode::Retry)
+   #endif
+   };  
+   
+   inline VN::BridgeSensor::MeasQueueMode ToNativeInstance(MeasQueueMode mode)
+   {
+       return static_cast<VN::BridgeSensor::MeasQueueMode>(static_cast<int>(mode));
+   }
+   
+   inline MeasQueueMode ToManagedInstance(VN::BridgeSensor::MeasQueueMode mode)
+   {
+       return static_cast<MeasQueueMode>(static_cast<int>(mode));
+   }
+   
+    class BinaryOutputMeasurements
+   {
+       private:
+           VN::BridgeSensor::BinaryOutputMeasurements* _output_measurements;
+   
+       public:
+           BinaryOutputMeasurements()
+           {
+               _output_measurements = new VN::BridgeSensor::BinaryOutputMeasurements{};
+           }
+   
+           ~BinaryOutputMeasurements()
+           {
+               this->!BinaryOutputMeasurements();
+           }
+   
+           !BinaryOutputMeasurements()
+           {
+               delete _output_measurements;
+               _output_measurements = nullptr;
+           }
+   
+           VN::BridgeSensor::BinaryOutputMeasurements& ToNativePointer()
+           {
+               return *_output_measurements;
+           }
+   };
+   
+   public enum class FaSubscriberFilterType
+   {
+       ExactMatch = static_cast<int>(VN::BridgeSensor::FaSubscriberFilterType::ExactMatch),
+       AnyMatch = static_cast<int>(VN::BridgeSensor::FaSubscriberFilterType::AnyMatch),
+       NotExactMatch = static_cast<int>(VN::BridgeSensor::FaSubscriberFilterType::NotExactMatch),
+   };
+   
+   inline VN::BridgeSensor::FaSubscriberFilterType ToNativeInstance(FaSubscriberFilterType filterType)
+   {
+       return static_cast<VN::BridgeSensor::FaSubscriberFilterType>(static_cast<int>(filterType));
+   }
+   
+   inline FaSubscriberFilterType ToManagedInstance(VN::BridgeSensor::FaSubscriberFilterType filterType)
+   {
+       return static_cast<FaSubscriberFilterType>(static_cast<int>(filterType));
+   }
+   
+   
+   public enum class AsciiSubscriberFilterType
+   {
+       StartsWith = static_cast<int>(VN::BridgeSensor::AsciiSubscriberFilterType::StartsWith),
+       DoesNotStartWith = static_cast<int>(VN::BridgeSensor::AsciiSubscriberFilterType::DoesNotStartWith)
+   };
+   
+   inline VN::BridgeSensor::AsciiSubscriberFilterType ToNativeInstance(AsciiSubscriberFilterType filterType)
+   {
+       return static_cast<VN::BridgeSensor::AsciiSubscriberFilterType>(static_cast<int>(filterType));
+   }
+   
+   inline AsciiSubscriberFilterType ToManagedInstance(VN::BridgeSensor::AsciiSubscriberFilterType filterType)
+   {
+       return static_cast<AsciiSubscriberFilterType>(static_cast<int>(filterType));
+   }
+   
+   public enum class SyncByte
+   {
+       Ascii = static_cast<int>(VN::BridgeSensor::SyncByte::Ascii),
+       FA = static_cast<int>(VN::BridgeSensor::SyncByte::FA),
+       FB = static_cast<int>(VN::BridgeSensor::SyncByte::FB),
+       None = static_cast<int>(VN::BridgeSensor::SyncByte::None),
+   };
+   
+   inline VN::BridgeSensor::SyncByte ToNativeInstance(SyncByte filterType)
+   {
+       return static_cast<VN::BridgeSensor::SyncByte>(static_cast<int>(filterType));
+   }
+   
+   inline SyncByte ToManagedInstance(VN::BridgeSensor::SyncByte filterType)
+   {
+       return static_cast<SyncByte>(static_cast<int>(filterType));
+   }
+   
     class Sensor
    {
    private:
-       VN::Sensor * _sensor;
+       VN::BridgeSensor * _sensor;
        SteadyClock _clock{};
+   
    
    public:
        using BaudRate = Registers::System::BaudRate::BaudRates;
        Sensor()
        {
-           _sensor = new VN::Sensor();
+           _sensor = new VN::BridgeSensor();
+       }
+   
+       Sensor(MeasQueueMode mode)
+       {
+           VN::BridgeSensor::MeasQueueMode native_mode = ToNativeInstance(mode);
+           _sensor = new VN::BridgeSensor(native_mode);
        }
        
        ~Sensor()
+       {
+           this->!Sensor();
+       }
+   
+       !Sensor()
        {
            delete _sensor;
        }
    
    
-       VN::Sensor &GetNativeInstance()
+       VN::BridgeSensor &GetNativeInstance()
        {
            return *_sensor;
        };
@@ -83,9 +194,20 @@ Program Listing for File CLI_Sensor.hpp
        // ------------------------------------------ //@{
        // ------------------------------------------
    
+       void Connect(String * portName, BaudRate baudRate);
+   
        void Connect(String * portName, UInt32 baudRate);
    
+       void Connect(String * portName, UInt32 baudRate, bool monitorAsyncErrors);
+   
+       void Connect(String * portName, BaudRate baudRate, bool monitorAsyncErrors);
+   
+       void Connect(String* fileName);
+   
        void AutoConnect(String * portName);
+   
+       void AutoConnect(String * portName, bool moniforAsyncErrors);
+   
    
        bool VerifySensorConnectivity();
    
@@ -93,8 +215,16 @@ Program Listing for File CLI_Sensor.hpp
    
        uint32_t ConnectedBaudRate();
    
+       void ChangeBaudRate(BaudRate baudRate);
+   
        void ChangeBaudRate(UInt32 baudRate);
    
+       void ChangeBaudRate(BaudRate baudRate, Registers::System::BaudRate::SerialPort serialPort);
+       
+       void ChangeBaudRate(UInt32 baudRate, System::Byte serialPort);
+   
+       void ChangeHostBaudRate(BaudRate baudRate);
+       
        void ChangeHostBaudRate(UInt32 baudRate);
    
        void Disconnect();
@@ -110,17 +240,18 @@ Program Listing for File CLI_Sensor.hpp
    
        enum class SendCommandBlockMode
        {
-           None = (int)VN::Sensor::SendCommandBlockMode::None,            
-           Block = (int)VN::Sensor::SendCommandBlockMode::Block,           
-           BlockWithRetry = (int)VN::Sensor::SendCommandBlockMode::BlockWithRetry,  
+           None = (int)VN::BridgeSensor::SendCommandBlockMode::None,            
+           Block = (int)VN::BridgeSensor::SendCommandBlockMode::Block,           
+           BlockWithRetry = (int)VN::BridgeSensor::SendCommandBlockMode::BlockWithRetry,  
        };
    
        // ------------------------------------------ //@{
        // ------------------------------------------
    
-       void ReadRegister(Registers::Register * reg);
+       void ReadRegister(Registers::ConfigRegister * reg);
+       void ReadRegister(Registers::MeasRegister * reg);
    
-       void WriteRegister(Registers::Register * reg);
+       void WriteRegister(Registers::ConfigRegister * reg);
    
        void WriteSettings();
    
@@ -128,13 +259,19 @@ Program Listing for File CLI_Sensor.hpp
    
        void RestoreFactorySettings();
    
+       void KnownMagneticDisturbance(KnownMagneticDisturbance::State state);
+   
        void KnownMagneticDisturbance(uint8_t state);
+   
+       void KnownAccelerationDisturbance(KnownAccelerationDisturbance::State state);
    
        void KnownAccelerationDisturbance(uint8_t state);
    
        void SetInitialHeading(float heading);
        void SetInitialHeading(Ypr ypr);
        void SetInitialHeading(Quaternion quat);
+   
+       void Sensor::AsyncOutputEnable(AsyncOutputEnable::State state);
    
        void AsyncOutputEnable(uint8_t state);
    
@@ -152,27 +289,36 @@ Program Listing for File CLI_Sensor.hpp
        // Error Handling
        // ------------------------------------------
    
-       Nullable<AsyncError> Sensor::GetAsynchronousError();
+       void ThrowIfAsyncError();
    
-       System::DateTime Sensor::Now();
+       System::DateTime Now();
    
        // -----------------------------------------
        // Additional logging
        // ------------------------------------------
+       void SubscribeToMessage(ManagedQueuePointer* queueToSubscribe, BinaryOutputMeasurements* binaryOutputMeasurementFilter);
+   
+       void SubscribeToMessage(ManagedQueuePointer* queueToSubscribe, BinaryOutputMeasurements* binaryOutputMeasurementFilter, FaSubscriberFilterType filterType);
+   
+       void UnsubscribeFromMessage(ManagedQueuePointer* queueToUnsubscribe, BinaryOutputMeasurements* binaryOutputMeasurementFilter);
+   
+       void SubscribeToMessage(ManagedQueuePointer* queueToSubscribe, System::String* asciiHeaderFilter);
+   
+       void SubscribeToMessage(ManagedQueuePointer* queueToSubscribe, System::String* asciiHeaderFilter, AsciiSubscriberFilterType filterType);
+   
+       void UnsubscribeFromMessage(ManagedQueuePointer* queueToUnsubscribe, System::String* asciiHeaderFilter);
+   
+       void SubscribeToMessage(ManagedQueuePointer* queueToSubscribe, SyncByte syncByte);
+   
+       void UnsubscribeFromMessage(ManagedQueuePointer* queueToUnsubscribe, SyncByte syncByte);
    
        void RegisterReceivedByteBuffer(ByteBuffer* buffer);
+   
        void DeregisterReceivedByteBuffer();
-       void RegisterSkippedByteBuffer(ByteBuffer* buffer);
-       void DeregisterSkippedByteBuffer();
    
    #if (PLUGIN_DATAEXPORT)
-       void RegisterDataExporter(Exporter* exporter);
-       void DeregisterDataExporter(Exporter* exporter);
-   #endif
-   
-   #if (PLUGIN_CALIBRATION)
-       void RegisterHsiCalibration(Calibration::HsiCalibration_Base* hsi);
-       void DeregisterHsiCalibration(Calibration::HsiCalibration_Base* hsi);
+       void RegisterDataExporter(DataExport::Exporter* exporter);
+       void DeregisterDataExporter(DataExport::Exporter * exporter);
    #endif
        // ------------------------------------------
        // Unthreaded Packet Processing

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -71,7 +71,7 @@ AsciiMessage GenericCommand::getCommandString() noexcept
 std::optional<uint16_t> GenericCommand::_getErrorValue(const AsciiMessage& errIn) noexcept
 {
     const uint8_t commaIdx = 6;  //$VNERR,
-    if ((errIn.length() < 8) || errIn.at(commaIdx) != ',') { return false; }
+    if ((errIn.length() < 8) || errIn[commaIdx] != ',') { return false; }
 
     const size_t astereskIndex = errIn.find('*', commaIdx);
     if (astereskIndex == AsciiMessage::npos) { return false; }
@@ -89,7 +89,7 @@ bool GenericCommand::isMatchingError(const AsciiMessage& errIn) noexcept
     return VnErr_Synchronous::is_value(static_cast<Error>(errorValue.value()));
 }
 
-bool GenericCommand::matchResponse(const AsciiMessage& responseToCheck, const time_point timestamp) noexcept
+bool GenericCommand::isMatchingResponse(const AsciiMessage& responseToCheck, const time_point timestamp) noexcept
 {
     LockGuard lock(_mutex);
     _awaitingResponse = false;

@@ -3,16 +3,15 @@
 Class Timer
 ===========
 
-- Defined in :ref:`file_include_vectornav_HAL_Timer_Mbed.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_Timer_PC.hpp`
 
 
 Inheritance Relationships
 -------------------------
 
-Base Types
-**********
+Base Type
+*********
 
-- ``private VN::Timer_Base`` (:ref:`exhale_class_class_v_n_1_1_timer___base`)
 - ``private VN::Timer_Base`` (:ref:`exhale_class_class_v_n_1_1_timer___base`)
 
 

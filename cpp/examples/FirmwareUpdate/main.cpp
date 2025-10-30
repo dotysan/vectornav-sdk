@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,7 +36,7 @@ std::string usage =
 struct ParsedArgs
 {
     std::optional<Serial_Base::PortName> portName;
-    std::optional<std::variant<FirmwareUpdater::FilePaths, Filesystem::FilePath>> filePaths;
+    std::optional<std::variant<FirmwareProgrammer::FirmwareUpdater::FilePaths, Filesystem::FilePath>> filePaths;
     std::optional<Sensor::BaudRate> firmwareBaudRate;
     std::optional<Sensor::BaudRate> bootloaderBaudRate;
 };
@@ -45,55 +45,60 @@ std::optional<ParsedArgs> parseArgs(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
-    // This firmware update example will walk you throgh the C++ usage of the SDK to connect to and update the firmware on a VectorNav sensor.
+    /*
+    This firmware update example walks through the C++ usage of the SDK to connect to and update the firmware on a VectorNav unit.
 
-    // This example will achieve the following:
-    // 1. Connect to the sensor
-    // 2. Create a firmwareUpdater object
-    // 3. Update the firmware based on the file type
-    // 4. Disconnect from the sensor
+    This example will achieve the following:
+    1. Instantiate a Sensor object and use it to connect to the VectorNav unit
+    2. Create a FirmwareUpdater object
+    3. Update the firmware based on the file type
+    4. Disconnect from the VectorNav unit
+    */
 
     // Parse command line arguments
     std::optional<ParsedArgs> parsedArgs = parseArgs(argc, argv);
     if (!parsedArgs.has_value())
     {
-        std::cout << "Error: Invalid arguments." << std::endl;
+        std::cerr << "Error: Invalid arguments." << std::endl;
         return 1;
     }
 
     // Define the port connection parameters to be used later
     const std::string portName =
-        parsedArgs->portName.has_value() ? parsedArgs->portName.value() : "COM10";  // Change the sensor port name to the COM port of your local machine
+        parsedArgs->portName.has_value() ? parsedArgs->portName.value() : "COM1";  // Change the sensor port name to the COM port of your local machine
     const Sensor::BaudRate firmwareBaudRate = parsedArgs->firmwareBaudRate.has_value() ? parsedArgs->firmwareBaudRate.value() : Sensor::BaudRate::Baud115200;
     const Sensor::BaudRate bootloaderBaudRate =
         parsedArgs->bootloaderBaudRate.has_value() ? parsedArgs->bootloaderBaudRate.value() : Sensor::BaudRate::Baud115200;
 
-    // [1] Instantiate a sensor object we'll use to connect to and interact with the unit.
+    // 1. Instantiate a Sensor object and use it to connect to the VectorNav unit.
     // We are not autoconnecting or verifying connectivity because we cannot assume the sensor has a valid firmware
     Sensor sensor;
     Error latestError = sensor.connect(portName, firmwareBaudRate);
     if (latestError != Error::None)
     {
-        std::cerr << "Error " << latestError << " occurred when connecting." << std::endl;
-        return 1;
+        std::cerr << latestError << " encountered when connecting to " + portName << std::endl;
+        return static_cast<int>(latestError);
     }
-    // [2] Create firmwareUpdater object
-    FirmwareUpdater firmwareUpdater;
+    std::cout << "Connected to " << portName << " at " << sensor.connectedBaudRate().value() << std::endl;
 
-    // [3] Update firmware based on the filetype. There are two file types that can be used to update the firmware: VNX or VNXML
-    bool firmwareUpdateFailure = false;
+    // 2. Create a FirmwareUpdater object
+    FirmwareProgrammer::FirmwareUpdater firmwareUpdater;
+
+    // 3. Update firmware based on the file type - There are two file types that can be used to update the firmware: VNX or VNXML
+    ErrorAll firmwareUpdateError{Error::None};
+
     if (parsedArgs->filePaths.has_value())
     {
-        if (std::holds_alternative<FirmwareUpdater::FilePaths>(*parsedArgs->filePaths))
+        if (std::holds_alternative<FirmwareProgrammer::FirmwareUpdater::FilePaths>(*parsedArgs->filePaths))
         {
             // Run loading individual VNX files
-            firmwareUpdateFailure =
-                firmwareUpdater.updateFirmware(&sensor, std::get<FirmwareUpdater::FilePaths>(*parsedArgs->filePaths), {firmwareBaudRate, bootloaderBaudRate});
+            firmwareUpdateError = firmwareUpdater.updateFirmware(&sensor, std::get<FirmwareProgrammer::FirmwareUpdater::FilePaths>(*parsedArgs->filePaths),
+                                                                 {firmwareBaudRate, bootloaderBaudRate});
         }
         else if (std::holds_alternative<Filesystem::FilePath>(*parsedArgs->filePaths))
         {
             // Run using a VNXML file
-            firmwareUpdateFailure =
+            firmwareUpdateError =
                 firmwareUpdater.updateFirmware(&sensor, std::get<Filesystem::FilePath>(*parsedArgs->filePaths), {firmwareBaudRate, bootloaderBaudRate});
         }
         else { VN_ABORT(); }
@@ -102,18 +107,20 @@ int main(int argc, char** argv)
     {
         // No paths were provided via command line, so run loading individual packaged reference model VNX files
         const auto dirPath = std::filesystem::path(__FILE__).parent_path();
-        firmwareUpdateFailure = firmwareUpdater.updateFirmware(
-            &sensor, FirmwareUpdater::FilePaths{{(dirPath / "ReferenceModels_v3.vn100.vnx").string(), FirmwareUpdater::Processor::Nav}},
-            {firmwareBaudRate, bootloaderBaudRate});  // Change this to your desired VNX file
+        firmwareUpdateError =
+            firmwareUpdater.updateFirmware(&sensor,
+                                           FirmwareProgrammer::FirmwareUpdater::FilePaths{
+                                               {(dirPath / "ReferenceModels_v3.vn100.vnx").string(), FirmwareProgrammer::FirmwareUpdater::Processor::Nav}},
+                                           {firmwareBaudRate, bootloaderBaudRate});  // Change this to your desired VNX file
     }
 
-    if (firmwareUpdateFailure)
+    if (firmwareUpdateError != Error::None)
     {
-        std::cout << "Error : FirmwareUpdate failed" << std::endl;
+        std::cerr << firmwareUpdateError << " : firmware update failed." << std::endl;
         return 1;
     }
 
-    // [4] Disconnect from sensor
+    // 4. Disconnect from the VectorNav unit
     sensor.disconnect();
     std::cout << "FirmwareUpdate example complete" << std::endl;
 }
@@ -163,10 +170,11 @@ std::optional<ParsedArgs> parseArgs(int argc, char** argv)
         }
         else if (startsWith(argv[i], "--Nav="))
         {
-            if (!retVal.filePaths.has_value()) { retVal.filePaths = FirmwareUpdater::FilePaths{}; }
-            if (std::holds_alternative<FirmwareUpdater::FilePaths>(retVal.filePaths.value()))
+            if (!retVal.filePaths.has_value()) { retVal.filePaths = FirmwareProgrammer::FirmwareUpdater::FilePaths{}; }
+            if (std::holds_alternative<FirmwareProgrammer::FirmwareUpdater::FilePaths>(retVal.filePaths.value()))
             {
-                std::get<FirmwareUpdater::FilePaths>(*retVal.filePaths).push_back({rhs, FirmwareUpdater::Processor::Nav});
+                std::get<FirmwareProgrammer::FirmwareUpdater::FilePaths>(*retVal.filePaths)
+                    .push_back({rhs, FirmwareProgrammer::FirmwareUpdater::Processor::Nav});
             }
             else if (std::holds_alternative<Filesystem::FilePath>(retVal.filePaths.value()))
             {
@@ -177,10 +185,11 @@ std::optional<ParsedArgs> parseArgs(int argc, char** argv)
         }
         else if (startsWith(argv[i], "--Gnss="))
         {
-            if (!retVal.filePaths.has_value()) { retVal.filePaths = FirmwareUpdater::FilePaths{}; }
-            if (std::holds_alternative<FirmwareUpdater::FilePaths>(retVal.filePaths.value()))
+            if (!retVal.filePaths.has_value()) { retVal.filePaths = FirmwareProgrammer::FirmwareUpdater::FilePaths{}; }
+            if (std::holds_alternative<FirmwareProgrammer::FirmwareUpdater::FilePaths>(retVal.filePaths.value()))
             {
-                std::get<FirmwareUpdater::FilePaths>(*retVal.filePaths).push_back({rhs, FirmwareUpdater::Processor::Gnss});
+                std::get<FirmwareProgrammer::FirmwareUpdater::FilePaths>(*retVal.filePaths)
+                    .push_back({rhs, FirmwareProgrammer::FirmwareUpdater::Processor::Gnss});
             }
             else if (std::holds_alternative<Filesystem::FilePath>(retVal.filePaths.value()))
             {
@@ -191,10 +200,11 @@ std::optional<ParsedArgs> parseArgs(int argc, char** argv)
         }
         else if (startsWith(argv[i], "--Imu="))
         {
-            if (!retVal.filePaths.has_value()) { retVal.filePaths = FirmwareUpdater::FilePaths{}; }
-            if (std::holds_alternative<FirmwareUpdater::FilePaths>(retVal.filePaths.value()))
+            if (!retVal.filePaths.has_value()) { retVal.filePaths = FirmwareProgrammer::FirmwareUpdater::FilePaths{}; }
+            if (std::holds_alternative<FirmwareProgrammer::FirmwareUpdater::FilePaths>(retVal.filePaths.value()))
             {
-                std::get<FirmwareUpdater::FilePaths>(*retVal.filePaths).push_back({rhs, FirmwareUpdater::Processor::Imu});
+                std::get<FirmwareProgrammer::FirmwareUpdater::FilePaths>(*retVal.filePaths)
+                    .push_back({rhs, FirmwareProgrammer::FirmwareUpdater::Processor::Imu});
             }
             else if (std::holds_alternative<Filesystem::FilePath>(retVal.filePaths.value()))
             {

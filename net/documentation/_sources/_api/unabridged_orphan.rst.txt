@@ -45,6 +45,11 @@ Files
 .. toctree::
    :maxdepth: 5
 
+   file_documentation__include_vectornav_CLI_Exceptions.hpp.rst
+
+.. toctree::
+   :maxdepth: 5
+
    file_documentation__include_vectornav_CLI_GenericCommand.hpp.rst
 
 .. toctree::
@@ -60,12 +65,12 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file_documentation__include_vectornav_CLI_Packet.hpp.rst
+   file_documentation__include_vectornav_CLI_Plugins.hpp.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file_documentation__include_vectornav_CLI_Plugins.hpp.rst
+   file_documentation__include_vectornav_CLI_QueueDefinitions.hpp.rst
 
 .. toctree::
    :maxdepth: 5

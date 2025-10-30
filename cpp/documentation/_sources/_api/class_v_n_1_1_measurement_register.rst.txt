@@ -26,8 +26,6 @@ Derived Types
 - ``public VN::Registers::Attitude::YprMagAccelAngularRates`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_attitude_1_1_ypr_mag_accel_angular_rates`)
 - ``public VN::Registers::GNSS::Gnss2SolEcef`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss2_sol_ecef`)
 - ``public VN::Registers::GNSS::Gnss2SolLla`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss2_sol_lla`)
-- ``public VN::Registers::GNSS::GnssSolEcef`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_sol_ecef`)
-- ``public VN::Registers::GNSS::GnssSolLla`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_1_1_gnss_sol_lla`)
 - ``public VN::Registers::GNSSCompass::GnssCompassEstBaseline`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_compass_1_1_gnss_compass_est_baseline`)
 - ``public VN::Registers::GNSSCompass::GnssCompassSignalHealthStatus`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_compass_1_1_gnss_compass_signal_health_status`)
 - ``public VN::Registers::GNSSCompass::GnssCompassStartupStatus`` (:ref:`exhale_class_class_v_n_1_1_registers_1_1_g_n_s_s_compass_1_1_gnss_compass_startup_status`)

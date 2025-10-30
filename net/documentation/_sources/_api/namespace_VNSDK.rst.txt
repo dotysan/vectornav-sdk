@@ -58,6 +58,8 @@ Classes
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_async_output_enable`
 
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_binary_output_measurements`
+
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_byte_buffer`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_composite_data`
@@ -69,6 +71,8 @@ Classes
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_known_acceleration_disturbance`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_known_magnetic_disturbance`
+
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_managed_queue_pointer`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_mat3f`
 
@@ -86,6 +90,8 @@ Classes
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_steady_clock`
 
+- :ref:`exhale_class_class_v_n_s_d_k_1_1_vec2f`
+
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_vec3d`
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_vec3f`
@@ -96,13 +102,44 @@ Classes
 
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_vn_exception`
 
-- :ref:`exhale_class_class_v_n_s_d_k_1_1_v_n_packet`
-
 - :ref:`exhale_class_class_v_n_s_d_k_1_1_write_settings`
 
 
-Variables
+Enums
+-----
+
+
+- :ref:`exhale_enum__c_l_i___sensor_8hpp_1a31e647fd1769b5c5ecaaf710f0f61c05`
+
+- :ref:`exhale_enum__c_l_i___sensor_8hpp_1adfcb3dfaa2e5f4e59aee361bf8a1a0ad`
+
+- :ref:`exhale_enum__c_l_i___sensor_8hpp_1ad4ac7c50a2f6009399ce864499208ff6`
+
+- :ref:`exhale_enum__c_l_i___sensor_8hpp_1a6b259e2e9f7af800e870315cb7575cf9`
+
+
+Functions
 ---------
 
 
-- :ref:`exhale_variable__c_l_i___measurement_datatypes_8hpp_1a487742b55b6d1e4a33cb90ce2ac0e05a`
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1ada3b4a6bbc797d7afa58df62bda24a84`
+
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1a6c647d8cce4aa257a38f2463e02041d1`
+
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1af6a10e007a085efb775d265a2d4bc773`
+
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1aa926b91905014b9d135f3be33ad0aa5d`
+
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1aadb63f5ca988db5bb1e7f3f1c8856cd2`
+
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1a26d1a56e23b2d6f4cfc0dddf9935b1b9`
+
+- :ref:`exhale_function__c_l_i___commands_8hpp_1a7a8259cbd5e3b489bdb3b4ab65d5c576`
+
+- :ref:`exhale_function__c_l_i___commands_8hpp_1ae8f378459a6e31f50978f077e880a401`
+
+- :ref:`exhale_function__c_l_i___commands_8hpp_1a04982d8734ca371931d22f1b125d74db`
+
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1a9570546e0dfb3726b046c11491fffcc2`
+
+- :ref:`exhale_function__c_l_i___sensor_8hpp_1acdb39e1fa1e8ebfb2e8fc7607422586f`

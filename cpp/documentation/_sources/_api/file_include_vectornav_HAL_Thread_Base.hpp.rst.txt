@@ -38,8 +38,6 @@ Included By
 -----------
 
 
-- :ref:`file_include_vectornav_HAL_Thread_Mbed.hpp`
-
 - :ref:`file_include_vectornav_HAL_Thread_PC.hpp`
 
 

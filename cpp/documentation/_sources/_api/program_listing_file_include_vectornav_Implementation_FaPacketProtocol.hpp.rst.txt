@@ -30,13 +30,7 @@ Program Listing for File FaPacketProtocol.hpp
    
    using Validity = PacketDispatcher::FindPacketRetVal::Validity;
    
-   struct Metadata
-   {
-       BinaryHeader header;
-       size_t length;
-       time_point timestamp;
-       bool operator==(const Metadata& other) const noexcept { return header == other.header && length == other.length; }
-   };
+   using Metadata = PacketMetadata<BinaryHeader>;
    
    struct FindPacketReturn
    {
@@ -65,24 +59,24 @@ Program Listing for File FaPacketProtocol.hpp
        T extract_unchecked() noexcept
        {
            uint16_t tmp = _index;
-           _index += sizeof(T);
-           return *reinterpret_cast<const T*>(_buffer.peek_linear_unchecked(tmp));
+           _index += static_cast<uint16_t>(sizeof(T));
+           return *reinterpret_cast<const T*>(_buffer.peek_ptr_unchecked(tmp));
        }
    
        template <class T>
-       bool extract(std::optional<T>& value) noexcept;
+       Errored extract(std::optional<T>& value) noexcept;
    
        template <uint16_t N, uint16_t M, class T>
-       bool extract(std::optional<Matrix<N, M, T>>& value) noexcept;
+       Errored extract(std::optional<Matrix<N, M, T>>& value) noexcept;
    
-       bool discard(const uint16_t numDiscard) noexcept
+       Errored discard(const uint16_t numDiscard) noexcept
        {
            if ((_index + numDiscard) > _metadata.length) { return true; }
            _index += numDiscard;
            return false;
        }
    
-       bool discard(const uint8_t group, const uint8_t field) noexcept
+       Errored discard(const uint8_t group, const uint8_t field) noexcept
        {
            uint16_t numDiscard = 0;
            if ((group == 3 || group == 6) && (field == 14 || field == 16))
@@ -115,61 +109,61 @@ Program Listing for File FaPacketProtocol.hpp
    private:
        const ByteBuffer _buffer;
        const FaPacketProtocol::Metadata& _metadata;
-       size_t _index = 0;
+       uint16_t _index = 0;
    };
    
    template <class T>
-   bool FaPacketExtractor::extract(std::optional<T>& value) noexcept
+   Errored FaPacketExtractor::extract(std::optional<T>& value) noexcept
    {
        T tmp;
        if (_buffer.peek(reinterpret_cast<uint8_t*>(&tmp), sizeof(T), _index)) { return true; }
        value = tmp;
-       _index += sizeof(T);
+       _index += static_cast<uint16_t>(sizeof(T));
        return false;
    }
    
    template <>
-   inline bool FaPacketExtractor::extract(std::optional<Ypr>& value) noexcept
+   inline Errored FaPacketExtractor::extract(std::optional<Ypr>& value) noexcept
    {
        Ypr ypr;
        if (_buffer.peek(reinterpret_cast<uint8_t*>(&ypr), sizeof(ypr), _index)) { return true; }
        value = ypr;
-       _index += sizeof(ypr);
+       _index += static_cast<uint16_t>(sizeof(ypr));
        return false;
    }
    
    template <>
-   inline bool FaPacketExtractor::extract(std::optional<DeltaTheta>& value) noexcept
+   inline Errored FaPacketExtractor::extract(std::optional<DeltaTheta>& value) noexcept
    {
        DeltaTheta deltaTheta;
        if (_buffer.peek(reinterpret_cast<uint8_t*>(&deltaTheta), sizeof(deltaTheta), _index)) { return true; };
        value = deltaTheta;
-       _index += sizeof(deltaTheta);
+       _index += static_cast<uint16_t>(sizeof(deltaTheta));
        return false;
    }
    
    template <>
-   inline bool FaPacketExtractor::extract(std::optional<Lla>& value) noexcept
+   inline Errored FaPacketExtractor::extract(std::optional<Lla>& value) noexcept
    {
        Lla lla;
        if (_buffer.peek(reinterpret_cast<uint8_t*>(&lla), sizeof(lla), _index)) { return true; };
        value = lla;
-       _index += sizeof(lla);
+       _index += static_cast<uint16_t>(sizeof(lla));
        return false;
    }
    
    template <uint16_t N, uint16_t M, class T>
-   bool FaPacketExtractor::extract(std::optional<Matrix<N, M, T>>& value) noexcept
+   Errored FaPacketExtractor::extract(std::optional<Matrix<N, M, T>>& value) noexcept
    {
        Matrix<N, M, T> mat;
        if (_buffer.peek(reinterpret_cast<uint8_t*>(&mat), sizeof(T) * M * N, _index)) { return true; };
        value = mat;
-       _index += sizeof(T) * M * N;
+       _index += static_cast<uint16_t>(sizeof(T)) * M * N;
        return false;
    }
    
    template <>
-   inline bool FaPacketExtractor::extract(std::optional<GnssSatInfo>& value) noexcept
+   inline Errored FaPacketExtractor::extract(std::optional<GnssSatInfo>& value) noexcept
    {
        GnssSatInfo satInfo;
    
@@ -194,14 +188,14 @@ Program Listing for File FaPacketProtocol.hpp
    }
    
    template <>
-   inline bool FaPacketExtractor::extract(std::optional<GnssRawMeas>& value) noexcept
+   inline Errored FaPacketExtractor::extract(std::optional<GnssRawMeas>& value) noexcept
    {
        GnssRawMeas rawMeas;
    
        _buffer.peek_unchecked(reinterpret_cast<uint8_t*>(&rawMeas.tow), sizeof(rawMeas.tow), _index);
-       _index += sizeof(rawMeas.tow);
+       _index += static_cast<uint16_t>(sizeof(rawMeas.tow));
        _buffer.peek_unchecked(reinterpret_cast<uint8_t*>(&rawMeas.week), sizeof(rawMeas.week), _index);
-       _index += sizeof(rawMeas.week);
+       _index += static_cast<uint16_t>(sizeof(rawMeas.week));
        _buffer.peek_unchecked(reinterpret_cast<uint8_t*>(&rawMeas.numMeas), sizeof(rawMeas.numMeas), _index++);
        if (_index + 1 + 28 * rawMeas.numMeas > _metadata.length) { return true; }
    
@@ -215,13 +209,13 @@ Program Listing for File FaPacketProtocol.hpp
            rawMeas.freqNum[i] = _buffer.peek_unchecked(_index++);
            rawMeas.cno[i] = static_cast<int8_t>(_buffer.peek_unchecked(_index++));
            _buffer.peek_unchecked(reinterpret_cast<uint8_t*>(&rawMeas.flags[i]), sizeof(uint16_t), _index);
-           _index += sizeof(uint16_t);
+           _index += static_cast<uint16_t>(sizeof(uint16_t));
            _buffer.peek_unchecked(reinterpret_cast<uint8_t*>(&rawMeas.pr[i]), sizeof(double), _index);
-           _index += sizeof(double);
+           _index += static_cast<uint16_t>(sizeof(double));
            _buffer.peek_unchecked(reinterpret_cast<uint8_t*>(&rawMeas.cp[i]), sizeof(double), _index);
-           _index += sizeof(double);
+           _index += static_cast<uint16_t>(sizeof(double));
            _buffer.peek_unchecked(reinterpret_cast<uint8_t*>(&rawMeas.dp[i]), sizeof(float), _index);
-           _index += sizeof(float);
+           _index += static_cast<uint16_t>(sizeof(float));
        }
    
        value = rawMeas;

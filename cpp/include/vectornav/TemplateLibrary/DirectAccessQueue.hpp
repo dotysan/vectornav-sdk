@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,7 +28,11 @@
 #include <cstdint>
 #include <memory>
 
+#include "vectornav/Config.hpp"
 #include "vectornav/HAL/Mutex.hpp"
+#if THREADING_ENABLE
+#include "vectornav/HAL/Thread.hpp"
+#endif
 #include "vectornav/TemplateLibrary/Queue.hpp"
 
 namespace VN
@@ -125,11 +129,21 @@ public:
         DirectAccessQueue_Interface::Element* _element = nullptr;
     };
 
+    enum class PutMode : uint8_t
+    {
+        Force = 1,
+        Try = 2,
+#if THREADING_ENABLE
+        Retry = 3
+#endif
+    };
+
     using value_type = OwningPtr;  // Used to be able to arbitrate away implementation in Sensor
     virtual OwningPtr put() noexcept = 0;
     virtual OwningPtr get() noexcept = 0;
     virtual OwningPtr getBack() noexcept = 0;
     virtual void reset() noexcept = 0;
+    virtual void setPutMode(PutMode mode) noexcept = 0;
     virtual uint16_t size() const noexcept = 0;
     virtual bool isEmpty() const noexcept = 0;
     virtual uint16_t capacity() const noexcept = 0;
@@ -141,15 +155,16 @@ class DirectAccessQueue : public DirectAccessQueue_Interface<ItemType>
 public:
     using OwningPtr = typename DirectAccessQueue_Interface<ItemType>::OwningPtr;
     using Element = typename DirectAccessQueue_Interface<ItemType>::Element;
+    using PutMode = typename DirectAccessQueue_Interface<ItemType>::PutMode;
 
     template <typename... Args>
-    DirectAccessQueue(Args&&... args) : _elements{std::forward<Args>(args)...}
+    DirectAccessQueue(PutMode putMode, Args&&... args) : _putMode{putMode}, _elements{std::forward<Args>(args)...}
     {
     }
 
     // Used for array initialization of a single value
     template <class CArg>
-    DirectAccessQueue(CArg&& arg) : _elements(initializeArray<Element>(arg, std::make_index_sequence<Capacity>{}))
+    DirectAccessQueue(PutMode putMode, CArg&& arg) : _putMode{putMode}, _elements(initializeArray<Element>(arg, std::make_index_sequence<Capacity>{}))
     {
     }
 
@@ -161,34 +176,33 @@ public:
     virtual OwningPtr put() noexcept override final
     {
         LockGuard lock(_mutex);
-        uint16_t i = 0;
-        for (auto& element : _elements)
+        OwningPtr ret = _tryPut();
+        if (ret || _putMode == PutMode::Try) { return ret; }
+        else if (_putMode == PutMode::Force)
         {
-            if (element.status == Element::Status::Free)
+            auto nextIdx = _circularBuffer.peek();
+            if (nextIdx.has_value() && (_elements[*nextIdx].status == Element::Status::InQueue))
             {
-                element.status = Element::Status::Putting;
-                _circularBuffer.put(i);
-                return &element;
+                _circularBuffer.get();  // Pop it from queue
+                _elements[*nextIdx].status = Element::Status::Putting;
+                _circularBuffer.put(*nextIdx);
+                return &_elements[*nextIdx];
             }
-            ++i;
+            else { return nullptr; }
         }
-
-        // Queue is totally full. We can go to the queue head and overwrite it, force pushing.
-        _reset();
-        // Retry the exact same thing
-        i = 0;
-        for (auto& element : _elements)
+#if THREADING_ENABLE
+        else if (_putMode == PutMode::Retry)
         {
-            if (element.status == Element::Status::Free)
-            {
-                element.status = Element::Status::Putting;
-                _circularBuffer.put(i);
-                return &element;
-            }
-            ++i;
+            do {
+                _mutex.unlock();
+                thisThread::sleepFor(Config::Sensor::listenSleepDuration);
+                _mutex.lock();
+                ret = _tryPut();
+            } while (!ret);
+            return ret;
         }
-        VN_DEBUG_2("Request put failed.");
-        return nullptr;
+#endif
+        else { return nullptr; }
     }
 
     virtual void reset() noexcept override final
@@ -232,6 +246,12 @@ public:
         return &_elements[latestIdx];
     }
 
+    virtual void setPutMode(PutMode mode) noexcept override final
+    {
+        LockGuard lock(_mutex);
+        _putMode = mode;
+    }
+
     virtual uint16_t size() const noexcept override final
     {
         LockGuard lock(_mutex);
@@ -244,11 +264,12 @@ public:
         return queueSize;
     }
 
-    virtual bool isEmpty() const noexcept override final { return _circularBuffer.isEmpty() || (size() == 0); }
+    virtual bool isEmpty() const noexcept override final { return (size() == 0); }
 
     virtual uint16_t capacity() const noexcept override final { return Capacity; }
 
 private:
+    PutMode _putMode;
     std::array<Element, Capacity> _elements;
     Queue<uint16_t, Capacity> _circularBuffer;
     mutable Mutex _mutex;
@@ -268,6 +289,22 @@ private:
                 break;  // Assume the rest are "putting", and don't clear any further items. Or buffer is empty and we've cleared them all.
             }
         }
+    }
+
+    OwningPtr _tryPut()
+    {
+        uint16_t i = 0;
+        for (auto& element : _elements)
+        {
+            if (element.status == Element::Status::Free)
+            {
+                element.status = Element::Status::Putting;
+                _circularBuffer.put(i);
+                return &element;
+            }
+            ++i;
+        }
+        return nullptr;
     }
 };
 

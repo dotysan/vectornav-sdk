@@ -83,17 +83,33 @@
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv4I0EN2VN12RegisterScan12ConfigWriterE">
 <span id="_CPPv3I0EN2VN12RegisterScan12ConfigWriterE"></span><span id="_CPPv2I0EN2VN12RegisterScan12ConfigWriterE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="struct_v_n_1_1_register_scan_1_1_config_writer"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConfigWriter</span></span></span><a class="headerlink" href="#_CPPv4I0EN2VN12RegisterScan12ConfigWriterE" title="Link to this definition">¶</a><br /></dt>
-<dd><div class="breathe-sectiondef docutils container">
+<dd><p>Base template interface for writing VectorNav configurations using the CRTP patter. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Template Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> – The derived writer class implementing the specific writing mechanism. </p>
+</dd>
+</dl>
+<div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan12ConfigWriter11writeConfigERK12AsciiMessage">
-<span id="_CPPv3N2VN12RegisterScan12ConfigWriter11writeConfigERK12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan12ConfigWriter11writeConfigERK12AsciiMessage"></span><span id="VN::RegisterScan::ConfigWriter::writeConfig__AsciiMessageCR"></span><span class="target" id="struct_v_n_1_1_register_scan_1_1_config_writer_1a3cca028cdad9b654d862a4d3d6875556"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">writeConfig</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan12ConfigWriter11writeConfigERK12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<span id="_CPPv3N2VN12RegisterScan12ConfigWriter11writeConfigERK12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan12ConfigWriter11writeConfigERK12AsciiMessage"></span><span id="VN::RegisterScan::ConfigWriter::writeConfig__AsciiMessageCR"></span><span class="target" id="struct_v_n_1_1_register_scan_1_1_config_writer_1a844a82e8f292178fe5712f9ad24b624d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">writeConfig</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan12ConfigWriter11writeConfigERK12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Writes a configuration message using the derived class implementation. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> – The ASCII message containing the configuration to write. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Error code indicating success or failure of the operation. </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan12ConfigWriter5closeEv">
 <span id="_CPPv3N2VN12RegisterScan12ConfigWriter5closeEv"></span><span id="_CPPv2N2VN12RegisterScan12ConfigWriter5closeEv"></span><span id="VN::RegisterScan::ConfigWriter::close"></span><span class="target" id="struct_v_n_1_1_register_scan_1_1_config_writer_1ae3cfd991ccd9fb091c7a9cfaf8eec4dc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">close</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan12ConfigWriter5closeEv" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Finalizes the writing process, closing files or performing cleanup. </p>
+</dd></dl>
 
 </div>
 </dd></dl>

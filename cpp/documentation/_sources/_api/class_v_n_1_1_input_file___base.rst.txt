@@ -9,10 +9,9 @@ Class InputFile_Base
 Inheritance Relationships
 -------------------------
 
-Derived Types
-*************
+Derived Type
+************
 
-- ``public VN::InputFile`` (:ref:`exhale_class_class_v_n_1_1_input_file`)
 - ``public VN::InputFile`` (:ref:`exhale_class_class_v_n_1_1_input_file`)
 
 

@@ -3,17 +3,15 @@
 Class LockGuard
 ===============
 
-- Defined in :ref:`file_include_vectornav_HAL_Mutex_Disabled.hpp`
+- Defined in :ref:`file_include_vectornav_HAL_Mutex_PC.hpp`
 
 
 Inheritance Relationships
 -------------------------
 
-Base Types
-**********
+Base Type
+*********
 
-- ``public VN::LockGuard_Base`` (:ref:`exhale_class_class_v_n_1_1_lock_guard___base`)
-- ``public VN::LockGuard_Base`` (:ref:`exhale_class_class_v_n_1_1_lock_guard___base`)
 - ``public VN::LockGuard_Base`` (:ref:`exhale_class_class_v_n_1_1_lock_guard___base`)
 
 

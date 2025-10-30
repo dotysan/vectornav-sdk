@@ -40,7 +40,7 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Template Class EnumCheck" href="class_v_n_1_1_enum_check.html" />
+    <link rel="next" title="Class DynamicPacketQueue" href="class_v_n_1_1_dynamic_packet_queue.html" />
     <link rel="prev" title="Template Class DirectAccessQueue" href="class_v_n_1_1_direct_access_queue.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
@@ -53,7 +53,7 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="class_v_n_1_1_enum_check.html" title="Template Class EnumCheck"
+          <a href="class_v_n_1_1_dynamic_packet_queue.html" title="Class DynamicPacketQueue"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="class_v_n_1_1_direct_access_queue.html" title="Template Class DirectAccessQueue"
@@ -89,9 +89,10 @@
 <section id="derived-types">
 <h3>Derived Types<a class="headerlink" href="#derived-types" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">VN::DirectAccessQueue&lt;</span> <span class="pre">1000</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#exhale-class-class-v-n-1-1-direct-access-queue"><span class="std std-ref">Template Class DirectAccessQueue</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">VN::DirectAccessQueue&lt;</span> <span class="pre">PACKET_QUEUE_SIZE</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#exhale-class-class-v-n-1-1-direct-access-queue"><span class="std std-ref">Template Class DirectAccessQueue</span></a>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">VN::DirectAccessQueue&lt;</span> <span class="pre">CompositeData,</span> <span class="pre">Config::PacketDispatchers::compositeDataQueueCapacity</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#exhale-class-class-v-n-1-1-direct-access-queue"><span class="std std-ref">Template Class DirectAccessQueue</span></a>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">VN::DirectAccessQueue&lt;</span> <span class="pre">ItemType,</span> <span class="pre">Capacity</span> <span class="pre">&gt;</span></code> (<a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#exhale-class-class-v-n-1-1-direct-access-queue"><span class="std std-ref">Template Class DirectAccessQueue</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">public</span> <span class="pre">VN::DynamicPacketQueue</span></code> (<a class="reference internal" href="class_v_n_1_1_dynamic_packet_queue.html#exhale-class-class-v-n-1-1-dynamic-packet-queue"><span class="std std-ref">Class DynamicPacketQueue</span></a>)</p></li>
 </ul>
 </section>
 </section>
@@ -100,9 +101,25 @@
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv4I0EN2VN27DirectAccessQueue_InterfaceE">
 <span id="_CPPv3I0EN2VN27DirectAccessQueue_InterfaceE"></span><span id="_CPPv2I0EN2VN27DirectAccessQueue_InterfaceE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ItemType</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="class_v_n_1_1_direct_access_queue___interface"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DirectAccessQueue_Interface</span></span></span><a class="headerlink" href="#_CPPv4I0EN2VN27DirectAccessQueue_InterfaceE" title="Link to this definition">¶</a><br /></dt>
-<dd><p>Subclassed by <a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#class_v_n_1_1_direct_access_queue"><span class="std std-ref">VN::DirectAccessQueue&lt; 1000 &gt;</span></a>, <a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#class_v_n_1_1_direct_access_queue"><span class="std std-ref">VN::DirectAccessQueue&lt; CompositeData, Config::PacketDispatchers::compositeDataQueueCapacity &gt;</span></a>, <a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#class_v_n_1_1_direct_access_queue"><span class="std std-ref">VN::DirectAccessQueue&lt; ItemType, Capacity &gt;</span></a></p>
+<dd><p>Subclassed by <a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#class_v_n_1_1_direct_access_queue"><span class="std std-ref">VN::DirectAccessQueue&lt; PACKET_QUEUE_SIZE &gt;</span></a>, <a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#class_v_n_1_1_direct_access_queue"><span class="std std-ref">VN::DirectAccessQueue&lt; CompositeData, Config::PacketDispatchers::compositeDataQueueCapacity &gt;</span></a>, <a class="reference internal" href="class_v_n_1_1_direct_access_queue.html#class_v_n_1_1_direct_access_queue"><span class="std std-ref">VN::DirectAccessQueue&lt; ItemType, Capacity &gt;</span></a>, <a class="reference internal" href="class_v_n_1_1_dynamic_packet_queue.html#class_v_n_1_1_dynamic_packet_queue"><span class="std std-ref">VN::DynamicPacketQueue</span></a></p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp enum-class">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN27DirectAccessQueue_Interface7PutModeE">
+<span id="_CPPv3N2VN27DirectAccessQueue_Interface7PutModeE"></span><span id="_CPPv2N2VN27DirectAccessQueue_Interface7PutModeE"></span><span class="target" id="class_v_n_1_1_direct_access_queue___interface_1ad4006979e9471c706c023b01c0a3207b"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PutMode</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><a class="headerlink" href="#_CPPv4N2VN27DirectAccessQueue_Interface7PutModeE" title="Link to this definition">¶</a><br /></dt>
+<dd><p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN27DirectAccessQueue_Interface7PutMode5ForceE">
+<span id="_CPPv3N2VN27DirectAccessQueue_Interface7PutMode5ForceE"></span><span id="_CPPv2N2VN27DirectAccessQueue_Interface7PutMode5ForceE"></span><span class="target" id="class_v_n_1_1_direct_access_queue___interface_1ad4006979e9471c706c023b01c0a3207ba9eb6b78a99cdb6ffd3d40d18621d9f80"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Force</span></span></span><a class="headerlink" href="#_CPPv4N2VN27DirectAccessQueue_Interface7PutMode5ForceE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN27DirectAccessQueue_Interface7PutMode3TryE">
+<span id="_CPPv3N2VN27DirectAccessQueue_Interface7PutMode3TryE"></span><span id="_CPPv2N2VN27DirectAccessQueue_Interface7PutMode3TryE"></span><span class="target" id="class_v_n_1_1_direct_access_queue___interface_1ad4006979e9471c706c023b01c0a3207baeead05a01ff69770e90ba2a541988cab"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Try</span></span></span><a class="headerlink" href="#_CPPv4N2VN27DirectAccessQueue_Interface7PutMode3TryE" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="cpp type">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN27DirectAccessQueue_Interface10value_typeE">
 <span id="_CPPv3N2VN27DirectAccessQueue_Interface10value_typeE"></span><span id="_CPPv2N2VN27DirectAccessQueue_Interface10value_typeE"></span><span class="target" id="class_v_n_1_1_direct_access_queue___interface_1a7574278ceb625ea2835d04399de6dfd8"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">value_type</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N2VN27DirectAccessQueue_Interface9OwningPtrE" title="VN::DirectAccessQueue_Interface::OwningPtr"><span class="n"><span class="pre">OwningPtr</span></span></a><a class="headerlink" href="#_CPPv4N2VN27DirectAccessQueue_Interface10value_typeE" title="Link to this definition">¶</a><br /></dt>
@@ -129,6 +146,11 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN27DirectAccessQueue_Interface5resetEv">
 <span id="_CPPv3N2VN27DirectAccessQueue_Interface5resetEv"></span><span id="_CPPv2N2VN27DirectAccessQueue_Interface5resetEv"></span><span id="VN::DirectAccessQueue_Interface::reset"></span><span class="target" id="class_v_n_1_1_direct_access_queue___interface_1a84992c40eeba6ecfa34fa2c6fb320a45"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">reset</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N2VN27DirectAccessQueue_Interface5resetEv" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N2VN27DirectAccessQueue_Interface10setPutModeE7PutMode">
+<span id="_CPPv3N2VN27DirectAccessQueue_Interface10setPutModeE7PutMode"></span><span id="_CPPv2N2VN27DirectAccessQueue_Interface10setPutModeE7PutMode"></span><span id="VN::DirectAccessQueue_Interface::setPutMode__PutMode"></span><span class="target" id="class_v_n_1_1_direct_access_queue___interface_1a6d8ba67c50b56d869758fc0b68ab45f6"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setPutMode</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N2VN27DirectAccessQueue_Interface7PutModeE" title="VN::DirectAccessQueue_Interface::PutMode"><span class="n"><span class="pre">PutMode</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">mode</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N2VN27DirectAccessQueue_Interface10setPutModeE7PutMode" title="Link to this definition">¶</a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp function">
@@ -363,8 +385,8 @@
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="class_v_n_1_1_enum_check.html"
-                          title="Next page">&rarr; Template Class EnumCheck</a></p>
+    <p class="topless"><a href="class_v_n_1_1_dynamic_packet_queue.html"
+                          title="Next page">&rarr; Class DynamicPacketQueue</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -403,7 +425,7 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="class_v_n_1_1_enum_check.html" title="Template Class EnumCheck"
+          <a href="class_v_n_1_1_dynamic_packet_queue.html" title="Class DynamicPacketQueue"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
           <a href="class_v_n_1_1_direct_access_queue.html" title="Template Class DirectAccessQueue"

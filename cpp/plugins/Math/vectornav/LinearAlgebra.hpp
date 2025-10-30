@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,18 +36,44 @@ namespace Math
 {
 
 // Vector math
+
+/**
+ * @brief Computes the dot product of two 3D vectors.
+ * @tparam T Type of elements in the left-hand side vector.
+ * @tparam S Type of elements in the right-hand side vector.
+ * @param lhs Left-hand side vector.
+ * @param rhs Right-hand side vector.
+ * @return The dot product (scalar).
+ */
 template <typename T, typename S>
 T dot(const Matrix<3, 1, T>& lhs, const Matrix<3, 1, S>& rhs) noexcept
 {
     return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
 }
 
+/**
+ * @brief Computes the dot product of two 4D vectors.
+ * @tparam T Type of elements in the left-hand side vector.
+ * @tparam S Type of elements in the right-hand side vector.
+ * @param lhs Left-hand side vector.
+ * @param rhs Right-hand side vector.
+ * @return The dot product (scalar).
+ */
 template <typename T, typename S>
 T dot(const Matrix<4, 1, T>& lhs, const Matrix<4, 1, S>& rhs) noexcept
 {
     return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2] + lhs[3] * rhs[3];
 }
 
+/**
+ * @brief Computes the dot product of two vectors of arbitrary dimension.
+ * @tparam m The size of the vectors.
+ * @tparam T Type of elements in the left-hand side vector.
+ * @tparam S Type of elements in the right-hand side vector.
+ * @param lhs Left-hand side vector.
+ * @param rhs Right-hand side vector.
+ * @return The dot product (scalar).
+ */
 template <uint16_t m, typename T, typename S>
 T dot(const Matrix<m, 1, T>& lhs, const Matrix<m, 1, S>& rhs) noexcept
 {
@@ -56,6 +82,13 @@ T dot(const Matrix<m, 1, T>& lhs, const Matrix<m, 1, S>& rhs) noexcept
     return sum;
 }
 
+/**
+ * @brief Computes the cross product of two 3D vectors.
+ * @tparam T Type of elements in the input vectors.
+ * @param lhs Left-hand side vector.
+ * @param rhs Right-hand side vector.
+ * @return The cross product.
+ */
 template <typename T>
 Matrix<3, 1, T> cross(const Matrix<3, 1, T>& lhs, const Matrix<3, 1, T>& rhs) noexcept
 {
@@ -66,7 +99,13 @@ Matrix<3, 1, T> cross(const Matrix<3, 1, T>& lhs, const Matrix<3, 1, T>& rhs) no
     return retMatrix;
 }
 
-// If non-invertable it will return an identity matrix
+/**
+ * @brief Computes the inverse of a square matrix.
+ * @tparam n The size of the square matrix.
+ * @tparam T The type of elements in the matrix.
+ * @param mat The square matrix.
+ * @return The inverse of the matrix, or a null matrix if the matrix is non-invertible.
+ */
 template <uint16_t n, typename T>
 Matrix<n, n, T> inverse(const Matrix<n, n, T>& mat) noexcept
 {
@@ -141,6 +180,12 @@ Matrix<n, n, T> inverse(const Matrix<n, n, T>& mat) noexcept
     return retMatrix;  // Matrix inversion successful
 }
 
+/**
+ * @brief Computes the inverse of a 2x2 matrix.
+ * @tparam T The type of elements in the matrix.
+ * @param mat The 2x2 matrix.
+ * @return The inverse of the matrix, or a null matrix if the matrix is non-invertible.
+ */
 template <typename T>
 Matrix<2, 2, T> inverse(const Matrix<2, 2, T>& mat) noexcept
 {
@@ -154,6 +199,44 @@ Matrix<2, 2, T> inverse(const Matrix<2, 2, T>& mat) noexcept
     return nm * invDet;
 }
 
+/**
+ * @brief Computes the inverse of a 3x3 matrix.
+ * @tparam T The type of elements in the matrix.
+ * @param mat The 3x3 matrix.
+ * @return The inverse of the matrix, or a null matrix if the matrix is non-invertible.
+ */
+template <typename T>
+Matrix<3, 3, T> inverse(const Matrix<3, 3, T>& mat) noexcept
+{
+    Matrix<3, 3, T> nm;
+    T det = mat(0, 0) * (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) - mat(0, 1) * (mat(1, 0) * mat(2, 2) - mat(1, 2) * mat(2, 0)) +
+            mat(0, 2) * (mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0));
+
+    if (std::abs(det) < std::numeric_limits<T>::epsilon()) { return Matrix<3, 3, T>::null(); }
+
+    T invDet = 1 / det;
+
+    nm(0, 0) = (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) * invDet;
+    nm(0, 1) = (mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2)) * invDet;
+    nm(0, 2) = (mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1)) * invDet;
+    nm(1, 0) = (mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2)) * invDet;
+    nm(1, 1) = (mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0)) * invDet;
+    nm(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2)) * invDet;
+    nm(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1)) * invDet;
+    nm(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1)) * invDet;
+    nm(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1)) * invDet;
+
+    return nm;
+}
+
+/**
+ * @brief Solves a linear system of equations (`Ux = b`) using LU decomposition.
+ * @tparam n The size of the square matrix (n x n) and vectors (n X 1).
+ * @tparam T The type of elements in the matrix and vectors.
+ * @param U The matrix `U` of the system.
+ * @param b The vector `b` of the system.
+ * @return The solution vector `x` to the system.
+ */
 template <uint16_t n, typename T>
 Matrix<n, 1, T> solveLinearSystemLU(Matrix<n, n, T> U, const Matrix<n, 1, T>& b) noexcept
 {
@@ -220,6 +303,14 @@ Matrix<n, 1, T> solveLinearSystemLU(Matrix<n, n, T> U, const Matrix<n, 1, T>& b)
     return x;
 }
 
+/**
+ * @brief Computes the transpose of an n x m matrix.
+ * @tparam m The number of rows of the matrix.
+ * @tparam n The number of columns of the matrix.
+ * @tparam T The type of elements in the matrix.
+ * @param mat The matrix.
+ * @return The transpose of the matrix.
+ */
 template <uint16_t m, uint16_t n, typename T>
 Matrix<n, m, T> transpose(const Matrix<m, n, T>& mat) noexcept
 {
@@ -233,42 +324,38 @@ Matrix<n, m, T> transpose(const Matrix<m, n, T>& mat) noexcept
     return nm;
 }
 
-template <typename T>
-Matrix<3, 3, T> inverse(const Matrix<3, 3, T>& mat) noexcept
-{
-    Matrix<3, 3, T> nm;
-    T det = mat(0, 0) * (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) - mat(0, 1) * (mat(1, 0) * mat(2, 2) - mat(1, 2) * mat(2, 0)) +
-            mat(0, 2) * (mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0));
-
-    if (std::abs(det) < std::numeric_limits<T>::epsilon()) { return Matrix<3, 3, T>::null(); }
-
-    T invDet = 1 / det;
-
-    nm(0, 0) = (mat(1, 1) * mat(2, 2) - mat(2, 1) * mat(1, 2)) * invDet;
-    nm(0, 1) = (mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2)) * invDet;
-    nm(0, 2) = (mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1)) * invDet;
-    nm(1, 0) = (mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2)) * invDet;
-    nm(1, 1) = (mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0)) * invDet;
-    nm(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2)) * invDet;
-    nm(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1)) * invDet;
-    nm(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1)) * invDet;
-    nm(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1)) * invDet;
-
-    return nm;
-}
-
+/**
+ * @brief Returns the sign of a value.
+ * @tparam T The type of the value (can be any numeric type).
+ * @param val The value.
+ * @return The sign of the value (-1, 0, or 1).
+ */
 template <typename T>
 T sign(T val) noexcept
 {
-    return (T(0) < val) - (val < T(0));
+    return static_cast<T>((T(0) < val) - (val < T(0)));
 }
 
+/**
+ * @brief Returns the skew-symmetric matrix of a 3D vector.
+ * @tparam T The type of elements in the vector.
+ * @param vec The 3D vector.
+ * @return The skew-symmetric matrix corresponding to the vector.
+ */
 template <typename T>
 Matrix<3, 3, T> skew(const Matrix<3, 1, T>& vec) noexcept
 {
     return {0, -vec[2], vec[1], vec[2], 0, -vec[0], -vec[1], vec[0], 0};
 }
 
+/**
+ * @brief Computes the norm of a matrix.
+ * @tparam m The number of rows in the matrix.
+ * @tparam n The number of columns in the matrix.
+ * @tparam T The type of the elements in the matrix.
+ * @param mat The matrix.
+ * @return The norm of the matrix.
+ */
 template <uint16_t m, uint16_t n, typename T>
 T norm(const Matrix<m, n, T>& mat) noexcept
 {
@@ -278,6 +365,13 @@ T norm(const Matrix<m, n, T>& mat) noexcept
     return std::sqrt(sum);
 }
 
+/**
+ * @brief Finds the index of the maximum element in a vector.
+ * @tparam n The size of the vector.
+ * @tparam T The type of the elements in the vector.
+ * @param vec The vector.
+ * @return The index of the element with the maximum value.
+ */
 template <uint16_t n, typename T>
 uint16_t maxi(const Matrix<n, 1, T>& vec) noexcept
 {
@@ -286,41 +380,87 @@ uint16_t maxi(const Matrix<n, 1, T>& vec) noexcept
     return maxIndex;
 }
 
+/**
+ * @brief Finds the index of the minimum element in a vector.
+ * @tparam n The size of the vector.
+ * @tparam T The type of the elements in the vector.
+ * @param vec The vector.
+ * @return The index of the element with the minimum value.
+ */
+
 template <uint16_t n, typename T>
 uint16_t mini(const Matrix<n, 1, T>& vec) noexcept
 {
-    uint16_t maxIndex = 0;
-    for (uint16_t i = 1; i < n; i++) { maxIndex = (vec[i] < vec[maxIndex]) ? i : maxIndex; }
-    return maxIndex;
+    uint16_t minIndex = 0;
+    for (uint16_t i = 1; i < n; i++) { minIndex = (vec[i] < vec[minIndex]) ? i : minIndex; }
+    return minIndex;
 }
 
+/**
+ * @brief Computes the condition number of a matrix using its norm and inverse.
+ * @tparam m The size of the square matrix.
+ * @param A The matrix.
+ * @param Ainv The inverse of the matrix.
+ * @return The condition number of the matrix.
+ */
 template <uint16_t m>
 float condition(const Matrix<m, m, float>& A, const Matrix<m, m, float>& Ainv) noexcept
 {
     return norm(A) * norm(Ainv);
 }
 
+/**
+ * @brief Normalizes a vector.
+ * @tparam m The size of the vector.
+ * @tparam T The type of the elements in the vector.
+ * @param vec The vector.
+ * @return An optional containing the normalized vector, or empty if the norm is too small.
+ */
 template <uint16_t m, typename T>
-std::optional<Matrix<m, 1, T>> normalize(Matrix<m, 1, T>& mat) noexcept
+std::optional<Matrix<m, 1, T>> normalize(Matrix<m, 1, T>& vec) noexcept
 {
-    T normM = norm(mat);
+    T normM = norm(vec);
     if (normM < std::numeric_limits<T>::epsilon()) { return std::nullopt; }
-    return std::make_optional<Matrix<m, 1, T>>(mat / normM);
+    return std::make_optional<Matrix<m, 1, T>>(vec / normM);
 }
 
+/**
+ * @brief Computes the outer product of a vector with itself.
+ * @tparam m The size of the vector.
+ * @tparam T The type of the elements in the vector.
+ * @param lhs The vector.
+ * @return The resulting outer product matrix.
+ */
 template <uint16_t m, typename T>
 Matrix<m, m, T> outer(const Matrix<m, 1, T>& lhs) noexcept
 {
-    Matrix<m, m, T> retMatrix;
     return lhs * transpose(lhs);
 }
 
+/**
+ * @brief Computes the outer product of two vectors.
+ * @tparam m The size of the vector.
+ * @tparam T The type of the elements in the vectors.
+ * @param vec1 The first vector.
+ * @param vec2 The second vector.
+ * @return The resulting outer product matrix.
+ */
 template <uint16_t m, typename T>
-Matrix<m, m, T> outer(const Matrix<m, 1, T>& mat1, const Matrix<m, 1, T>& mat2) noexcept
+Matrix<m, m, T> outer(const Matrix<m, 1, T>& vec1, const Matrix<m, 1, T>& vec2) noexcept
 {
-    return mat1 * transpose(mat2);
+    return vec1 * transpose(vec2);
 }
 
+/**
+ * @brief Concatenates two matrices vertically.
+ * @tparam n1 The number of rows in the first matrix.
+ * @tparam n2 The number of rows in the second matrix.
+ * @tparam m The number of columns in both matrices.
+ * @tparam T The type of the elements in the matrices.
+ * @param a The first matrix.
+ * @param b The second matrix.
+ * @return The resulting matrix after vertical concatenation.
+ */
 template <uint16_t n1, uint16_t m, uint16_t n2, typename T>
 Matrix<n1 + n2, m, T> vertcat(const Matrix<n1, m, T>& a, const Matrix<n2, m, T>& b) noexcept
 {
@@ -330,6 +470,16 @@ Matrix<n1 + n2, m, T> vertcat(const Matrix<n1, m, T>& a, const Matrix<n2, m, T>&
     return out;
 }
 
+/**
+ * @brief Concatenates two matrices horizontally.
+ * @tparam n The number of rows in both matrices.
+ * @tparam m1 The number of columns in the first matrix.
+ * @tparam m2 The number of columns in the second matrix.
+ * @tparam T The type of the elements in the matrices.
+ * @param a The first matrix.
+ * @param b The second matrix.
+ * @return The resulting matrix after horizontal concatenation.
+ */
 template <uint16_t n, uint16_t m1, uint16_t m2, typename T>
 Matrix<n, m1 + m2, T> horzcat(const Matrix<n, m1, T>& a, const Matrix<n, m2, T>& b) noexcept
 {

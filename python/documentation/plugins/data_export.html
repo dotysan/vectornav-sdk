@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Data Export &#8212; VectorNav 0.22.0 documentation</title>
+    <title>Data Export (BETA) &#8212; VectorNav SDK 0.22.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/cloud.css?v=36acb9b5" />
     <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=4c969af8" />
@@ -37,8 +37,8 @@
 
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Firmware Update" href="firmware_update.html" />
-    <link rel="prev" title="Plugins" href="index.html" /> 
+    <link rel="next" title="Firmware Programmer" href="firmware_programmer.html" />
+    <link rel="prev" title="Calibration (BETA)" href="calibration.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -50,15 +50,15 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="firmware_update.html" title="Firmware Update"
+          <a href="firmware_programmer.html" title="Firmware Programmer"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="index.html" title="Plugins"
+          <a href="calibration.html" title="Calibration (BETA)"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav 0.22.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Plugins</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Data Export</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Data Export (<em>BETA</em>)</a></li> 
       </ul>
     </div>
     </div>
@@ -69,47 +69,69 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="data-export">
-<h1>Data Export<a class="headerlink" href="#data-export" title="Link to this heading">¶</a></h1>
-<p>The DataExport plugin provides the necessary classes to export data form the sensor directly to various file formats such as Csv,Ascii,Rinex, and Imr files. In addition, the same classes can be used to export data from a file.</p>
+  <section id="data-export-beta">
+<span id="pythondataexportpage"></span><h1>Data Export (<em>BETA</em>)<a class="headerlink" href="#data-export-beta" title="Link to this heading">¶</a></h1>
+<p>The DataExport plugin provides the necessary classes to export data form the sensor directly to various file formats such as Csv, Ascii, and Rinex files. In addition, the same classes can be used to export data from a file.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This plugin is currently in <em>BETA</em> and may be subject to interface changes in the future.</p>
+</div>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>The DataExport plugin works via the Exporter class. It is an abstract base class where other exporters like <a class="reference internal" href="#vectornav.Plugins.ExporterCsv" title="vectornav.Plugins.ExporterCsv"><code class="xref py py-class docutils literal notranslate"><span class="pre">vectornav.Plugins.ExporterCsv</span></code></a>, <a class="reference internal" href="#vectornav.Plugins.ExporterAscii" title="vectornav.Plugins.ExporterAscii"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExporterAscii</span></code></a>, etc.. are derived from insuring a common interface. The mechanism from a file and in real-time are slightly different. The examples of both are in the subsequent sections.</p>
+<p>The DataExport plugin works via the Exporter class. It is an abstract base class where other exporters like <code class="xref py py-class docutils literal notranslate"><span class="pre">ExporterCsv</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ExporterAscii</span></code>, etc.. are derived from insuring a common interface. The mechanism from a file and in real-time are slightly different. The examples of both are in the subsequent sections.</p>
 <section id="exporting-in-real-time">
 <h3>Exporting in Real-Time<a class="headerlink" href="#exporting-in-real-time" title="Link to this heading">¶</a></h3>
 <p>To export data from a CSV in real-time requires the following imports</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">vectornav</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">vectornav</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sensor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">vectornav.Plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExporterCsv</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">vectornav</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">vectornav.Plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataExport</span>
 </pre></div>
 </div>
 <p>We can create a ExporterCsv class which has two arguments – the folder to log the CSV files, and whether to include system timestamps (the time reported by the computer when a packet of data was received). The ExporterCsv class requires a <strong>folder</strong> not a file path. This is because each unique packet output by the sensor will generate its own CSV file.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vs</span> <span class="o">=</span> <span class="n">Sensor</span><span class="p">()</span>
-<span class="n">csvExporter</span> <span class="o">=</span> <span class="n">ExporterCsv</span><span class="p">(</span><span class="n">local_folder</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="c1"># exporting with system timestamps</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">csvExporter</span> <span class="o">=</span> <span class="n">DataExport</span><span class="o">.</span><span class="n">ExporterCsv</span><span class="p">(</span><span class="n">outputDirectory</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Before exporting data from the sensor, the exporter needs to provide its internal queue to a subscriber of your choice. For all data from the sensor subscribe to both Ascii and Binary packets:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># subscribe to binary FA packets</span>
-<span class="n">vs</span><span class="o">.</span><span class="n">subscribeToMessage</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sensor</span> <span class="o">=</span> <span class="n">Sensor</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 3. Add a subscriber to all binary and ASCII packets</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">sensor</span><span class="o">.</span><span class="n">subscribeToMessage</span><span class="p">(</span>
         <span class="n">csvExporter</span><span class="o">.</span><span class="n">getQueuePtr</span><span class="p">(),</span>
-        <span class="n">vectornav</span><span class="o">.</span><span class="n">Registers</span><span class="o">.</span><span class="n">BinaryOutputMeasurements</span><span class="p">(),</span>
-        <span class="n">vectornav</span><span class="o">.</span><span class="n">FaPacketDispatcher</span><span class="o">.</span><span class="n">SubscriberFilterType</span><span class="o">.</span><span class="n">AnyMatch</span>
-<span class="p">)</span>
+        <span class="n">Sensor</span><span class="o">.</span><span class="n">BinaryOutputMeasurements</span><span class="p">(),</span>
+        <span class="n">Sensor</span><span class="o">.</span><span class="n">FaSubscriberFilterType</span><span class="o">.</span><span class="n">AnyMatch</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">latestError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">latestError</span><span class="si">}</span><span class="s2"> encountered when subscribing.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span>
 
-<span class="c1"># subscribe to binary VectorNav ascii packets</span>
-<span class="n">vs</span><span class="o">.</span><span class="n">subscribeToMessage</span><span class="p">(</span>
-        <span class="n">csvExporter</span><span class="o">.</span><span class="n">getQueuePtr</span><span class="p">(),</span>
-        <span class="s2">&quot;VN&quot;</span><span class="p">,</span>
-        <span class="n">vectornav</span><span class="o">.</span><span class="n">AsciiPacketDispatcher</span><span class="o">.</span><span class="n">SubscriberFilterType</span><span class="o">.</span><span class="n">StartsWith</span>
-<span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">sensor</span><span class="o">.</span><span class="n">subscribeToMessage</span><span class="p">(</span>
+        <span class="n">csvExporter</span><span class="o">.</span><span class="n">getQueuePtr</span><span class="p">(),</span> <span class="s2">&quot;VN&quot;</span><span class="p">,</span> <span class="n">Sensor</span><span class="o">.</span><span class="n">AsciiSubscriberFilterType</span><span class="o">.</span><span class="n">StartsWith</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">latestError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">latestError</span><span class="si">}</span><span class="s2"> encountered when subscribing.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span>
+
 </pre></div>
 </div>
 <p>With the subscribers setup, connect to the sensor and begin logging:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vs</span><span class="o">.</span><span class="n">autoConnect</span><span class="p">(</span><span class="n">your_port</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sensor</span><span class="o">.</span><span class="n">autoConnect</span><span class="p">(</span><span class="n">portName</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">csvExporter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Logging to &quot;</span><span class="p">,</span> <span class="n">outputDirectory</span><span class="p">)</span>
 
-<span class="n">csvExporter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+
+    <span class="c1"># Handle asynchronous errors</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sensor</span><span class="o">.</span><span class="n">throwIfAsyncError</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">asyncError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received async error: </span><span class="si">{</span><span class="n">asyncError</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">);</span>
 
 <span class="n">csvExporter</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
@@ -117,218 +139,59 @@
 </section>
 <section id="exporting-from-a-file">
 <h3>Exporting from a file<a class="headerlink" href="#exporting-from-a-file" title="Link to this heading">¶</a></h3>
-<p>Exporting data from a file requires quite a few pieces, so there is a convenience class to easily allow exporting data from a file. Only one import is required:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">vectornav.Plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileExporter</span>
+<p>Exporting data from a file requires quite a few pieces. First create a sensor with the <code class="xref py py-class docutils literal notranslate"><span class="pre">MeasQueueMode`</span></code> set to Off.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pushToCompositeData</span> <span class="o">=</span> <span class="n">Sensor</span><span class="o">.</span><span class="n">MeasQueueMode</span><span class="o">.</span><span class="n">Off</span>
+<span class="n">sensor</span> <span class="o">=</span> <span class="n">Sensor</span><span class="p">(</span><span class="n">pushToCompositeData</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>A factory pattern allows adding exporters easily:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fileExporter</span><span class="o">.</span><span class="n">addCsvExporter</span><span class="p">(</span><span class="n">outputPath</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="c1"># system timestamps are not necessary</span>
-<span class="n">fileExporter</span><span class="o">.</span><span class="n">addAsciiExporter</span><span class="p">(</span><span class="n">outputPath</span><span class="p">)</span>
+<p>Create the exporters to your desired file types and subscribe the sensor to their Queue pointers</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">asciiExporter</span> <span class="o">=</span> <span class="n">DataExport</span><span class="o">.</span><span class="n">ExporterAscii</span><span class="p">(</span><span class="n">outputPath</span><span class="p">,</span> <span class="n">DataExport</span><span class="o">.</span><span class="n">PacketQueueMode</span><span class="o">.</span><span class="n">Retry</span><span class="p">)</span>
+<span class="n">sensor</span><span class="o">.</span><span class="n">subscribeToMessage</span><span class="p">(</span>
+    <span class="n">asciiExporter</span><span class="o">.</span><span class="n">getQueuePtr</span><span class="p">(),</span> <span class="s2">&quot;VN&quot;</span><span class="p">,</span> <span class="n">Sensor</span><span class="o">.</span><span class="n">AsciiSubscriberFilterType</span><span class="o">.</span><span class="n">StartsWith</span>
+<span class="p">)</span>
+
+<span class="n">csvExporter</span> <span class="o">=</span> <span class="n">DataExport</span><span class="o">.</span><span class="n">ExporterCsv</span><span class="p">(</span><span class="n">outputPath</span><span class="p">,</span> <span class="n">DataExport</span><span class="o">.</span><span class="n">PacketQueueMode</span><span class="o">.</span><span class="n">Retry</span><span class="p">)</span>
+<span class="n">sensor</span><span class="o">.</span><span class="n">subscribeToMessage</span><span class="p">(</span>
+    <span class="n">csvExporter</span><span class="o">.</span><span class="n">getQueuePtr</span><span class="p">(),</span>
+    <span class="n">Sensor</span><span class="o">.</span><span class="n">BinaryOutputMeasurements</span><span class="p">(),</span>
+    <span class="n">Sensor</span><span class="o">.</span><span class="n">FaSubscriberFilterType</span><span class="o">.</span><span class="n">AnyMatch</span>
+<span class="p">)</span>
+<span class="n">sensor</span><span class="o">.</span><span class="n">subscribeToMessage</span><span class="p">(</span>
+    <span class="n">csvExporter</span><span class="o">.</span><span class="n">getQueuePtr</span><span class="p">(),</span> <span class="s2">&quot;VN&quot;</span><span class="p">,</span> <span class="n">Sensor</span><span class="o">.</span><span class="n">AsciiSubscriberFilterType</span><span class="o">.</span><span class="n">StartsWith</span>
+<span class="p">)</span>
+
 </pre></div>
 </div>
-<p>With the desired exporters added, pass the file location of a binary file to the fileExporter to export the data:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fileExporter</span><span class="o">.</span><span class="n">processFile</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+<p>Start the desired exporter threads.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">asciiExporter</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Connect the sensor to the input file and monitor for errors.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sensor</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+
+    <span class="c1"># Handle asynchronous errors</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sensor</span><span class="o">.</span><span class="n">throwIfAsyncError</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">vectornav</span><span class="o">.</span><span class="n">FileReadFailed</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">asyncError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received async error: </span><span class="si">{</span><span class="n">asyncError</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">sensor</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Lastly, stop the exporter threads</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">asciiExporter</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
-<section id="exportercsv">
-<h3>ExporterCsv<a class="headerlink" href="#exportercsv" title="Link to this heading">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterCsv">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vectornav.Plugins.</span></span><span class="sig-name descname"><span class="pre">ExporterCsv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enableSystemTimeStamps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">false</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterCsv" title="Link to this definition">¶</a></dt>
-<dd><p>An Exporter that will parse data packets from the sensor and export that data to a unique CSV file.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterCsv.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterCsv.start" title="Link to this definition">¶</a></dt>
-<dd><p>Starts a thread that logs data in the background</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterCsv.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterCsv.stop" title="Link to this definition">¶</a></dt>
-<dd><p>Stops the logging thread and closes created files</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterCsv.isLogging">
-<span class="sig-name descname"><span class="pre">isLogging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterCsv.isLogging" title="Link to this definition">¶</a></dt>
-<dd><p>Returns if the logger is currently logging data</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterCsv.getQueuePtr">
-<span class="sig-name descname"><span class="pre">getQueuePtr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterCsv.getQueuePtr" title="Link to this definition">¶</a></dt>
-<dd><p>Returns a pointer to the internal queue. Required for real-time exporting</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterCsv.exportToFile">
-<span class="sig-name descname"><span class="pre">exportToFile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterCsv.exportToFile" title="Link to this definition">¶</a></dt>
-<dd><p>Method to manually control when the Exporter writes to a file</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="exporterascii">
-<h3>ExporterAscii<a class="headerlink" href="#exporterascii" title="Link to this heading">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterAscii">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vectornav.Plugins.</span></span><span class="sig-name descname"><span class="pre">ExporterAscii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterAscii" title="Link to this definition">¶</a></dt>
-<dd><p>An Exporter to export data all ASCII based data from the sensor into their respective file.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterAscii.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterAscii.start" title="Link to this definition">¶</a></dt>
-<dd><p>Starts a thread that logs data in the background</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterAscii.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterAscii.stop" title="Link to this definition">¶</a></dt>
-<dd><p>Stops the logging thread and closes created files</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterAscii.isLogging">
-<span class="sig-name descname"><span class="pre">isLogging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterAscii.isLogging" title="Link to this definition">¶</a></dt>
-<dd><p>Returns if the logger is currently logging data</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterAscii.getQueuePtr">
-<span class="sig-name descname"><span class="pre">getQueuePtr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterAscii.getQueuePtr" title="Link to this definition">¶</a></dt>
-<dd><p>Returns a pointer to the internal queue. Required for real-time exporting</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterAscii.exportToFile">
-<span class="sig-name descname"><span class="pre">exportToFile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterAscii.exportToFile" title="Link to this definition">¶</a></dt>
-<dd><p>Method to manually control when the Exporter writes to a file</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="exporterrinex">
-<h3>ExporterRinex<a class="headerlink" href="#exporterrinex" title="Link to this heading">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterRinex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vectornav.Plugins.</span></span><span class="sig-name descname"><span class="pre">ExporterRinex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnssGroup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterRinex" title="Link to this definition">¶</a></dt>
-<dd><p>An Exporter to export data to the RINEXv3 format. Requries gnssRawMeas to be enabled.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterRinex.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterRinex.start" title="Link to this definition">¶</a></dt>
-<dd><p>Starts a thread that logs data in the background</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterRinex.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterRinex.stop" title="Link to this definition">¶</a></dt>
-<dd><p>Stops the logging thread and closes created files</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterRinex.isLogging">
-<span class="sig-name descname"><span class="pre">isLogging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterRinex.isLogging" title="Link to this definition">¶</a></dt>
-<dd><p>Returns if the logger is currently logging data</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterRinex.getQueuePtr">
-<span class="sig-name descname"><span class="pre">getQueuePtr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterRinex.getQueuePtr" title="Link to this definition">¶</a></dt>
-<dd><p>Returns a pointer to the internal queue. Required for real-time exporting</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterRinex.exportToFile">
-<span class="sig-name descname"><span class="pre">exportToFile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterRinex.exportToFile" title="Link to this definition">¶</a></dt>
-<dd><p>Method to manually control when the Exporter writes to a file</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="exporterimr">
-<h3>ExporterImr<a class="headerlink" href="#exporterimr" title="Link to this heading">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterImr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vectornav.Plugins.</span></span><span class="sig-name descname"><span class="pre">ExporterImr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterImr" title="Link to this definition">¶</a></dt>
-<dd><p>An Exporter class that will export data into the IMR file format. Requires gpsTow, uncompAccel and uncompGyro to be enabled in the same output message.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterImr.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterImr.start" title="Link to this definition">¶</a></dt>
-<dd><p>Starts a thread that logs data in the background</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterImr.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterImr.stop" title="Link to this definition">¶</a></dt>
-<dd><p>Stops the logging thread and closes created files</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterImr.isLogging">
-<span class="sig-name descname"><span class="pre">isLogging</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterImr.isLogging" title="Link to this definition">¶</a></dt>
-<dd><p>Returns if the logger is currently logging data</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterImr.getQueuePtr">
-<span class="sig-name descname"><span class="pre">getQueuePtr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterImr.getQueuePtr" title="Link to this definition">¶</a></dt>
-<dd><p>Returns a pointer to the internal queue. Required for real-time exporting</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.ExporterImr.exportToFile">
-<span class="sig-name descname"><span class="pre">exportToFile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.ExporterImr.exportToFile" title="Link to this definition">¶</a></dt>
-<dd><p>Method to manually control when the Exporter writes to a file</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="fileexporter">
-<h3>FileExporter<a class="headerlink" href="#fileexporter" title="Link to this heading">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="vectornav.Plugins.FileExporter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vectornav.Plugins.</span></span><span class="sig-name descname"><span class="pre">FileExporter</span></span><a class="headerlink" href="#vectornav.Plugins.FileExporter" title="Link to this definition">¶</a></dt>
-<dd><p>A convenience class for helping export data from a binary file.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.FileExporter.processFile">
-<span class="sig-name descname"><span class="pre">processFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.FileExporter.processFile" title="Link to this definition">¶</a></dt>
-<dd><p>Processes the file into all exporters that have been added</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.FileExporter.addCsvExporter">
-<span class="sig-name descname"><span class="pre">addCsvExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enableSystemTimeStamps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">false</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.FileExporter.addCsvExporter" title="Link to this definition">¶</a></dt>
-<dd><p>Adds a ExporterCsv class to the list of exporters</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.FileExporter.addAsciiExporter">
-<span class="sig-name descname"><span class="pre">addAsciiExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.FileExporter.addAsciiExporter" title="Link to this definition">¶</a></dt>
-<dd><p>Adds a ExporterAscii class to the list of exporters</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.FileExporter.addRinexExporter">
-<span class="sig-name descname"><span class="pre">addRinexExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnssGroup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.FileExporter.addRinexExporter" title="Link to this definition">¶</a></dt>
-<dd><p>Adds a ExporterRinex class to the list of exporters</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vectornav.Plugins.FileExporter.addImrExporter">
-<span class="sig-name descname"><span class="pre">addImrExporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#vectornav.Plugins.FileExporter.addImrExporter" title="Link to this definition">¶</a></dt>
-<dd><p>Adds a ExporterImr class to the list of exporters</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
+<p>The Python API for the DataExport plugin is modeled from the C++ API which can be found here:
+<a class="reference external" href="../../../cpp/documentation/_api/namespace_VN__DataExport.html#namespace-vn-dataexport" title="(in VectorNav SDK)"><span class="xref std std-ref">DataExport</span></a></p>
 </section>
 </section>
 
@@ -348,23 +211,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../pages/advanced_functionality.html">Advanced Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">VNSDK API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Plugins</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Export</a></li>
-<li class="toctree-l2"><a class="reference internal" href="firmware_update.html">Firmware Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calibration.html">Calibration (<em>BETA</em>)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Export (<em>BETA</em>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="firmware_programmer.html">Firmware Programmer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logger.html">Logger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="math.html">Math (<em>BETA</em>)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="register_scan.html">Register Scan</a></li>
-<li class="toctree-l2"><a class="reference internal" href="simple_logger.html">Simple Logger</a></li>
 </ul>
 </li>
 </ul>
 </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
-    <p class="topless"><a href="index.html"
-                          title="Previous page">&larr; Plugins</a></p>
+    <p class="topless"><a href="calibration.html"
+                          title="Previous page">&larr; Calibration (<em>BETA</em>)</a></p>
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="firmware_update.html"
-                          title="Next page">&rarr; Firmware Update</a></p>
+    <p class="topless"><a href="firmware_programmer.html"
+                          title="Next page">&rarr; Firmware Programmer</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -413,15 +278,15 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="firmware_update.html" title="Firmware Update"
+          <a href="firmware_programmer.html" title="Firmware Programmer"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="index.html" title="Plugins"
+          <a href="calibration.html" title="Calibration (BETA)"
              >previous</a> &nbsp; &nbsp;</li>
-    <li><a href="../Documentation.html">VectorNav 0.22.0 documentation</a> &#187;</li>
+    <li><a href="../Documentation.html">VectorNav SDK 0.22.0 documentation</a> &#187;</li>
 
           <li class="nav-item nav-item-1"><a href="index.html" >Plugins</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Data Export</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Data Export (<em>BETA</em>)</a></li> 
       </ul>
     </div>
     </div>

@@ -40,6 +40,8 @@ Includes
 
 - ``vectornav/Config.hpp``
 
+- ``vectornav/HAL/File.hpp``
+
 - ``vectornav/HAL/Serial.hpp``
 
 - ``vectornav/HAL/Serial_Base.hpp``
@@ -78,15 +80,15 @@ Included By
 -----------
 
 
-- :ref:`file_plugins_FirmwareUpdate_include_vectornav_Bootloader.hpp`
+- :ref:`file_include_vectornav_Interface_BridgeSensor.hpp`
 
-- :ref:`file_plugins_FirmwareUpdate_include_vectornav_FirmwareUpdater.hpp`
+- :ref:`file_plugins_FirmwareProgrammer_include_vectornav_Bootloader.hpp`
+
+- :ref:`file_plugins_FirmwareProgrammer_include_vectornav_FirmwareUpdater.hpp`
 
 - :ref:`file_plugins_RegisterScan_include_vectornav_ConfigReader.hpp`
 
 - :ref:`file_plugins_RegisterScan_include_vectornav_ConfigWriter.hpp`
-
-- :ref:`file_plugins_SimpleLogger_SimpleLogger.hpp`
 
 
 

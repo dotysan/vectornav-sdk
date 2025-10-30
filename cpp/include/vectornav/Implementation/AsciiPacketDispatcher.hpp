@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,14 +36,19 @@ namespace VN
 class AsciiPacketDispatcher : public PacketDispatcher
 {
 public:
-    AsciiPacketDispatcher(MeasurementQueue* measurementQueue, EnabledMeasurements enabledMeasurements, CommandProcessor* commandProcessor)
-        : PacketDispatcher{{'$'}}, _compositeDataQueue(measurementQueue), _enabledMeasurements(enabledMeasurements), _commandProcessor(commandProcessor)
+    AsciiPacketDispatcher(MeasurementQueue* measurementQueue, EnabledMeasurements enabledMeasurements, CommandProcessor* commandProcessor,
+                          bool parseToCD = true)
+        : PacketDispatcher{{'$'}},
+          _compositeDataQueue(measurementQueue),
+          _enabledMeasurements(enabledMeasurements),
+          _commandProcessor(commandProcessor),
+          _parseToCD{parseToCD}
     {
     }
 
     PacketDispatcher::FindPacketRetVal findPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
 
-    void dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
+    Error dispatchPacket(const ByteBuffer& byteBuffer, const size_t syncByteIndex) noexcept override;
 
     enum class SubscriberFilterType
     {
@@ -51,7 +56,7 @@ public:
         DoesNotStartWith
     };
 
-    bool addSubscriber(PacketQueue_Interface* subscriber, const AsciiHeader& headerToUse, SubscriberFilterType filterType) noexcept;
+    Error addSubscriber(PacketQueue_Interface* subscriber, const AsciiHeader& headerToUse, SubscriberFilterType filterType) noexcept;
 
     void removeSubscriber(PacketQueue_Interface* subscriberToRemove) noexcept;
     void removeSubscriber(PacketQueue_Interface* subscriberToRemove, const AsciiHeader& headerToUse) noexcept;
@@ -72,12 +77,13 @@ private:
     static const auto SUBSCRIBER_CAPACITY = Config::PacketDispatchers::asciiPacketSubscriberCapacity;
     using Subscribers = Vector<Subscriber, SUBSCRIBER_CAPACITY>;
     Subscribers _subscribers;
+    bool _parseToCD;
 
-    bool _tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata,
-                                      AsciiPacketProtocol::AsciiMeasurementHeader measEnum) noexcept;
-    void _invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata) noexcept;
-    bool _tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata,
-                              Subscriber& subscriber) noexcept;
+    Error _tryPushToCompositeDataQueue(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata,
+                                       AsciiPacketProtocol::AsciiMeasurementHeader measEnum) noexcept;
+    Error _invokeSubscribers(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata) noexcept;
+    Error _tryPushToSubscriber(const ByteBuffer& byteBuffer, const size_t syncByteIndex, const AsciiPacketProtocol::Metadata& metadata,
+                               Subscriber& subscriber) noexcept;
 };
 }  // namespace VN
 

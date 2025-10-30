@@ -29,38 +29,37 @@ To add a new HAL implementation, for each HAL class you need to implement you sh
 Serial
 ======
 
-:class:`VN::Serial_Base`
+:class:`~VN::Serial_Base`
 
 Mutex
 =====
 
-:class:`VN::Mutex_Base`
+:class:`~VN::Mutex_Base`
 
 Timer
 =====
 
-:class:`VN::Timer_Base`
+:class:`~VN::Timer_Base`
 
 Thread
 ======
 
-:class:`VN::Thread_Base`
+:class:`~VN::Thread_Base`
 
 Single-Threaded Operation
 *************************
 
-By default, the VnSdk is multi-threaded, where a high-priority listening thread is spawned upon the `connect` call, and joined on the `disconnect` call. This behavior can be disabled via Config.hpp, with the THREADING_ENABLE parameter. 
+By default, the VnSdk is multi-threaded, where a high-priority listening thread is spawned upon the :func:`~VN::Sensor::connect` call, and joined on the :func:`~VN::Sensor::disconnect` call. This behavior can be disabled via :ref:`Config.hpp <file_include_vectornav_Config.hpp>`, with the ``THREADING_ENABLE`` parameter. 
 
-The high-priority normally handles
+The high-priority thread normally handles
 
-#. Polling data from serial port
-#. Attempt to find a packet
-#. If found, route that packet through to its respective output queue, parsing if applicable
+#. Polling data from the serial port
+#. Attempting to find a packet
+#. If found, routing that packet through to its respective output queue, parsing if applicable
 
 In most applications no special care needs to be taken, as all blocking calls automatically manage those two functions. For example, a function which is only interested in asynchronous measurement output, content to block until the next received measurement, can safely run as:
 
 .. code-block:: cpp
-   :linenos:
 
     while (true) {
         auto nextMeasurement = sensor.getNextMeasurement();
@@ -72,14 +71,13 @@ In most applications no special care needs to be taken, as all blocking calls au
         // ... Do other system-level things
     }
 
-Because the `getNextMeasurement` call is blocking, it will manage polling the serial and pushing packets through the pipeline until a measurement is found. The same holds true for any commands to the sensor (including read/write register): so long as the call to send the command is blocking, no special code needs to be added.
+Because the :func:`~VN::Sensor::getNextMeasurement` call is blocking, it will manage polling the serial and pushing packets through the pipeline until a measurement is found. The same holds true for any commands to the sensor (including read/write register): so long as the call to send the command is blocking, no special code needs to be added.
 
-If it is unacceptable that a blocking call is used (for example where other system control inputs are necessary), the serial polling and triggering of packet identification/routing must be handled explicitly. To this end, there are two methods available only when threading is disabled: `loadMainBufferFromSerial` and `processNextPacket`. 
+If it is unacceptable that a blocking call is used (for example where other system control inputs are necessary), the serial polling and triggering of packet identification/routing must be handled explicitly. To this end, there are two methods available only when threading is disabled: :func:`~VN::Sensor::loadMainBufferFromSerial` and :func:`~VN::Sensor::processNextPacket` . 
 
 To avoid data drops, best practice is to 
 
 .. code-block:: cpp
-   :linenos:
    :emphasize-lines: 5, 7
 
     while (true) {
@@ -95,5 +93,3 @@ To avoid data drops, best practice is to
                 // ... Handle next measurmenet
         }
     }
-
-some methods are no longer const

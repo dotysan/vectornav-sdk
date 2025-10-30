@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// VectorNav SDK (v0.22.0)
+// VectorNav SDK (v0.99.0)
 // Copyright (c) 2024 VectorNav Technologies, LLC
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,25 +21,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-
 #include "vectornav/CLI_Sensor.hpp"
-#include "vectornav/CLI_Commands.hpp"
-
-#include <conio.h>
-#include <msclr/marshal.h>
-
-#include <cstdint>
-#include <string>
 
 using namespace msclr::interop;
 
 namespace VNSDK
 {
-void Sensor::Connect(String ^ portName, UInt32 baudRate)
+
+void Sensor::Connect(String ^ portName, UInt32 baudRate) { Connect(portName, static_cast<BaudRate>(baudRate), false); }
+
+void Sensor::Connect(String ^ portName, BaudRate baudRate) { Connect(portName, baudRate, false); }
+
+void Sensor::Connect(String ^ portName, UInt32 baudRate, bool monitorAsyncErrors) { Connect(portName, static_cast<BaudRate>(baudRate), monitorAsyncErrors); }
+
+void Sensor::Connect(String ^ portName, BaudRate baudRate, bool monitorAsyncErrors)
 {
     marshal_context ^ context = gcnew marshal_context();
-    VN::Error error = _sensor->connect(context->marshal_as<const char*>(portName), static_cast<VN::Registers::System::BaudRate::BaudRates>(baudRate));
+    VN::Error error = _sensor->connect(context->marshal_as<const char*>(portName), Registers::System::ToNativeInstance(baudRate), monitorAsyncErrors);
+    if (error != VN::Error::None)
+    {
+        throw gcnew VnException(error);
+    }
+}
+
+void Sensor::Connect(String^ fileName)
+{
+    marshal_context ^ context = gcnew marshal_context();
+    VN::Error error = _sensor->connect(context->marshal_as<const char*>(fileName));
+    if (error != VN::Error::None)
+    {
+        throw gcnew VnException(error);
+    }
+}
+
+void Sensor::AutoConnect(String ^ portName) { AutoConnect(portName, false); }
+
+void Sensor::AutoConnect(String ^ portName, bool monitorAsyncErrors)
+{
+    marshal_context ^ context = gcnew marshal_context();
+    VN::Error error = _sensor->autoConnect(context->marshal_as<const char*>(portName), monitorAsyncErrors);
     if (error != VN::Error::None)
     {
         throw gcnew VnException(error);
@@ -47,16 +67,6 @@ void Sensor::Connect(String ^ portName, UInt32 baudRate)
     delete context;
 }
 
-void Sensor::AutoConnect(String ^ portName)
-{
-    marshal_context ^ context = gcnew marshal_context();
-    VN::Error error = _sensor->autoConnect(context->marshal_as<const char*>(portName));
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
-    delete context;
-}
 
 bool Sensor::VerifySensorConnectivity()
 {
@@ -66,40 +76,61 @@ bool Sensor::VerifySensorConnectivity()
 String ^ Sensor::ConnectedPortName()
 {
     auto connectedPortName = _sensor->connectedPortName();
-    if (!connectedPortName.has_value())
-    {
-        throw gcnew VnException(VN::Error::SerialPortClosed);
-    }
+    if (!connectedPortName.has_value()) { throw gcnew VnException(VN::Error::SerialPortClosed); }
     String ^ portName = msclr::interop::marshal_as<String ^>(connectedPortName.value().c_str());
     return portName;
 }
 
+// Sensor::BaudRate Sensor::ConnectedBaudRate()
+// {
+//     auto connectedBaudRate = _sensor->connectedBaudRate();
+//     if (!connectedBaudRate.has_value()) { throw gcnew VnException(VN::Error::SerialPortClosed); }
+//     return static_cast<Sensor::BaudRate>(connectedBaudRate.value());
+// }
+
 uint32_t Sensor::ConnectedBaudRate()
 {
     auto connectedBaudRate = _sensor->connectedBaudRate();
-    if (!connectedBaudRate.has_value())
-    {
-        throw gcnew VnException(VN::Error::SerialPortClosed);
-    }
+    if (!connectedBaudRate.has_value()) { throw gcnew VnException(VN::Error::SerialPortClosed); }
     return static_cast<uint32_t>(connectedBaudRate.value());
+}
+
+void Sensor::ChangeBaudRate(BaudRate baudRate)
+{
+    VN::Error error = _sensor->changeBaudRate(Registers::System::ToNativeInstance(baudRate));
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::ChangeBaudRate(UInt32 baudRate)
 {
     VN::Error error = _sensor->changeBaudRate(static_cast<VN::Registers::System::BaudRate::BaudRates>(baudRate));
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+}
+
+void Sensor::ChangeBaudRate(BaudRate baudRate, Registers::System::BaudRate::SerialPort serialPort)
+{
+    VN::Error error = _sensor->changeBaudRate(Registers::System::ToNativeInstance(baudRate),
+        static_cast<VN::Registers::System::BaudRate::SerialPort>(serialPort));
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+}
+
+void Sensor::ChangeBaudRate(UInt32 baudRate, System::Byte serialPort)
+{
+    VN::Error error = _sensor->changeBaudRate(static_cast<VN::Registers::System::BaudRate::BaudRates>(baudRate),
+        static_cast<VN::Registers::System::BaudRate::SerialPort>(serialPort));
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+}
+
+void Sensor::ChangeHostBaudRate(BaudRate baudRate)
+{
+    VN::Error error = _sensor->changeHostBaudRate(Registers::System::ToNativeInstance(baudRate));
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::ChangeHostBaudRate(UInt32 baudRate)
 {
     VN::Error error = _sensor->changeHostBaudRate(static_cast<VN::Registers::System::BaudRate::BaudRates>(baudRate));
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::Disconnect()
@@ -119,20 +150,14 @@ bool Sensor::HasMeasurement()
 Nullable<CompositeData> Sensor::GetNextMeasurement()
 {
     auto measurement = _sensor->getNextMeasurement();
-    if (measurement)
-    {
-        return CompositeData(*measurement);
-    }
+    if (measurement) { return CompositeData(*measurement); }
     return Nullable<CompositeData>();
 }
 
 Nullable<CompositeData> Sensor::GetMostRecentMeasurement()
 {
     auto measurement = _sensor->getMostRecentMeasurement();
-    if (measurement)
-    {
-        return CompositeData(*measurement);
-    }
+    if (measurement) { return CompositeData(*measurement); }
     return Nullable<CompositeData>();
 }
 
@@ -140,36 +165,33 @@ Nullable<CompositeData> Sensor::GetMostRecentMeasurement()
 // Commands
 // ----------------------
 
-void Sensor::ReadRegister(VNSDK::Registers::Register ^ reg)
+void Sensor::ReadRegister(VNSDK::Registers::ConfigRegister ^ reg)
 {
     VN::Error error = _sensor->readRegister(reg->GetReference());
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
-void Sensor::WriteRegister(VNSDK::Registers::Register ^ reg)
+void Sensor::ReadRegister(VNSDK::Registers::MeasRegister ^ reg)
+{
+    VN::Error error = _sensor->readRegister(reg->GetReference());
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+}
+
+void Sensor::WriteRegister(VNSDK::Registers::ConfigRegister ^ reg)
 {
     VN::Error error = _sensor->writeRegister((VN::ConfigurationRegister*)reg->GetReference());
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::WriteSettings()
 {
     VN::Error error = _sensor->writeSettings();
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::Reset()
 {
-    VN::Error error = _sensor->reset();
+    VN::Error error = _sensor->reset(_sensor->asyncErrorThrowingEnabled());
     if (error != VN::Error::None)
     {
         throw gcnew VnException(error);
@@ -179,75 +201,69 @@ void Sensor::Reset()
 void Sensor::RestoreFactorySettings()
 {
     VN::Error error = _sensor->restoreFactorySettings();
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+}
+
+void Sensor::KnownMagneticDisturbance(KnownMagneticDisturbance::State state)
+{
+    VN::Error error = _sensor->knownMagneticDisturbance(ToNativeInstance(state));
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::KnownMagneticDisturbance(uint8_t state)
 {
     VN::Error error = _sensor->knownMagneticDisturbance(static_cast<VN::KnownMagneticDisturbance::State>(state));
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+}
+
+void Sensor::KnownAccelerationDisturbance(KnownAccelerationDisturbance::State state)
+{
+    VN::Error error = _sensor->knownAccelerationDisturbance(ToNativeInstance(state));
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::KnownAccelerationDisturbance(uint8_t state)
 {
     VN::Error error = _sensor->knownAccelerationDisturbance(static_cast<VN::KnownAccelerationDisturbance::State>(state));
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::SetInitialHeading(float heading)
 {
     VN::Error error = _sensor->setInitialHeading(heading);
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::SetInitialHeading(Ypr ypr)
 {
     VN::Ypr nativeYpr{ypr.yaw, ypr.pitch, ypr.roll};
     VN::Error error = _sensor->setInitialHeading(nativeYpr);
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::SetInitialHeading(Quaternion quat)
 {
     const VN::Quat nativeQuat{VN::Vec3f{quat.vector.x, quat.vector.y, quat.vector.z}, quat.scalar};
     VN::Error error = _sensor->setInitialHeading(nativeQuat);
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+}
+
+void Sensor::AsyncOutputEnable(AsyncOutputEnable::State state)
+{
+    VN::Error error = _sensor->asyncOutputEnable(ToNativeInstance(state));
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::AsyncOutputEnable(uint8_t state)
 {
     VN::Error error = _sensor->asyncOutputEnable(static_cast<VN::AsyncOutputEnable::State>(state));
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 void Sensor::SetFilterBias()
 {
     VN::Error error = _sensor->setFilterBias();
-    if (error != VN::Error::None)
-    {
-        throw gcnew VnException(error);
-    }
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
 // Error sendCommand(Command* commandToSend, SendCommandBlockMode waitMode, const Microseconds waitLength = Config::Sensor::commandSendTimeoutLength,
@@ -255,13 +271,9 @@ void Sensor::SetFilterBias()
 
 void Sensor::SendCommand(GenericCommand^% commandToSend, Sensor::SendCommandBlockMode waitMode)
 {
-    VN::Sensor::SendCommandBlockMode waitModeC = static_cast<VN::Sensor::SendCommandBlockMode>(static_cast<int>(waitMode));
-	VN::Error error = _sensor->sendCommand(commandToSend->GetReference(), waitModeC); 	
-    if (error != VN::Error::None)
-	{
-		VnException^ pVnException = gcnew VnException(error);
-		throw pVnException;
-	}
+    VN::BridgeSensor::SendCommandBlockMode waitModeC = static_cast<VN::BridgeSensor::SendCommandBlockMode>(static_cast<int>(waitMode));
+    VN::Error error = _sensor->sendCommand(commandToSend->GetReference(), waitModeC); 	
+    if (error != VN::Error::None) {throw gcnew VnException(error); }
 }
 
 void Sensor::SerialSend(String ^ msgToSend)
@@ -276,18 +288,13 @@ void Sensor::SerialSend(String ^ msgToSend)
 // Error Handling
 // ----------------------
 
-Nullable<AsyncError> Sensor::GetAsynchronousError() {
-    auto latestError = _sensor->getAsynchronousError();
-    if (!latestError.has_value()) {
-        return Nullable<AsyncError>();
+void Sensor::ThrowIfAsyncError() {
+    auto asyncError = _sensor->getNextAsyncError();
+    if (asyncError) 
+    {
+        throw gcnew VnException(asyncError->error);
     }
-    AsyncError error;
-    error.Error = static_cast<uint16_t>(latestError->error);
-    error.Message = marshal_as<String^>(latestError->message.to_string());
-    error.Timestamp = _clock.ConvertTime(latestError->timestamp);
-    return error;
 }
-
 
 System::DateTime Sensor::Now() 
 {
@@ -298,9 +305,80 @@ System::DateTime Sensor::Now()
 // Additional logging
 // ----------------------
 
+void Sensor::SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, BinaryOutputMeasurements^ binaryOutputMeasurementFilter)
+{
+    VN::Error error = _sensor->subscribeToMessage(queueToSubscribe->ToNativePointer(), binaryOutputMeasurementFilter->ToNativePointer());
+    if (error != VN::Error::None)
+	{
+		VnException^ vnException = gcnew VnException(error);
+		throw vnException;
+	}
+}
+
+void Sensor::SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, BinaryOutputMeasurements^ binaryOutputMeasurementFilter, FaSubscriberFilterType filterType)
+{
+    VN::Error error = _sensor->subscribeToMessage(queueToSubscribe->ToNativePointer(), binaryOutputMeasurementFilter->ToNativePointer(), ToNativeInstance(filterType));
+    if (error != VN::Error::None)
+	{
+		VnException^ vnException = gcnew VnException(error);
+		throw vnException;
+	}
+}
+
+void Sensor::SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, System::String^ asciiHeaderFilter)
+{
+    std::string nativeString = msclr::interop::marshal_as<std::string>(asciiHeaderFilter);
+    VN::AsciiHeader header(nativeString.c_str());
+    VN::Error error = _sensor->subscribeToMessage(queueToSubscribe->ToNativePointer(), header);
+    if (error != VN::Error::None)
+	{
+		VnException^ vnException = gcnew VnException(error);
+		throw vnException;
+	}
+}
+
+void Sensor::SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, System::String^ asciiHeaderFilter, AsciiSubscriberFilterType filterType)
+{
+    std::string nativeString = msclr::interop::marshal_as<std::string>(asciiHeaderFilter);
+    VN::AsciiHeader header(nativeString.c_str());
+    VN::Error error = _sensor->subscribeToMessage(queueToSubscribe->ToNativePointer(), header, ToNativeInstance(filterType));
+    if (error != VN::Error::None)
+	{
+		VnException^ vnException = gcnew VnException(error);
+		throw vnException;
+	}
+}
+
+void Sensor::SubscribeToMessage(ManagedQueuePointer^ queueToSubscribe, SyncByte sb)
+{
+    VN::Error error = _sensor->subscribeToMessage(queueToSubscribe->ToNativePointer(), ToNativeInstance(sb));
+    if (error != VN::Error::None)
+    {
+        VnException^ vnException = gcnew VnException(error);
+        throw vnException;
+    }
+}
+
+void Sensor::UnsubscribeFromMessage(ManagedQueuePointer^ queueToUnsubscribe, BinaryOutputMeasurements^ binaryOutputMeasurementFilter)
+{
+    _sensor->unsubscribeFromMessage(queueToUnsubscribe->ToNativePointer(), binaryOutputMeasurementFilter->ToNativePointer());
+}
+
+void Sensor::UnsubscribeFromMessage(ManagedQueuePointer^ queueToUnsubscribe, System::String^ asciiHeaderFilter)
+{
+    std::string nativeString = msclr::interop::marshal_as<std::string>(asciiHeaderFilter);
+    VN::AsciiHeader header(nativeString.c_str());
+    _sensor->unsubscribeFromMessage(queueToUnsubscribe->ToNativePointer(), header);
+}
+
+void Sensor::UnsubscribeFromMessage(ManagedQueuePointer^ queueToUnsubscribe, SyncByte syncByte)
+{
+    _sensor->unsubscribeFromMessage(queueToUnsubscribe->ToNativePointer(), ToNativeInstance(syncByte));
+}
+
 void Sensor::RegisterReceivedByteBuffer(ByteBuffer^ buffer)
 {
-    _sensor->registerReceivedByteBuffer(buffer->GetReference());
+    _sensor->registerReceivedByteBuffer(buffer->GetNativePointer());
 }
 
 void Sensor::DeregisterReceivedByteBuffer()
@@ -308,40 +386,20 @@ void Sensor::DeregisterReceivedByteBuffer()
     _sensor->deregisterReceivedByteBuffer();
 }
 
-void Sensor::RegisterSkippedByteBuffer(ByteBuffer^ buffer)
+#if (PLUGIN_DATAEXPORT)
+void Sensor::RegisterDataExporter(DataExport::Exporter^ exporter)
 {
-    _sensor->registerSkippedByteBuffer(buffer->GetReference());
+    VN::Error error = _sensor->subscribeToMessage(exporter->GetQueuePointer(), "VN", VN::BridgeSensor::AsciiSubscriberFilterType::StartsWith);
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
+    error = _sensor->subscribeToMessage(exporter->GetQueuePointer(), VN::BridgeSensor::BinaryOutputMeasurements{}, VN::BridgeSensor::FaSubscriberFilterType::AnyMatch);
+    if (error != VN::Error::None) { throw gcnew VnException(error); }
 }
 
-void Sensor::DeregisterSkippedByteBuffer()
-{
-    _sensor->deregisterSkippedByteBuffer();
-}
-
-
-void Sensor::RegisterDataExporter(Exporter^ exporter)
-{
-    VN::Error error = _sensor->subscribeToMessage(exporter->GetQueuePointer(), "VN", VN::Sensor::AsciiSubscriberFilterType::StartsWith);
-    error = _sensor->subscribeToMessage(exporter->GetQueuePointer(), VN::Sensor::BinaryOutputMeasurements{}, VN::Sensor::FaSubscriberFilterType::AnyMatch);
-}
-
-void Sensor::DeregisterDataExporter(Exporter^ exporter)
+void Sensor::DeregisterDataExporter(DataExport::Exporter^ exporter)
 {
     _sensor->unsubscribeFromMessage(exporter->GetQueuePointer(), "VN");
-    _sensor->unsubscribeFromMessage(exporter->GetQueuePointer(), VN::Sensor::BinaryOutputMeasurements{});
+    _sensor->unsubscribeFromMessage(exporter->GetQueuePointer(), VN::BridgeSensor::BinaryOutputMeasurements{});
 }
-
-#if (PLUGIN_CALIBRATION)
-void Sensor::RegisterHsiCalibration(Calibration::HsiCalibration_Base^ hsi)
-{
-    VN::Error error = _sensor->subscribeToMessage(hsi->GetQueuePointer(), "VNYMR", VN::Sensor::AsciiSubscriberFilterType::StartsWith);
-}
-
-void Sensor::DeregisterHsiCalibration(Calibration::HsiCalibration_Base^ hsi)
-{
-    _sensor->unsubscribeFromMessage(hsi->GetQueuePointer(), "VNYMR");
-}
-
-
 #endif
+
 } // namespace VNSDK

@@ -17,6 +17,4 @@ Variables
 ---------
 
 
-- :ref:`exhale_variable__config_8hpp_1abd997e93dae45fcbeac14b6ae7511922`
-
 - :ref:`exhale_variable__config_8hpp_1ad5df6441d89ff398d56b4c36bdb7b4e3`

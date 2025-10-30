@@ -83,12 +83,27 @@
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv4I0EN2VN12RegisterScan12ConfigReaderE">
 <span id="_CPPv3I0EN2VN12RegisterScan12ConfigReaderE"></span><span id="_CPPv2I0EN2VN12RegisterScan12ConfigReaderE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="struct_v_n_1_1_register_scan_1_1_config_reader"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ConfigReader</span></span></span><a class="headerlink" href="#_CPPv4I0EN2VN12RegisterScan12ConfigReaderE" title="Link to this definition">¶</a><br /></dt>
-<dd><div class="breathe-sectiondef docutils container">
+<dd><p>A base template interface for reading VectorNav configuration messages through the CRTP pattern. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Template Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> – The derived reader class implementing the specific reading mechanism. </p>
+</dd>
+</dl>
+<div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N2VN12RegisterScan12ConfigReader13getNextConfigER12AsciiMessage">
 <span id="_CPPv3N2VN12RegisterScan12ConfigReader13getNextConfigER12AsciiMessage"></span><span id="_CPPv2N2VN12RegisterScan12ConfigReader13getNextConfigER12AsciiMessage"></span><span id="VN::RegisterScan::ConfigReader::getNextConfig__AsciiMessageR"></span><span class="target" id="struct_v_n_1_1_register_scan_1_1_config_reader_1a9266c2850ece7b94f9e090af23d74ba3"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">VN</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="enum__errors_8hpp_1a1176d97ac8230053c095d40f6ddd9541.html#_CPPv4N2VN5ErrorE" title="VN::Error"><span class="n"><span class="pre">Error</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getNextConfig</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="typedef__generic_command_8hpp_1ac3acfe4b91a3c68083e27bef5cd68c2b.html#_CPPv4N2VN12AsciiMessageE" title="VN::AsciiMessage"><span class="n"><span class="pre">AsciiMessage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N2VN12RegisterScan12ConfigReader13getNextConfigER12AsciiMessage" title="Link to this definition">¶</a><br /></dt>
-<dd></dd></dl>
+<dd><p>Gets the next configuration message using the derived class implementation. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> – <strong>[out]</strong> Reference to an AsciiMessage object that will be populated with the next configuration. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Error code indicating success or failure of the operation. </p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 </dd></dl>
