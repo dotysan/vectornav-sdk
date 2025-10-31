@@ -1,18 +1,24 @@
+"""Setup script for building the VectorNav Python SDK extension module.
+
+This module configures and builds the vectornav Python extension using pybind11 and setuptools.
+It dynamically includes plugins and sets compilation options based on available source files.
+"""
+
 # The MIT License (MIT)
-# 
+#
 # VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,10 +27,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from setuptools import setup, Extension
-from pybind11.setup_helpers import Pybind11Extension
 from pathlib import Path
-import platform 
+import platform
+
+from pybind11.setup_helpers import Pybind11Extension
+from setuptools import setup
+
 regScan = Path('plugins/PyRegisterScan.cpp')
 firUpdt = Path('plugins/PyFirmwareProgrammer.cpp')
 logger = Path('plugins/PyLogger.cpp')
@@ -33,7 +41,7 @@ calibration = Path('plugins/PyCalibration.cpp')
 math = Path('plugins/PyMath.cpp')
 
 # Overwrite GNSS groups to enable satInfo and rawMeas, which are disabled by default in c++
-macros = [('__PYTHON__', None),('GNSS_GROUP_ENABLE', 0xFFFFFFFF),('GNSS2_GROUP_ENABLE', 0xFFFFFFFF)]
+macros = [('__PYTHON__', None), ('GNSS_GROUP_ENABLE', 0xFFFFFFFF), ('GNSS2_GROUP_ENABLE', 0xFFFFFFFF)]
 plugins = []
 includes = ['../cpp/include/', '../cpp/plugins', '../cpp/libs', './include', '../cpp/plugins/Math']
 
@@ -44,7 +52,7 @@ if regScan.exists():
     plugins.extend([
         '../cpp/plugins/RegisterScan/src/RegisterScan.cpp',
         '../cpp/plugins/RegisterScan/src/ConfigReader.cpp',
-        '../cpp/plugins/RegisterScan/src/ConfigWriter.cpp'
+        '../cpp/plugins/RegisterScan/src/ConfigWriter.cpp',
     ])
     includes.append('../cpp/plugins/RegisterScan/include')
 
@@ -54,8 +62,8 @@ if firUpdt.exists():
     plugins.append(str(firUpdt))
     plugins.extend([
         '../cpp/plugins/FirmwareProgrammer/src/Bootloader.cpp',
-        '../cpp/plugins/FirmwareProgrammer/src/FirmwareUpdater.cpp',   
-        '../cpp/plugins/FirmwareProgrammer/src/VnXml.cpp',   
+        '../cpp/plugins/FirmwareProgrammer/src/FirmwareUpdater.cpp',
+        '../cpp/plugins/FirmwareProgrammer/src/VnXml.cpp',
     ])
     includes.append('../cpp/plugins/FirmwareProgrammer/include')
 
@@ -70,7 +78,7 @@ if dataExp.exists():
     macros.append(('__DATAEXPORT__', None))
     plugins.append(str(dataExp))
     plugins.extend([
-        '../cpp/plugins/DataExport/src/ExporterCsvUtils.cpp',   
+        '../cpp/plugins/DataExport/src/ExporterCsvUtils.cpp',
     ])
     includes.append('../cpp/plugins/DataExport/include')
 
@@ -103,7 +111,7 @@ ext_modules = [
         [
             # Pybind Files
             'src/vectornav.cpp',
-            'src/PySensor.cpp',   
+            'src/PySensor.cpp',
             'src/PyRegisters.cpp',
             'src/PyCompositeData.cpp',
             'src/PyCommands.cpp',
@@ -128,15 +136,15 @@ ext_modules = [
             '../cpp/src/Interface/GenericCommand.cpp',
             '../cpp/src/Interface/Sensor.cpp',
             '../cpp/src/Interface/Registers.cpp',
-            
-            # plugins            
+
+            # plugins
             *plugins,
         ],
         include_dirs=includes,
         language="c++",
         cxx_std=17,
         define_macros=macros,
-        libraries=ext_libs
+        libraries=ext_libs,
     ),
 ]
 
