@@ -115,7 +115,7 @@ constexpr uint8_t asciiPacketSubscriberCapacity = 5;
 
 namespace Serial
 {
-constexpr uint16_t PortNameMaxLength = 32;
+constexpr uint16_t PortNameMaxLength = 4096;
 }  // namespace Serial
 
 namespace Sensor
