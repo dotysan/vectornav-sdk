@@ -1,18 +1,25 @@
+"""
+Getting Started Example for VectorNav SDK.
+
+This module demonstrates how to connect to a VectorNav sensor, poll data, configure outputs,
+and handle measurements using the Python SDK.
+"""
+
 # The MIT License (MIT)
-# 
+#
 # VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,7 +34,7 @@ import time
 from vectornav import Registers, Sensor
 
 
-def main(argv):
+def main(argv: list[str]) -> None:
     """
     This getting started example walks through the Python usage of the SDK to connect to and interact with a VectorNav unit.
 
@@ -36,7 +43,8 @@ def main(argv):
     2. Poll and print the model number using a read register command
     3. Poll and print the current yaw, pitch, and roll using a read register command
     4. Configure the asynchronous ASCII output to YPR at 2Hz
-    5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group, at a 2 Hz output rate (1 Hz if VN-300) through both serial ports
+    5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group,
+       at a 2 Hz output rate (1 Hz if VN-300) through both serial ports
     6. Enter a loop for 5 seconds where it:
        Determines which measurement it received (VNYPR or the necessary binary header)
        Prints out the relevant measurement from the CompositeData struct
@@ -56,7 +64,8 @@ def main(argv):
     print(f"Connected to {portName} at {sensor.connectedBaudRate()}")
 
     # 2. Poll and print the model number using a read register command
-    # Create an empty register object of the necessary type, where the data member will be populated when the sensor responds to the "read register" request
+    # Create an empty register object of the necessary type.
+    # The data member will be populated when the sensor responds to the "read register" request.
     modelRegister = Registers.System.Model()
     try:
         sensor.readRegister(modelRegister)
@@ -95,7 +104,8 @@ def main(argv):
         return
     print("ADOF Configured")
 
-    # 5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group, at a 2 Hz output rate (1 Hz if VN-300) through both serial ports
+    # 5. Configure the first binary output message to output timeStartup, accel, and angRate, all from common group,
+    #    at a 2 Hz output rate (1 Hz if VN-300) through both serial ports
     binaryOutput1Register = Registers.System.BinaryOutput1()
     binaryOutput1Register.asyncMode.serial1 = 1
     binaryOutput1Register.asyncMode.serial2 = 1
@@ -141,8 +151,8 @@ def main(argv):
         try:
             sensor.throwIfAsyncError()
         except Exception as asyncError:
-            print(f"Received async error: {asyncError}");
-  
+            print(f"Received async error: {asyncError}")
+
     # 7. Disconnect from the VectorNav unit
     sensor.disconnect()
     print("Sensor disconnected")
