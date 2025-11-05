@@ -28,10 +28,14 @@ and handle measurements using the Python SDK.
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from pathlib import Path
 import sys
 import time
 
 from vectornav import Registers, Sensor
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from examples.utils import get_default_port
 
 
 def main(argv: list[str]) -> None:
@@ -52,7 +56,7 @@ def main(argv: list[str]) -> None:
     """
 
     # Define the port connection parameters
-    portName = argv[0] if argv else "COM1"  # Change the sensor port name to the com port of your local machine
+    portName = argv[0] if argv else get_default_port()
 
     # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
     sensor = Sensor()
