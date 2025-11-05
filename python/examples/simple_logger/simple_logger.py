@@ -1,18 +1,25 @@
+"""
+Simple Logger Example for VectorNav SDK.
+
+This module demonstrates how to use the VectorNav Python SDK to log data from a VectorNav unit.
+It covers connecting to the device, logging data, handling errors, and disconnecting.
+"""
+
 # The MIT License (MIT)
-# 
+#
 # VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,14 +28,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from pathlib import Path
 import sys
 import time
 
 from vectornav import ByteBuffer, Registers, Sensor
 from vectornav.Plugins import Logger
 
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from examples.utils import get_default_port
 
-def main(argv):
+
+def main(argv: list[str]) -> None:
     """
     This simple logger example walks through the Python usage of the SDK to log data from a VectorNav unit.
 
@@ -42,7 +53,7 @@ def main(argv):
     """
 
     # Pass in port name and path as positional arguments, or edit them here
-    portName = argv[0] if len(argv) > 0 else "COM1"
+    portName = argv[0] if argv else get_default_port()
     filePath = argv[1] if len(argv) > 2 else "log.bin"
 
     # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
