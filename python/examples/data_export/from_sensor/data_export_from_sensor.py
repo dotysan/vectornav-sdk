@@ -1,18 +1,24 @@
+"""
+This module demonstrates how to export data from a VectorNav sensor to a CSV file using the VectorNav Python SDK.
+
+It connects to a VectorNav unit, subscribes to data packets, and logs the data to a specified output directory.
+"""
+
 # The MIT License (MIT)
-# 
+#
 # VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,15 +27,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import os
+from pathlib import Path
 import sys
 import time
 
 from vectornav import Sensor
 from vectornav.Plugins import DataExport
 
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from examples.utils import get_default_port
 
-def main(argv):
+
+def main(argv: list[str]) -> None:
     """
     This data export example walks through the Python usage of the SDK to export data from a VectorNav unit to a CSV file.
 
@@ -42,8 +51,8 @@ def main(argv):
     """
 
     # Parse command line arguments
-    portName = argv[0] if argv else "COM1"
-    outputDirectory = argv[1] if len(argv) == 2 else os.path.dirname(os.path.abspath(__file__))
+    portName = argv[0] if argv else get_default_port()
+    outputDirectory = argv[1] if len(argv) == 2 else str(Path(__file__).parent)
     print(outputDirectory)
 
     # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
@@ -63,7 +72,7 @@ def main(argv):
         sensor.subscribeToMessage(
             csvExporter.getQueuePtr(),
             Sensor.BinaryOutputMeasurements(),
-            Sensor.FaSubscriberFilterType.AnyMatch
+            Sensor.FaSubscriberFilterType.AnyMatch,
         )
     except Exception as latestError:
         print(f"Error: {latestError} encountered when subscribing.\n")
@@ -71,7 +80,7 @@ def main(argv):
 
     try:
         sensor.subscribeToMessage(
-            csvExporter.getQueuePtr(), "VN", Sensor.AsciiSubscriberFilterType.StartsWith
+            csvExporter.getQueuePtr(), "VN", Sensor.AsciiSubscriberFilterType.StartsWith,
         )
     except Exception as latestError:
         print(f"Error: {latestError} encountered when subscribing.\n")
@@ -90,7 +99,7 @@ def main(argv):
         try:
             sensor.throwIfAsyncError()
         except Exception as asyncError:
-            print(f"Received async error: {asyncError}");
+            print(f"Received async error: {asyncError}")
 
     csvExporter.stop()
 

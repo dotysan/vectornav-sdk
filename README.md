@@ -8,3 +8,4 @@ Even though they've licensed it MIT, they don't appear to have a publicly availb
   - `uv sync --managed-python --python=3.11`
   - `uv run examples/getting_started/getting_started.py`
   - `uv run examples/simple_logger/simple_logger.py `
+  - `uv run examples/data_export/from_sensor/data_export_from_sensor.py`

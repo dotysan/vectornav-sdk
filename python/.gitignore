@@ -1,5 +1,6 @@
 # test data from this repo
 /log.bin
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
