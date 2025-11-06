@@ -1,0 +1,5 @@
+{
+    "python.defaultInterpreterPath":
+        "${workspaceFolder}/python/.venv/bin/python",
+    "python.analysis.typeCheckingMode": "standard",  // basic/standard/strict
+}

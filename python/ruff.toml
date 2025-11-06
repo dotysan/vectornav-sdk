@@ -1,0 +1,99 @@
+target-version = "py311"
+
+# GitHub recommended
+line-length = 127
+
+# enables E2/E3/W3
+preview = true
+
+[isort]
+combine-as-imports = true
+force-sort-within-sections = true
+force-wrap-aliases = true
+
+[mccabe]
+max-complexity = 12
+# default = 10
+# max-complexity = 8
+
+[lint]
+
+# enable these lint checks
+select = [
+    "ALL", # just testing
+
+    # https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes
+    "E1", # indentation
+    "E2", # whitespace
+    "E3", # blank line
+    "E4", # import (default)
+    "E5", # line length
+    "E7", # statement (default)
+    "E9", # runtime (default)
+    "W1", # indentation warning
+    "W2", # whitespace warning
+    "W3", # blank line warning
+    "W5", # line break warning
+    "W6", # deprecation warning
+
+    "F", # Pyflakes (default)
+
+    "D", # https://github.com/PyCQA/pydocstyle
+
+    "UP", # pyupgrade
+
+    "B", # flake8-bugbear
+
+    "SIM", # flake8-simplify
+
+    "PTH", # Flake8-use-pathlib
+
+    "I", # isort
+
+    "C90", # McCable complexity
+]
+
+# disable these lint checks
+ignore = [
+
+    "BLE001", # bare-except
+
+#    "COM812", # conflicts with `ruff format` since it already enforces
+
+    # "CPY", # https://github.com/savoirfairelinux/flake8-copyright
+
+    "D202", # blank-line-after-function
+    "D203", # exclusive with D211
+    "D210", # No whitespaces allowed surrounding docstring text
+    "D212", # exclusive with D213
+    "D213", # exclusive with D212
+    "D4", # ???
+
+    "ERA", # https://github.com/pycqa/eradicate
+
+    "FIX002", # line-contains-todo
+
+    "N806", # non-lowercase-variable-in-function
+    "N816", # mixed-case-variable-in-global-scope
+
+    "PLR2004", # magic-value-comparison
+
+    "Q000", # flake8-quotes because I prefer 'single' unless f"double"
+
+    "T20", # flake8-print
+
+    "TD002", # missing-todo-autor
+    "TD003", # missing-todo-link
+]
+
+[lint.pylint]
+max-statements = 75
+
+[lint.flake8-copyright]
+min-file-size = 256
+notice-rgx = "(?i)Copyright \\(C\\)"
+
+# [format]
+# quote-style = "double"
+# quote-style = "single"
+# # TODO: Perl-style single for constants and double for anything variable such as f-strings, docstrings, etc.
