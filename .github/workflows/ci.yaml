@@ -48,7 +48,8 @@ jobs:
       #   working-directory: python
 
       - name: Build Python package
-        run: cd python && uv build
+        working-directory: python
+        run: uv build --wheel
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
