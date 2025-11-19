@@ -1,18 +1,24 @@
+""" Example demonstrating non-blocking command usage with VectorNav sensors.
+
+This module connects to a VectorNav sensor, configures asynchronous output, sends non-blocking
+commands, validates responses, and demonstrates velocity aiding commands at a fixed rate.
+"""
+
 # The MIT License (MIT)
-# 
+#
 # VectorNav SDK (v0.99.0)
 # Copyright (c) 2024 VectorNav Technologies, LLC
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,18 +27,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from pathlib import Path
 import random
 import sys
 import time
 
-from vectornav import GenericCommand, KnownMagneticDisturbance, Registers, Sensor
+from vectornav import (
+    KnownMagneticDisturbance,
+    Registers,
+    Sensor,
+)
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from examples.utils import get_default_port
 
 
-def main(argv):
+def main(argv: list[str]) -> None:  # noqa: C901, PLR0911, PLR0912, PLR0914, PLR0915
     """
     This example demonstrates how to send commands without blocking, validating each command was received correctly
-    with different types of commands. For more information on non-blocking commands, please refer to the 'Advanced Functionality'
-    section of the documentation.
+
+    with different types of commands. For more information on non-blocking commands, please refer to
+    the 'Advanced Functionality' section of the documentation.
 
     This example will achieve the following:
     1. Instantiate a Sensor object and use it to connect to the VectorNav unit
@@ -43,15 +58,18 @@ def main(argv):
         5.1. Check if a valid response has been received from the velocity aiding command
         5.2. Print response and send new command
     6. Disconnect from the VectorNav unit'
+
+    Raises:
+        RuntimeError: If sensor connectivity verification fails.
     """
 
     # 1. Instantiate a Sensor object and use it to connect to the VectorNav unit
-    portName = argv[0] if argv else "COM1"  # Change the sensor port name to the com port of your local machine
+    portName = argv[0] if argv else get_default_port()  # Change the sensor port name to the com port of your local machine
     sensor = Sensor()
     try:
         sensor.autoConnect(portName)
         if not sensor.verifySensorConnectivity():
-            raise RuntimeError("VerificationFailure")
+            raise RuntimeError("VerificationFailure")  # noqa: EM101, TRY301
     except Exception as latestError:
         print(f"Error: {latestError} encountered when connecting to {portName}.\n")
         return
@@ -96,8 +114,9 @@ def main(argv):
     # 4. Wait and check response from the unit
     time.sleep(0.25)
 
-    # We could check kmd.awaitingResponse() but it will be removed from the command queue (setting kmd.awaitingResponse to false) after
-    # commandRemovalTimeoutLength (default 200ms), if any command has been sent or received since.
+    # We could check kmd.awaitingResponse() but it will be removed from the command queue
+    # (setting kmd.awaitingResponse to false) after commandRemovalTimeoutLength (default 200ms),
+    # if any command has been sent or received since.
     if kmd.hasValidResponse():
         print(f"KMD Response: {kmd.getResponse()}")
         error_maybe = kmd.getError()
@@ -118,8 +137,7 @@ def main(argv):
     if velAidWRGCmdOpt is None:
         print("Error: Failed to create velocity aiding command.")
         return
-    else:
-        velAidWRGCommand = velAidWRGCmdOpt
+    velAidWRGCommand = velAidWRGCmdOpt
 
     asciiCount = 0
     velAidSentCount = 0
@@ -130,6 +148,7 @@ def main(argv):
 
     while time.time() - start_time < 5:
         compositeData = sensor.getNextMeasurement(True)
+        # compositeData = sensor.getNextMeasurement(blocking=True)
         if compositeData and compositeData.matchesMessage("VNYPR"):
             ypr = compositeData.attitude.ypr
             print(f"YPR: {ypr.yaw}, {ypr.pitch}, {ypr.roll}")
@@ -151,6 +170,7 @@ def main(argv):
                 print("Error: Response Timeout")
                 return
 
+            # ruff: noqa: S311
             velAidRegister.velocityX = random.random()  # random.random() to simulate different velocities
             velAidRegister.velocityY = random.random()
             velAidRegister.velocityZ = random.random()
@@ -158,8 +178,7 @@ def main(argv):
             if velAidWRGCmdOpt is None:
                 print("Error: Failed to create velocity aiding command.")
                 return
-            else:
-                velAidWRGCommand = velAidWRGCmdOpt
+            velAidWRGCommand = velAidWRGCmdOpt
             try:
                 sensor.sendCommand(velAidWRGCommand, Sensor.SendCommandBlockMode.none)  # Non-blocking
             except Exception as latestError:
@@ -168,12 +187,12 @@ def main(argv):
             validResponseReceived = False
             velAidSentCount += 1
             resend_time = time.time()  # Restart send timer
-      
+
         # Handle asynchronous errors
         try:
             sensor.throwIfAsyncError()
         except Exception as asyncError:
-            print(f"Received async error: {asyncError}");
+            print(f"Received async error: {asyncError}")
 
     print(f"\nTotal ASCII YPR Packets Received: {asciiCount}")
     print(f"Total Velocity Aiding Commands Sent: {velAidSentCount}")
